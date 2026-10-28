@@ -31,7 +31,7 @@ export class SettingsTab extends PluginSettingTab {
   }
   hide() {
     super.hide()
-    unmount(this.view)
+    void unmount(this.view)
 
     const errors = [];
 

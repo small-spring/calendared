@@ -110,7 +110,7 @@ export default class TimelineManager {
 
   public unmountAll() {
     for (const timeline of Object.values(TimelineManager.components)) {
-      unmount(timeline);
+      void unmount(timeline);
     }
     TimelineManager.components = {};
   }

@@ -11,6 +11,22 @@
   - 元: `periodic-notes-calendar` / `Periodic notes calendar`
 - `scripts/deploy.sh`（`npm run deploy`）を追加。ビルドして Vault にコピーする
 
+## 依存パッケージと安全対策
+
+- 開発環境は Node.js 24 LTS（Homebrew の `node@24`）、npm 11.19 以上
+- `.npmrc` に供給網（サプライチェーン）攻撃への対策を追加
+  - `ignore-scripts=true`: 依存パッケージのインストールスクリプトを動かさない
+  - `min-release-age=14`: 公開から 14 日たっていないバージョンは入れない（乗っ取られた版の多くはその間に見つかる）
+  - 元にあった `resolution-mode=highest` は今の npm では使えない設定なので削除
+- 依存の更新は必要なものだけを指定して行う（一括の `npm audit fix` はしない）。更新後は `npm audit signatures` と、
+  追加・変更されたパッケージの一覧を確認する
+- プラグインに入る部品の既知の脆弱性を解消: Svelte 5.1.10 → 5.57.2、uuid 11.0.3 → 11.1.1（`npm audit --omit=dev` で 0 件）
+  - 新しい Svelte では `unmount()` が Promise を返すので、呼び出しに `void` を付けた（6 か所。動作は同じ）
+  - 新しい Svelte の svelte-check は「初期値しか見ていない」という警告（`state_referenced_locally`）を元のコードに 20 件ほど出すが、
+    動作上の問題ではないので今は残している
+  - `tsconfig.json` の `moduleResolution: "node"` のため、svelte-check が依存パッケージ（esrap）の型を見つけられないエラーが 2 件増えた。ビルドには影響しない
+- ビルド用の道具（開発用依存）にも既知の脆弱性が残っている（24 件）。ビルドにしか使わないので今は更新していない
+
 ## 不具合修正
 
 - 設定画面の Folder / Template 入力欄の候補が、設定モーダルの裏に隠れて見えなかったのを修正

@@ -54,7 +54,7 @@ export class CalendarPopoverBehavior extends BaseComponentBehavior {
     if (mouseoverCb) {
       this.refHtmlEl?.removeEventListener('mouseover', mouseoverCb);
     }
-    unmount(this.component)
+    void unmount(this.component)
   }
 
   public getWindowEvents(): TWindowEvents {

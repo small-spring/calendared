@@ -451,7 +451,7 @@ export class ViewManager {
   }
   static cleanupPreviewControls() {
     if (this.previewControlsComponent) {
-      unmount(this.previewControlsComponent)
+      void unmount(this.previewControlsComponent)
     }
     this.previewControlsComponent = null;
   }

@@ -37,7 +37,7 @@ export class StickerPopoverBehavior extends BaseComponentBehavior {
   }
   public cleanup() {
     this.close();
-    unmount(this.component);
+    void unmount(this.component);
   }
 
   public getWindowEvents(): TWindowEvents {

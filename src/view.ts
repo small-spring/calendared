@@ -29,7 +29,7 @@ export class CalendarView extends ItemView {
   }
 
   onClose(): Promise<void> {
-    unmount(this.view);
+    void unmount(this.view);
 
     return Promise.resolve();
   }
