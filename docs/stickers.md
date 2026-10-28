@@ -39,6 +39,10 @@
 
 プロパティ欄を直接編集して `sticker: 🎉` と書いても同じ。
 
+**絵文字の検索**: Obsidian の表示言語が日本語なら、ピッカーを日本語で検索できる（「いいね」→ 👍、「旅行」→ ✈️、「日本」→ 🗾 🇯🇵 など）。
+ピッカーの文言（「検索」「よく使う絵文字」など）も日本語になる。英語の名前でも引き続き検索できる。
+ほかの言語は今のところ英語のみ（追加のしかたは 10 章）
+
 ## 3. 設定
 
 「設定 → Calendared → Stickers」にある。
@@ -113,6 +117,7 @@ Calendared ではタグ形式を **読まない** ので、元の版で付けた
 | 内容 | 場所 |
 |---|---|
 | 付ける（`setSticker`）・読む（`getSticker`）・プロパティ名（`getStickerProperty`）・禁止リスト（`RESERVED_STICKER_PROPERTIES`） | `src/ui/utils/picker.ts` |
+| 絵文字ピッカーの表示言語・言語ごとのキーワード | `src/ui/utils/emoji-locale.ts`、`src/ui/utils/emoji-keywords/`、`scripts/build-emoji-keywords.mjs` |
 | 絵文字ピッカーの表示 | `src/ui/utils/picker.ts`（`initializePicker`）、`src/ui/components/StickerPopover.svelte`、`src/ui/popovers/sticker.ts` |
 | 見出しバーのボタン（`StickerActions`）、ピッカーを開く・外す共通処理（`openStickerPicker`, `removeSticker`） | `src/ui/sticker-actions.ts`、`src/ui/utils/picker.ts`（`removeSticker`） |
 | ピッカーの「Remove sticker」ボタン | `src/ui/components/StickerPopover.svelte` |
@@ -147,6 +152,20 @@ Calendared ではタグ形式を **読まない** ので、元の版で付けた
 - タイムライン（`TimelineManager`）とは独立している。タイムラインは `resize` のときだけ付け直す作りなので、それに相乗りしない
 - タイムラインは見出しバーの下（ノートの表示領域の上から 56px）に浮いていて、ボタンは見出しバーの中なので重ならない
 - プラグインを止めるとき（`onunload`）に `removeAll()` で外す
+
+**絵文字の検索を表示言語に対応させる仕組み**（`src/ui/utils/emoji-locale.ts`）
+
+- emoji-mart の検索は、絵文字データの `id` `name` `keywords` `emoticons` だけを見る（英語）。各キーワードの「先頭一致」で探す
+- Unicode CLDR の注釈（言語ごとの絵文字の名前とキーワード）から、言語ごとのキーワード表を作ってプラグインに同梱し、
+  ピッカーに渡すデータの `keywords` に足している。Obsidian の表示言語は `getLanguage()`（古い版では localStorage の `language`）で読む
+- キーワード表は `scripts/build-emoji-keywords.mjs` で作る（`src/ui/utils/emoji-keywords/<言語>.json`、絵文字の id → キーワード）。
+  元データは開発用の依存 `cldr-annotations-full`（通常の絵文字）と `cldr-annotations-derived-full`（国旗・肌の色など）
+  - CLDR は絵文字の異体字セレクタ（U+FE0F）を省いた形で持っているので、それを無視して突き合わせる
+  - 国旗の名前は「旗: 日本」のような形なので、`:` で分けて両方をキーワードにする
+- emoji-mart は、英語以外の文言を、渡されないとネットから取りに行く。それを避けるため、`@emoji-mart/data/i18n/<言語>.json` も同梱して渡す
+- **言語を足すには**: `node scripts/build-emoji-keywords.mjs <言語コード>` でキーワード表を作り、`emoji-locale.ts` の `LOCALES` に
+  キーワード表と emoji-mart の i18n を足す。1 言語あたりプラグインが 140 KB ほど大きくなる
+- CLDR のデータを新しい版にしたら、同じスクリプトでキーワード表を作り直す
 
 **実装上の注意**
 

@@ -1,6 +1,6 @@
 import { TFileData } from "@/io";
 import { settingsStore } from "@/settings";
-import data from "@emoji-mart/data";
+import { getEmojiPickerLocale } from "./emoji-locale";
 import { Picker } from "emoji-mart";
 import emojiRegex from "emoji-regex";
 import { type CachedMetadata, type TFile } from "obsidian";
@@ -46,7 +46,8 @@ export function initializePicker(
   fileData: TFileData
 ) {
   const pickerOptions = {
-    data,
+    // Calendared: data with keywords in Obsidian's language, and the picker's own text in that language
+    ...getEmojiPickerLocale(),
     onEmojiSelect: async (emoji: TEmoji) => {
       const stickerInstance = Popover.stickerSingleton;
       stickerInstance?.close()
