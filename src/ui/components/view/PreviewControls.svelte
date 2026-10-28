@@ -56,10 +56,9 @@
     }).toggle(event.target as Element);
   };
   const handleMoreClick = (event: MouseEvent) => {
-    const tags = file
-      ? PluginService.getPlugin()?.app.metadataCache.getFileCache(file)?.tags
-      : null;
-    const sticker = getSticker(tags);
+    const sticker = getSticker(
+      file ? PluginService.getPlugin()?.app.metadataCache.getFileCache(file) : null,
+    );
 
     const crrActiveLeaf =
       PluginService.getPlugin()?.app.workspace.getActiveViewOfType(

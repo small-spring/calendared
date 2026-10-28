@@ -13,14 +13,9 @@
   import TimelineManager from "@/ui/components/timeline/manager";
   import { Popover } from "@/ui/popovers";
   import { derived as derivedStore } from "svelte/store";
-  import { Platform } from "obsidian";
+  import { Notice, Platform } from "obsidian";
+  import { isReservedStickerProperty, RESERVED_STICKER_PROPERTIES } from "@/ui/utils/picker";
   import { createCalendarPopover } from "@/ui/popovers/base";
-  import { trim } from "@/io";
-  import {
-    FilepathsCount,
-    handlePNMigrate,
-    handlePNBackup,
-  } from "./sticker-prefix/";
 
   // Essential
   const handleFloatingModeToggle = (floatingMode: boolean) => {
@@ -74,15 +69,22 @@
   };
 
   // Sticker
-  let stickerPrefix: string = $state($settingsStore.stickerPrefix);
-  const handleStickerPrefixInput = () => {
+  // Calendared: stickers live in one property. Upstream's prefix / migrate / backup settings were removed
+  let stickerProperty: string = $state($settingsStore.stickerProperty);
+  const handleStickerPropertyInput = () => {
+    const property = stickerProperty.trim();
+    if (property === "" || isReservedStickerProperty(property)) {
+      new Notice(
+        property === ""
+          ? "Enter a property name for stickers."
+          : `Adding a sticker overwrites the whole value of its property, so '${property}' can't be used (see the list under Sticker property). Choose another name, such as 'sticker' or 'mood'.`,
+        8000,
+      );
+      stickerProperty = $settingsStore.stickerProperty;
+      return;
+    }
     settingsStore.update((s) => {
-      const newStickerPrefix = trim(stickerPrefix);
-      s.lastUsedStickerPrefixes = [
-        ...s.lastUsedStickerPrefixes,
-        s.stickerPrefix,
-      ];
-      s.stickerPrefix = newStickerPrefix;
+      s.stickerProperty = property;
       return s;
     });
   };
@@ -392,48 +394,68 @@
 </div>
 
 <!-- ------------------------------- -->
-<!-- --- Sticker prefix section ---- -->
+<!-- ------ Sticker section ------- -->
 <!-- ------------------------------- -->
 <div class="setting-group">
-  <SettingItem isHeading={true} name="Stickers" />
+  <!-- Calendared: turning stickers off hides everything about them (display, header button, menu item, commands) -->
+  <SettingItem isHeading={true} name="Stickers" type="toggle">
+    {#snippet control()}
+      <Toggle
+        isEnabled={$settingsStore.stickersEnabled}
+        onChange={(enabled: boolean) =>
+          settingsStore.update((s) => {
+            s.stickersEnabled = enabled;
+            return s;
+          })}
+      />
+    {/snippet}
+  </SettingItem>
+  {#if $settingsStore.stickersEnabled}
   <div class="setting-items">
     <SettingItem
-      name="Sticker prefix"
-      description="Prepend text to group new stickers (e.g., 'sticker/')."
+      name="Sticker button in note header"
+      description="Show a button next to the reading-view icon of periodic notes. It shows the note's sticker, and opens the emoji picker."
+      type="toggle"
     >
       {#snippet control()}
-        <input
-          class="flex-grow"
-          bind:value={stickerPrefix}
-          type="text"
-          spellcheck={false}
-          placeholder="sticker/"
-          onblur={handleStickerPrefixInput}
+        <Toggle
+          isEnabled={$settingsStore.stickerHeaderButton}
+          onChange={(enabled: boolean) =>
+            settingsStore.update((s) => {
+              s.stickerHeaderButton = enabled;
+              return s;
+            })}
         />
       {/snippet}
     </SettingItem>
-    <SettingItem name="Migrate stickers">
+    <!-- Calendared: where new stickers are saved -->
+    <SettingItem
+      name="Sticker property"
+    >
       {#snippet description()}
-        <span>
-          <p>Convert old sticker tags to the new prefix format.</p>
-          <FilepathsCount />
-        </span>
+        <p class="m-0">
+          Property that holds a note's sticker emoji (e.g. 'sticker', 'mood').
+          Adding a sticker overwrites this property's value.
+        </p>
+        <!-- Calendared: always show which names are refused, from the same list the check uses -->
+        <p class="m-0 mt-1">
+          Not allowed (Obsidian's built-in properties):
+          {#each RESERVED_STICKER_PROPERTIES as name, i}<code>{name}</code>{i < RESERVED_STICKER_PROPERTIES.length - 1 ? ", " : ""}{/each}
+        </p>
       {/snippet}
       {#snippet control()}
-        <div class="setting-item-control">
-          <button
-            aria-label="Archive notes before migration"
-            onclick={handlePNBackup}>Backup</button
-          >
-          <button
-            class="mod-cta"
-            aria-label="Run migration"
-            onclick={handlePNMigrate}>Migrate</button
-          >
-        </div>
+        <input
+          class="flex-grow"
+          bind:value={stickerProperty}
+          type="text"
+          spellcheck={false}
+          placeholder="sticker"
+          onblur={handleStickerPropertyInput}
+        />
       {/snippet}
     </SettingItem>
   </div>
+  {/if}
 </div>
 
 <!-- ------------------------ -->

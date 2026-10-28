@@ -36,6 +36,10 @@ export class BaseComponentBehavior {
       onClose?: () => void,
     }
   ) {
+    // Calendared: drop popovers a previous load of the plugin left behind (versions without onunload cleanup),
+    // otherwise the lookup by id below finds the stale one instead of ours
+    document.querySelectorAll(`#${id}[data-popover="true"]`).forEach((staleEl) => staleEl.remove());
+
     this.component = mount(view.Component, {
       target: document.body,
       props: {

@@ -62,7 +62,7 @@ export class FileMenuPopoverBehavior {
   public close() {
     this.opened = false;
 
-    this.menu?.close()
+    this.menu?.hide()
   }
   public cleanup() {
     this.close();

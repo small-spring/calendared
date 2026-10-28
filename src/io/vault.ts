@@ -91,8 +91,7 @@ export function getFileData(
   let sticker = null;
   if (abstractFile instanceof TFile) {
     file = abstractFile
-    const tags = PluginService.getPlugin()?.app.metadataCache.getFileCache(file)?.tags;
-    sticker = getSticker(tags)
+    sticker = getSticker(PluginService.getPlugin()?.app.metadataCache.getFileCache(file))
   }
 
   return {

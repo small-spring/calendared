@@ -62,3 +62,9 @@
 .pnc-suggestion-item {
   @apply cursor-[var(--cursor)];
 }
+
+/* Calendared: the sticker shown in a periodic note's header, sized like the neighboring icons */
+.pnc-sticker-action-emoji {
+  font-size: var(--icon-size);
+  line-height: 1;
+}

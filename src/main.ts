@@ -5,7 +5,7 @@ import { mount, type SvelteComponent } from 'svelte';
 import { get } from 'svelte/store';
 import { PluginService } from './app-service';
 import { CALENDAR_LUCIDE_ICON, CALENDAR_POPOVER_ID, CALENDAR_RIBBON_ID, granularities, LEAF_TYPE } from './constants';
-import { basename, createOrOpenNote, extractAndReplaceTODOItems, getFileData, getStartupNoteGranularity, isBackupPath, storeAllVaultPeriodicFilepaths } from './io';
+import { basename, createOrOpenNote, extractAndReplaceTODOItems, getStartupNoteGranularity, isBackupPath, storeAllVaultPeriodicFilepaths } from './io';
 import { getPeriodicityFromGranularity } from './io/parse';
 import type { IGranularity } from './io/types';
 import { isValidPeriodicNote } from './io/validation';
@@ -18,23 +18,37 @@ import {
   previewLeafStore,
   processingPreviewChangeStore,
   setupLocale,
-  spFileDataStore,
   themeStore,
   timelineParentFileStore
 } from './stores';
-import StickerPopoverComponent from './ui/components/StickerPopover.svelte';
 import TimelineManager from './ui/components/timeline/manager';
 import { createNldatePickerDialog } from './ui/modals/nldate-picker';
 import { Popover } from './ui/popovers';
 import { getDailyNotesPlugin } from './utils';
 import { CalendarView } from './view';
-import { createCalendarPopover, createStickerPopover } from './ui/popovers/base';
+import { createCalendarPopover } from './ui/popovers/base';
+import { getNoteSticker, isPeriodicNote, openStickerPicker, removeSticker, StickerActions } from './ui/sticker-actions';
 
 export default class PeriodicNotesCalendarPlugin extends Plugin {
   popovers: Record<string, SvelteComponent | null> = {};
   popoverAutoUpdateCleanup: (() => void) | null = null;
+  /** Calendared: sticker button in the header of periodic notes */
+  stickerActions = new StickerActions();
 
-  onunload() { }
+  /**
+   * Calendared: upstream left this empty, so popovers mounted on document.body (calendar, sticker picker, ...)
+   * and timelines stayed in the page after the plugin was turned off. On the next load the new popovers looked
+   * themselves up by id and got the stale ones from the previous load instead.
+   */
+  onunload() {
+    Popover.calendarSingleton?.cleanup();
+    Popover.stickerSingleton?.cleanup();
+    Popover.fileMenuSingleton?.cleanup();
+    Popover.baseSingleton?.cleanup();
+    Popover.cleanup();
+    TimelineManager.destroy();
+    this.stickerActions.removeAll();
+  }
 
   async onload() {
     PluginService.init(this);
@@ -53,6 +67,8 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     // sub settings
     const unsubSettingsStore = settingsStore.subscribe(this.saveSettings.bind(this))
     this.register(unsubSettingsStore);
+    // Calendared: show/hide the header sticker buttons when the sticker settings change
+    this.register(settingsStore.subscribe(() => this.stickerActions.refresh()));
 
     this.addSettingTab(new SettingsTab());
 
@@ -104,6 +120,36 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
       });
     });
 
+    // Calendared: sticker commands for the open periodic note (hidden from the palette otherwise)
+    this.addCommand({
+      id: 'manage-sticker',
+      name: 'Manage sticker',
+      checkCallback: (checking) => {
+        const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+        if (!get(settingsStore).stickersEnabled || !isPeriodicNote(view?.file)) return false;
+        if (checking) return true;
+
+        // open after the command palette has finished handling the click/key that ran this command,
+        // otherwise the picker's "click outside closes it" listener catches that click and closes it at once
+        const file = view.file;
+        const anchorEl = this.stickerActions.getActiveButton() ?? view.containerEl;
+        window.setTimeout(() => openStickerPicker(file, anchorEl), 0);
+        return true;
+      }
+    });
+    this.addCommand({
+      id: 'remove-sticker',
+      name: 'Remove sticker',
+      checkCallback: (checking) => {
+        const file = this.app.workspace.getActiveViewOfType(MarkdownView)?.file;
+        if (!get(settingsStore).stickersEnabled || !isPeriodicNote(file) || !getNoteSticker(file)) return false;
+        if (checking) return true;
+
+        removeSticker(file).catch(console.error);
+        return true;
+      }
+    });
+
     this.addCommand({
       id: 'open-nldate-note',
       name: 'Open periodic note from natural language date',
@@ -118,6 +164,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
       // Calendared: when the plugin is enabled while a note is already open, no `file-open` fires,
       // so pick up the current note once here (on app startup this just repeats what `file-open` does)
       this.onFileOpen(this.app.workspace.getActiveFile());
+      this.stickerActions.refresh();
 
       if (get(settingsStore).openPopoverOnRibbonHover) {
         createCalendarPopover({
@@ -278,7 +325,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
   }
 
   registerEvents() {
-    this.registerEvent(this.app.workspace.on('file-menu', (menu, file) => this.onFileMenu(menu, file)))
+    this.registerEvent(this.app.workspace.on('file-menu', (menu, file, source) => this.onFileMenu(menu, file, source)))
 
     this.registerEvent(
       this.app.workspace.on('css-change', () => {
@@ -302,6 +349,10 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     this.registerEvent(
       this.app.workspace.on('file-open', (file) => this.onFileOpen(file))
     )
+    // Calendared: keep the header sticker buttons in step with the notes shown and their stickers
+    this.registerEvent(this.app.workspace.on('file-open', () => this.stickerActions.refresh()))
+    this.registerEvent(this.app.workspace.on('layout-change', () => this.stickerActions.refresh()))
+    this.registerEvent(this.app.metadataCache.on('changed', () => this.stickerActions.refresh()))
   }
 
   /**
@@ -331,7 +382,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     }
   }
 
-  private async onFileMenu(_menu: Menu, file: TAbstractFile) {
+  private async onFileMenu(_menu: Menu, file: TAbstractFile, source?: string) {
     if (!(file instanceof TFile)) return;
 
     const menu = _menu as Menu & { dom: Element; bgEl: Element }
@@ -357,24 +408,20 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
             })
         )
       }
-      // Add custom "Add sticker" option
-      menu.addItem((item) =>
+      // Calendared: "Manage sticker" only in the calendar's own right-click menu ("custom-file-menu", see file-menu.ts),
+      // where it's the way to sticker a day without opening its note. Upstream added "Add sticker" to every file menu
+      // (file explorer, the note's "…" menu), which are shared and already long; the note header button and the
+      // "Manage sticker" command cover those
+      if (source === "custom-file-menu" && get(settingsStore).stickersEnabled) menu.addItem((item) =>
         item.setSection("action")
-          .setTitle("Add sticker")
+          .setTitle("Manage sticker")
           .setIcon("lucide-smile-plus")
           .onClick((evt) => {
             evt.preventDefault()
             evt.stopPropagation()
 
-            const fileData = getFileData(granularity, date);
-            spFileDataStore.set(fileData);
-
             if (menu.dom || menu.bgEl) {
-              createStickerPopover({
-                view: {
-                  Component: StickerPopoverComponent,
-                },
-              }).open(menu.dom || menu.bgEl)
+              openStickerPicker(file, menu.dom || menu.bgEl)
             }
           })
       );

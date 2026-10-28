@@ -63,9 +63,12 @@ export interface ISettings {
   minimalMode: boolean;
   /** Whether to always show a minimal view of the calendar when in floating mode*/
   floatingViewAlwaysMinimal: boolean;
-  lastUsedStickerPrefixes: string[];
-  stickerPrefix: string;
-  shouldConfirmBeforeStickerMigrate: boolean;
+  /** Calendared: property that holds a note's sticker emoji (see docs/stickers.md) */
+  stickerProperty: string;
+  /** Calendared: turns the whole sticker feature on/off (display, header button, menu item, commands) */
+  stickersEnabled: boolean;
+  /** Calendared: show the sticker button in the header of periodic notes */
+  stickerHeaderButton: boolean;
 
   /** Whether to show a confirmation dialog before creating a new note */
   shouldConfirmBeforeCreate: boolean;
@@ -177,9 +180,9 @@ export const DEFAULT_SETTINGS: ISettings = Object.freeze({
   syncCalendar: true,
   minimalMode: false,
   floatingViewAlwaysMinimal: true,
-  lastUsedStickerPrefixes: [],
-  stickerPrefix: "",
-  shouldConfirmBeforeStickerMigrate: true,
+  stickerProperty: "sticker",
+  stickersEnabled: true,
+  stickerHeaderButton: true,
   shouldConfirmBeforeCreate: true,
   shouldConfirmBeforeDeleteFormat: true,
   shouldConfirmBeforeReplaceAllFormats: true,

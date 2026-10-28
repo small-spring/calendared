@@ -5,6 +5,10 @@
 
 元の版との違いをここに記録します。コード中の変更箇所には `Calendared:` というコメントを付けています。
 
+機能ごとの仕様（今どう動くか）は `docs/` にまとめています。
+
+- [docs/stickers.md](docs/stickers.md): ステッカー
+
 ## 名前・ビルド
 
 - プラグイン id / 表示名を `calendared` / `Calendared` に変更（`manifest.json`, `package.json`）
@@ -47,6 +51,17 @@
   （`src/settings/ui/suggest.ts`, `src/app.css`）
 - カレンダー・タイムラインで選択中の日付の背景色が付かず、文字だけ黒く見えていたのを修正
   （`src/ui/components/core/DateBttn.svelte`）
+- プラグインをオフ→オンした後（Obsidian を再起動せずに）「Add sticker」で何も出ない不具合を修正（`src/ui/utils/picker.ts`）
+  - エラー: `Failed to construct 'HTMLElement': Illegal constructor`
+  - 原因: 絵文字ピッカー（emoji-mart）は `<em-emoji-picker>` を「名前が空いていれば」登録する。登録は Obsidian を再起動するまで残るので、
+    読み込み直した新しいプラグインの `Picker` は登録されず、それを `new` するとブラウザに拒否される
+  - 修正: 実際に登録されているクラス（`customElements.get("em-emoji-picker")`）を使って作る
+- プラグインをオフにしても、ページに置いた吹き出し（カレンダー、絵文字ピッカーなど）とタイムラインが残っていた不具合を修正
+  - 元の `onunload()` は空だった。再びオンにすると、新しい吹き出しが id で自分を探すときに前回の残りを見つけてしまい、
+    古いコードの絵文字ピッカーが動いていた（ステッカーが開いた日ではなく古い対象に、古い方式で本文の先頭に追加されていた）
+  - `onunload()` で吹き出しとタイムラインを片付ける（`src/main.ts`）。吹き出しを作るときも、同じ id の残骸があれば先に消す
+    （`src/ui/popovers/base-component-behavior.ts`。片付けのない古い版から切り替える 1 回目のため）
+  - 絵文字を選んだときの対象ノートは、ピッカーを作ったときに覚えた値ではなく、選んだ時点の値を使う（`src/ui/utils/picker.ts`）
 
 ## 見た目の変更
 
@@ -115,8 +130,65 @@
   - プラグインを有効にした時点で既にノートが開いていると `file-open` が来ないので、読み込み完了時（`onLayoutReady`）に 1 回だけ
     今のノートで同じ処理をする
 
+## ステッカー
+
+仕様の全体は [docs/stickers.md](docs/stickers.md)。ここには元の版からの変更点だけを書く。
+
+- 保存先を **プロパティ 1 つ** に変更（標準は `sticker: 👍`）。名前は設定「Sticker property」（`stickerProperty`）で変えられる。
+  Obsidian が特別に扱うプロパティ（`tags`、`aliases`、`cssclasses` と古い単数形）と空欄は設定できない。付けると値を丸ごと上書きする
+  仕組みなので、自分のタグなどが消えるのを防ぐため（`src/ui/utils/picker.ts` の `setSticker` / `getSticker` /
+  `getStickerProperty` / `RESERVED_STICKER_PROPERTIES`）
+  - 書き込みは Obsidian 公式の `processFrontMatter`。プロパティ欄がなければ作られ、本文は変わらない
+  - 元は本文の一番先頭に `#接頭辞+絵文字` のタグを差し込んでいたので、プロパティ欄のあるノートではプロパティ欄が壊れていた
+    （末尾に空白を 1 つ足す癖もあった）
+  - 読むのも設定のプロパティだけ。値がリストなら最初の絵文字 1 文字の要素を使う。元の版のタグ形式は読まない
+- 周期ノートの見出しバー（閲覧ビューのアイコンの左）にステッカーのボタンを追加（`src/ui/sticker-actions.ts`）。
+  付いていればその絵文字、なければ 😊+ を表示し、押すと絵文字ピッカーが開く
+- コマンド「Manage sticker」（ピッカーを開く）「Remove sticker」を追加。開いている周期ノートが対象（`src/main.ts`）
+- 右クリックの項目は、カレンダーの日付のメニューにだけ「Manage sticker」として出す。
+  元はファイルエクスプローラーやノートの「…」メニューにも「Add sticker」を出していた（docs の ADR-007）
+- 設定に、ステッカー機能全体のオン・オフ（`stickersEnabled`）と、見出しバーのボタンのオン・オフ（`stickerHeaderButton`）を追加
+- 絵文字ピッカーの一番上の行に、今のステッカーとゴミ箱アイコン（外す）を表示（ステッカーがあるときだけ、`src/ui/components/StickerPopover.svelte`）。
+  ピッカーと 1 つの箱に見えるよう、ピッカーの背景を Obsidian の背景色にし、枠と影は外の箱で付ける（`src/ui/utils/picker.ts`）
+- 元の版の「Sticker prefix」「Migrate stickers」「Backup」の設定と、そのコード（`src/settings/ui/tabs/calendar/sticker-prefix/`）を削除。
+  設定の `stickerPrefix` / `lastUsedStickerPrefixes` / `shouldConfirmBeforeStickerMigrate` も型から外した
+  （元の版の `data.json` に残っていても害はない）
+  - 理由: タグ形式の移行はこの機能から切り離すため。Migrate は「以前の接頭辞＋絵文字 1 つ」のタグを本文で書き換える仕組みで、
+    ステッカーのつもりでない `#👍` も書き換えうるうえ、確認画面の件数が実際に変わる数と違っていた。
+    Backup は周期ノート全部をコピーするもので、Migrate の保険として置かれていた
+
+## そのほかの修正
+
+- Obsidian の型定義が 1.14 になり `Menu.close()` が非推奨になったので、別名の `hide()` に置き換えた（4 か所、動作は同じ）
+
 ## やりたいことメモ（未着手）
 
 - 状態管理の作り直し（リファクタ段階 3）: ノートの一覧を設定から切り離す、`internalFileModStore` の `Math.random()` による合図をやめる、など。
   先に処理部分のテストを書いてから
 - スマホでの見え方の確認（優先度低）
+- 設定画面の整理（機能の整理が終わったら）
+  - 今は「Calendar」と「Periods」のタブがあり、「Calendar」タブの中にステッカー・タイムライン・プレビューなどの設定が詰め込まれている
+  - 機能ごとの階層構造を考え直して、タブや見出しを組み直す
+- タイムライン: 同じタブで別のノートを開いても、前のノートのまま（例: 月次ノートの Q1 表示がデイリーノートに残る）
+  - 原因（調査済み）: タイムラインを付け直す `TimelineManager.layoutSync()` は、Obsidian の `resize` イベントのときだけ呼ばれている
+    （`src/ui/components/view/manager.ts` の `setupVisibilityTracking`）。同じタブでノートを替えても `resize` は来ないことが多い
+  - 方針案: ノートを開いたとき（`src/main.ts` の `onFileOpen`）にも `TimelineManager.instance?.layoutSync()` を呼ぶ。
+    同じノートなら中で何もしないので、二重に付け直すことはない
+- タイムライン（周期ノートの右上）の見た目（`src/ui/components/timeline/Timeline.svelte`, `constants.ts`）
+  - 月次ノートなどで、まとまりの見出し（`Q1` など）が月の数字（`01 02 03`）とほぼ同じに見える。
+    `Q1 | 01 02 03` のように区切り線を入れる、見出しの文字を小さく・薄くする、などで区別したい
+  - 年が表示されないので、何度も移動すると今何年を見ているかわからない。
+    見出しの書式（`G_MAP` の `titleFormat`）が月は `[Q]Q`、週は `MMM` など年を含まないため。年も出したい（例: `2026 Q1`）
+
+### ステッカー関連（保留。ステッカーを使うようになったら）
+
+- 絵文字ピッカーで日本語検索（「いいね」→ 👍 など）をしたい
+  - 調査: 今のピッカー（emoji-mart）の検索は、絵文字データの `id` `name` `keywords` `emoticons` だけを見る（英語のみ）。
+    `@emoji-mart/data/i18n/ja.json` はあるが、画面の文言（「検索」「よく使う絵文字」など）の翻訳だけで、検索語は増えない
+  - 案 1: Unicode CLDR の日本語の注釈（絵文字ごとの短い名前とキーワード。例: 👍 →「サムズアップ」「いいね」「親指」）を、
+    ピッカーに渡す絵文字データの `keywords` に足す。ピッカーはそのまま使える。ほかの言語も同じ方法で足せる。データの分だけプラグインが大きくなる
+  - 案 2: 別のピッカー（例: emoji-picker-element。多言語のデータ emojibase を使い、日本語でも検索できる）に乗り換える。作り直しが大きい
+  - あわせて、ピッカーの画面の文言を Obsidian の表示言語に合わせる（emoji-mart の `locale` / `i18n`）
+- 月・年のタイトル（ヘッダーの「10月」など）にもステッカーを表示する。今は月の吹き出しの中の月にだけ出る
+- 元の版のステッカー（本文のタグ）をプロパティに移す移行機能を、ステッカー機能とは別に作る（必要になったら）
+  - 書き換える前に、対象のノートと変更内容の一覧を見せる。ステッカーのつもりでないタグを書き換えないよう、対象を選べるようにする

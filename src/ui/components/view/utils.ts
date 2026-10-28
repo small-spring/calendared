@@ -50,7 +50,7 @@ export const addExtraItems = (menu: Menu) => {
       .onClick((ev) => {
         ev.stopPropagation();
 
-        menu.close();
+        menu.hide();
 
         const leaf = get(previewLeafStore)?.leaf;
         if (leaf) {
@@ -80,7 +80,7 @@ export const addExtraItems = (menu: Menu) => {
           const mainSection = crrPeriodSettings.preview.mainSection;
           goToNoteHeading({
             heading: mainSection,
-            extra: () => menu.close(),
+            extra: () => menu.hide(),
           });
         }
       }),
@@ -102,7 +102,7 @@ export const addExtraItems = (menu: Menu) => {
           const todoSection = crrPeriodSettings?.preview.todoSection;
           goToNoteHeading({
             heading: todoSection,
-            extra: () => menu.close(),
+            extra: () => menu.hide(),
           });
         }
       }),

@@ -1,12 +1,13 @@
-import { modifyFile, TFileData, trim } from "@/io";
+import { TFileData } from "@/io";
 import { settingsStore } from "@/settings";
 import data from "@emoji-mart/data";
 import { Picker } from "emoji-mart";
 import emojiRegex from "emoji-regex";
-import { type TagCache } from "obsidian";
+import { type CachedMetadata, type TFile } from "obsidian";
 import { get } from "svelte/store";
 import { Popover } from "../popovers";
 import { PluginService } from "@/app-service";
+import { spFileDataStore } from "@/stores/popovers";
 
 type TEmoji = {
   aliases?: string[],
@@ -18,11 +19,8 @@ type TEmoji = {
   skin?: number,
   unified: string,
 }
-export type TSticker = {
-  emoji: string,
-  startOffset: number,
-  endOffset: number,
-}
+/** Calendared: a note's sticker (one emoji kept in the sticker property; see docs/stickers.md) */
+export type TSticker = { emoji: string }
 
 export const onInputKeydown = (ev: KeyboardEvent) => {
   const input = document.querySelector('em-emoji-picker')?.shadowRoot?.querySelector('input');
@@ -53,44 +51,38 @@ export function initializePicker(
       const stickerInstance = Popover.stickerSingleton;
       stickerInstance?.close()
 
-      const { file, sticker } = fileData;
-
+      // Calendared: read the target note now rather than from `fileData` captured when the picker was built,
+      // so the sticker always goes to the note the picker was opened for
+      const file = get(spFileDataStore)?.file ?? fileData.file;
       if (file) {
-        // update note with new emoji tag
-        const content = await PluginService.getPlugin()?.app.vault.read(file) ?? ""
-        let updatedContent = content
-        const stickerString = `${trim(get(settingsStore).stickerPrefix)}${emoji.native}`
-
-        if (sticker) {
-          const bef = updatedContent.slice(0, sticker.startOffset)
-          const aft = updatedContent.slice(sticker.endOffset)
-          updatedContent = `${bef}#${stickerString}${aft}`;
-
-          await modifyFile(file, updatedContent)
-        } else {
-          const firstLine = updatedContent.split('\n')[0].trim();
-          updatedContent = `#${stickerString}${firstLine !== "" ? " \n" : ""}${updatedContent} `
-
-          await modifyFile(file, updatedContent)
-        }
-      };
+        await setSticker(file, emoji.native);
+      }
     },
     autoFocus: true,
     emojiButtonColors: ['color-mix(in srgb, var(--interactive-accent) 20%, transparent)'],
     theme,
   };
 
-  const pickerEl = new Picker(pickerOptions);
+  // Calendared: emoji-mart registers <em-emoji-picker> only if the name is free. After the plugin is turned off and on
+  // (without restarting Obsidian) the window still holds the class from the earlier load, and constructing this bundle's
+  // unregistered `Picker` throws "Illegal constructor". Use whichever class is actually registered.
+  const RegisteredPicker = (customElements.get("em-emoji-picker") as typeof Picker | undefined) ?? Picker;
+  const pickerEl = new RegisteredPicker(pickerOptions);
   const style = getComputedStyle(document.body)
   const h = parseInt(style.getPropertyValue('--accent-h'));
   const s = parseInt(style.getPropertyValue('--accent-s'));
   const l = parseInt(style.getPropertyValue('--accent-l'));
 
   const accentRgb = hslToRgb(h / 360, s / 100, l / 100)
+  // Calendared: the picker sits inside the sticker popover's box (StickerPopover.svelte), which draws the border,
+  // corners and shadow. Give the picker the box's background (Obsidian's) and drop its own frame so they read as one
   pickerEl.injectStyles(`
         section#root {
             font-family: var(--font-interface);
             font-weight: 400 !important;
+            --rgb-background: ${cssColorToRgb("var(--background-primary)").join(", ")};
+            border-radius: 0;
+            box-shadow: none;
             --rgb-accent: ${accentRgb[0]}, ${accentRgb[1]}, ${accentRgb[2]};
             --color-a: var(--interactive-accent-hover);
             --color-b: var(--text-muted);
@@ -130,6 +122,18 @@ function handleMutationObserver(shadowRoot: ShadowRoot | null) {
 }
 
 /**
+ * Calendared: resolve a CSS color (e.g. `var(--background-primary)`) to `[r, g, b]`,
+ * for emoji-mart, which takes colors as `--rgb-*` triplets
+ */
+function cssColorToRgb(color: string): [number, number, number] {
+  const probe = document.body.createDiv();
+  probe.style.color = color;
+  const [r = 0, g = 0, b = 0] = (getComputedStyle(probe).color.match(/\d+(\.\d+)?/g) ?? []).map(Number);
+  probe.remove();
+  return [r, g, b];
+}
+
+/**
  * Converts an HSL color value to RGB. Conversion formula
  * adapted from https://en.wikipedia.org/wiki/HSL_color_space.
  * Assumes h, s, and l are contained in the set [0, 1] and
@@ -165,39 +169,66 @@ function hueToRgb(p: number, q: number, t: number) {
   return p;
 }
 
-export function getSticker(tags: TagCache[] | null | undefined): TSticker | null {
-  if (!tags) {
-    return null
-  }
+/** The emoji if `value` is exactly one emoji */
+function asEmoji(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed.match(emojiRegex())?.[0] === trimmed ? trimmed : null;
+}
 
-  let sticker: { emoji: string, startOffset: number, endOffset: number } | null = null;
-  const prefix = trim(get(settingsStore).stickerPrefix);
+/**
+ * Calendared: properties Obsidian itself gives meaning to (including the old singular names).
+ * Stickers overwrite their property's value, so using one of these would wipe the user's tags, aliases or CSS classes.
+ */
+export const RESERVED_STICKER_PROPERTIES = ["tags", "tag", "aliases", "alias", "cssclasses", "cssclass"];
 
-  for (const tagObj of tags) {
-    // tagObj.tag includes the '#'
-    const tagWithoutHash = tagObj.tag.slice(1);
-    if (!tagWithoutHash.startsWith(prefix)) {
-      continue;
-    }
+export function isReservedStickerProperty(property: string): boolean {
+  return RESERVED_STICKER_PROPERTIES.includes(property.trim().toLowerCase());
+}
 
-    const emojiCandidate = tagWithoutHash.slice(prefix.length);
-    const match = emojiCandidate.match(emojiRegex());
+/** Calendared: the property stickers live in (setting `stickerProperty`, default "sticker"); never a reserved one */
+export function getStickerProperty(): string {
+  const property = get(settingsStore).stickerProperty?.trim();
+  return property && !isReservedStickerProperty(property) ? property : "sticker";
+}
 
-    if (
-      match?.[0] === emojiCandidate &&
-      match?.[0].length === emojiCandidate.length
-    ) {
-      sticker = {
-        emoji: emojiCandidate,
-        startOffset: tagObj.position.start.offset,
-        endOffset: tagObj.position.end.offset,
-      }
+/**
+ * Calendared: a note's sticker, read only from the sticker property (e.g. `sticker: 👍`).
+ * If the property holds a list (e.g. edited by hand), its first single-emoji item is used.
+ * Upstream stored stickers as `#prefix+emoji` tags in the body; those are no longer read.
+ */
+export function getSticker(cache: CachedMetadata | null | undefined): TSticker | null {
+  // Calendared: with stickers turned off in the settings, no note has one as far as the plugin is concerned
+  if (!get(settingsStore).stickersEnabled) return null;
 
-      break;
-    } else {
-      continue;
-    }
-  }
+  const value: unknown = cache?.frontmatter?.[getStickerProperty()];
+  const emoji = Array.isArray(value)
+    ? value.map(asEmoji).find((e) => e !== null) ?? null
+    : asEmoji(value);
+  return emoji ? { emoji } : null;
+}
 
-  return sticker;
+/**
+ * Calendared: set a note's sticker by writing the emoji to the sticker property (replacing any previous one).
+ * Upstream inserted `#prefix+emoji` at the very top of the body, which broke the properties block.
+ */
+export async function setSticker(file: TFile, emoji: string) {
+  const app = PluginService.getPlugin()?.app;
+  if (!app) return;
+
+  const property = getStickerProperty();
+  await app.fileManager.processFrontMatter(file, (frontmatter: Record<string, unknown>) => {
+    frontmatter[property] = emoji;
+  });
+}
+
+/** Calendared: remove a note's sticker by deleting the sticker property */
+export async function removeSticker(file: TFile) {
+  const app = PluginService.getPlugin()?.app;
+  if (!app) return;
+
+  const property = getStickerProperty();
+  await app.fileManager.processFrontMatter(file, (frontmatter: Record<string, unknown>) => {
+    delete frontmatter[property];
+  });
 }
