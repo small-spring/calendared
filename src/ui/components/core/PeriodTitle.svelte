@@ -30,8 +30,12 @@
     textClassName?: string;
     /** called after the title is clicked */
     onOpen?: () => void;
+    /** show the "note exists" dot under the label (off where there's no room, e.g. the timeline heading) */
+    showDot?: boolean;
+    /** text to show instead of `date.format(title.formatValue)` (e.g. a month name formatted with Intl) */
+    text?: string;
   }
-  let { date, title, className = "", textClassName = "", onOpen }: Props = $props();
+  let { date, title, className = "", textClassName = "", onOpen, showDot = true, text }: Props = $props();
 
   let periodicity = $derived(getPeriodicityFromGranularity(title.granularity));
   // a disabled period can't create its note (see createOrOpenNote), so only look clickable if it exists
@@ -83,14 +87,16 @@
         });
       }}
     >
-      {date.format(title.formatValue)}
+      {text ?? date.format(title.formatValue)}
     </Button>
-    <div class="h-[8px] leading-[0]">
-      <Dot
-        className="w-1"
-        isVisible={!!title.fileData.file}
-        isFilled={!!title.fileData.file}
-      />
-    </div>
+    {#if showDot}
+      <div class="h-[8px] leading-[0]">
+        <Dot
+          className="w-1"
+          isVisible={!!title.fileData.file}
+          isFilled={!!title.fileData.file}
+        />
+      </div>
+    {/if}
   </div>
 </div>

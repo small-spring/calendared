@@ -4,12 +4,15 @@
   import { TIMELINE_TYPE } from "@/constants";
   import { IGranularity } from "@/io";
   import { settingsStore, TimelineViewMode } from "@/settings";
-  import { localeSwitched } from "@/stores";
+  import { getFileData } from "@/io";
+  import { localeSwitched, notesChangedStore } from "@/stores";
   import { Arrow } from "@/ui";
   import { cn } from "@/ui/utils";
   import { setIcon, Platform } from "obsidian";
   import { onDestroy, onMount } from "svelte";
   import DateBttn from "../core/DateBttn.svelte";
+  import Dot from "../core/Dot.svelte";
+  import PeriodTitle from "../core/PeriodTitle.svelte";
   import { G_MAP, VIEW_MODES } from "./constants";
 
   interface Props {
@@ -27,7 +30,7 @@
     isSide = null,
   }: Props = $props();
   let timelineEl: HTMLDivElement | null = $state(null);
-  let arrowEl: HTMLDivElement | null = $state(null);
+  let arrowEl: HTMLButtonElement | null = $state(null);
 
   // Calendared: the timeline keeps its own navigation state, seeded from the note it was mounted for.
   // TimelineManager.restart() unmounts and mounts a new one for a different note, so the props never change here.
@@ -96,8 +99,53 @@
 
     return dates;
   });
+  // Calendared: the period the heading names (e.g. Q3 for a monthly note's timeline) and its note
+  let groupDate = $derived(crrDisplayedDate.clone().startOf(G_MAP[derivedG].group));
+  let groupFileData = $derived.by(() => {
+    $notesChangedStore; // recompute when notes change
+    return getFileData(G_MAP[derivedG].group, groupDate);
+  });
+
   let startOfDate = $derived(dates[0]);
   let endOfDate = $derived(dates[dates.length - 1]);
+
+  /**
+   * Calendared: where the shown dates are, always shown: the month for a week of days (with the year outside the
+   * current year), the year for other granularities.
+   * e.g. "9月", "9月–10月", "2025年12月–2026年1月", "2025". Months are formatted in Obsidian's language with Intl
+   * (each end separately: Intl's formatRange switches to numbers like "2025/12～2026/01" across years in Japanese).
+   * A year on its own is just its digits ("2025", not "2025年"): nothing to translate, and it fits the narrow timelines.
+   */
+  let contextUnit = $derived<"month" | "year">(derivedG === "day" ? "month" : "year");
+  let contextLabel = $derived.by(() => {
+    $localeSwitched;
+    if (!startOfDate || !endOfDate || derivedG === "year") return "";
+
+    const today = window.moment();
+    const unit = contextUnit;
+
+    let start: string, end: string;
+    if (unit === "year") {
+      [start, end] = [String(startOfDate.year()), String(endOfDate.year())];
+    } else {
+      const showYear = !(startOfDate.isSame(today, "year") && endOfDate.isSame(today, "year"));
+      const format = new Intl.DateTimeFormat(window.moment.locale(), {
+        month: "long",
+        ...(showYear && { year: "numeric" }),
+      });
+      [start, end] = [format.format(startOfDate.toDate()), format.format(endOfDate.toDate())];
+    }
+    return start === end ? start : `${start}–${end}`;
+  });
+
+  // Calendared: when the label names a single month or year (not a range like "9月–10月"), it opens that note
+  let contextDate = $derived(
+    contextLabel && startOfDate?.isSame(endOfDate, contextUnit) ? startOfDate.clone().startOf(contextUnit) : null,
+  );
+  let contextFileData = $derived.by(() => {
+    $notesChangedStore; // recompute when notes change
+    return contextDate ? getFileData(contextUnit, contextDate) : null;
+  });
 
   let isInitial = $derived(
     derivedInitialDate.isSame(crrDisplayedDate, derivedG),
@@ -185,6 +233,8 @@
     class={cn(
       `timeline-container-${granularity}`,
       "absolute right-[26px] z-10 flex gap-[0.15rem] flex-col p-1 rounded-[var(--radius-s)]",
+      // Calendared: wide enough for the footer (toggle, a 4-digit year, ‹ ›, ⌖) even on the narrow monthly timeline
+      viewMode === "expanded" && "min-w-[9.5rem]",
       viewMode === "expanded" &&
         "[border-bottom:1px_solid_var(--divider-color)]",
       isSide
@@ -204,10 +254,17 @@
         out:fly={{ x: 8 }}
       >
         {#if derivedG !== "day"}
+          <!--
+            Calendared: a divider sets the heading (Q3, the year, the month) apart from the numbers next to it.
+            The box copies the date buttons' metrics (padding, text-xs line, dot 0.2rem from the bottom), so the
+            heading's text and its "note exists" dot sit on the same lines as theirs
+          -->
           <div
             class={cn(
-              "flex items-center text-[0.7em] text-center pt-0.5",
-              derivedG === "year" && "justify-center",
+              "relative flex flex-col items-center text-center",
+              derivedG === "year"
+                ? "justify-center text-[0.7em] pt-0.5"
+                : "!px-1.5 pt-1 pb-2.5 text-xs leading-4 [border-right:1px_solid_var(--background-modifier-border)]",
             )}
           >
             {#if derivedG === "year" && startOfDate && endOfDate}
@@ -217,11 +274,25 @@
                 G_MAP.year.titleFormat,
               )}
             {:else}
-              {crrDisplayedDate.format(G_MAP[derivedG].titleFormat)}
+              <!-- Calendared: the heading opens (or creates) its own note, like the calendar header's titles -->
+              <PeriodTitle
+                date={groupDate}
+                title={{
+                  granularity: G_MAP[derivedG].group,
+                  fileData: groupFileData,
+                  formatValue: G_MAP[derivedG].titleFormat,
+                }}
+                textClassName="font-normal text-[0.9em] leading-4"
+                showDot={false}
+              />
+              <div class="absolute bottom-[.2rem] leading-[0]">
+                <Dot isVisible={!!groupFileData.file} isFilled={!!groupFileData.file} />
+              </div>
             {/if}
           </div>
         {/if}
-        <div id="timeline-dates-list" class="flex gap-0.5">
+        <!-- Calendared: flex-1 justify-between spreads the dates over any width the minimum adds -->
+        <div id="timeline-dates-list" class="flex gap-0.5 flex-1 justify-between">
           {#each dates as d}
             <div class="flex flex-col gap-0.5 text-center">
               {#if derivedG === "day"}
@@ -242,13 +313,14 @@
                 onclick={() => handleSelectDate(d)}
                 onkeydown={() => handleSelectDate(d)}
               >
+                <!-- Calendared: upstream hid the "note exists" dot here (displayDot={false}); shown like in the calendar -->
                 <DateBttn
                   date={d}
                   granularity={derivedG}
                   isActiveOverride={d.isSame(crrSelectedDate, derivedG)}
                   displaySticker={$settingsStore.timeline.displayStickers}
-                  displayDot={false}
-                  className="!p-1.5 text-xs"
+                  className="!px-1.5 !pt-1 !pb-2.5 text-xs"
+                  dotContainerClassName="bottom-[.2rem]"
                   ignoreAdjacentMonth={true}
                 >
                   {d.format(G_MAP[derivedG].format)}
@@ -260,28 +332,50 @@
       </div>
     {/if}
     <div
-      tabindex="0"
-      role="button"
       id="timeline-toggle-button"
       class={cn(
-        "absolute cursor-[var(--cursor)] flex justify-end items-center pl-1 transition-all duration-400 ease-out right-0",
+        "absolute flex justify-end items-center pl-1 transition-all duration-400 ease-out right-0",
         "rounded-[var(--radius-s)]",
         viewMode === "collapsed"
           ? "top-0 px-1.5 pl-1 py-[0.3rem]"
           : "top-[calc(100%+0.15rem)]",
-        viewMode === "expanded" && "w-auto min-w-full",
+        // Calendared: upstream used w-auto min-w-full, so a wider footer (e.g. with the year label) stuck out past the dates
+        viewMode === "expanded" && "w-full",
         isSide
           ? Platform.isPhone
-            ? "bg-[var(--mobile-sidebar-background)] hover:bg-[var(--background-secondary)]"
-            : "bg-[var(--background-secondary)] hover:bg-[var(--color-base-25)]"
-          : "bg-[var(--background-primary)] hover:bg-[var(--color-base-10)]",
+            ? "bg-[var(--mobile-sidebar-background)]"
+            : "bg-[var(--background-secondary)]"
+          : "bg-[var(--background-primary)]",
       )}
-      onclick={handleToggleViewMode}
-      onkeydown={handleToggleViewMode}
     >
+      <!--
+        Calendared: upstream made this whole strip the open/close button (any click on it, and any key while it had focus).
+        Now only the chevron toggles, so the clickable area matches what it looks like.
+      -->
       <!-- Calendared: upstream showed a relative date ("Today", "3 days ago") next to the chevron -->
-      <div class="flex items-center gap-1 mr-auto">
-        <div class="flex text-[var(--text-accent)]" bind:this={arrowEl}></div>
+      <div class="flex items-center gap-1 mr-auto min-w-0">
+        <!-- -ml-1 offsets the button's padding so the chevron stays where it was -->
+        <button
+          class="clickable-icon !p-1 -ml-1 shrink-0 !text-[var(--text-accent)]"
+          aria-label={viewMode === "collapsed" ? "Show timeline" : "Hide timeline"}
+          aria-expanded={viewMode === "expanded"}
+          onclick={handleToggleViewMode}
+          bind:this={arrowEl}
+        ></button>
+        {#if viewMode === "expanded" && contextDate && contextFileData}
+          <PeriodTitle
+            className="ml-1 min-w-0"
+            date={contextDate}
+            title={{ granularity: contextUnit, fileData: contextFileData, formatValue: "YYYY" }}
+            text={contextLabel}
+            textClassName="font-normal [font-size:var(--font-smallest)] !text-[var(--text-muted)]"
+            showDot={false}
+          />
+        {:else if viewMode === "expanded" && contextLabel}
+          <span class="ml-1 min-w-0 truncate [font-size:var(--font-smallest)] text-[var(--text-muted)]">
+            {contextLabel}
+          </span>
+        {/if}
       </div>
 
       {#if viewMode === "expanded"}
@@ -303,7 +397,7 @@
           />
           <button
             class={cn(
-              "clickable-icon ml-2",
+              "clickable-icon ml-1",
               isInitial && "opacity-30 !cursor-default",
             )}
             id="reset-button"

@@ -353,6 +353,10 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     this.registerEvent(this.app.workspace.on('file-open', () => this.stickerActions.refresh()))
     this.registerEvent(this.app.workspace.on('layout-change', () => this.stickerActions.refresh()))
     this.registerEvent(this.app.metadataCache.on('changed', () => this.stickerActions.refresh()))
+    // Calendared: upstream re-mounted the timeline only on workspace `resize`, so opening another note in the same tab
+    // kept the previous note's timeline (e.g. a monthly note's Q1 view on a daily note).
+    // layoutSync() does nothing when the timeline already belongs to the open note
+    this.registerEvent(this.app.workspace.on('file-open', () => TimelineManager.instance?.layoutSync()))
   }
 
   /**
