@@ -3,8 +3,7 @@
     // Replaces upstream's "Month" tab (YearHeader + months table in Calendar.svelte).
     import { monthsIndexesInQuarters } from "@/constants";
     import { getFileData } from "@/io";
-    import { settingsStore } from "@/settings";
-    import { displayedDateStore, todayStore } from "@/stores";
+    import { displayedDateStore, notesChangedStore, todayStore } from "@/stores";
     import { cn } from "@/ui/utils";
     import Arrow from "./core/Arrow.svelte";
     import DateBttn from "./core/DateBttn.svelte";
@@ -18,7 +17,7 @@
 
     let pickerYear = $state($displayedDateStore.clone().startOf("year"));
     let yearFileData = $derived.by(() => {
-        $settingsStore.filepaths; // update when notes are created or deleted
+        $notesChangedStore; // recompute when notes change
         return getFileData("year", pickerYear);
     });
 </script>
@@ -38,7 +37,7 @@
             fileData: yearFileData,
             formatValue: "YYYY",
         }}
-        className="text-sm"
+        textClassName="text-sm"
         onOpen={onPick}
     />
     <Arrow

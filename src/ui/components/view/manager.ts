@@ -1,7 +1,7 @@
 import { LEAF_TYPE, PREVIEW_CONTROLS_TYPE } from '@/constants';
 import { createNote, getFileData, IGranularity } from '@/io';
 import { isValidPeriodicNote } from '@/io/validation';
-import { PeriodSettings, settingsStore, type ISettings } from '@/settings';
+import { PeriodSettings, settingsStore } from '@/settings';
 import { activeFileStore, mainLeafStore, previewLeafStore, processingPreviewChangeStore } from '@/stores';
 import { capitalize } from '@/utils';
 import { MarkdownView, TFile, View, WorkspaceLeaf, Platform } from 'obsidian';

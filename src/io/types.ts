@@ -47,6 +47,7 @@ declare module 'obsidian' {
     containerEl?: HTMLElement;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- must match Obsidian's own declaration to merge
   interface FuzzySuggestModal<T> {
     updateSuggestions: () => void
   }

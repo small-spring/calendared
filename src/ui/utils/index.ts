@@ -1,6 +1,4 @@
-import { HUMAN_FORMATS_PER_GRANULARITY } from '@/constants';
-import { IGranularity } from '@/io';
-import { localeDataStore, todayStore } from '@/stores';
+import { localeDataStore } from '@/stores';
 import { Platform, setIcon } from 'obsidian';
 import { get } from 'svelte/store';
 
@@ -74,27 +72,6 @@ export function getYears({ startRangeYear }: { startRangeYear: number }): IYears
   }
 
   return years;
-}
-
-export function getRelativeDate(granularity: IGranularity, date: moment.Moment) {
-  const startOfDate = date.clone().startOf(granularity);
-  const startOfToday = get(todayStore).clone().startOf(granularity);
-  const diff = startOfDate.diff(startOfToday, granularity);
-  const absDiff = Math.abs(diff);
-  const humanizedDiff = window.moment.duration(diff, granularity).humanize(true, { d: 7, w: 4 });
-
-  if (absDiff <= 1) {
-    if (granularity === 'day') {
-      return startOfDate.calendar().split(' ')[0];
-    }
-  }
-  if (absDiff === 0) {
-    if (granularity === "week" || granularity === 'month' || granularity === 'quarter' || granularity === 'year') {
-      return startOfDate.format(HUMAN_FORMATS_PER_GRANULARITY[granularity]);
-    }
-  }
-
-  return humanizedDiff
 }
 
 /**

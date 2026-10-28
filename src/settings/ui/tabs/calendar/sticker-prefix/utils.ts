@@ -1,3 +1,4 @@
+import { PluginService } from "@/app-service";
 import { join, modifyFile, trim } from "@/io";
 import { settingsStore } from "@/settings/store";
 import { createConfirmationDialog } from "@/ui/modals/confirmation";
@@ -8,6 +9,9 @@ import MigrateTitle from './MigrateTitle.svelte'
 import { genNoticeFragment } from "@/ui/utils";
 
 export const handlePNBackup = async () => {
+  const app = PluginService.getPlugin()?.app;
+  if (!app) return;
+
   const paths: string[] = Object.keys(get(settingsStore).filepaths);
   if (paths.length === 0) {
     new Notice("No periodic notes to backup.");
@@ -18,8 +22,8 @@ export const handlePNBackup = async () => {
   const backupFolder = `periodic-notes-BACKUP-${timestamp}`;
 
   try {
-    if (!window.app.vault.getAbstractFileByPath(backupFolder)) {
-      await window.app.vault.createFolder(backupFolder);
+    if (!app.vault.getAbstractFileByPath(backupFolder)) {
+      await app.vault.createFolder(backupFolder);
     }
   } catch (e) {
     console.error("Failed to create backup folder", e);
@@ -35,7 +39,7 @@ export const handlePNBackup = async () => {
   ]))
 
   for (const path of paths) {
-    const file = window.app.vault.getAbstractFileByPath(path);
+    const file = app.vault.getAbstractFileByPath(path);
     if (file instanceof TFile) {
       const destPath = normalizePath(join(backupFolder, path));
       const destFolder = destPath.substring(0, destPath.lastIndexOf("/"));
@@ -45,17 +49,17 @@ export const handlePNBackup = async () => {
       let currentPath = "";
       for (const folder of folders) {
         currentPath = currentPath ? `${currentPath}/${folder}` : folder;
-        if (!window.app.vault.getAbstractFileByPath(currentPath)) {
+        if (!app.vault.getAbstractFileByPath(currentPath)) {
           try {
-            await window.app.vault.createFolder(currentPath);
-          } catch (e) {
+            await app.vault.createFolder(currentPath);
+          } catch {
             // Folder might have been created by another iteration or exists
           }
         }
       }
 
       try {
-        await window.app.vault.copy(file, destPath);
+        await app.vault.copy(file, destPath);
         backedUpCount++;
       } catch (e) {
         console.error(`Failed to copy file ${path}`, e);
@@ -72,6 +76,9 @@ export const handlePNBackup = async () => {
 };
 
 export const handlePNMigrate = async () => {
+  const app = PluginService.getPlugin()?.app;
+  if (!app) return;
+
   const paths = Object.keys(get(settingsStore).filepaths);
 
   const migrate = async () => {
@@ -98,10 +105,10 @@ export const handlePNMigrate = async () => {
     ]));
 
     for (const path of paths) {
-      const file = window.app.vault.getAbstractFileByPath(path);
+      const file = app.vault.getAbstractFileByPath(path);
       if (!(file instanceof TFile)) continue;
 
-      const tags = window.app.metadataCache.getFileCache(file)?.tags;
+      const tags = app.metadataCache.getFileCache(file)?.tags;
       if (!tags) continue;
 
       let stickerToMigrate = null;
@@ -134,7 +141,7 @@ export const handlePNMigrate = async () => {
       }
 
       if (stickerToMigrate) {
-        const content = await window.app.vault.read(file);
+        const content = await app.vault.read(file);
         const stickerString = `${newPrefix}${stickerToMigrate.emoji}`;
 
         const bef = content.slice(0, stickerToMigrate.startOffset);

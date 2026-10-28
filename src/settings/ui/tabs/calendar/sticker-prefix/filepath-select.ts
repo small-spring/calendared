@@ -1,6 +1,7 @@
 import { FuzzyMatch, FuzzySuggestModal, Notice, TAbstractFile, TFile } from 'obsidian';
 import { mount } from "svelte";
 
+import { PluginService } from '@/app-service';
 import { ModalManager } from '@/ui/modals/modals-manager';
 import { genNoticeFragment } from '@/ui/utils';
 import Suggestion from "./Suggestion.svelte";
@@ -11,7 +12,10 @@ export class FilepathModal extends FuzzySuggestModal<string> {
   private topBarContainer: HTMLElement | null = null;
 
   constructor(filePaths: string[]) {
-    super(window.app);
+    const app = PluginService.getPlugin()?.app
+    if (!app) return;
+
+    super(app);
     ModalManager.register(this);
 
     this.filePaths = filePaths;
@@ -53,8 +57,8 @@ export class FilepathModal extends FuzzySuggestModal<string> {
     ModalManager.closeAll();
 
     // close settings tab
-    if (window.app?.setting && window.app?.setting?.activeTab) {
-      window.app.setting.close?.();
+    if (this.app.setting?.activeTab) {
+      this.app.setting.close?.();
     }
 
     const file = this.app.vault.getAbstractFileByPath(filePath);

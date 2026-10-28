@@ -2,12 +2,11 @@
   import { IGranularity } from "@/io";
 
   import { getFileData } from "@/io";
-  import { settingsStore } from "@/settings";
   import {
     activeFileStore,
     displayedDateStore,
     todayStore,
-    internalFileModStore,
+    notesChangedStore,
   } from "@/stores/";
   import { cn, eventHandlers, isControlPressed } from "@/ui/utils";
   import { Button } from "@/ui/components/core";
@@ -47,8 +46,7 @@
   }: Props = $props();
 
   let { file, sticker } = $derived.by(() => {
-    $settingsStore; // crr file might have been deleted from settings page
-    $internalFileModStore; // update on file rename or sticker update
+    $notesChangedStore; // file or sticker may have changed
     return getFileData(granularity, date);
   });
   let isActive = $derived.by(() => {

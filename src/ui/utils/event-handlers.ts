@@ -1,10 +1,8 @@
-import { FILE_MENU_POPOVER_ID } from '@/constants';
 import type { IGranularity } from '@/io';
 import { createOrOpenNote } from "@/io";
 import { settingsStore } from '@/settings';
 import { TFile, WorkspaceLeaf } from 'obsidian';
 import { get } from 'svelte/store';
-import { Popover } from '../popovers';
 import { FileMenuOpenParams } from '../popovers/file-menu';
 import { PluginService } from '@/app-service';
 import { createFileMenuPopover } from '../popovers/base';

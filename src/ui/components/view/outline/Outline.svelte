@@ -1,7 +1,6 @@
 <script lang="ts">
     import { BASE_POPOVER_ID } from "@/constants";
-    import { settingsStore } from "@/settings";
-    import { internalFileModStore, previewLeafStore } from "@/stores";
+    import { notesChangedStore, previewLeafStore } from "@/stores";
     import { cn } from "@/ui/utils";
     import { escapeRegex } from "@/utils";
     import { HeadingCache, setIcon, TFile, WorkspaceLeaf } from "obsidian";
@@ -20,8 +19,7 @@
     let leaf: WorkspaceLeaf | undefined | null = $state(null);
 
     let headings: HeadingCache[] | undefined = $derived.by(() => {
-        $settingsStore;
-        $internalFileModStore;
+        $notesChangedStore; // headings change with the note's metadata
         if (file) {
             return PluginService.getPlugin()?.app.metadataCache.getFileCache(
                 file,

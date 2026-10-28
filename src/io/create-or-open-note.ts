@@ -1,7 +1,7 @@
 import { settingsStore } from "@/settings";
 import { activeFileStore, internalFileModStore } from "@/stores/notes";
 import { createConfirmationDialog } from "@/ui/modals/confirmation";
-import { Notice, TAbstractFile, TFile, WorkspaceLeaf } from "obsidian";
+import { Notice, TFile, WorkspaceLeaf } from "obsidian";
 import { get } from "svelte/store";
 import CreateNote from "./CreateNote.svelte";
 import { getPeriodicityFromGranularity, replaceTemplateContents } from "./parse";
@@ -109,7 +109,7 @@ export async function createNote(granularity: IGranularity, date: moment.Moment)
 
   const normalizedPath = getNotePath(granularity, date);
   await ensureFolderExists(normalizedPath);
-  const [templateContents, IFoldInfo] = await getTemplateInfo(templatePath);
+  const [templateContents] = await getTemplateInfo(templatePath);
 
   try {
     internalFileModStore.set("created");

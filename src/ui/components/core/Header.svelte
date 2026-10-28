@@ -107,7 +107,7 @@
     <PeriodTitle
       date={leftDate}
       title={leftTitle}
-      className="text-xl !text-[--color-text-header-title]"
+      textClassName="text-xl !text-[--color-text-header-title]"
     />
   {/if}
 
@@ -130,7 +130,8 @@
     <PeriodTitle
       date={rightDate}
       title={rightTitle}
-      className="text-sm font-medium !text-[--interactive-accent] ml-4"
+      className="ml-8"
+      textClassName="text-sm font-medium !text-[--interactive-accent]"
     />
   {/if}
 

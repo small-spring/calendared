@@ -1,15 +1,11 @@
 <script lang="ts">
     import { getFileData } from "@/io";
-    import { settingsStore } from "@/settings";
-    import { displayedDateStore, yearsRanges } from "@/stores";
+    import { displayedDateStore, notesChangedStore, yearsRanges } from "@/stores";
     import { todayStore } from "@/stores/dates";
-    import { getContext } from "svelte";
     import { Header } from "./core";
-    import { cn } from "../utils";
-    import { Platform } from "obsidian";
 
     let fileData = $derived.by(() => {
-        $settingsStore.filepaths; // trigger reactivity
+        $notesChangedStore; // recompute when notes change
         return getFileData("year", $displayedDateStore);
     });
     let isToday = $derived($displayedDateStore.isSame($todayStore, "year"));
@@ -20,10 +16,6 @@
             yearsRanges.selectOrCreateRanges();
         }
     });
-
-    let minimalMode = getContext("minimalMode") as
-        | { value: boolean }
-        | undefined;
 </script>
 
 <Header
@@ -58,20 +50,5 @@
         },
     }}
 >
-    <!--
-        Calendared: upstream showed the current 12-year range (e.g. "2020-2031") on the right.
-        Hidden here (the new Header has no right-title slot; see CUSTOMIZATIONS.md).
-
-    {#snippet rightTitleSnippet()}
-        <div
-            id="years-range"
-            class={cn(
-                "font-medium rounded-[2px]",
-                minimalMode?.value || Platform.isPhone ? "text-sm" : "text-lg",
-            )}
-        >
-            {$yearsRanges.ranges[$yearsRanges.crrRangeIndex]}
-        </div>
-    {/snippet}
-    -->
+    <!-- Calendared: upstream also showed the current 12-year range (e.g. "2020-2031") on the right; removed -->
 </Header>

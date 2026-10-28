@@ -60,11 +60,18 @@
   - `‹ • ›` を `‹ ›` と ⌖（locate-fixed）に分けた。⌖ は開いているノートの日付に戻る（元はノートも開き直していたが、それはやめた）。
     ノートの日付を表示中は薄くなる。矢印の大きさはカレンダーのヘッダーと同じ
 
+## リファクタ（段階 1・2）
+
+- 使われなくなったコードを削除: `DateNavigator.svelte`、`getRelativeDate` と `HUMAN_FORMATS_PER_GRANULARITY`、年ヘッダーの使われていない変数とコメントアウト
+- 元のコードの ESLint 警告（14 件、未使用の import・変数など）を解消。`npx eslint ./src` で警告 0
+- `PeriodTitle` の class を `className`（外枠の配置）と `textClassName`（文字の大きさ・色）に分けた。
+  元は `ml-4` が二重にかかっていたので、年タイトルは `ml-8` 1 つにした（間隔は同じ。年の下のドットは文字の真下になった）
+- Obsidian 本体へのアクセスを `PluginService.getPlugin()?.app` に統一（`window.app` の直接利用をなくした）
+- 「読むだけで再描画させる」書き方を、`notesChangedStore`（`src/stores/notes.ts`）を読む形に統一。
+  ノートの情報を描き直す理由が 1 か所に名前付きでまとまった（中身は今までと同じ: 設定かファイルの変化で発火）
+
 ## やりたいことメモ（未着手）
 
-- 可読性・保守性のためのリファクタ
-  - 使われなくなった `DateNavigator.svelte`、`getRelativeDate`（`src/ui/utils`）、使われていない変数など
-  - `PeriodTitle` の `className` が外枠とボタンの両方にかかっている（`ml-4` が二重になって今の間隔になっている）。見た目を変えずに整理する
-  - 状態管理の整理（元のコード由来）: ストアが用途ごとに散らばっている、`Math.random()` を入れて変更を知らせるストアがある、
-    `$settingsStore.filepaths;` のような「読むだけで再描画させる」書き方、`window.app` と `PluginService` の混在など
+- 状態管理の作り直し（リファクタ段階 3）: ノートの一覧を設定から切り離す、`internalFileModStore` の `Math.random()` による合図をやめる、など。
+  先に処理部分のテストを書いてから
 - スマホでの見え方の確認（優先度低）

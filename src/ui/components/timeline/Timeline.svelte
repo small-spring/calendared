@@ -47,7 +47,7 @@
   let crrSelectedDate = $state(initialDate);
   let resetEl: HTMLButtonElement | null = $state(null);
   let dates: moment.Moment[] = $derived.by(() => {
-    $localeSwitched;
+    $localeSwitched; // moment objects don't track the locale; rebuild when it changes
 
     let dates: moment.Moment[] = [];
 

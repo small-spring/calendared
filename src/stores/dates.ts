@@ -140,7 +140,7 @@ function createYearsRangesStore() {
     // update todayRange if it doesnt include todayYear anymore
     const [todayRangeStartYear, todayRangeEndYear] = todayRange.split('-');
     if (!(todayYear >= +todayRangeStartYear && todayYear <= +todayRangeEndYear)) {
-      for (const [_, range] of newRanges.entries()) {
+      for (const range of newRanges) {
         const [start, end] = range.split('-');
 
         if (todayYear >= +start && todayYear <= +end) {

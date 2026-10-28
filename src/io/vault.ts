@@ -123,7 +123,6 @@ export async function getTemplateInfo(
       contents = await app?.vault.cachedRead(templateFile) || "";
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const foldInfo = PluginService.getPlugin()?.app.foldManager.load(templateFile) ?? null;
     return [contents, foldInfo];
   } catch (err) {

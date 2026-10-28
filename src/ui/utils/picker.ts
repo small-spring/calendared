@@ -1,4 +1,3 @@
-import { STICKER_POPOVER_ID } from "@/constants";
 import { modifyFile, TFileData, trim } from "@/io";
 import { settingsStore } from "@/settings";
 import data from "@emoji-mart/data";
@@ -57,7 +56,6 @@ export function initializePicker(
       const { file, sticker } = fileData;
 
       if (file) {
-        const app = PluginService.getPlugin()?.app
         // update note with new emoji tag
         const content = await PluginService.getPlugin()?.app.vault.read(file) ?? ""
         let updatedContent = content

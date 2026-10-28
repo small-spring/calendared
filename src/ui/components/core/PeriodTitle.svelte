@@ -24,12 +24,14 @@
   interface Props {
     date: moment.Moment;
     title: TTitle;
-    /** font size/color classes; also applied to the width samples so they measure the same */
+    /** layout classes for the outer box (e.g. margins) */
     className?: string;
+    /** font size/weight/color classes; applied to the label and to the width samples so they measure the same */
+    textClassName?: string;
     /** called after the title is clicked */
     onOpen?: () => void;
   }
-  let { date, title, className = "", onOpen }: Props = $props();
+  let { date, title, className = "", textClassName = "", onOpen }: Props = $props();
 
   let periodicity = $derived(getPeriodicityFromGranularity(title.granularity));
   // a disabled period can't create its note (see createOrOpenNote), so only look clickable if it exists
@@ -42,7 +44,7 @@
   The invisible samples share one grid cell with the title, so the cell is as wide as the widest label.
   The title stays left-aligned with its dot centered under the visible text.
 -->
-<div class={cn("grid font-semibold tabular-nums", className)}>
+<div class={cn("grid font-semibold tabular-nums", textClassName, className)}>
   {#each title.widthSamples ?? [] as sample}
     <span class="invisible [grid-area:1/1]" aria-hidden="true">{sample}</span>
   {/each}
@@ -50,7 +52,7 @@
     <Button
       class={cn(
         "h-auto font-semibold tabular-nums hover:!shadow-[0px_0px_0_5px_var(--interactive-hover)] rounded-[2px] !p-0",
-        className,
+        textClassName,
         title.className,
         !canOpen && "!cursor-default hover:!shadow-none hover:!bg-transparent",
       )}

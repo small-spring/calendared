@@ -1,24 +1,17 @@
 <script lang="ts">
     import { getFileData } from "@/io";
-    import { settingsStore } from "@/settings";
-    import { displayedDateStore, yearsRanges } from "@/stores";
+    import { displayedDateStore, notesChangedStore, yearsRanges } from "@/stores";
     import { todayStore } from "@/stores/dates";
     import { Header } from "./core";
     import MonthPicker from "./MonthPicker.svelte";
 
-    let monthFileData = $state(getFileData("month", $displayedDateStore));
-    let yearFileData = $state(
-        getFileData("year", $displayedDateStore.clone().startOf("year")),
-    );
-    $effect.pre(() => {
-        if ($settingsStore.filepaths) {
-            monthFileData = getFileData("month", $displayedDateStore);
-
-            yearFileData = getFileData(
-                "year",
-                $displayedDateStore.clone().startOf("year"),
-            );
-        }
+    let monthFileData = $derived.by(() => {
+        $notesChangedStore; // recompute when notes change
+        return getFileData("month", $displayedDateStore);
+    });
+    let yearFileData = $derived.by(() => {
+        $notesChangedStore; // recompute when notes change
+        return getFileData("year", $displayedDateStore.clone().startOf("year"));
     });
     let isToday = $derived($displayedDateStore.isSame($todayStore, "month"));
 </script>

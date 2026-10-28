@@ -2,12 +2,12 @@ import { DEFAULT_SETTINGS, settingsStore, SettingsTab, type ISettings } from '@/
 import { InvalidFormat, View, ViewManager } from '@/ui';
 import { MarkdownView, Menu, Notice, Plugin, TAbstractFile, TFile, WorkspaceLeaf, WorkspaceRoot, Platform } from 'obsidian';
 import { mount, type SvelteComponent } from 'svelte';
-import { get, Subscriber } from 'svelte/store';
+import { get } from 'svelte/store';
 import { PluginService } from './app-service';
-import { CALENDAR_LUCIDE_ICON, CALENDAR_POPOVER_ID, CALENDAR_RIBBON_ID, granularities, LEAF_TYPE, STICKER_POPOVER_ID } from './constants';
+import { CALENDAR_LUCIDE_ICON, CALENDAR_POPOVER_ID, CALENDAR_RIBBON_ID, granularities, LEAF_TYPE } from './constants';
 import { basename, createOrOpenNote, extractAndReplaceTODOItems, getFileData, getStartupNoteGranularity, isBackupPath, storeAllVaultPeriodicFilepaths } from './io';
 import { getPeriodicityFromGranularity } from './io/parse';
-import type { IGranularity, IPeriodicity } from './io/types';
+import type { IGranularity } from './io/types';
 import { isValidPeriodicNote } from './io/validation';
 import {
   activeFileStore,

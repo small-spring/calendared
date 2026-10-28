@@ -2,9 +2,6 @@
     import { YEARS_RANGE_SIZE } from "@/constants";
     import { displayedDateStore, todayStore, yearsRanges } from "@/stores";
     import { Header } from "./core";
-    import { getContext } from "svelte";
-    import { cn } from "../utils";
-    import { Platform } from "obsidian";
 
     let showingCurrentRange: boolean = $derived(
         $yearsRanges.todayRange ===
@@ -20,10 +17,6 @@
             yearsRanges.selectOrCreateRanges();
         }
     });
-
-    let minimalMode = getContext("minimalMode") as
-        | { value: boolean }
-        | undefined;
 </script>
 
 <Header
@@ -51,12 +44,10 @@
     }}
 >
     {#snippet leftTitleSnippet()}
+        <!-- Calendared: always uses upstream's minimal-mode size -->
         <div
             id="years-range"
-            class={cn(
-                // Calendared: always use upstream's minimal-mode size
-                "!text-[--color-text-header-title] text-xl font-semibold mb-2",
-            )}
+            class="!text-[--color-text-header-title] text-xl font-semibold mb-2"
         >
             {crrRange[0].slice(2)} - {crrRange[1].slice(2)}
         </div>
