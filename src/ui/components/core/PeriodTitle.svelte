@@ -20,6 +20,7 @@
   import { capitalize } from "@/utils";
   import Button from "./Button.svelte";
   import Dot from "./Dot.svelte";
+  import Sticker from "../Sticker.svelte";
 
   interface Props {
     date: moment.Moment;
@@ -34,8 +35,19 @@
     showDot?: boolean;
     /** text to show instead of `date.format(title.formatValue)` (e.g. a month name formatted with Intl) */
     text?: string;
+    /** show the note's sticker at the top-right of the label, like on the date buttons (see docs/stickers.md ADR-008) */
+    showSticker?: boolean;
   }
-  let { date, title, className = "", textClassName = "", onOpen, showDot = true, text }: Props = $props();
+  let {
+    date,
+    title,
+    className = "",
+    textClassName = "",
+    onOpen,
+    showDot = true,
+    text,
+    showSticker = false,
+  }: Props = $props();
 
   let periodicity = $derived(getPeriodicityFromGranularity(title.granularity));
   // a disabled period can't create its note (see createOrOpenNote), so only look clickable if it exists
@@ -87,7 +99,13 @@
         });
       }}
     >
-      {text ?? date.format(title.formatValue)}
+      <span class="relative">
+        {text ?? date.format(title.formatValue)}
+        {#if showSticker && title.fileData.sticker}
+          <!-- the emoji keeps the date buttons' small size, whatever the title's size -->
+          <span class="text-xs font-normal"><Sticker sticker={title.fileData.sticker.emoji} /></span>
+        {/if}
+      </span>
     </Button>
     {#if showDot}
       <div class="h-[8px] leading-[0]">

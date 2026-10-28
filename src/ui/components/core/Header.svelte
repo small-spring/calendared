@@ -103,6 +103,7 @@
       date={leftDate}
       title={leftTitle}
       textClassName="text-xl !text-[--color-text-header-title]"
+      showSticker
     />
   {/if}
 
@@ -127,6 +128,7 @@
       title={rightTitle}
       className="ml-8"
       textClassName="text-sm font-medium !text-[--interactive-accent]"
+      showSticker
     />
   {/if}
 
