@@ -38,7 +38,7 @@ abstract class BaseSuggest<T> extends PopoverSuggest<T> {
 
     // create divs and add event handlers. Divs and event handlers removed in `this.destroy()`
     this.suggestionContainerEl = createDiv({
-      cls: 'suggestion-container',
+      cls: 'suggestion-container pnc-suggestion-container',
     });
     this.suggestionItemsContainerEl = this.suggestionContainerEl.createDiv({
       cls: "suggestion",
@@ -52,12 +52,17 @@ abstract class BaseSuggest<T> extends PopoverSuggest<T> {
   render(...props: unknown[]) {
     const suggestionValues = this.getSuggestions(this.inputEl.value, ...props)
 
+    // focus and click both call render(); close first so scope and autoUpdate aren't registered twice
+    if (this.suggestionContainerEl.isConnected) {
+      this.close()
+    }
+
     if (suggestionValues.length > 0) {
       this.clear()
       // add global event handlers, cleaned in `this.close()`
       PluginService.getPlugin()?.app.keymap.pushScope(this.scope);
-      // attached to the DOM, detached in `this.close()`
-      PluginService.getPlugin()?.app.workspace.containerEl.appendChild(this.suggestionContainerEl);
+      // attached to body (not the workspace) so it stays above the settings modal, detached in `this.close()`
+      activeDocument.body.appendChild(this.suggestionContainerEl);
 
       const position = () => computePosition(this.inputEl, this.suggestionContainerEl, {
         placement: "bottom-start",

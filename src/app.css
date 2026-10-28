@@ -52,6 +52,11 @@
   display: none
 }
 
+/* settings suggestions are appended to body; keep them above the settings modal */
+.pnc-suggestion-container {
+  z-index: var(--layer-menu);
+}
+
 .pnc-suggestion-item {
   @apply cursor-[var(--cursor)];
 }
