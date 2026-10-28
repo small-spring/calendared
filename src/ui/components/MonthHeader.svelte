@@ -29,6 +29,9 @@
         granularity: "month",
         fileData: monthFileData,
         formatValue: "MMM",
+        widthSamples: Array.from({ length: 12 }, (_, i) =>
+            $displayedDateStore.clone().month(i).format("MMM"),
+        ),
     }}
     rightDate={$displayedDateStore.clone().startOf("year")}
     rightTitle={{

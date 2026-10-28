@@ -13,6 +13,8 @@
     granularity: IGranularity;
     fileData: TFileData;
     formatValue: string;
+    /** Calendared: every label this title can show (e.g. all month names); the title is sized to the widest so nothing next to it shifts */
+    widthSamples?: string[];
   };
 
   interface Props {
@@ -109,10 +111,18 @@
   Title sizes follow upstream's minimal mode.
 -->
 {#snippet title(date: moment.Moment, t: TTitle, sizeClassName: string)}
-  <div class="flex flex-col items-center">
+  <!--
+    The invisible samples share one grid cell with the title, so the cell is as wide as the widest label.
+    The title stays left-aligned with its dot centered under the visible text.
+  -->
+  <div class={cn("grid font-semibold tabular-nums", sizeClassName)}>
+    {#each t.widthSamples ?? [] as sample}
+      <span class="invisible [grid-area:1/1]" aria-hidden="true">{sample}</span>
+    {/each}
+  <div class="[grid-area:1/1] justify-self-start flex flex-col items-center">
     <Button
       class={cn(
-        "h-auto font-semibold hover:!shadow-[0px_0px_0_5px_var(--interactive-hover)] rounded-[2px] !p-0",
+        "h-auto font-semibold tabular-nums hover:!shadow-[0px_0px_0_5px_var(--interactive-hover)] rounded-[2px] !p-0",
         sizeClassName,
         t.className,
       )}
@@ -148,6 +158,7 @@
         isFilled={!!t.fileData.file}
       />
     </div>
+  </div>
   </div>
 {/snippet}
 
