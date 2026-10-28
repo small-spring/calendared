@@ -1,5 +1,5 @@
 {
-  "name": "periodic-notes-calendar",
+  "name": "calendared",
   "version": "1.2.1",
   "description": "Obsidian plugin to organize periodic notes from daily to yearly with a calendar interface. Navigate and summarize entries using stickers in the calendar view.",
   "author": "luiisca",
@@ -14,7 +14,8 @@
     "format": "biome format --write ./src",
     "biome-lint": "npm run check && biome lint --apply-unsafe ./src",
     "lint": "eslint ./src",
-    "lint-fix": "npm run check && eslint --fix ./src"
+    "lint-fix": "npm run check && eslint --fix ./src",
+    "deploy": "scripts/deploy.sh"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
