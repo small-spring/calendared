@@ -1,21 +1,10 @@
 <script lang="ts">
-  import { getPeriodicityFromGranularity, IGranularity, TFileData } from "@/io";
-  import { cn, eventHandlers, isControlPressed } from "@/ui/utils";
+  import { cn } from "@/ui/utils";
   import { capitalize } from "@/utils";
   import Arrow from "./Arrow.svelte";
-  import Button from "./Button.svelte";
-  import Dot from "./Dot.svelte";
+  import PeriodTitle, { type TTitle } from "./PeriodTitle.svelte";
   import { Snippet } from "svelte";
   import { setIcon } from "obsidian";
-
-  type TTitle = {
-    className?: string;
-    granularity: IGranularity;
-    fileData: TFileData;
-    formatValue: string;
-    /** Calendared: every label this title can show (e.g. all month names); the title is sized to the widest so nothing next to it shifts */
-    widthSamples?: string[];
-  };
 
   interface Props {
     leftDate?: moment.Moment | null;
@@ -110,63 +99,16 @@
   Now one row: [left title ‹ ›] [right title ⌄] ... [go to current]
   Title sizes follow upstream's minimal mode.
 -->
-{#snippet title(date: moment.Moment, t: TTitle, sizeClassName: string)}
-  <!--
-    The invisible samples share one grid cell with the title, so the cell is as wide as the widest label.
-    The title stays left-aligned with its dot centered under the visible text.
-  -->
-  <div class={cn("grid font-semibold tabular-nums", sizeClassName)}>
-    {#each t.widthSamples ?? [] as sample}
-      <span class="invisible [grid-area:1/1]" aria-hidden="true">{sample}</span>
-    {/each}
-  <div class="[grid-area:1/1] justify-self-start flex flex-col items-center">
-    <Button
-      class={cn(
-        "h-auto font-semibold tabular-nums hover:!shadow-[0px_0px_0_5px_var(--interactive-hover)] rounded-[2px] !p-0",
-        sizeClassName,
-        t.className,
-      )}
-      id={t.granularity}
-      aria-label={`Open ${getPeriodicityFromGranularity(t.granularity)} note`}
-      onclick={(event) =>
-        eventHandlers.onClick({
-          date,
-          createNewSplitLeaf: isControlPressed(event),
-          granularity: t.granularity,
-        })}
-      oncontextmenu={(event) =>
-        eventHandlers.onContextMenu({
-          event,
-          fileData: t.fileData,
-          date,
-          granularity: t.granularity,
-        })}
-      onpointerenter={(event) => {
-        eventHandlers.onHover({
-          event,
-          isControlPressed: isControlPressed(event),
-          file: t.fileData.file,
-        });
-      }}
-    >
-      {date.format(t.formatValue)}
-    </Button>
-    <div class="h-[8px] leading-[0]">
-      <Dot
-        className="w-1"
-        isVisible={!!t.fileData.file}
-        isFilled={!!t.fileData.file}
-      />
-    </div>
-  </div>
-  </div>
-{/snippet}
 
 <!-- items-end: arrows and icons sit on the titles' bottom line (titles reserve 8px below for the dot) -->
 <div id="header" class="relative flex items-end gap-1 mt-4 mb-3" bind:this={headerEl}>
   {@render leftTitleSnippet?.()}
   {#if leftTitle && leftDate}
-    {@render title(leftDate, leftTitle, "text-xl !text-[--color-text-header-title]")}
+    <PeriodTitle
+      date={leftDate}
+      title={leftTitle}
+      className="text-xl !text-[--color-text-header-title]"
+    />
   {/if}
 
   <div class="flex items-end mb-[11px] -ml-0.5" id="nav-arrows">
@@ -185,11 +127,11 @@
   </div>
 
   {#if rightTitle && rightDate}
-    {@render title(
-      rightDate,
-      rightTitle,
-      "text-sm font-medium !text-[--interactive-accent] ml-4",
-    )}
+    <PeriodTitle
+      date={rightDate}
+      title={rightTitle}
+      className="text-sm font-medium !text-[--interactive-accent] ml-4"
+    />
   {/if}
 
   {#if picker}

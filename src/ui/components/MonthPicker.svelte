@@ -2,10 +2,13 @@
     // Calendared: month picker shown as a popover from the header's year chevron.
     // Replaces upstream's "Month" tab (YearHeader + months table in Calendar.svelte).
     import { monthsIndexesInQuarters } from "@/constants";
+    import { getFileData } from "@/io";
+    import { settingsStore } from "@/settings";
     import { displayedDateStore, todayStore } from "@/stores";
     import { cn } from "@/ui/utils";
     import Arrow from "./core/Arrow.svelte";
     import DateBttn from "./core/DateBttn.svelte";
+    import PeriodTitle from "./core/PeriodTitle.svelte";
 
     interface Props {
         /** Called after a month is picked */
@@ -14,6 +17,10 @@
     let { onPick }: Props = $props();
 
     let pickerYear = $state($displayedDateStore.clone().startOf("year"));
+    let yearFileData = $derived.by(() => {
+        $settingsStore.filepaths; // update when notes are created or deleted
+        return getFileData("year", pickerYear);
+    });
 </script>
 
 <div class="flex items-center justify-between mb-1">
@@ -23,7 +30,17 @@
         tooltip="Previous year"
         className="!h-auto !py-1 !px-2 [&>svg]:w-1.5"
     />
-    <span class="text-sm font-semibold">{pickerYear.format("YYYY")}</span>
+    <!-- like every other year label, opens (or creates) the yearly note -->
+    <PeriodTitle
+        date={pickerYear}
+        title={{
+            granularity: "year",
+            fileData: yearFileData,
+            formatValue: "YYYY",
+        }}
+        className="text-sm"
+        onOpen={onPick}
+    />
     <Arrow
         direction="right"
         onClick={() => (pickerYear = pickerYear.clone().add(1, "year"))}

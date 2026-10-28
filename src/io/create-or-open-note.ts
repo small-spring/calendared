@@ -11,6 +11,7 @@ import { extractAndReplaceTODOItems } from "./utils";
 import { ensureFolderExists, getNotePath, getTemplateInfo } from "./vault";
 import { ViewManager } from "@/ui";
 import { PluginService } from "@/app-service";
+import { capitalize } from "@/utils";
 
 export async function createOrOpenNote({
   leaf,
@@ -66,6 +67,12 @@ export async function createOrOpenNote({
     return new Notice(`Not a file: ${normalizedPath}`);
   } else {
     const periodicity = getPeriodicityFromGranularity(granularity);
+
+    // Calendared: upstream created the note even when its period was disabled in settings.
+    // Existing notes still open (above); only creation is blocked.
+    if (!get(settingsStore).periods[granularity].enabled) {
+      return new Notice(`${capitalize(periodicity)} notes are turned off in settings`);
+    }
 
     if (confirmBeforeCreateOverride) {
       createConfirmationDialog({
