@@ -10,6 +10,10 @@
 - プラグイン id / 表示名を `calendared` / `Calendared` に変更（`manifest.json`, `package.json`）
   - 元: `periodic-notes-calendar` / `Periodic notes calendar`
 - `scripts/deploy.sh`（`npm run deploy`）を追加。ビルドして Vault にコピーする
+  - コピーの前に読み込み確認（スモークテスト、`scripts/check-load.cjs`）をする。ビルドした `main.js` を Node.js で、
+    偽物の Obsidian（何を聞かれても何かを返す Proxy）を使って読み込み、読み込み中に落ちたらコピーしない。
+    読み込み順の不具合（例: `Cannot access 'X' before initialization`）は型チェックや ESLint では見つからないため。
+    動作や見た目は確かめないので、Obsidian での確認は引き続き必要
 
 ## 依存パッケージと安全対策
 
