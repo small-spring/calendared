@@ -32,9 +32,14 @@
     leftTitle={{
         granularity: "year",
         fileData,
-        formatValue: "YY",
+        // Calendared: upstream used "YY" (e.g. "26")
+        formatValue: "YYYY",
     }}
 >
+    <!--
+        Calendared: upstream showed the current 12-year range (e.g. "2020-2031") on the right.
+        Hidden here; restore by uncommenting.
+
     {#snippet rightTitleSnippet()}
         <div
             id="years-range"
@@ -46,6 +51,7 @@
             {$yearsRanges.ranges[$yearsRanges.crrRangeIndex]}
         </div>
     {/snippet}
+    -->
 
     {#snippet bottomNavSnippet()}
         <DateNavigator
