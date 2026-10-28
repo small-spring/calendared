@@ -109,6 +109,10 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
       ViewManager.handleLayoutChange().catch(console.error);
       TimelineManager.create()?.mountAll();
 
+      // Calendared: when the plugin is enabled while a note is already open, no `file-open` fires,
+      // so pick up the current note once here (on app startup this just repeats what `file-open` does)
+      this.onFileOpen(this.app.workspace.getActiveFile());
+
       if (get(settingsStore).openPopoverOnRibbonHover) {
         createCalendarPopover({
           view: {
@@ -289,6 +293,36 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     this.registerEvent(
       this.app.metadataCache.on('changed', () => this.onMetadataChanged())
     )
+    this.registerEvent(
+      this.app.workspace.on('file-open', (file) => this.onFileOpen(file))
+    )
+  }
+
+  /**
+   * Calendared: keep the calendar in step with whichever note is open, however it was opened
+   * (file explorer, a hotkey, links, switching tabs...). Upstream only updated the selection when a note was
+   * opened from the calendar, and followed other opens (`syncCalendar`) inside TimelineManager, so nothing
+   * happened while the timeline was disabled.
+   */
+  private onFileOpen(file: TFile | null) {
+    // nothing open (e.g. the last tab was closed) or a non-periodic note: nothing on the calendar is "open" anymore
+    if (!file) {
+      activeFileStore.set({ file: null, date: null, granularity: null });
+      return;
+    }
+    const { isValid, granularity, date } = isValidPeriodicNote(file.basename);
+    if (typeof isValid !== "boolean" || !date || !granularity) {
+      activeFileStore.set({ file: null, date: null, granularity: null });
+      return;
+    }
+
+    activeFileStore.set({ file, date, granularity });
+
+    // move the calendar to the note's month, except for notes shown in the calendar's own preview panel
+    const leaf = this.app.workspace.getMostRecentLeaf();
+    if (get(settingsStore).syncCalendar && !ViewManager.isPreviewLeaf(leaf)?.leaf) {
+      displayedDateStore.set(date);
+    }
   }
 
   private async onFileMenu(_menu: Menu, file: TAbstractFile) {

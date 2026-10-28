@@ -1,11 +1,11 @@
-import { FileView, MarkdownView, TFile, WorkspaceLeaf, Platform } from "obsidian";
+import { MarkdownView, TFile, WorkspaceLeaf, Platform } from "obsidian";
 import { mount, unmount } from "svelte";
 
 import { LEAF_TYPE, TIMELINE_TYPE } from "@/constants";
 import { IGranularity } from "@/io";
 import { isValidPeriodicNote } from "@/io/validation";
 import { settingsStore } from "@/settings";
-import { displayedDateStore, timelineParentFileStore } from "@/stores";
+import { timelineParentFileStore } from "@/stores";
 
 import { get } from "svelte/store";
 import { ViewManager } from "../view";
@@ -140,18 +140,8 @@ export default class TimelineManager {
       this.restart(crrActiveLeaf, { isPeriodic: true, granularity, date }, activeFile);
       timelineParentFileStore.set(activeFile)
 
-      if (
-        PluginService.getPlugin()?.app.workspace.layoutReady
-        && !ViewManager.isMainLeaf(crrActiveLeaf)
-        && crrActiveLeaf?.view
-        && crrActiveLeaf?.view instanceof FileView
-        && !ViewManager.isPreviewLeaf(crrActiveLeaf)?.leaf
-        && get(settingsStore).syncCalendar
-      ) {
-        displayedDateStore.set(date)
-        // Calendared: upstream also switched the calendar tab to the note's granularity here.
-        // Tabs are gone; the calendar stays on the day view and months are picked from the header popover.
-      }
+      // Calendared: upstream also moved the calendar to this note's date here (`syncCalendar`) and switched its tab.
+      // That only ran while the timeline was enabled; it now lives in the plugin's `file-open` handler (main.ts).
 
       return;
     }
