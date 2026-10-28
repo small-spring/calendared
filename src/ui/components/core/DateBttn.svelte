@@ -76,7 +76,7 @@
     "date-bttn",
     "relative !h-auto w-full flex flex-col font-medium rounded-[--radius-s] tabular-nums transition-colors text-center",
     isActive
-      ? "isActive !text-[--text-on-accent]"
+      ? "isActive !text-[--text-on-accent] !bg-[--interactive-accent] hover:!bg-[--interactive-accent-hover]"
       : isToday
         ? "!text-[--color-text-today]"
         : isAdjacentMonth
@@ -132,15 +132,3 @@
     </div>
   {/if}
 </Button>
-
-<style lang="postcss">
-  button:hover {
-    @apply !bg-[var(--interactive-hover)];
-  }
-  button.isActive {
-    @apply !bg-[--interactive-accent];
-  }
-  button.isActive:hover {
-    @apply !bg-[--interactive-accent-hover];
-  }
-</style>
