@@ -6,7 +6,6 @@ import { IGranularity } from "@/io";
 import { isValidPeriodicNote } from "@/io/validation";
 import { settingsStore } from "@/settings";
 import { displayedDateStore, timelineParentFileStore } from "@/stores";
-import { crrTabStore, getEnabledPeriods, periodTabs } from "@/stores/calendar";
 
 import { get } from "svelte/store";
 import { ViewManager } from "../view";
@@ -150,10 +149,8 @@ export default class TimelineManager {
         && get(settingsStore).syncCalendar
       ) {
         displayedDateStore.set(date)
-        const enabledPeriodsRes = getEnabledPeriods();
-        if (enabledPeriodsRes.tabs.includes(granularity as typeof periodTabs[number])) {
-          crrTabStore.set(granularity as typeof periodTabs[number])
-        }
+        // Calendared: upstream also switched the calendar tab to the note's granularity here.
+        // Tabs are gone; the calendar stays on the day view and months are picked from the header popover.
       }
 
       return;

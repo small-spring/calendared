@@ -18,7 +18,6 @@
     import MonthHeader from "./MonthHeader.svelte";
     import YearHeader from "./YearHeader.svelte";
     import YearsHeader from "./YearsHeader.svelte";
-    import { Tabs } from "./core";
     import DateBttn from "./core/DateBttn.svelte";
     import { settingsStore } from "@/settings";
     import { Platform } from "obsidian";
@@ -59,17 +58,11 @@
 </script>
 
 <div id="pnc-container" class="px-4 !pt-2" bind:this={containerEl}>
-    {#if tabs.length > 1}
-        <Tabs
-            tabs={[...tabs]}
-            selectedTab={crrTab}
-            selectTab={(tab: (typeof periodTabs)[number]) =>
-                crrTabStore.set(tab)}
-            id="periods-container"
-            tabId="period"
-            className="mx-0 ml-auto"
-        />
-    {/if}
+    <!--
+        Calendared: upstream showed Day/Month/Year tabs here. The calendar now stays on the day view and
+        months are picked from the header popover (MonthPicker). The month/year views below are only
+        reached when the day (or month) period is disabled in settings.
+    -->
 
     {#if crrTab === "day" && enabledPeriods.day}
         <MonthHeader />
@@ -181,6 +174,17 @@
                                         .month(monthIndex)
                                         .startOf("month")}
                                     granularity="month"
+                                    onSelect={enabledPeriods.day
+                                        ? () => {
+                                              displayedDateStore.set(
+                                                  $displayedDateStore
+                                                      .clone()
+                                                      .month(monthIndex)
+                                                      .startOf("month"),
+                                              );
+                                              crrTabStore.set("day");
+                                          }
+                                        : null}
                                     className={cn(
                                         "px-1 mb-3 items-center justify-center",
                                         minimalMode?.value || Platform.isPhone
@@ -232,6 +236,17 @@
                                         .year(year)
                                         .startOf("year")}
                                     granularity="year"
+                                    onSelect={enabledPeriods.month
+                                        ? () => {
+                                              displayedDateStore.set(
+                                                  $displayedDateStore
+                                                      .clone()
+                                                      .year(year)
+                                                      .startOf("year"),
+                                              );
+                                              crrTabStore.set("month");
+                                          }
+                                        : null}
                                     className={cn(
                                         "tracking-wide px-1 !pt-2.5 !pb-4",
                                         minimalMode?.value || Platform.isPhone

@@ -1,7 +1,6 @@
 <script lang="ts">
     import { YEARS_RANGE_SIZE } from "@/constants";
     import { displayedDateStore, todayStore, yearsRanges } from "@/stores";
-    import DateNavigator from "./DateNavigator.svelte";
     import { Header } from "./core";
     import { getContext } from "svelte";
     import { cn } from "../utils";
@@ -27,42 +26,39 @@
         | undefined;
 </script>
 
-<Header>
+<Header
+    nav={{
+        type: "range",
+        showingCrrDate: showingCurrentRange,
+        decrement: () => {
+            yearsRanges.updateRanges({
+                action: "decrement",
+                displayedDateModifier: -YEARS_RANGE_SIZE,
+            });
+        },
+        reset: () => {
+            yearsRanges.update((values) => ({
+                ...values,
+                crrRangeIndex: values.ranges.findIndex(
+                    (range) => range === values.todayRange,
+                ),
+            }));
+            displayedDateStore.set($todayStore);
+        },
+        increment: () => {
+            yearsRanges.updateRanges({ action: "increment" });
+        },
+    }}
+>
     {#snippet leftTitleSnippet()}
         <div
             id="years-range"
             class={cn(
-                "!text-[--color-text-header-title] text-6xl font-semibold",
-                minimalMode?.value || Platform.isPhone ? "text-xl" : "text-7xl",
+                // Calendared: always use upstream's minimal-mode size
+                "!text-[--color-text-header-title] text-xl font-semibold mb-2",
             )}
         >
             {crrRange[0].slice(2)} - {crrRange[1].slice(2)}
         </div>
-    {/snippet}
-
-    {#snippet bottomNavSnippet()}
-        <DateNavigator
-            showingCrrDate={showingCurrentRange}
-            type="range"
-            decrementdisplayedDate={() => {
-                yearsRanges.updateRanges({
-                    action: "decrement",
-                    displayedDateModifier: -YEARS_RANGE_SIZE,
-                });
-            }}
-            resetdisplayedDate={() => {
-                yearsRanges.update((values) => ({
-                    ...values,
-                    crrRangeIndex: values.ranges.findIndex(
-                        (range) => range === values.todayRange,
-                    ),
-                }));
-
-                displayedDateStore.set($todayStore);
-            }}
-            incrementdisplayedDate={() => {
-                yearsRanges.updateRanges({ action: "increment" });
-            }}
-        />
     {/snippet}
 </Header>

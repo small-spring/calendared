@@ -28,6 +28,8 @@
     children?: Snippet;
     text?: Snippet;
     ignoreAdjacentMonth?: boolean;
+    /** Calendared: when set, a click calls this instead of opening the note */
+    onSelect?: (() => void) | null;
   }
 
   let {
@@ -41,6 +43,7 @@
     text,
     ignoreAdjacentMonth = false,
     isActiveOverride = null,
+    onSelect = null,
   }: Props = $props();
 
   let { file, sticker } = $derived.by(() => {
@@ -90,6 +93,10 @@
         color: var(--color-text-${granularity}-bttn);
     `}
   onclick={(event) => {
+    if (onSelect) {
+      onSelect();
+      return;
+    }
     eventHandlers.onClick({
       date,
       createNewSplitLeaf: isControlPressed(event),

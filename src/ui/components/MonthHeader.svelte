@@ -2,9 +2,9 @@
     import { getFileData } from "@/io";
     import { settingsStore } from "@/settings";
     import { displayedDateStore, yearsRanges } from "@/stores";
-    import DateNavigator from "./DateNavigator.svelte";
     import { todayStore } from "@/stores/dates";
     import { Header } from "./core";
+    import MonthPicker from "./MonthPicker.svelte";
 
     let monthFileData = $state(getFileData("month", $displayedDateStore));
     let yearFileData = $state(
@@ -36,31 +36,31 @@
         fileData: yearFileData,
         formatValue: "YYYY",
     }}
+    nav={{
+        type: "month",
+        showingCrrDate: isToday,
+        decrement: () => {
+            displayedDateStore.update((date) =>
+                date.clone().subtract(1, "month"),
+            );
+        },
+        reset: () => {
+            yearsRanges.update((values) => ({
+                ...values,
+                crrRangeIndex: values.ranges.findIndex(
+                    (range) => range === values.todayRange,
+                ),
+            }));
+            displayedDateStore.set($todayStore);
+        },
+        increment: () => {
+            displayedDateStore.update((date) =>
+                date.clone().add(1, "month"),
+            );
+        },
+    }}
 >
-    {#snippet bottomNavSnippet()}
-        <DateNavigator
-            showingCrrDate={isToday}
-            type="month"
-            decrementdisplayedDate={() => {
-                displayedDateStore.update((date) =>
-                    date.clone().subtract(1, "month"),
-                );
-            }}
-            resetdisplayedDate={() => {
-                yearsRanges.update((values) => ({
-                    ...values,
-                    crrRangeIndex: values.ranges.findIndex(
-                        (range) => range === values.todayRange,
-                    ),
-                }));
-
-                displayedDateStore.set($todayStore);
-            }}
-            incrementdisplayedDate={() => {
-                displayedDateStore.update((date) =>
-                    date.clone().add(1, "month"),
-                );
-            }}
-        />
+    {#snippet picker(close: () => void)}
+        <MonthPicker onPick={close} />
     {/snippet}
 </Header>

@@ -35,8 +35,10 @@
 }
 
 #pnc-calendar-parent {
-  scrollbar-gutter: stable;
-  @apply pr-0 overflow-x-hidden
+  /* Calendared: upstream used `scrollbar-gutter: stable` + `pr-0`, which leaves the right side
+     narrower than the left when scrollbars overlay (macOS). Keep the pane padding symmetric. */
+  scrollbar-gutter: stable both-edges;
+  @apply overflow-x-hidden
 }
 
 #pnc-settings-container {

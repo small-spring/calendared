@@ -5,7 +5,6 @@
     import { todayStore } from "@/stores/dates";
     import { getContext } from "svelte";
     import { Header } from "./core";
-    import DateNavigator from "./DateNavigator.svelte";
     import { cn } from "../utils";
     import { Platform } from "obsidian";
 
@@ -35,10 +34,33 @@
         // Calendared: upstream used "YY" (e.g. "26")
         formatValue: "YYYY",
     }}
+    nav={{
+        type: "year",
+        showingCrrDate: isToday,
+        decrement: () => {
+            displayedDateStore.update((date) =>
+                date.clone().subtract(1, "year"),
+            );
+        },
+        reset: () => {
+            yearsRanges.update((values) => ({
+                ...values,
+                crrRangeIndex: values.ranges.findIndex(
+                    (range) => range === values.todayRange,
+                ),
+            }));
+            displayedDateStore.set($todayStore);
+        },
+        increment: () => {
+            displayedDateStore.update((date) =>
+                date.clone().add(1, "year"),
+            );
+        },
+    }}
 >
     <!--
         Calendared: upstream showed the current 12-year range (e.g. "2020-2031") on the right.
-        Hidden here; restore by uncommenting.
+        Hidden here (the new Header has no right-title slot; see CUSTOMIZATIONS.md).
 
     {#snippet rightTitleSnippet()}
         <div
@@ -52,31 +74,4 @@
         </div>
     {/snippet}
     -->
-
-    {#snippet bottomNavSnippet()}
-        <DateNavigator
-            showingCrrDate={isToday}
-            type="year"
-            decrementdisplayedDate={() => {
-                displayedDateStore.update((date) =>
-                    date.clone().subtract(1, "year"),
-                );
-            }}
-            resetdisplayedDate={() => {
-                yearsRanges.update((values) => ({
-                    ...values,
-                    crrRangeIndex: values.ranges.findIndex(
-                        (range) => range === values.todayRange,
-                    ),
-                }));
-
-                displayedDateStore.set($todayStore);
-            }}
-            incrementdisplayedDate={() => {
-                displayedDateStore.update((date) =>
-                    date.clone().add(1, "year"),
-                );
-            }}
-        />
-    {/snippet}
 </Header>
