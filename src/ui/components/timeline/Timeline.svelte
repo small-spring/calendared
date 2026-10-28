@@ -5,14 +5,8 @@
   import { IGranularity } from "@/io";
   import { settingsStore, TimelineViewMode } from "@/settings";
   import { localeSwitched } from "@/stores";
-  import { Arrow, Dot } from "@/ui";
-  import {
-    cn,
-    eventHandlers,
-    getRelativeDate,
-    isControlPressed,
-  } from "@/ui/utils";
-  import { Button } from "@/ui/components/core";
+  import { Arrow } from "@/ui";
+  import { cn } from "@/ui/utils";
   import { setIcon, Platform } from "obsidian";
   import { onDestroy, onMount } from "svelte";
   import DateBttn from "../core/DateBttn.svelte";
@@ -51,10 +45,7 @@
     crrDisplayedDate = crrDisplayedDate.locale(window.moment.locale());
   });
   let crrSelectedDate = $state(initialDate);
-  const relativeFormattedDate = $derived.by(() => {
-    $localeSwitched;
-    return getRelativeDate(derivedG, crrDisplayedDate);
-  });
+  let resetEl: HTMLButtonElement | null = $state(null);
   let dates: moment.Moment[] = $derived.by(() => {
     $localeSwitched;
 
@@ -117,11 +108,7 @@
     event.stopPropagation();
     crrDisplayedDate = derivedInitialDate;
     crrSelectedDate = derivedInitialDate;
-    eventHandlers.onClick({
-      date: derivedInitialDate,
-      createNewSplitLeaf: isControlPressed(event),
-      granularity: derivedG,
-    });
+    // Calendared: upstream also re-opened the note here; it's already open, so just move back to it
   }
   function handleSelectDate(d: moment.Moment) {
     crrSelectedDate = d;
@@ -130,6 +117,12 @@
     const crrViewModeIndex = VIEW_MODES.findIndex((m) => m === viewMode);
     viewMode = VIEW_MODES[(crrViewModeIndex + 1) % VIEW_MODES.length];
   }
+
+  $effect(() => {
+    if (resetEl) {
+      setIcon(resetEl, "locate-fixed");
+    }
+  });
 
   $effect.pre(() => {
     if (arrowEl) {
@@ -279,16 +272,13 @@
       onclick={handleToggleViewMode}
       onkeydown={handleToggleViewMode}
     >
+      <!-- Calendared: upstream showed a relative date ("Today", "3 days ago") next to the chevron -->
       <div class="flex items-center gap-1 mr-auto">
         <div class="flex text-[var(--text-accent)]" bind:this={arrowEl}></div>
-        <p
-          class="m-0 flex items-center text-[var(--text-accent)] [font-size:var(--font-smallest)] font-semibold tracking-[0.4px] whitespace-nowrap"
-        >
-          {relativeFormattedDate}
-        </p>
       </div>
 
       {#if viewMode === "expanded"}
+        <!-- Calendared: upstream was ‹ • ›; now ‹ › stay together and ⌖ (back to the note's dates) sits apart, like the calendar header -->
         <div class="flex items-center ml-1 h-fit" id="bottom-nav">
           <Arrow
             direction="left"
@@ -296,26 +286,24 @@
               modDisplayedDate(ev, "subtract");
             }}
             tooltip={`Previous ${G_MAP[derivedG].group}`}
-            className="[&>svg]:w-1.5"
+            className="!h-auto !py-0.5 !px-1 [&>svg]:w-1.5"
           />
-          <Button
-            class={cn(
-              "flex items-center !p-1.5",
-              isInitial ? "opacity-100" : "opacity-60",
-            )}
-            id="reset-button"
-            onclick={handleResetDate}
-            aria-label={`Go to note's ${G_MAP[derivedG].group}`}
-            data-tooltip-delay="200"
-          >
-            <Dot className="h-[0.3rem] w-[0.3rem]" isFilled={isInitial} />
-          </Button>
           <Arrow
             direction="right"
             onClick={(ev) => modDisplayedDate(ev, "add")}
             tooltip={`Next ${G_MAP[derivedG].group}`}
-            className="[&>svg]:w-1.5"
+            className="!h-auto !py-0.5 !px-1 [&>svg]:w-1.5"
           />
+          <button
+            class={cn(
+              "clickable-icon ml-2",
+              isInitial && "opacity-30 !cursor-default",
+            )}
+            id="reset-button"
+            onclick={handleResetDate}
+            aria-label={`Go to note's ${G_MAP[derivedG].group}`}
+            bind:this={resetEl}
+          ></button>
         </div>
       {/if}
     </div>
