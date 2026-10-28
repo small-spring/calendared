@@ -40,8 +40,6 @@
   let pickerToggleEl: HTMLButtonElement | null = $state(null);
   let resetEl: HTMLButtonElement | null = $state(null);
   let pickerOpen = $state(false);
-  /** x of the popover's tip, centered under the chevron */
-  let tipLeft = $state(0);
   const closePicker = () => (pickerOpen = false);
 
   $effect(() => {
@@ -54,9 +52,6 @@
   $effect(() => {
     if (!pickerOpen) return;
 
-    if (pickerToggleEl) {
-      tipLeft = pickerToggleEl.offsetLeft + pickerToggleEl.offsetWidth / 2;
-    }
     const onPointerDown = (ev: PointerEvent) => {
       const target = ev.target as HTMLElement;
       if (!headerEl || headerEl.contains(target)) return;
@@ -168,10 +163,7 @@
       id="picker-popover"
       class="absolute left-0 right-0 top-full mt-1.5 z-[var(--layer-popover)] p-2 rounded-[--radius-m] bg-[--background-primary] [border:1px_solid_var(--background-modifier-border)] [box-shadow:var(--shadow-s)]"
     >
-      <span
-        class="absolute -top-[6px] w-[10px] h-[10px] rotate-45 bg-[--background-primary] [border-left:1px_solid_var(--background-modifier-border)] [border-top:1px_solid_var(--background-modifier-border)]"
-        style={`left: ${tipLeft - 5}px`}
-      ></span>
+      <!-- no pointer tail: like Obsidian's own menus and popovers; the ⌃ chevron shows where it opened from -->
       {@render picker(closePicker)}
     </div>
   {/if}
