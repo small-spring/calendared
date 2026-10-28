@@ -16,6 +16,9 @@ fi
 
 npx vite build --mode production
 
+# smoke test: refuse to deploy a bundle that crashes while loading (see scripts/check-load.cjs)
+node scripts/check-load.cjs main.js
+
 mkdir -p "$DEST"
 cp manifest.json main.js styles.css "$DEST/"
 echo "Deployed $PLUGIN_ID to $DEST"

@@ -82,7 +82,12 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
         this.addCommand({
           id: `create-${posText}-note`,
           name: `Open${pos === 'current' ? '' : ` ${pos}`} ${periodicity} note`,
-          callback: () => {
+          // Calendared: upstream used `callback`. With `checkCallback`, Obsidian asks first (checking = true)
+          // and hides the command while its period is disabled in settings
+          checkCallback: (checking) => {
+            if (!get(settingsStore).periods[granularity].enabled) return false;
+            if (checking) return true;
+
             const leaf = this.app.workspace.getLeaf(false);
             let newDate = window
               .moment()
@@ -93,6 +98,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
             }
 
             createOrOpenNote({ leaf, date: newDate, granularity, confirmBeforeCreateOverride: false }).catch(console.error);
+            return true;
           }
         });
       });
