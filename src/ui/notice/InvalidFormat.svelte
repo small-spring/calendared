@@ -11,7 +11,7 @@
 
     let { granularity, filepath, formatValue, error }: Props = $props();
 
-    const periodicity = capitalize(getPeriodicityFromGranularity(granularity));
+    const periodicity = $derived(capitalize(getPeriodicityFromGranularity(granularity)));
 </script>
 
 <p class="text-[--text-warning]">Warning: {error}</p>

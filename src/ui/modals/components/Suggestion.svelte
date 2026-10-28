@@ -19,8 +19,8 @@
         format,
     }: Props = $props();
 
-    const basename = filepath.split("/").pop() || "";
-    const path = filepath.substring(0, filepath.lastIndexOf("/"));
+    const basename = $derived(filepath.split("/").pop() || "");
+    const path = $derived(filepath.substring(0, filepath.lastIndexOf("/")));
     let loading = $derived($settingsStore.formats[format.id].loading);
 </script>
 

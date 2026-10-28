@@ -44,12 +44,15 @@
     type = "default",
   }: Props = $props();
 
-  const defaultFormat = DEFAULT_FORMATS_PER_GRANULARITY[granularity];
+  const defaultFormat = $derived(DEFAULT_FORMATS_PER_GRANULARITY[granularity]);
   let removeBttnEl: HTMLElement;
   let replaceBttnEl: HTMLElement;
   let labelEl: HTMLLabelElement;
 
+  // the input edits its own copy, seeded once from the saved format (the list is keyed by format id)
+  // svelte-ignore state_referenced_locally
   let value = $state(format.value || "");
+  // svelte-ignore state_referenced_locally
   let error = $state(format.error || "");
   let selected = $state(false);
   $effect.pre(() => {
@@ -57,7 +60,7 @@
       type === "skeleton" ? false : format.id === $settings.selectedFormat.id;
   });
   let { triggerRerender } = getContext<INotesContext>("notesContext");
-  let formatId = format.id;
+  const formatId = $derived(format.id);
 
   let filepaths = $derived(
     $settingsStore.filepathsByFormatValue[format.value] || {},

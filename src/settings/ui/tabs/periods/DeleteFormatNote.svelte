@@ -6,7 +6,7 @@
     }
 
     let { granularity }: Props = $props();
-    const periodicity = getPeriodicityFromGranularity(granularity);
+    const periodicity = $derived(getPeriodicityFromGranularity(granularity));
 </script>
 
 <span class="u-pop">

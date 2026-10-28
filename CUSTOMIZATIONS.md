@@ -22,14 +22,24 @@
   - `ignore-scripts=true`: 依存パッケージのインストールスクリプトを動かさない
   - `min-release-age=14`: 公開から 14 日たっていないバージョンは入れない（乗っ取られた版の多くはその間に見つかる）
   - 元にあった `resolution-mode=highest` は今の npm では使えない設定なので削除
-- 依存の更新は必要なものだけを指定して行う（一括の `npm audit fix` はしない）。更新後は `npm audit signatures` と、
-  追加・変更されたパッケージの一覧を確認する
+- 依存の更新のしかた
+  - プラグインに入る部品は、必要なものだけをバージョンを指定して更新する
+  - ビルド用の道具は、今のバージョン範囲の中での更新（`npm audit fix`。`--force` は使わない）にとどめる
+  - どちらも更新後に、追加・変更されたパッケージの一覧、公開からの日数、`npm audit signatures`、
+    ビルド・ESLint・読み込み確認を見る
 - プラグインに入る部品の既知の脆弱性を解消: Svelte 5.1.10 → 5.57.2、uuid 11.0.3 → 11.1.1（`npm audit --omit=dev` で 0 件）
   - 新しい Svelte では `unmount()` が Promise を返すので、呼び出しに `void` を付けた（6 か所。動作は同じ）
-  - 新しい Svelte の svelte-check は「初期値しか見ていない」という警告（`state_referenced_locally`）を元のコードに 20 件ほど出すが、
-    動作上の問題ではないので今は残している
+  - 新しい Svelte の「初期値しか見ていない」という警告（`state_referenced_locally`、21 件）を解消。どれも不具合ではなかった
+    （ダイアログ・通知・候補の 1 行など毎回作り直される部品か、id で区別されたリストの要素で、props が途中で変わらない）
+    - 値を読んで計算しているだけのものは `$derived` にした（props が変わっても追従する書き方）
+    - 入力欄やタイムラインのように、props を「最初の値」として自分で書き換える状態は、意図どおりなので
+      `// svelte-ignore state_referenced_locally` と理由のコメントを付けた（`Format.svelte`, `Timeline.svelte`）
+  - 残りの svelte-check の警告は設定画面のトグル（`Toggle.svelte`）のアクセシビリティ（キーボード操作・読み上げ）に関する 2 件
   - `tsconfig.json` の `moduleResolution: "node"` のため、svelte-check が依存パッケージ（esrap）の型を見つけられないエラーが 2 件増えた。ビルドには影響しない
-- ビルド用の道具（開発用依存）にも既知の脆弱性が残っている（24 件）。ビルドにしか使わないので今は更新していない
+- ビルド用の道具（開発用依存）の既知の脆弱性: 24 件 → 11 件（高 13 → 2）。範囲内の更新で 71 個を更新
+  - 残り: 修正版がまだ 14 日の待ち期間内のもの（picomatch, fast-uri, postcss-selector-parser）、メジャー更新が必要なもの
+    （vite 6, vite-plugin-svelte）、提案が不自然な格下げのもの（eslint-plugin-obsidianmd 経由の moment）。
+    どれも開発用サーバー（使っていない）や細工した入力が前提で、このプロジェクトでの実害はない
 
 ## 不具合修正
 

@@ -11,7 +11,7 @@
 
     let { config, modalClass }: Props = $props();
 
-    const { title, text, note, cta, onAccept } = config;
+    const { title, text, note, cta, onAccept } = $derived(config);
 
     let dontAskAgain = $state(false);
 

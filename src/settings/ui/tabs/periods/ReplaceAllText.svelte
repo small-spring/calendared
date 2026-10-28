@@ -8,7 +8,7 @@
 
     let { replacingFormat, granularity }: Props = $props();
 
-    const periodicity = getPeriodicityFromGranularity(granularity);
+    const periodicity = $derived(getPeriodicityFromGranularity(granularity));
 </script>
 
 All existing {periodicity} notes (if any) will be renamed to match this format:

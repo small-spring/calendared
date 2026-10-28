@@ -29,21 +29,28 @@
   let timelineEl: HTMLDivElement | null = $state(null);
   let arrowEl: HTMLDivElement | null = $state(null);
 
+  // Calendared: the timeline keeps its own navigation state, seeded from the note it was mounted for.
+  // TimelineManager.restart() unmounts and mounts a new one for a different note, so the props never change here.
+  // svelte-ignore state_referenced_locally
   let viewMode = $state(viewModeOverride);
+  // svelte-ignore state_referenced_locally
   let derivedG = $state(granularity);
   $effect.pre(() => {
     if (!$settingsStore.timeline.granularityBased) {
       derivedG = "day";
     }
   });
+  // svelte-ignore state_referenced_locally
   let derivedInitialDate = $state(initialDate);
 
+  // svelte-ignore state_referenced_locally
   let crrDisplayedDate = $state(initialDate);
   $effect.pre(() => {
     $localeSwitched;
     // this is crucial, existing moment objects keep their existing locale, so we need to re-locale them
     crrDisplayedDate = crrDisplayedDate.locale(window.moment.locale());
   });
+  // svelte-ignore state_referenced_locally
   let crrSelectedDate = $state(initialDate);
   let resetEl: HTMLButtonElement | null = $state(null);
   let dates: moment.Moment[] = $derived.by(() => {

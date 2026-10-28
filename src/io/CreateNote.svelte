@@ -9,7 +9,7 @@
     }
     const { granularity }: Props = $props();
 
-    const periodicity = getPeriodicityFromGranularity(granularity);
+    const periodicity = $derived(getPeriodicityFromGranularity(granularity));
     let dnPlugin: DnPluginSettings | undefined = $state();
     let dnPluginLoaded = $state(false);
     $effect.pre(() => {
@@ -18,8 +18,9 @@
             dnPluginLoaded = true;
         });
     });
-    const { settings: periodSettings, type: periodSettingsType } =
-        getNormalizedPeriodSettings(granularity);
+    const { settings: periodSettings, type: periodSettingsType } = $derived(
+        getNormalizedPeriodSettings(granularity),
+    );
 </script>
 
 {#if periodSettingsType === "period"}
