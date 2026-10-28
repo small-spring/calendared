@@ -5,15 +5,20 @@
 
 元の版との違いをここに記録します。コード中の変更箇所には `Calendared:` というコメントを付けています。
 
+各項目の末尾の〔日付 コミット ID〕は、その変更が入ったコミット（項目が後から広がったものは複数）。変更は `git show <コミット ID>` で見られる。
+
+**書き足し方**: コミット ID はそのコミット自身の中には書けない（ID は中身から決まるため）。新しい項目には〔日付 次の更新で記入〕と書き、
+次にこのファイルを更新するときに `git log --date=short --format='%ad %h %s'` を見て ID を埋める。
+
 機能ごとの仕様（今どう動くか）は `docs/` にまとめています。
 
 - [docs/stickers.md](docs/stickers.md): ステッカー
 
 ## 名前・ビルド
 
-- プラグイン id / 表示名を `calendared` / `Calendared` に変更（`manifest.json`, `package.json`）
+- プラグイン id / 表示名を `calendared` / `Calendared` に変更（`manifest.json`, `package.json`）〔2026-10-28 `ddf77c5`〕
   - 元: `periodic-notes-calendar` / `Periodic notes calendar`
-- `scripts/deploy.sh`（`npm run deploy`）を追加。ビルドして Vault にコピーする
+- `scripts/deploy.sh`（`npm run deploy`）を追加。ビルドして Vault にコピーする〔2026-10-28 `ddf77c5`, `ec35107`〕
   - コピーの前に読み込み確認（スモークテスト、`scripts/check-load.cjs`）をする。ビルドした `main.js` を Node.js で、
     偽物の Obsidian（何を聞かれても何かを返す Proxy）を使って読み込み、読み込み中に落ちたらコピーしない。
     読み込み順の不具合（例: `Cannot access 'X' before initialization`）は型チェックや ESLint では見つからないため。
@@ -21,17 +26,17 @@
 
 ## 依存パッケージと安全対策
 
-- 開発環境は Node.js 24 LTS（Homebrew の `node@24`）、npm 11.19 以上
-- `.npmrc` に供給網（サプライチェーン）攻撃への対策を追加
+- 開発環境は Node.js 24 LTS（Homebrew の `node@24`）、npm 11.19 以上〔2026-10-28 `1e75f0e`〕
+- `.npmrc` に供給網（サプライチェーン）攻撃への対策を追加〔2026-10-28 `1e75f0e`〕
   - `ignore-scripts=true`: 依存パッケージのインストールスクリプトを動かさない
   - `min-release-age=14`: 公開から 14 日たっていないバージョンは入れない（乗っ取られた版の多くはその間に見つかる）
   - 元にあった `resolution-mode=highest` は今の npm では使えない設定なので削除
-- 依存の更新のしかた
+- 依存の更新のしかた〔2026-10-28 `1e75f0e`, `7eb661c`〕
   - プラグインに入る部品は、必要なものだけをバージョンを指定して更新する
   - ビルド用の道具は、今のバージョン範囲の中での更新（`npm audit fix`。`--force` は使わない）にとどめる
   - どちらも更新後に、追加・変更されたパッケージの一覧、公開からの日数、`npm audit signatures`、
     ビルド・ESLint・読み込み確認を見る
-- プラグインに入る部品の既知の脆弱性を解消: Svelte 5.1.10 → 5.57.2、uuid 11.0.3 → 11.1.1（`npm audit --omit=dev` で 0 件）
+- プラグインに入る部品の既知の脆弱性を解消: Svelte 5.1.10 → 5.57.2、uuid 11.0.3 → 11.1.1（`npm audit --omit=dev` で 0 件）〔2026-10-28 `1e75f0e`, `486e984`〕
   - 新しい Svelte では `unmount()` が Promise を返すので、呼び出しに `void` を付けた（6 か所。動作は同じ）
   - 新しい Svelte の「初期値しか見ていない」という警告（`state_referenced_locally`、21 件）を解消。どれも不具合ではなかった
     （ダイアログ・通知・候補の 1 行など毎回作り直される部品か、id で区別されたリストの要素で、props が途中で変わらない）
@@ -40,23 +45,23 @@
       `// svelte-ignore state_referenced_locally` と理由のコメントを付けた（`Format.svelte`, `Timeline.svelte`）
   - 残りの svelte-check の警告は設定画面のトグル（`Toggle.svelte`）のアクセシビリティ（キーボード操作・読み上げ）に関する 2 件
   - `tsconfig.json` の `moduleResolution: "node"` のため、svelte-check が依存パッケージ（esrap）の型を見つけられないエラーが 2 件増えた。ビルドには影響しない
-- ビルド用の道具（開発用依存）の既知の脆弱性: 24 件 → 11 件（高 13 → 2）。範囲内の更新で 71 個を更新
+- ビルド用の道具（開発用依存）の既知の脆弱性: 24 件 → 11 件（高 13 → 2）。範囲内の更新で 71 個を更新〔2026-10-28 `7eb661c`〕
   - 残り: 修正版がまだ 14 日の待ち期間内のもの（picomatch, fast-uri, postcss-selector-parser）、メジャー更新が必要なもの
     （vite 6, vite-plugin-svelte）、提案が不自然な格下げのもの（eslint-plugin-obsidianmd 経由の moment）。
     どれも開発用サーバー（使っていない）や細工した入力が前提で、このプロジェクトでの実害はない
 
 ## 不具合修正
 
-- 設定画面の Folder / Template 入力欄の候補が、設定モーダルの裏に隠れて見えなかったのを修正
+- 設定画面の Folder / Template 入力欄の候補が、設定モーダルの裏に隠れて見えなかったのを修正〔2026-10-28 `71a825b`〕
   （`src/settings/ui/suggest.ts`, `src/app.css`）
-- カレンダー・タイムラインで選択中の日付の背景色が付かず、文字だけ黒く見えていたのを修正
+- カレンダー・タイムラインで選択中の日付の背景色が付かず、文字だけ黒く見えていたのを修正〔2026-10-28 `4739161`〕
   （`src/ui/components/core/DateBttn.svelte`）
-- プラグインをオフ→オンした後（Obsidian を再起動せずに）「Add sticker」で何も出ない不具合を修正（`src/ui/utils/picker.ts`）
+- プラグインをオフ→オンした後（Obsidian を再起動せずに）「Add sticker」で何も出ない不具合を修正（`src/ui/utils/picker.ts`）〔2026-10-28 `3858f8a`〕
   - エラー: `Failed to construct 'HTMLElement': Illegal constructor`
   - 原因: 絵文字ピッカー（emoji-mart）は `<em-emoji-picker>` を「名前が空いていれば」登録する。登録は Obsidian を再起動するまで残るので、
     読み込み直した新しいプラグインの `Picker` は登録されず、それを `new` するとブラウザに拒否される
   - 修正: 実際に登録されているクラス（`customElements.get("em-emoji-picker")`）を使って作る
-- プラグインをオフにしても、ページに置いた吹き出し（カレンダー、絵文字ピッカーなど）とタイムラインが残っていた不具合を修正
+- プラグインをオフにしても、ページに置いた吹き出し（カレンダー、絵文字ピッカーなど）とタイムラインが残っていた不具合を修正〔2026-10-28 `3858f8a`〕
   - 元の `onunload()` は空だった。再びオンにすると、新しい吹き出しが id で自分を探すときに前回の残りを見つけてしまい、
     古いコードの絵文字ピッカーが動いていた（ステッカーが開いた日ではなく古い対象に、古い方式で本文の先頭に追加されていた）
   - `onunload()` で吹き出しとタイムラインを片付ける（`src/main.ts`）。吹き出しを作るときも、同じ id の残骸があれば先に消す
@@ -65,13 +70,13 @@
 
 ## 見た目の変更
 
-- 年表示のヘッダー（`src/ui/components/YearHeader.svelte`）
+- 年表示のヘッダー（`src/ui/components/YearHeader.svelte`）〔2026-10-28 `dcf2335`〕
   - 年を 4 桁で表示（元: `26` → `2026`）
   - 右上の 12 年範囲表示（例: `2020-2031`）を非表示。コードはコメントアウトして残してある
 
 ## カレンダーのナビゲーション
 
-- Day / Month / Year のタブを廃止（`src/ui/components/Calendar.svelte`）
+- Day / Month / Year のタブを廃止（`src/ui/components/Calendar.svelte`）〔2026-10-28 `c83d407`, `e56e7ee`〕
   - カレンダーは常に日のビュー。年の横のシェブロン（⌄）で月を選ぶ吹き出し（`src/ui/components/MonthPicker.svelte`）を開く
     - 吹き出しの中の ‹ › で年を移動し、月をクリックするとその月を表示して閉じる（ノートは開かない。右クリックメニューは元のまま）
     - 吹き出しの中の年の表記は、ヘッダーと同じく年次ノートを開く（なければ作る）。押すと吹き出しは閉じる
@@ -81,7 +86,7 @@
   - 月次・年次ノートを開いたときにカレンダーのタブを切り替える処理を削除（`src/ui/components/timeline/manager.ts`）
   - 元の月・年のビュー（`YearHeader`, `YearsHeader`）は、設定で日（または月）を無効にしたときだけ表示される
   - 月・年のビューで月・年をクリックすると、ノートを開く代わりに一つ下のビューへ移動する
-- ヘッダーを 1 行に再構成（`src/ui/components/core/Header.svelte`）
+- ヘッダーを 1 行に再構成（`src/ui/components/core/Header.svelte`）〔2026-10-28 `c83d407`, `558be8e`, `5668cdb`〕
   - 並び: `[月] ‹ › [年] ⌄ …… ⌖`。元は大きなタイトル＋右上に年、その下に `‹ • ›`
   - 月・年タイトルの下のドットは、そのノートがあるかどうか（日付のドットと同じ意味）
   - 元の `•`（今月に戻る）は右端の locate-fixed アイコンに変更。今月表示中は薄くなる
@@ -90,25 +95,25 @@
   - ‹ › は小さめで月タイトルの下端に揃える。⌖ はカレンダーの右端の列（日曜）の中央に揃える
   - 月・年のタイトルは `src/ui/components/core/PeriodTitle.svelte` に切り出し、ヘッダーと月の吹き出しで共通にした。
     ルール: 年・月の表記を押すとそのノートを開く（なければ作る）
-- カレンダーのペインの左右の余白を揃えた（`src/app.css` の `#pnc-calendar-parent`。元は右だけ余白なし）
+- カレンダーのペインの左右の余白を揃えた（`src/app.css` の `#pnc-calendar-parent`。元は右だけ余白なし）〔2026-10-28 `c83d407`〕
   - `DateNavigator.svelte` は使われなくなったが、ファイルは残してある
-- `DateBttn` に `onSelect` を追加。指定するとクリックでノートを開く代わりにそれを呼ぶ
+- `DateBttn` に `onSelect` を追加。指定するとクリックでノートを開く代わりにそれを呼ぶ〔2026-10-28 `c83d407`〕
 
 ## ノートの作成
 
-- 設定で無効にしている周期（例: 年）のノートは作らない（`src/io/create-or-open-note.ts`）。既にあるノートは今までどおり開く
+- 設定で無効にしている周期（例: 年）のノートは作らない（`src/io/create-or-open-note.ts`）。既にあるノートは今までどおり開く〔2026-10-28 `5668cdb`〕
   - カレンダーのタイトル、コマンドパレットの「Open yearly note」なども同じ。作ろうとすると通知を出す
   - タイトルも、ノートがなく作れないときはクリックできる見た目（枠・背景の変化）にしない（`PeriodTitle.svelte`）
-- 無効にしている周期の「Open (previous/next) ... note」コマンドは、コマンドパレットに出さない（`src/main.ts`、`checkCallback`）
+- 無効にしている周期の「Open (previous/next) ... note」コマンドは、コマンドパレットに出さない（`src/main.ts`、`checkCallback`）〔2026-10-28 `ec35107`〕
   - 設定を変えると再起動なしで反映される。そのコマンドに割り当てたホットキーも、無効の間は何もしない
 
 ## タイムライン（周期ノートの右上）
 
-- 同じタブで別のノートを開いても、タイムラインが前のノートのまま（例: 月次ノートの Q1 表示がデイリーノートに残る）だった不具合を修正
+- 同じタブで別のノートを開いても、タイムラインが前のノートのまま（例: 月次ノートの Q1 表示がデイリーノートに残る）だった不具合を修正〔2026-10-28 `1291aaf`〕
   - 元はタイムラインを付け直す `TimelineManager.layoutSync()` を、Obsidian の `resize` イベントのときだけ呼んでいた
     （`src/ui/components/view/manager.ts` の `setupVisibilityTracking`）。同じタブでノートを替えても `resize` は来ないことが多い
   - ノートを開いたとき（`file-open`、`src/main.ts` の `registerEvents`）にも呼ぶようにした。同じノートなら中で何もしない
-- `src/ui/components/timeline/Timeline.svelte`
+- `src/ui/components/timeline/Timeline.svelte`〔2026-10-28 `c439ff0`, `1291aaf`, `99ad354`〕
   - 開閉ボタンの横の相対表記（「今日」「3日前」など）を削除。週を動かしても文字が変わらない
   - `‹ • ›` を `‹ ›` と ⌖（locate-fixed）に分けた。⌖ は開いているノートの日付に戻る（元はノートも開き直していたが、それはやめた）。
     ノートの日付を表示中は薄くなる。矢印の大きさはカレンダーのヘッダーと同じ
@@ -147,17 +152,17 @@
 
 ## リファクタ（段階 1・2）
 
-- 使われなくなったコードを削除: `DateNavigator.svelte`、`getRelativeDate` と `HUMAN_FORMATS_PER_GRANULARITY`、年ヘッダーの使われていない変数とコメントアウト
-- 元のコードの ESLint 警告（14 件、未使用の import・変数など）を解消。`npx eslint ./src` で警告 0
-- `PeriodTitle` の class を `className`（外枠の配置）と `textClassName`（文字の大きさ・色）に分けた。
+- 使われなくなったコードを削除: `DateNavigator.svelte`、`getRelativeDate` と `HUMAN_FORMATS_PER_GRANULARITY`、年ヘッダーの使われていない変数とコメントアウト〔2026-10-28 `15e0f1b`〕
+- 元のコードの ESLint 警告（14 件、未使用の import・変数など）を解消。`npx eslint ./src` で警告 0〔2026-10-28 `15e0f1b`〕
+- `PeriodTitle` の class を `className`（外枠の配置）と `textClassName`（文字の大きさ・色）に分けた。〔2026-10-28 `15e0f1b`〕
   元は `ml-4` が二重にかかっていたので、年タイトルは `ml-8` 1 つにした（間隔は同じ。年の下のドットは文字の真下になった）
-- Obsidian 本体へのアクセスを `PluginService.getPlugin()?.app` に統一（`window.app` の直接利用をなくした）
-- 「読むだけで再描画させる」書き方を、`notesChangedStore`（`src/stores/notes.ts`）を読む形に統一。
+- Obsidian 本体へのアクセスを `PluginService.getPlugin()?.app` に統一（`window.app` の直接利用をなくした）〔2026-10-28 `15e0f1b`〕
+- 「読むだけで再描画させる」書き方を、`notesChangedStore`（`src/stores/notes.ts`）を読む形に統一。〔2026-10-28 `15e0f1b`〕
   ノートの情報を描き直す理由が 1 か所に名前付きでまとまった（中身は今までと同じ: 設定かファイルの変化で発火）
 
 ## カレンダーの選択状態の追従
 
-- どこからノートを開いても、カレンダーの選択（と表示中の月）が追従するようにした（`src/main.ts` の `onFileOpen`）
+- どこからノートを開いても、カレンダーの選択（と表示中の月）が追従するようにした（`src/main.ts` の `onFileOpen`）〔2026-10-28 `fc69e20`〕
   - 元は、選択中のノート（`activeFileStore`）を更新するのはカレンダーから開いたときなどプラグイン自身の操作だけで、
     ほかの方法で開いたときの追従（設定の `syncCalendar`）は `TimelineManager` の中にあった。タイムラインを無効にしていると動かなかった
   - Obsidian の `file-open` イベント（エクスプローラー、Cmd+D などのホットキー、リンク、タブの切り替え）で:
@@ -172,7 +177,7 @@
 
 仕様の全体は [docs/stickers.md](docs/stickers.md)。ここには元の版からの変更点だけを書く。
 
-- 保存先を **プロパティ 1 つ** に変更（標準は `sticker: 👍`）。名前は設定「Sticker property」（`stickerProperty`）で変えられる。
+- 保存先を **プロパティ 1 つ** に変更（標準は `sticker: 👍`）。名前は設定「Sticker property」（`stickerProperty`）で変えられる。〔2026-10-28 `3858f8a`〕
   Obsidian が特別に扱うプロパティ（`tags`、`aliases`、`cssclasses` と古い単数形）と空欄は設定できない。付けると値を丸ごと上書きする
   仕組みなので、自分のタグなどが消えるのを防ぐため（`src/ui/utils/picker.ts` の `setSticker` / `getSticker` /
   `getStickerProperty` / `RESERVED_STICKER_PROPERTIES`）
@@ -180,21 +185,21 @@
   - 元は本文の一番先頭に `#接頭辞+絵文字` のタグを差し込んでいたので、プロパティ欄のあるノートではプロパティ欄が壊れていた
     （末尾に空白を 1 つ足す癖もあった）
   - 読むのも設定のプロパティだけ。値がリストなら最初の絵文字 1 文字の要素を使う。元の版のタグ形式は読まない
-- 周期ノートの見出しバー（閲覧ビューのアイコンの左）にステッカーのボタンを追加（`src/ui/sticker-actions.ts`）。
+- 周期ノートの見出しバー（閲覧ビューのアイコンの左）にステッカーのボタンを追加（`src/ui/sticker-actions.ts`）。〔2026-10-28 `3858f8a`〕
   付いていればその絵文字、なければ 😊+ を表示し、押すと絵文字ピッカーが開く
-- カレンダーのヘッダーの月・年のタイトルと、タイムラインの見出し（Q4、W43 など）にもステッカーを出す。タイムラインの下の帯の年月には出さない
+- カレンダーのヘッダーの月・年のタイトルと、タイムラインの見出し（Q4、W43 など）にもステッカーを出す。タイムラインの下の帯の年月には出さない〔2026-10-28 `99ad354`〕
   （`PeriodTitle` の `showSticker`。docs の ADR-008）
-- コマンド「Manage sticker」（ピッカーを開く）「Remove sticker」を追加。開いている周期ノートが対象（`src/main.ts`）
-- 右クリックの項目は、カレンダーの日付のメニューにだけ「Manage sticker」として出す。
+- コマンド「Manage sticker」（ピッカーを開く）「Remove sticker」を追加。開いている周期ノートが対象（`src/main.ts`）〔2026-10-28 `3858f8a`〕
+- 右クリックの項目は、カレンダーの日付のメニューにだけ「Manage sticker」として出す。〔2026-10-28 `3858f8a`〕
   元はファイルエクスプローラーやノートの「…」メニューにも「Add sticker」を出していた（docs の ADR-007）
-- 設定に、ステッカー機能全体のオン・オフ（`stickersEnabled`）と、見出しバーのボタンのオン・オフ（`stickerHeaderButton`）を追加
-- 絵文字ピッカーを Obsidian の表示言語で検索できるようにした（今は日本語。`src/ui/utils/emoji-locale.ts`）。
+- 設定に、ステッカー機能全体のオン・オフ（`stickersEnabled`）と、見出しバーのボタンのオン・オフ（`stickerHeaderButton`）を追加〔2026-10-28 `3858f8a`〕
+- 絵文字ピッカーを Obsidian の表示言語で検索できるようにした（今は日本語。`src/ui/utils/emoji-locale.ts`）。〔2026-10-28 `cda14d5`〕
   emoji-mart の検索は英語だけなので、Unicode CLDR の注釈から作ったキーワード表（`scripts/build-emoji-keywords.mjs` で生成、
   `src/ui/utils/emoji-keywords/ja.json`）をデータに足す。ピッカーの文言も日本語にした（ネットから取りに行かないよう同梱）。
   開発用の依存に `cldr-annotations-full` / `cldr-annotations-derived-full`（48.2.0）を追加。`tsconfig.json` に `resolveJsonModule`
-- 絵文字ピッカーの一番上の行に、今のステッカーとゴミ箱アイコン（外す）を表示（ステッカーがあるときだけ、`src/ui/components/StickerPopover.svelte`）。
+- 絵文字ピッカーの一番上の行に、今のステッカーとゴミ箱アイコン（外す）を表示（ステッカーがあるときだけ、`src/ui/components/StickerPopover.svelte`）。〔2026-10-28 `3858f8a`〕
   ピッカーと 1 つの箱に見えるよう、ピッカーの背景を Obsidian の背景色にし、枠と影は外の箱で付ける（`src/ui/utils/picker.ts`）
-- 元の版の「Sticker prefix」「Migrate stickers」「Backup」の設定と、そのコード（`src/settings/ui/tabs/calendar/sticker-prefix/`）を削除。
+- 元の版の「Sticker prefix」「Migrate stickers」「Backup」の設定と、そのコード（`src/settings/ui/tabs/calendar/sticker-prefix/`）を削除。〔2026-10-28 `3858f8a`〕
   設定の `stickerPrefix` / `lastUsedStickerPrefixes` / `shouldConfirmBeforeStickerMigrate` も型から外した
   （元の版の `data.json` に残っていても害はない）
   - 理由: タグ形式の移行はこの機能から切り離すため。Migrate は「以前の接頭辞＋絵文字 1 つ」のタグを本文で書き換える仕組みで、
@@ -203,7 +208,7 @@
 
 ## そのほかの修正
 
-- Obsidian の型定義が 1.14 になり `Menu.close()` が非推奨になったので、別名の `hide()` に置き換えた（4 か所、動作は同じ）
+- Obsidian の型定義が 1.14 になり `Menu.close()` が非推奨になったので、別名の `hide()` に置き換えた（4 か所、動作は同じ）〔2026-10-28 `3858f8a`〕
 
 ## やりたいことメモ（未着手）
 
