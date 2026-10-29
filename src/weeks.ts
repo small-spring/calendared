@@ -96,7 +96,10 @@ export function checkWeekFormat(format: string, scheme: WeekScheme): {
     let mismatched: { week: WeekName; name: string; expected: string } | null = null;
 
     const last = scheme.weekOf(window.moment({ year: CHECKED_YEARS.to, month: 11, day: 31 }));
-    for (let week = scheme.weekOf(window.moment({ year: CHECKED_YEARS.from, month: 0, day: 1 })); ; week = scheme.shift(week, 1)) {
+    // at most 53 weeks a year; the bound only guards against a scheme whose shift doesn't move forward
+    const maxWeeks = (CHECKED_YEARS.to - CHECKED_YEARS.from + 2) * 53;
+    let week = scheme.weekOf(window.moment({ year: CHECKED_YEARS.from, month: 0, day: 1 }));
+    for (let i = 0; i < maxWeeks; i++, week = scheme.shift(week, 1)) {
         const name = scheme.format(week, format);
         const readBack = scheme.parse(name, format);
         if (!unreadable && (!readBack || readBack.weekYear !== week.weekYear || readBack.week !== week.week)) {
