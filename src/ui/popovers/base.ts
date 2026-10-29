@@ -1,11 +1,9 @@
 import { BASE_POPOVER_ID } from "@/constants";
 import { BaseComponentBehavior, TBasePopoverParams } from "./base-component-behavior";
-import { CalendarPopoverBehavior, type TCalendarPopoverParams } from "./calendar";
 import { FileMenuPopoverBehavior, type FileMenuOpenParams } from "./file-menu";
 import { StickerPopoverBehavior, type TStickerPopoverParams } from "./sticker";
 
-export class Popover<T extends CalendarPopoverBehavior | StickerPopoverBehavior | FileMenuPopoverBehavior | BaseComponentBehavior> {
-  static calendarSingleton: Popover<CalendarPopoverBehavior> | null = null;
+export class Popover<T extends StickerPopoverBehavior | FileMenuPopoverBehavior | BaseComponentBehavior> {
   static stickerSingleton: Popover<StickerPopoverBehavior> | null = null;
   static fileMenuSingleton: Popover<FileMenuPopoverBehavior> | null = null;
   static baseSingleton: Popover<BaseComponentBehavior> | null = null;
@@ -24,7 +22,6 @@ export class Popover<T extends CalendarPopoverBehavior | StickerPopoverBehavior 
   }
 
   static cleanup() {
-    Popover.calendarSingleton = null;
     Popover.stickerSingleton = null;
     Popover.fileMenuSingleton = null;
     Popover.baseSingleton = null;
@@ -33,19 +30,12 @@ export class Popover<T extends CalendarPopoverBehavior | StickerPopoverBehavior 
   }
 
   static closeAll() {
-    Popover.calendarSingleton?.close();
     Popover.stickerSingleton?.close();
     Popover.fileMenuSingleton?.close();
     Popover.baseSingleton?.close();
   }
 }
 
-export const createCalendarPopover = (params: TCalendarPopoverParams) => {
-  if (!Popover.calendarSingleton) {
-    Popover.calendarSingleton = new Popover(new CalendarPopoverBehavior(params))
-  }
-  return Popover.calendarSingleton
-}
 export const createStickerPopover = (params: TStickerPopoverParams) => {
   if (!Popover.stickerSingleton) {
     Popover.stickerSingleton = new Popover(new StickerPopoverBehavior(params))

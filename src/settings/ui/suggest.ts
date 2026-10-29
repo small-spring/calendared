@@ -1,5 +1,4 @@
 import { PluginService } from "@/app-service";
-import { modifyFile } from "@/io";
 import { type TWindowEvents, type WindowEventHandler } from "@/ui/types";
 import { autoUpdate, computePosition, flip } from "@floating-ui/dom";
 import { debounce, PopoverSuggest, Scope, TAbstractFile, TFile, TFolder } from "obsidian";
@@ -266,84 +265,6 @@ export class FileSuggest extends BaseSuggest<TFile> {
     this.inputEl.trigger("input");
     this.suggestionSelected = true;
     this.close();
-  }
-}
-
-export class HeadingsSuggest extends BaseSuggest<string> {
-  public headings: string[];
-  public noHeadingsFound: boolean;
-  public newHeadingVal: string | null = null;
-  public templatePath: string;
-
-  update(headings: string[], templatePath: string) {
-    if (headings) {
-      this.headings = headings;
-    }
-    if (templatePath) {
-      this.templatePath = templatePath;
-    }
-  }
-
-  getSuggestions(inputVal: string) {
-    let filteredHeadings: string[] = [];
-
-    this.headings.forEach((heading) => {
-      if (
-        heading.toLowerCase().contains(inputVal.toLowerCase())
-      ) {
-        filteredHeadings.push(heading);
-      }
-    });
-    if (filteredHeadings.length === 0 && inputVal.trim() !== "") {
-      this.noHeadingsFound = true;
-      this.newHeadingVal = /^#{1,6} /.test(inputVal.trim()) ? inputVal : `# ${inputVal}`;
-      filteredHeadings = [`+ Add "${inputVal}" to template headings`];
-    } else {
-      this.noHeadingsFound = false;
-      this.newHeadingVal = null;
-    }
-
-    return filteredHeadings;
-  }
-
-  /**
-      * Set content of each individual suggestion div element
-      *
-      * called for each suggestion item from getSuggestions() in renderSuggestions()
-  */
-  renderSuggestion(heading: string, el: HTMLElement): void {
-    el.setText(heading);
-  }
-
-  selectSuggestion(heading: string, _: KeyboardEvent | MouseEvent) {
-    (async () => {
-      if (this.noHeadingsFound && heading.startsWith("+ Add")) {
-        const app = PluginService.getPlugin()?.app
-        const file = this.templatePath ? app?.vault.getAbstractFileByPath(this.templatePath) : null;
-        if (file && file instanceof TFile) {
-          const content = await app?.vault.read(file) ?? ""
-          if (this.newHeadingVal) {
-            await modifyFile(file, `${content.trim() === "" ? this.newHeadingVal : `${content.trim()}\n\n${this.newHeadingVal}`}`)
-
-            const metadataChangeCb = () => {
-              if (this.newHeadingVal) {
-                this.inputEl.value = this.newHeadingVal;
-                this.inputEl.trigger("input");
-                this.suggestionSelected = true;
-
-                app?.metadataCache.off("changed", metadataChangeCb);
-              }
-            }
-            app?.metadataCache.on("changed", metadataChangeCb);
-          }
-        }
-      } else {
-        this.inputEl.value = heading;
-        this.inputEl.trigger("input");
-        this.suggestionSelected = true;
-      }
-      this.close();
-    })().catch(console.error)
   }
 }
 

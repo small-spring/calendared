@@ -1,10 +1,8 @@
 import { Component, mount } from "svelte";
 import { Popover } from "./base";
 import { arrow, autoUpdate, computePosition, flip } from "@floating-ui/dom";
-import { BASE_POPOVER_ID, CALENDAR_POPOVER_ID, MODAL_CLASS, STICKER_POPOVER_ID } from "@/constants";
+import { BASE_POPOVER_ID, MODAL_CLASS, STICKER_POPOVER_ID } from "@/constants";
 import { type TWindowEvents, type WindowEventHandler } from "../types";
-import { get } from "svelte/store";
-import { settingsStore } from "@/settings";
 
 export type TBasePopoverParams = {
   view: {
@@ -16,7 +14,7 @@ export type TBasePopoverParams = {
     onClose?: () => void,
   }
 }
-export type TBasePopoverId = typeof STICKER_POPOVER_ID | typeof CALENDAR_POPOVER_ID | typeof BASE_POPOVER_ID
+export type TBasePopoverId = typeof STICKER_POPOVER_ID | typeof BASE_POPOVER_ID
 
 export class BaseComponentBehavior {
   public componentHtmlEl: HTMLElement;
@@ -180,9 +178,6 @@ export class BaseComponentBehavior {
     (Object.entries(windowEvents) as [keyof WindowEventMap, WindowEventHandler<keyof WindowEventMap>][]).forEach(
       ([evName, cb]) => {
         if (cb) {
-          if (evName === 'mouseover' && !get(settingsStore).openPopoverOnRibbonHover) {
-            return;
-          }
           // const boundCallback = cb.bind(popoverInstance);
           boundCallbacks.set(evName, cb);
 

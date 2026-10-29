@@ -2,7 +2,6 @@
   import { cn } from "@/ui/utils";
   import { Button } from "@/ui/components/core";
   import { capitalize } from "@/utils";
-  import { getContext } from "svelte";
   import { Platform } from "obsidian";
 
   interface Props {
@@ -22,8 +21,6 @@
     tabId = undefined,
     className = null,
   }: Props = $props();
-
-  let minimalMode = getContext("minimalMode") as { value: boolean } | undefined;
 </script>
 
 <div
@@ -40,7 +37,7 @@
         selectedTab === tab
           ? "!text-[--text-on-accent] !bg-[--interactive-accent] hover:!bg-[--interactive-accent-hover]"
           : "!text-[--icon-color] opacity-[--icon-opacity] hover:opacity-[--icon-opacity-hover] hover:!text-[--icon-color-hover] hover:!bg-[--background-modifier-hover]",
-        minimalMode?.value || Platform.isPhone
+        Platform.isPhone
           ? "py-1 h-fit"
           : "py-2 [font-size:100%]",
       )}

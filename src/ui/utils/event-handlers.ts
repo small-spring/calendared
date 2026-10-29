@@ -1,7 +1,7 @@
 import type { IGranularity } from '@/io';
 import { createOrOpenNote } from "@/io";
 import { settingsStore } from '@/settings';
-import { TFile, WorkspaceLeaf } from 'obsidian';
+import { TFile } from 'obsidian';
 import { get } from 'svelte/store';
 import { FileMenuOpenParams } from '../popovers/file-menu';
 import { PluginService } from '@/app-service';
@@ -26,12 +26,7 @@ const onClick = async ({
   granularity,
   openState,
 }: TOnClickParams): Promise<void> => {
-  let leaf: WorkspaceLeaf | null;
-  if (get(settingsStore).preview.openNotesInPreview && !createNewSplitLeaf) {
-    leaf = null;
-  } else {
-    leaf = PluginService.getPlugin()?.app.workspace.getLeaf(createNewSplitLeaf) ?? null;
-  }
+  const leaf = PluginService.getPlugin()?.app.workspace.getLeaf(createNewSplitLeaf) ?? null;
   createOrOpenNote({
     leaf,
     date,

@@ -46,14 +46,6 @@
   padding-right: calc(var(--size-4-12) - 16px)
 }
 
-#pnc-preview-tabheader-visible {
-  display: flex
-}
-
-#pnc-preview-tabheader-hidden {
-  display: none
-}
-
 /* settings suggestions are appended to body; keep them above the settings modal */
 .pnc-suggestion-container {
   z-index: var(--layer-menu);

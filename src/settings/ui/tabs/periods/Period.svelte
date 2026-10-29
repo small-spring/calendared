@@ -1,6 +1,6 @@
 <script lang="ts">
     import { getPeriodicityFromGranularity, type IGranularity } from "@/io";
-    import { PeriodSettings, settingsStore } from "@/settings";
+    import { settingsStore } from "@/settings";
     import { Arrow, Toggle } from "@/settings/ui/";
     import { capitalize } from "@/utils";
     import writableDerived from "svelte-writable-derived";
@@ -9,9 +9,7 @@
     import Template from "./Template.svelte";
     import OpenAtStartup from "./OpenAtStartup.svelte";
     import Formats from "./Formats.svelte";
-    import Preview from "./Preview.svelte";
     import { cn } from "@/ui/utils";
-    import { isTemplateValid } from "@/io/validation";
 
     interface Props {
         granularity: IGranularity;
@@ -104,27 +102,6 @@
             default:
                 break;
         }
-
-        const enabledGranularities: IGranularity[] = [];
-        let isCrrGranularityValid = false;
-        for (const [g, s] of Object.entries($settingsStore.periods) as [
-            IGranularity,
-            PeriodSettings,
-        ][]) {
-            if (s.enabled) {
-                if ($settingsStore.preview.crrGranularity === g) {
-                    isCrrGranularityValid = true;
-                }
-                enabledGranularities.push(g);
-            }
-        }
-        settingsStore.update((s) => {
-            s.preview.enabledGranularities = enabledGranularities;
-            if (!isCrrGranularityValid) {
-                s.preview.crrGranularity = enabledGranularities[0];
-            }
-            return s;
-        });
     };
 
     $effect.pre(() => {
@@ -197,9 +174,6 @@
             <Folder {settings} {granularity} />
             <Template {settings} />
             <OpenAtStartup {settings} {granularity} />
-            {#if isTemplateValid($settings.templatePath)}
-                <Preview {settings} {granularity} />
-            {/if}
         </div>
     {/if}
 </div>

@@ -6,7 +6,6 @@ import { getPeriodicityFromGranularity } from "./parse";
 import { getNormalizedPeriodSettings } from "./settings";
 import { type IGranularity } from "./types";
 import { isValidPeriodicNote } from "./validation";
-import { getFileData, modifyFile } from "./vault";
 import { PluginService } from "@/app-service";
 import { genNoticeFragment } from "@/ui/utils";
 
@@ -84,103 +83,6 @@ export function getStartupNoteGranularity() {
       return granularity
     }
   }
-}
-
-export async function extractAndReplaceTODOItems(date: moment.Moment, granularity: IGranularity, file: TFile, c = 0) {
-  const previewSettings = get(settingsStore).periods[granularity].preview
-  if (previewSettings.todoSection.trim() !== "") {
-    const app = PluginService.getPlugin()?.app
-    const prevPeriodDate = date.clone().subtract(1, granularity);
-    const { file: prevPeriodFile } = getFileData(granularity, prevPeriodDate);
-    if (prevPeriodFile) {
-      const content = await app?.vault.read(prevPeriodFile) ?? ""
-      const todos = extractTODOs(content, granularity);
-
-      if (todos.length > 0) {
-        const currentFileContent = await app?.vault.read(file) ?? "";
-        const updatedContent = appendTODOs(currentFileContent, todos, granularity);
-
-        await modifyFile(file, updatedContent)
-      }
-    } else {
-      if (c < 3) {
-        await extractAndReplaceTODOItems(prevPeriodDate, granularity, file, c + 1)
-      }
-    }
-  }
-}
-
-function extractTODOs(content: string, granularity: IGranularity): string[] {
-  const todoSection = get(settingsStore).periods[granularity].preview.todoSection;
-  const lines = content.trim().split('\n');
-  const todos: string[] = [];
-  let inTODOSection = false;
-
-  for (const line of lines) {
-    if (line.trim().startsWith(todoSection)) {
-      inTODOSection = true;
-      continue;
-    }
-
-    // Stop collecting items when hitting the next heading
-    if (inTODOSection && /^#{1,6} /.test(line.trim())) {
-      break;
-    }
-
-    // Collect TODO items that match a checklist pattern
-    if (inTODOSection && /^\s*- \[ \]/.test(line.trim())) {
-      todos.push(line.trim());
-    }
-  }
-
-  return todos;
-}
-
-function appendTODOs(content: string, todos: string[], granularity: IGranularity): string {
-  const todoSection = get(settingsStore).periods[granularity].preview.todoSection;
-  const lines = content.trim().split('\n');
-  const updatedLines: string[] = [];
-  let inTODOSection = false;
-  let appended = false;
-
-  if (content.trim() !== "") {
-    lines.forEach((line, index) => {
-      const nextLine = lines[index + 1] || "";
-      updatedLines.push(line);
-
-      if (line.trim().startsWith(todoSection)) {
-        inTODOSection = true;
-      }
-
-      if (inTODOSection && /^#{1,6} /.test(nextLine.trim())) {
-        // ensures todo items are added inmediately before next heading
-        if (!appended) {
-          updatedLines.push(...todos)
-        }
-        appended = true;
-
-        return;
-      }
-
-      if (index === lines.length - 1) {
-        if (!inTODOSection) {
-          updatedLines.push(todoSection);
-        }
-        if (!appended) {
-          updatedLines.push(...todos)
-        }
-        appended = true;
-
-        return;
-      }
-    })
-  } else {
-    // If the TODO section doesn't exist, add it at the end
-    updatedLines.push(todoSection);
-    updatedLines.push(...todos);
-  }
-
-  return updatedLines.join('\n');
 }
 
 export function trim(s: string) {

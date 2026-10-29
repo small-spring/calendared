@@ -1,11 +1,11 @@
-import { DEFAULT_SETTINGS, settingsStore, SettingsTab, type ISettings } from '@/settings';
-import { InvalidFormat, View, ViewManager } from '@/ui';
-import { MarkdownView, Menu, Notice, Plugin, TAbstractFile, TFile, WorkspaceLeaf, WorkspaceRoot, Platform } from 'obsidian';
+import { DEFAULT_SETTINGS, REMOVED_PERIOD_SETTINGS, REMOVED_SETTINGS, settingsStore, SettingsTab, type ISettings } from '@/settings';
+import { InvalidFormat, ViewManager } from '@/ui';
+import { MarkdownView, Menu, Notice, Plugin, TAbstractFile, TFile, WorkspaceLeaf, WorkspaceRoot } from 'obsidian';
 import { mount, type SvelteComponent } from 'svelte';
 import { get } from 'svelte/store';
 import { PluginService } from './app-service';
-import { CALENDAR_LUCIDE_ICON, CALENDAR_POPOVER_ID, CALENDAR_RIBBON_ID, granularities, LEAF_TYPE } from './constants';
-import { basename, createOrOpenNote, extractAndReplaceTODOItems, getStartupNoteGranularity, isBackupPath, storeAllVaultPeriodicFilepaths } from './io';
+import { CALENDAR_LUCIDE_ICON, granularities, LEAF_TYPE } from './constants';
+import { basename, createOrOpenNote, getFileData, getStartupNoteGranularity, isBackupPath, storeAllVaultPeriodicFilepaths } from './io';
 import { getPeriodicityFromGranularity } from './io/parse';
 import type { IGranularity } from './io/types';
 import { isValidPeriodicNote } from './io/validation';
@@ -13,20 +13,15 @@ import {
   activeFileStore,
   displayedDateStore,
   internalFileModStore,
-  mainLeafStore,
   pluginClassStore,
-  previewLeafStore,
-  processingPreviewChangeStore,
   setupLocale,
   themeStore,
   timelineParentFileStore
 } from './stores';
 import TimelineManager from './ui/components/timeline/manager';
-import { createNldatePickerDialog } from './ui/modals/nldate-picker';
 import { Popover } from './ui/popovers';
 import { getDailyNotesPlugin } from './utils';
 import { CalendarView } from './view';
-import { createCalendarPopover } from './ui/popovers/base';
 import { getNoteSticker, isPeriodicNote, openStickerPicker, removeSticker, StickerActions } from './ui/sticker-actions';
 
 export default class PeriodicNotesCalendarPlugin extends Plugin {
@@ -41,7 +36,6 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
    * themselves up by id and got the stale ones from the previous load instead.
    */
   onunload() {
-    Popover.calendarSingleton?.cleanup();
     Popover.stickerSingleton?.cleanup();
     Popover.fileMenuSingleton?.cleanup();
     Popover.baseSingleton?.cleanup();
@@ -75,7 +69,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     setupLocale()
     this.handleRibbon();
 
-    // register view and preview
+    // register view
     // register a view under a specific leaf type so obsidian knows to render it when calling `setViewState` with LEAF_TYPE
     this.registerView(LEAF_TYPE, (leaf) => new CalendarView(leaf));
 
@@ -88,35 +82,55 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
       }
     });
 
+    // Calendared: named after the period ("today's", "this week's"); ids are upstream's so existing hotkeys keep working
+    const currentPeriodNames: Record<IGranularity, string> = {
+      day: "Open today's note",
+      week: "Open this week's note",
+      month: "Open this month's note",
+      quarter: "Open this quarter's note",
+      year: "Open this year's note",
+    };
     granularities.forEach((granularity) => {
-      (['previous', 'current', 'next'] as const).forEach((pos) => {
-        const periodicity = getPeriodicityFromGranularity(granularity)
+      this.addCommand({
+        id: `create-current-${getPeriodicityFromGranularity(granularity)}-note`,
+        name: currentPeriodNames[granularity],
+        // Calendared: upstream used `callback`. With `checkCallback`, Obsidian asks first (checking = true)
+        // and hides the command while its period is disabled in settings
+        checkCallback: (checking) => {
+          if (!get(settingsStore).periods[granularity].enabled) return false;
+          if (checking) return true;
 
-        let posText:
-          | `${typeof pos}-${typeof periodicity}` = `${pos}-${periodicity}`
+          const leaf = this.app.workspace.getLeaf(false);
+          const date = window.moment().clone().startOf(granularity);
+          createOrOpenNote({ leaf, date, granularity, confirmBeforeCreateOverride: false }).catch(console.error);
+          return true;
+        }
+      });
+    });
 
-        this.addCommand({
-          id: `create-${posText}-note`,
-          name: `Open${pos === 'current' ? '' : ` ${pos}`} ${periodicity} note`,
-          // Calendared: upstream used `callback`. With `checkCallback`, Obsidian asks first (checking = true)
-          // and hides the command while its period is disabled in settings
-          checkCallback: (checking) => {
-            if (!get(settingsStore).periods[granularity].enabled) return false;
-            if (checking) return true;
+    // Calendared: step from the open periodic note to the one before / after it in the same period
+    // (a monthly note goes to the previous / next month). Only opens existing notes (shows a notice otherwise).
+    // Hidden from the palette unless a periodic note is open
+    (['previous', 'next'] as const).forEach((pos) => {
+      this.addCommand({
+        id: `open-${pos}-note`,
+        name: `Open ${pos} periodic note`,
+        checkCallback: (checking) => {
+          const file = this.app.workspace.getActiveFile();
+          if (!file) return false;
+          const { granularity, date } = isValidPeriodicNote(file.basename);
+          if (!granularity || !date) return false;
+          if (checking) return true;
 
-            const leaf = this.app.workspace.getLeaf(false);
-            let newDate = window
-              .moment()
-              .clone()
-              .startOf(granularity);
-            if (pos !== 'current') {
-              newDate = newDate.clone()[pos === 'next' ? 'add' : 'subtract'](1, granularity)
-            }
-
-            createOrOpenNote({ leaf, date: newDate, granularity, confirmBeforeCreateOverride: false }).catch(console.error);
-            return true;
+          const targetDate = date.clone()[pos === 'next' ? 'add' : 'subtract'](1, granularity);
+          const { file: target } = getFileData(granularity, targetDate);
+          if (target) {
+            this.app.workspace.getLeaf(false).openFile(target).catch(console.error);
+          } else {
+            new Notice(`No ${pos} ${getPeriodicityFromGranularity(granularity)} note`);
           }
-        });
+          return true;
+        }
       });
     });
 
@@ -150,32 +164,14 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
       }
     });
 
-    this.addCommand({
-      id: 'open-nldate-note',
-      name: 'Open periodic note from natural language date',
-      callback: createNldatePickerDialog,
-    });
-
     this.app.workspace.onLayoutReady(async () => {
       ViewManager.initView({ active: false });
-      ViewManager.handleLayoutChange().catch(console.error);
       TimelineManager.create()?.mountAll();
 
       // Calendared: when the plugin is enabled while a note is already open, no `file-open` fires,
       // so pick up the current note once here (on app startup this just repeats what `file-open` does)
       this.onFileOpen(this.app.workspace.getActiveFile());
       this.stickerActions.refresh();
-
-      if (get(settingsStore).openPopoverOnRibbonHover) {
-        createCalendarPopover({
-          view: {
-            Component: View,
-            props: {
-              popover: true
-            }
-          }
-        })
-      }
 
       // open note at startup
       const startupNoteGranularity = getStartupNoteGranularity();
@@ -185,7 +181,6 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
           date: window.moment(),
           granularity: startupNoteGranularity,
           confirmBeforeCreateOverride: false,
-          openInPreview: get(settingsStore).preview.enabled && get(settingsStore).preview.openNotesInPreview
         });
       }
 
@@ -202,7 +197,16 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
 
     settingsStore.update((old) => {
       const newSettings = { ...old, ...(loadedSettings || {}) };
+      // Calendared: drop the saved settings of removed features
+      for (const key of REMOVED_SETTINGS) {
+        delete (newSettings as Record<string, unknown>)[key];
+      }
       const periods = newSettings.periods
+      Object.values(periods).forEach((periodSettings) => {
+        for (const key of REMOVED_PERIOD_SETTINGS) {
+          delete (periodSettings as unknown as Record<string, unknown>)[key];
+        }
+      })
       Object.entries(periods).forEach(([granularity, periodSettings]) => {
         Object.values(periodSettings.formats).forEach((format) => {
           periods[granularity as IGranularity].formats[format.id].loading = false
@@ -210,10 +214,6 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
       })
       return {
         ...newSettings,
-        preview: {
-          ...newSettings.preview,
-          splitMode: Platform.isPhone ? false : newSettings.preview.splitMode
-        },
         // reset formats loading state
         periods
       }
@@ -229,41 +229,9 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
   }
 
   handleRibbon() {
-    const ribbonEl = this.addRibbonIcon(CALENDAR_LUCIDE_ICON, 'Open calendar', (ev) => {
-      const calendarPopover = Popover.calendarSingleton;
-
-      if (!get(settingsStore).floatingMode) {
-        this.toggleView().catch(console.error);
-
-        if (get(settingsStore).openPopoverOnRibbonHover && calendarPopover?.behaviors?.opened) {
-          calendarPopover.behaviors.close();
-        }
-
-        return;
-      } else {
-        const calendarEl = document.querySelector(`#${CALENDAR_POPOVER_ID}[data-popover="true"]`) as HTMLElement | undefined;
-        const target = ev.target as Element
-
-        if (
-          !calendarEl &&
-          !calendarPopover &&
-          target
-        ) {
-          createCalendarPopover({
-            view: {
-              Component: View,
-              props: {
-                popover: true,
-              }
-            }
-          }).open(target)
-        } else {
-          calendarPopover?.toggle(target)
-        }
-      }
+    this.addRibbonIcon(CALENDAR_LUCIDE_ICON, 'Open calendar', () => {
+      this.toggleView().catch(console.error);
     });
-
-    ribbonEl.id = CALENDAR_RIBBON_ID
   }
 
   async toggleView() {
@@ -379,9 +347,10 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
 
     activeFileStore.set({ file, date, granularity });
 
-    // move the calendar to the note's month, except for notes shown in the calendar's own preview panel
-    const leaf = this.app.workspace.getMostRecentLeaf();
-    if (get(settingsStore).syncCalendar && !ViewManager.isPreviewLeaf(leaf)?.leaf) {
+    // Calendared: always follow the open note, but only when the note isn't
+    // already on the displayed month. Otherwise clicking a year title would jump to January, or a week number to
+    // the month the week starts in
+    if (!isNoteOnDisplayedMonth(granularity, date, get(displayedDateStore))) {
       displayedDateStore.set(date);
     }
   }
@@ -392,26 +361,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     const menu = _menu as Menu & { dom: Element; bgEl: Element }
 
     const { isValid, granularity, date } = isValidPeriodicNote(file.basename);
-    const activeCalendarView = PluginService.getPlugin()?.app.workspace.getActiveViewOfType(CalendarView)
     if (typeof isValid === 'boolean' && date && granularity) {
-      // Reveal on calendar
-      if (!activeCalendarView) {
-        menu.addItem((item) =>
-          item.setSection("open")
-            .setTitle("Reveal on calendar")
-            .setIcon("lucide-calendar")
-            .onClick(() => {
-              ViewManager.revealView().catch(console.error);
-              activeFileStore.update((d) => {
-                if (d) {
-                  d.file = file;
-                }
-                return d
-              })
-              displayedDateStore.set(window.moment())
-            })
-        )
-      }
       // Calendared: "Manage sticker" only in the calendar's own right-click menu ("custom-file-menu", see file-menu.ts),
       // where it's the way to sticker a day without opening its note. Upstream added "Add sticker" to every file menu
       // (file explorer, the note's "…" menu), which are shared and already long; the note header button and the
@@ -430,51 +380,6 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
           })
       );
     }
-
-    // preview
-
-    // Open on preview
-    const crrActiveLeaf = PluginService.getPlugin()?.app.workspace.getActiveViewOfType(MarkdownView)?.leaf;
-    const crrActiveLeafId = crrActiveLeaf?.id;
-    const previewLeafId = get(previewLeafStore)?.leaf?.id;
-    const crrActiveLeafIsPreview = crrActiveLeafId && previewLeafId && (crrActiveLeafId === previewLeafId)
-    if (get(settingsStore).preview.enabled && !crrActiveLeafIsPreview) {
-      menu.addItem((item) =>
-        item.setSection("open")
-          .setTitle("Open in preview panel")
-          .setIcon("lucide-eye")
-          .onClick(async () => {
-            if (!get(mainLeafStore)?.visible) {
-              await ViewManager.revealView();
-            }
-            ViewManager.restartPreview(file, true)
-          })
-      );
-      menu.addItem((item) =>
-        item.setSection("open")
-          .setTitle("Open in preview panel (right)")
-          .setIcon("lucide-eye")
-          .onClick(async () => {
-            if (!get(mainLeafStore)?.visible) {
-              await ViewManager.revealView();
-            }
-            // TODO: avoid rebuilding the preview leaf, try to `reveal` an exisitng one when possible
-            ViewManager.restartPreview(file, true, 'vertical')
-          })
-      );
-      menu.addItem((item) =>
-        item.setSection("open")
-          .setTitle("Open in preview panel (down)")
-          .setIcon("lucide-eye")
-          .onClick(async () => {
-            if (!get(mainLeafStore)?.visible) {
-              await ViewManager.revealView();
-            }
-            // TODO: avoid rebuilding the preview leaf, try to `reveal` an exisitng one when possible
-            ViewManager.restartPreview(file, true, 'horizontal')
-          })
-      );
-    }
   }
 
   private onFileCreated(file: TAbstractFile) {
@@ -487,7 +392,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
       if (file.extension !== 'md') return;
       if (isBackupPath(file.path)) return;
 
-      const { isValid, date, granularity, format } = isValidPeriodicNote(file.basename);
+      const { isValid, granularity, format } = isValidPeriodicNote(file.basename);
 
       if (isValid === false) {
         const fragment = document.createDocumentFragment();
@@ -505,7 +410,6 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
       }
       if (typeof isValid === "boolean") {
         settingsStore.addFilepath(file.path, format.value)
-        extractAndReplaceTODOItems(date, granularity, file).catch(console.error)
       }
     }
   }
@@ -523,7 +427,6 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
       if (granularity && format) {
         settingsStore.deleteFilepath(file.path, format.value)
       }
-      this.closePreviewOnFileDeleted(file)
 
       // reset file state
       // this will add some cognitive load for sure
@@ -571,17 +474,18 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
   private onMetadataChanged() {
     internalFileModStore.set({ modified: Math.random() })
   }
+}
 
-  private closePreviewOnFileDeleted(file: TFile) {
-    const previewLeaf = ViewManager.searchPreviewLeaf(file)
-
-    if (previewLeaf) {
-      ViewManager.cleanupPreview({ leaf: previewLeaf });
-    }
-    processingPreviewChangeStore.set(true)
-    settingsStore.update((s) => {
-      s.preview.open = false;
-      return s;
-    });
+/**
+ * Calendared: whether the calendar's displayed month already shows this periodic note
+ * (its day, a day of its week, or a month inside its month / quarter / year)
+ */
+function isNoteOnDisplayedMonth(granularity: IGranularity, date: moment.Moment, displayed: moment.Moment) {
+  if (granularity === 'week') {
+    return date.isSame(displayed, 'month') || date.clone().add(6, 'days').isSame(displayed, 'month');
   }
+  if (granularity === 'day') {
+    return date.isSame(displayed, 'month');
+  }
+  return date.isSame(displayed, granularity);
 }

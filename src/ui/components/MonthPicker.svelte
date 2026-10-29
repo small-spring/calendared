@@ -51,6 +51,7 @@
     {#each monthsIndexesInQuarters.flat() as monthIndex}
         {@const month = pickerYear.clone().month(monthIndex)}
         <DateBttn
+            compactDot
             date={month}
             granularity="month"
             className={cn(

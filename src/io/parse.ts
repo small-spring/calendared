@@ -1,4 +1,3 @@
-import * as chrono from 'chrono-node';
 import type { IGranularity, IPeriodicity } from './types';
 
 
@@ -26,7 +25,6 @@ const REGEX = (function generateRegex(): RegExp {
  * - {{time}}: The current time
  * - {{currentDate}}: The current date and time
  * - {{weekday}}: Any day of the week (e.g., {{monday}}, {{tuesday}}, etc.)
- * - {{natural language date}}: 5 days ago, 2 weeks from now, etc
  * 
  * Each placeholder supports:
  * - Date adjustments: e.g., {{date+1d}}, {{monday-1w}}
@@ -38,7 +36,6 @@ const REGEX = (function generateRegex(): RegExp {
  * - Current time: {{time}}
  * - Current date: {{currentDAte:LLLL}}
  * - Sunday: {{sunday}}
- * - Tomorrow: {{tomorrow:dddd, MMMM Do YYYY}}
  * - Crr Week: {{date:w}}
  * - Prev Monday: {{monday-1w:LLLL}}
  * 
@@ -115,20 +112,7 @@ export function replaceTemplateContents(
             // handle weekdays
             momentDate = date.clone().weekday(localeWeekdays.indexOf(type.toLowerCase()));
           } else {
-            const parsedUnadjustedDate = parseNlDate(type, date)
-            const parsedDate = parseNlDate(
-              match,
-              date
-            );
-            if (parsedDate?.isValid()) {
-              if (!parsedDate.isSame(parsedUnadjustedDate)) {
-                // avoid adjustment if done by chrono already
-                delta = '';
-              }
-              momentDate = parsedDate;
-            } else {
-              return match; // Return unchanged if not recognized
-            }
+            return match; // Return unchanged if not recognized
           }
           break;
       }
@@ -144,35 +128,3 @@ export function replaceTemplateContents(
     }
   );
 }
-
-export function parseNlDate(text: string, refMomentDate: moment.Moment = window.moment()) {
-  const refJsDate = refMomentDate.toDate();
-  const parsedDate = chrono.parseDate(text, refJsDate);
-  if (parsedDate) {
-    return window.moment(parsedDate);
-  }
-}
-
-// Example usage
-// const exampleTemplate = `
-//     Title: {{title}}
-//     Date: {{date}}
-//     Current time: {{time}}
-//     Current date: {{currentDAte:LLLL}}
-//     Sunday: {{sunday}}
-//     Tomorrow: {{tomorrow:dddd, MMMM Do YYYY}}
-//     Crr Week: {{date:w}}
-//     Next Week: {{next week:[locale week]-w, [ISO Week]-W}}
-//     Prev Monday: {{monday-1w:LLLL}}
-//     Next Quarter: {{next quarter:}}
-//     In 3 days: {{in 3 days}}
-//     1 week ago: {{1 week ago}}
-//     1 week ago + 1d: {{1 week ago+1d}}
-//     2 years from now - 1y: {{2 years from now-1y}}
-//     2 years from now - 1y: {{2 years from now +- 1y}}
-//     2 years from now - 1y: {{  2 years from now   +  - 1y  : YYYY}}
-//
-//     Wrong: {{wrong:W}}
-// `;
-
-// console.log(replaceTemplateContents(window.moment(), 'YYYY-MM-DD', exampleTemplate));

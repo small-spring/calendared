@@ -16,7 +16,7 @@ Svelte 5 + TypeScript + Vite + Tailwind。作業ブランチは `custom`。`upst
 - 元の版から変えたコードには `Calendared:` で始まるコメントを付ける
 - なぜそうしたかはコミットメッセージの本文に書く。文書にはコミット ID を書かない
 - 変更を終えたら `docs/customizations.md` に 1〜2 行で足し（末尾に〔日付〕）、`docs/todo.md` から消す
-- 元の版のファイル（README、CHANGELOG、release-please の設定、`.github/`）はなるべく変えない（取り込み時の衝突を減らすため）
+- 元の版の更新は取り込まない（独立して公開する方針）。元の版のファイルも自由に変えてよい。機能を削ったときはコードにコメントを残さない
 - 確認は `npm run build`（ESLint 込み）と `npm run deploy`（読み込み確認をしてから Vault にコピー）。
   動作や見た目は Obsidian で確かめる必要がある
 - 文書は日本語で、平易な言葉で書く

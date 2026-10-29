@@ -6,7 +6,6 @@ export * from './dates';
 export * from './locale';
 export * from './notes';
 export * from './popovers';
-export * from './preview';
 
 export const pluginClassStore = writable<PeriodicNotesCalendarPlugin>();
 export const crrFileMenu = writable<Menu | null>(null);

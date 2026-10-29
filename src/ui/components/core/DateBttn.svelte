@@ -11,7 +11,7 @@
   import { cn, eventHandlers, isControlPressed } from "@/ui/utils";
   import { Button } from "@/ui/components/core";
   import Dot from "./Dot.svelte";
-  import { getContext, Snippet } from "svelte";
+  import type { Snippet } from "svelte";
   import { Sticker } from "..";
   import { Platform } from "obsidian";
 
@@ -29,6 +29,8 @@
     ignoreAdjacentMonth?: boolean;
     /** Calendared: when set, a click calls this instead of opening the note */
     onSelect?: (() => void) | null;
+    /** Calendared: the calendar's smaller dot (upstream's minimal mode, now the only calendar layout) */
+    compactDot?: boolean;
   }
 
   let {
@@ -43,6 +45,7 @@
     ignoreAdjacentMonth = false,
     isActiveOverride = null,
     onSelect = null,
+    compactDot = false,
   }: Props = $props();
 
   let { file, sticker } = $derived.by(() => {
@@ -67,8 +70,6 @@
       isAdjacentMonth = !date.isSame($displayedDateStore, "month");
     }
   });
-
-  let minimalMode = getContext("minimalMode") as { value: boolean } | undefined;
 </script>
 
 <Button
@@ -129,7 +130,7 @@
   {#if displayDot}
     <div class={cn("absolute leading-[0]", dotContainerClassName)}>
       <Dot
-        className={cn((minimalMode?.value || Platform.isPhone) && "w-1")}
+        className={cn((compactDot || Platform.isPhone) && "w-1")}
         isVisible={!!file}
         isFilled={!!file}
         {isActive}

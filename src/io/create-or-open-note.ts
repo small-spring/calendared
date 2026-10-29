@@ -7,9 +7,7 @@ import CreateNote from "./CreateNote.svelte";
 import { getPeriodicityFromGranularity, replaceTemplateContents } from "./parse";
 import { getNormalizedPeriodSettings } from "./settings";
 import { type IGranularity } from "./types";
-import { extractAndReplaceTODOItems } from "./utils";
 import { ensureFolderExists, getNotePath, getTemplateInfo } from "./vault";
-import { ViewManager } from "@/ui";
 import { PluginService } from "@/app-service";
 import { capitalize } from "@/utils";
 
@@ -19,14 +17,12 @@ export async function createOrOpenNote({
   granularity,
   openState,
   confirmBeforeCreateOverride = get(settingsStore).shouldConfirmBeforeCreate,
-  openInPreview,
 }: {
   leaf: WorkspaceLeaf | null;
   date: moment.Moment;
   openState?: Record<string, unknown>;
   granularity: IGranularity;
   confirmBeforeCreateOverride?: boolean;
-  openInPreview?: boolean;
 }) {
   const { settings: { selectedFormat } } = getNormalizedPeriodSettings(granularity);
 
@@ -45,12 +41,7 @@ export async function createOrOpenNote({
 
   async function openFile(file: TFile | undefined | null) {
     if (file) {
-      if (openInPreview) {
-        await ViewManager.revealView();
-        await ViewManager.tryInitPreview(file, true);
-      } else {
-        await leaf?.openFile(file, openState);
-      }
+      await leaf?.openFile(file, openState);
       activeFileStore.update(d => {
         if (d) {
           d.file = file;
@@ -119,8 +110,6 @@ export async function createNote(granularity: IGranularity, date: moment.Moment)
       replaceTemplateContents(date, selectedFormat.value, templateContents)
     );
     if (!file || !(file instanceof TFile)) return;
-
-    await extractAndReplaceTODOItems(date, granularity, file);
 
     settingsStore.addFilepath(normalizedPath, selectedFormat.value)
     internalFileModStore.set(null)

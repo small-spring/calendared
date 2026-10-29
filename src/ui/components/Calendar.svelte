@@ -7,7 +7,7 @@
         getEnabledPeriods,
         periodTabs,
     } from "@/stores/calendar";
-    import { getContext, onMount } from "svelte";
+    import { onMount } from "svelte";
     import {
         cn,
         getMonth,
@@ -20,16 +20,12 @@
     import YearsHeader from "./YearsHeader.svelte";
     import DateBttn from "./core/DateBttn.svelte";
     import { settingsStore } from "@/settings";
-    import { Platform } from "obsidian";
 
     let { weekdaysShort } = $derived($localeDataStore);
     let month = $derived(getMonth($displayedDateStore));
 
     let crrTab = $derived($crrTabStore);
     let tabs: typeof periodTabs = $state(periodTabs);
-    let minimalMode = getContext("minimalMode") as
-        | { value: boolean }
-        | undefined;
     let enabledPeriods: Record<IGranularity, boolean> = $state(
         {} as Record<IGranularity, boolean>,
     );
@@ -93,13 +89,12 @@
                                 class="[border-right:1px_solid_var(--background-modifier-border)] pr-1"
                             >
                                 <DateBttn
+                                    compactDot
                                     date={getStartOfWeek(week.days)}
                                     granularity="week"
                                     className={cn(
                                         "px-1 !pt-2.5 !pb-4 opacity-85 mx-auto",
-                                        minimalMode?.value || Platform.isPhone
-                                            ? "[font-size:var(--font-ui-smaller)] "
-                                            : "[font-size:var(--font-ui-small)] ",
+                                        "[font-size:var(--font-ui-smaller)] ",
                                     )}
                                     dotContainerClassName={"bottom-[.3rem]"}
                                 >
@@ -117,13 +112,12 @@
                                 )}
                             >
                                 <DateBttn
+                                    compactDot
                                     date={day}
                                     granularity="day"
                                     className={cn(
                                         "px-1 !pt-2.5 !pb-4",
-                                        minimalMode?.value || Platform.isPhone
-                                            ? "text-xs"
-                                            : "text-sm",
+                                        "text-xs",
                                     )}
                                     dotContainerClassName={"bottom-[.3rem]"}
                                 >
@@ -145,6 +139,7 @@
                         {#if enabledPeriods.quarter}
                             <td>
                                 <DateBttn
+                                    compactDot
                                     date={$displayedDateStore
                                         .clone()
                                         .quarter(i + 1)
@@ -152,9 +147,7 @@
                                     granularity="quarter"
                                     className={cn(
                                         "px-1 !pt-2.5 !pb-4 opacity-85",
-                                        minimalMode?.value || Platform.isPhone
-                                            ? "[font-size:var(--font-ui-smaller)]"
-                                            : "[font-size:var(--font-ui-small)] ",
+                                        "[font-size:var(--font-ui-smaller)]",
                                     )}
                                     dotContainerClassName={"bottom-[.3rem]"}
                                 >
@@ -169,6 +162,7 @@
                         {#each quarterMonthsIndexes as monthIndex}
                             <td>
                                 <DateBttn
+                                    compactDot
                                     date={$displayedDateStore
                                         .clone()
                                         .month(monthIndex)
@@ -187,29 +181,13 @@
                                         : null}
                                     className={cn(
                                         "px-1 mb-3 items-center justify-center",
-                                        minimalMode?.value || Platform.isPhone
-                                            ? "text-sm !pt-2.5 !pb-4"
-                                            : "text-base py-8",
+                                        "text-sm !pt-2.5 !pb-4",
                                     )}
                                     dotContainerClassName={cn(
                                         "[transform:translateY(100%)]",
-                                        minimalMode?.value || Platform.isPhone
-                                            ? "bottom-[calc(1rem/2)]"
-                                            : "bottom-[calc(1.75rem/2)]",
+                                        "bottom-[calc(1rem/2)]",
                                     )}
                                 >
-                                    {#snippet text()}
-                                        {#if !minimalMode?.value || Platform.isPhone}
-                                            <p
-                                                id="month-index"
-                                                class="text-5xl font-normal opacity-15 text-[--text-muted] absolute top-1/2 left-1/2 [transform:translate(-50%,-50%)] m-0"
-                                            >
-                                                {monthIndex < 9
-                                                    ? "0"
-                                                    : ""}{monthIndex + 1}
-                                            </p>
-                                        {/if}
-                                    {/snippet}
                                     {$displayedDateStore
                                         .clone()
                                         .month(monthIndex)
@@ -231,6 +209,7 @@
                         {#each rowYearsRange as year}
                             <td>
                                 <DateBttn
+                                    compactDot
                                     date={$displayedDateStore
                                         .clone()
                                         .year(year)
@@ -249,9 +228,7 @@
                                         : null}
                                     className={cn(
                                         "tracking-wide px-1 !pt-2.5 !pb-4",
-                                        minimalMode?.value || Platform.isPhone
-                                            ? "text-base"
-                                            : "text-xl",
+                                        "text-base",
                                     )}
                                     dotContainerClassName={"bottom-[.3rem]"}
                                 >

@@ -10,11 +10,6 @@ export type TFormat = {
   loading: boolean;
 }
 export type TimelineViewMode = 'expanded' | 'collapsed';
-export interface IPreview {
-  mainSection: "" | null,
-  todoSection: string,
-  destination: "default" | "below",
-}
 export interface PeriodSettings {
   enabled: boolean;
   openAtStartup: boolean;
@@ -23,27 +18,10 @@ export interface PeriodSettings {
   formats: Record<string, TFormat>;
   folder: string;
   templatePath: string;
-  preview: IPreview;
 }
 
 export interface ISettings {
   periods: Record<IGranularity, PeriodSettings>;
-  preview: {
-    enabled: boolean;
-    open: boolean;
-    openNotesInPreview: boolean;
-    zenMode: boolean;
-    tabHeaderVisible: boolean;
-    sideSplitDirection: "vertical" | "horizontal";
-    centerSplitDirection: "vertical" | "horizontal";
-    splitMode: boolean;
-    lastPreview: {
-      filepath: string;
-      splitPos?: "left" | "root" | "right" | null;
-    } | null;
-    enabledGranularities: IGranularity[] | null;
-    crrGranularity: IGranularity | null;
-  };
   timeline: {
     enabled: boolean;
     /** Whether the adjacent dates will be based in the crr file granularity or if they'll always be adjacent days. */
@@ -56,13 +34,7 @@ export interface ISettings {
   filepaths: Record<string, string>;
   filepathsByFormatValue: Record<string, Record<string, string> | undefined>;
 
-  floatingMode: boolean;
-  syncCalendar: boolean;
 
-  /** Whether to show a minimal view of the calendar */
-  minimalMode: boolean;
-  /** Whether to always show a minimal view of the calendar when in floating mode*/
-  floatingViewAlwaysMinimal: boolean;
   /** Calendared: property that holds a note's sticker emoji (see docs/stickers.md) */
   stickerProperty: string;
   /** Calendared: turns the whole sticker feature on/off (display, header button, menu item, commands) */
@@ -89,12 +61,6 @@ export interface ISettings {
 
   /** Whether to automatically preview notes on hover */
   autoHoverPreview: boolean;
-
-  /** Whether to open the calendar popover when hovering over the ribbon icon */
-  openPopoverOnRibbonHover: boolean;
-
-  /** TODO: Default granularity for the create/replace/link date modal */
-  crrNldModalGranularity: IGranularity;
 
   /** Locale and display settings */
   localeSettings: {
@@ -137,35 +103,30 @@ export function getDefaultPeriodicNotesConfig(
     formats: { [id]: selectedFormat },
     templatePath: "",
     folder: "/",
-    preview: {
-      mainSection: null,
-      todoSection: '## TODO',
-      destination: "below" as const,
-    },
-
   } satisfies PeriodSettings
 }
+
+/**
+ * Calendared: settings of removed features (preview panel, floating mode, minimal-mode toggle, natural language
+ * date picker, TODO carry-over, calendar auto-sync toggle). Dropped from data.json on load so they don't linger.
+ */
+export const REMOVED_SETTINGS = [
+  "preview",
+  "floatingMode",
+  "minimalMode",
+  "floatingViewAlwaysMinimal",
+  "openPopoverOnRibbonHover",
+  "crrNldModalGranularity",
+  "crrNldModalgranularityInputVal",
+  "syncCalendar",
+] as const;
+/** Calendared: per-period settings of removed features (`periods.<granularity>.preview`: TODO / preview sections) */
+export const REMOVED_PERIOD_SETTINGS = ["preview"] as const;
 
 export const DEFAULT_SETTINGS: ISettings = Object.freeze({
   periods: Object.fromEntries(granularities.map(
     g => [g, getDefaultPeriodicNotesConfig(g)],
   )) as Record<IGranularity, PeriodSettings>,
-  preview: {
-    enabled: true,
-    open: false,
-    openNotesInPreview: false,
-    zenMode: false,
-    tabHeaderVisible: true,
-    sideSplitDirection: "horizontal" as const,
-    centerSplitDirection: "vertical" as const,
-    splitMode: false,
-    lastPreview: {
-      filepath: "",
-      splitPos: null,
-    },
-    enabledGranularities: null,
-    crrGranularity: null,
-  },
   timeline: {
     enabled: true,
     granularityBased: true,
@@ -176,10 +137,6 @@ export const DEFAULT_SETTINGS: ISettings = Object.freeze({
   },
   filepaths: {},
   filepathsByFormatValue: {},
-  floatingMode: false,
-  syncCalendar: true,
-  minimalMode: false,
-  floatingViewAlwaysMinimal: true,
   stickerProperty: "sticker",
   stickersEnabled: true,
   stickerHeaderButton: true,
@@ -192,8 +149,6 @@ export const DEFAULT_SETTINGS: ISettings = Object.freeze({
   shouldConfirmBeforeDeleteAllFiles: true,
   yearsRangesStart: 2020,
   autoHoverPreview: false,
-  openPopoverOnRibbonHover: false,
-  crrNldModalGranularity: "day",
 
   localeSettings: {
     localeOverride: sysLocaleKey,
