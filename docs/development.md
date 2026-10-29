@@ -14,6 +14,7 @@
     （何を聞かれても何かを返す Proxy）を使って読み込み、読み込み中に落ちたらコピーしない。
     読み込み順の不具合（例: `Cannot access 'X' before initialization`）は型チェックや ESLint では見つからないため
   - 動作や見た目は確かめないので、Obsidian での確認は別に必要
+- Windows・iPhone で試すときは [device-testing.md](device-testing.md)（Remotely Save で Calendared のフォルダだけを同期する）
 - `npm run check`: svelte-check。残っている既知の警告・エラー:
   - 設定画面のトグル（`Toggle.svelte`）のアクセシビリティの警告 2 件
   - emoji-mart の型定義ファイルの中のエラー 2 件（部品の側の問題。ビルドには影響しない）
