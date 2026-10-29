@@ -1,0 +1,22 @@
+# Calendared
+
+Obsidian プラグイン。luiisca/obsidian-periodic-notes-calendar（v1.2.1）を改造した個人用の版（GPL-3.0）。
+Svelte 5 + TypeScript + Vite + Tailwind。作業ブランチは `custom`。`upstream` は元の版（push 不可）。
+
+## 文書（必要なものだけ読む）
+
+- `docs/customizations.md`: 元の版との違い（今どうなっているか）
+- `docs/todo.md`: これからやること（不具合・やりたいこと）
+- `docs/development.md`: ビルド・deploy・依存の更新・書き方の決まり
+- `docs/stickers.md`: ステッカー機能の仕様と ADR
+- `README.md`: 先頭の告知以外は元の版のまま（英語）
+
+## 決まり
+
+- 元の版から変えたコードには `Calendared:` で始まるコメントを付ける
+- なぜそうしたかはコミットメッセージの本文に書く。文書にはコミット ID を書かない
+- 変更を終えたら `docs/customizations.md` に 1〜2 行で足し（末尾に〔日付〕）、`docs/todo.md` から消す
+- 元の版のファイル（README、CHANGELOG、release-please の設定、`.github/`）はなるべく変えない（取り込み時の衝突を減らすため）
+- 確認は `npm run build`（ESLint 込み）と `npm run deploy`（読み込み確認をしてから Vault にコピー）。
+  動作や見た目は Obsidian で確かめる必要がある
+- 文書は日本語で、平易な言葉で書く

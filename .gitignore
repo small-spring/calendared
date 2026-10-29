@@ -10,3 +10,5 @@ main.js
 main.js.map
 styles.css
 .aider*
+# Calendared: Vite temp files (upstream committed one by accident)
+vite.config.ts.timestamp-*
