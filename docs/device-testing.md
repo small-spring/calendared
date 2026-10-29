@@ -103,25 +103,31 @@ Remotely Save は前回の同期の記録を端末ごとに持っていて、そ
 
 ### 3. Mac で設定する
 
-1. Remotely Save の設定で「設定フォルダも同期する」をオンにする
-2. 「同期しないパス」に次の 1 行を足す（`.obsidian` の中のうち、`plugins/calendared/` 以外は同期しない、という意味）
+先に 1 を済ませてから 2 をする（逆にすると、間の同期で `.obsidian` が丸ごと送られる）。
+
+1. 「同期しないパス」に次の 1 行を足す（`.obsidian` の中のうち、`.obsidian/` と `plugins/` のフォルダそのものと、`plugins/calendared/` 以外は同期しない、という意味）
 
    ```
-   ^\.obsidian/(?!plugins/calendared/).*
+   ^\.obsidian/(?!$|plugins/$|plugins/calendared/)
    ```
+
+   - Remotely Save は、無視したフォルダの中身もすべて無視する。なので `.obsidian/` と `plugins/` のフォルダそのものは無視しないようにしている
+2. Remotely Save の設定で「設定フォルダも同期する」をオンにする
 
    - 端末ごとに Calendared の設定を変えたいときは、`^\.obsidian/plugins/calendared/data\.json$` も足す
      （足さなければ、週の始まりや書式などの設定も全端末で同じになる）
 
 ### 4. 送られる中身を確かめてから、手動で 1 回同期する
 
-- Remotely Save に同期の予定を確かめる機能（ドライラン、ログ）があれば使い、`.obsidian` の中で送られるのが `plugins/calendared/` の中だけか見る
+- コマンドパレットで「Remotely Save: start sync (dry run only)」を実行する（ファイルは変わらず、同期の予定だけが作られる）
+- 続けて「Remotely Save: export sync plans (latest 1) (change part)」を実行すると、予定が `_debug_remotely_save/` にファイルとして書き出される
+  （`_` で始まるフォルダは同期されない）。`.obsidian` の中で送られるのが `plugins/calendared/` の中だけか見る
 - ほかのプラグインの設定や `community-plugins.json`、`hotkeys.json` などが含まれていたら **同期しない**。正規表現を見直す
 - 問題なければ手動で同期する
 
 ### 5. Windows・iPhone で設定する
 
-1. 手順 3 と同じ 2 つの設定をする
+1. 手順 3 と同じ 2 つの設定を、同じ順でする
 2. 手動で同期する。`.obsidian/plugins/calendared/` が届く
 3. Obsidian の設定 →「コミュニティプラグイン」で、制限モードがオンならオフにし、Calendared を有効にする
    （有効なプラグインの一覧は同期しないので、端末ごとに一度だけ必要）
@@ -142,7 +148,7 @@ Remotely Save は前回の同期の記録を端末ごとに持っていて、そ
 - **ほかのプラグインの設定が上書きされた**: Obsidian を閉じ、手順 2 のバックアップから `.obsidian` を戻す。
   上書きされた端末で同期する前に、ほかの端末の自動同期が止まっているか確かめる
 - **Calendared が届かない**: 「設定フォルダも同期する」がオンか、正規表現が `plugins/calendared/` を外していないかを確かめる。
-  正規表現の「〜以外」（`(?!…)`）が効かない場合は、ほかのプラグインのフォルダを 1 つずつ外す書き方に変える
+  `.obsidian/` か `plugins/` のフォルダそのものを無視する正規表現になっていると、中の `calendared/` も無視される
 - **届いたが動かない**: Obsidian を再起動する。プラグインのバージョン（`manifest.json`）が Mac と同じか確かめる。
   iPhone なら、開発者向けのログが見られないので、Mac で同じ操作をして再現するか確かめる
 
