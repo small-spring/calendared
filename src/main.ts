@@ -9,6 +9,7 @@ import { basename, createOrOpenNote, getFileData, getStartupNoteGranularity, isB
 import { getPeriodicityFromGranularity } from './io/parse';
 import type { IGranularity } from './io/types';
 import { isValidPeriodicNote } from './io/validation';
+import { getAdjacentPeriodDate, isNoteOnDisplayedMonth } from './periods';
 import {
   activeFileStore,
   displayedDateStore,
@@ -122,7 +123,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
           if (!granularity || !date) return false;
           if (checking) return true;
 
-          const targetDate = date.clone()[pos === 'next' ? 'add' : 'subtract'](1, granularity);
+          const targetDate = getAdjacentPeriodDate(granularity, date, pos);
           const { file: target } = getFileData(granularity, targetDate);
           if (target) {
             this.app.workspace.getLeaf(false).openFile(target).catch(console.error);
@@ -474,18 +475,4 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
   private onMetadataChanged() {
     internalFileModStore.set({ modified: Math.random() })
   }
-}
-
-/**
- * Calendared: whether the calendar's displayed month already shows this periodic note
- * (its day, a day of its week, or a month inside its month / quarter / year)
- */
-function isNoteOnDisplayedMonth(granularity: IGranularity, date: moment.Moment, displayed: moment.Moment) {
-  if (granularity === 'week') {
-    return date.isSame(displayed, 'month') || date.clone().add(6, 'days').isSame(displayed, 'month');
-  }
-  if (granularity === 'day') {
-    return date.isSame(displayed, 'month');
-  }
-  return date.isSame(displayed, granularity);
 }

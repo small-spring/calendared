@@ -13,7 +13,7 @@
     "noImplicitAny": true,
     "strictNullChecks": true,
     "strictBindCallApply": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "importHelpers": true,
     "importsNotUsedAsValues": "remove",

@@ -14,6 +14,9 @@ if [ ! -d "$VAULT/.obsidian" ]; then
   exit 1
 fi
 
+# unit tests of the plain logic (see docs/development.md); refuse to deploy if any fails
+npx vitest run
+
 npx vite build --mode production
 
 # smoke test: refuse to deploy a bundle that crashes while loading (see scripts/check-load.cjs)

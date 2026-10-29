@@ -21,4 +21,11 @@ export default defineConfig([
       "obsidianmd/prefer-file-manager-trash-file": "error",
     },
   },
+  {
+    // Calendared: unit tests run outside Obsidian, so they load moment from npm (same version Obsidian bundles)
+    files: ["src/**/*.test.ts", "src/test-*.ts"],
+    rules: {
+      "no-restricted-imports": "off",
+    },
+  },
 ]);

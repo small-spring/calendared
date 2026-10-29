@@ -18,6 +18,9 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 - `npm run deploy` を追加。ビルドし、読み込み確認をしてから Vault にコピーする（[development.md](development.md)）〔2026-10-28〕
 - `.npmrc` に供給網攻撃への対策、依存パッケージの既知の脆弱性を解消（[development.md](development.md)）〔2026-10-28〕
 - `package.json` の `license` を `GPL-3.0-only` に直した（元は LICENSE と食い違って `MIT` だった）〔2026-10-29〕
+- テストの仕組み（Vitest）を入れ、テンプレートの置き換え・ファイル名の読み取り・周期の日付の計算にテストを書いた。
+  `npm run deploy` はテストが通らないとコピーしない（[development.md](development.md) の「テスト」）〔2026-10-29〕
+- ビルドの道具を更新: Vite 5 → 7、vite-plugin-svelte 4 → 6。`tsconfig.json` の `moduleResolution` を `bundler` に〔2026-10-29〕
 
 ## 不具合修正
 
