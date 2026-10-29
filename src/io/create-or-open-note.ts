@@ -113,7 +113,6 @@ export async function createNote(granularity: IGranularity, date: moment.Moment)
     if (!file || !(file instanceof TFile)) return;
 
     settingsStore.addFilepath(normalizedPath, selectedFormat.value)
-    internalFileModStore.set(null)
 
     return file;
   } catch (err) {
@@ -121,5 +120,8 @@ export async function createNote(granularity: IGranularity, date: moment.Moment)
     new Notice(`Failed to create file: '${normalizedPath}'`);
 
     return null
+  } finally {
+    // Calendared: clear the mark on failure too; upstream left it set, so later notes created by others were ignored
+    internalFileModStore.set(null)
   }
 }

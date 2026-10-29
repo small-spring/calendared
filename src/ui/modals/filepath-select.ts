@@ -391,10 +391,13 @@ export class FilepathModal extends FuzzySuggestModal<string> {
   private async deleteFile(file: TFile, filePath: string) {
     internalFileModStore.set("deleted")
 
-    await this.app.fileManager.trashFile(file);
-    settingsStore.deleteFilepath(filePath, this.format.value);
-
-    internalFileModStore.set(null)
+    // Calendared: clear the mark on failure too; upstream left it set, so later deletions by others were ignored
+    try {
+      await this.app.fileManager.trashFile(file);
+      settingsStore.deleteFilepath(filePath, this.format.value);
+    } finally {
+      internalFileModStore.set(null)
+    }
   }
 
   private isFileValid(filepath: string, file: TAbstractFile | null) {
