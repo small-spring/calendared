@@ -18,7 +18,6 @@ import {
   pluginClassStore,
   setupLocale,
   themeStore,
-  timelineParentFileStore
 } from './stores';
 import TimelineManager from './ui/components/timeline/manager';
 import { Popover } from './ui/popovers';
@@ -437,10 +436,9 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
         settingsStore.deleteFilepath(file.path, format.value)
       }
 
-      // reset file state
-      // this will add some cognitive load for sure
-      activeFileStore.set({ file: null, date: null, granularity: null })
-      timelineParentFileStore.set(null)
+      // Calendared: upstream cleared the calendar's selection and the timeline's note here for any deleted note, so
+      // deleting an unrelated note from the file explorer dropped the open note's highlight. When the open note itself
+      // is deleted, Obsidian shows another file (or none) and `file-open` updates both (onFileOpen, layoutSync)
     }
   }
 
