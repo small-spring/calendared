@@ -3,7 +3,8 @@ import { PeriodSettings, settingsStore, TFormat } from '@/settings';
 import { get } from 'svelte/store';
 import { type IGranularity } from '../types';
 import { normalizePath } from 'obsidian';
-import { isTokenEffective } from './format';
+import { formatPeriod, parsePeriod, rangeOfPeriod, type PeriodName } from '@/periods';
+import { weekSchemeFor } from '@/weeks';
 import { PluginService } from '@/app-service';
 
 export function removeEscapedCharacters(format: string): string {
@@ -17,65 +18,25 @@ export function getBasename(format: string): string {
     return isTemplateNested ? format.split('/').pop() ?? '' : format;
 }
 
-/**
- * When parsing dates that contain both week numbers and months,
- * Moment ignores the week numbers. Remove both M{1,4} and D{1,4} from format to patch.
- */
-export function isWeekFormatAmbiguous(format: string) {
-    const cleanFormat = removeEscapedCharacters(format);
-    return /w{1,2}/i.test(cleanFormat) && (/M{1,4}/.test(cleanFormat) || /D{1,4}/.test(cleanFormat));
-}
-
 export function isValidPeriodicNote(fileName: string, customGranularities = granularities as unknown as IGranularity[], customFormats?: Record<string, TFormat>)
-    : { isValid: boolean, granularity: IGranularity, date: moment.Moment, format: PeriodSettings['formats'][0] } | { isValid: null, granularity: null, date: null, format: null } {
+    : { isValid: boolean, granularity: IGranularity, date: moment.Moment, period: PeriodName, format: PeriodSettings['formats'][0] } | { isValid: null, granularity: null, date: null, period: null, format: null } {
+    // Calendared: every granularity is read as a period name through the week scheme (docs/periods.md).
+    // Upstream built a weekly note's date from today, so it fell on today's weekday instead of the week's first day
+    const weeks = weekSchemeFor(get(settingsStore).localeSettings);
 
     for (const granularity of customGranularities) {
         const formats = customFormats || get(settingsStore).periods[granularity].formats;
         for (const format of Object.values(formats)) {
-            let parsedDate = window.moment(fileName, format.value, true);
-            const match = parsedDate.isValid() && parsedDate.format(format.value) === fileName
+            const period = parsePeriod(fileName, granularity, format.value, weeks);
+            // the name must be exactly what this format writes for that period
+            if (!period || formatPeriod(period, format.value, weeks) !== fileName) continue;
 
-            if (match) {
-                if (format.error) {
-                    return { isValid: false, granularity, date: parsedDate, format };
-                }
-
-                if (granularity === 'week') {
-                    const disambiguatedFormatValue = isWeekFormatAmbiguous(format.value)
-                        ? format.value.replace(/M{1,4}/g, "").replace(/D{1,4}/g, "")
-                        : format.value;
-                    const TOKENS = ["Y", "y", "g"];
-                    const getEffectiveTokenIndex = (tokens: string[]) => {
-                        let effectiveTokenIndex = -1;
-                        tokens.find((token) => {
-                            const res = isTokenEffective(format.value, token);
-                            if (res?.isEffective) {
-                                effectiveTokenIndex = res.effectiveTokenIndex;
-
-                                return true;
-                            }
-                        });
-
-                        return effectiveTokenIndex;
-                    };
-
-                    const foundIndex = getEffectiveTokenIndex(TOKENS);
-                    const slicedFormattedDate = fileName.slice(foundIndex, foundIndex + 4);
-                    const slicedFormat = format.value.slice(foundIndex, foundIndex + 4);
-                    const parsedYear = window.moment(slicedFormattedDate, slicedFormat).year();
-                    const parsedWeek = window.moment(fileName, disambiguatedFormatValue).week();
-
-                    const newDate = window.moment().clone().year(parsedYear).week(parsedWeek);
-
-                    parsedDate = newDate;
-                }
-
-                return { isValid: true, granularity, date: parsedDate, format };
-            }
+            const date = rangeOfPeriod(period, weeks)!.start;
+            return { isValid: !format.error, granularity, date, period, format };
         }
     }
 
-    return { isValid: null, granularity: null, date: null, format: null };
+    return { isValid: null, granularity: null, date: null, period: null, format: null };
 }
 
 export function validateFolder(folder: string): string {

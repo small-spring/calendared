@@ -5,6 +5,7 @@
   import { settingsStore } from "@/settings/store";
   import { Dropdown, SettingItem, Toggle } from "@/settings/ui";
   import { switchLocale, updateWeekStartSetting } from "@/stores";
+  import { toSupportedWeekStart } from "@/weeks";
   import TimelineManager from "@/ui/components/timeline/manager";
   import { derived as derivedStore } from "svelte/store";
   import { Notice, Platform } from "obsidian";
@@ -126,28 +127,19 @@
 
     updateWeekStartSetting(newWeekStartId);
   };
+  // Calendared: Saturday, Sunday or Monday only, like Google Calendar (docs/periods.md, ADR-003)
   const weekdayOptionsStore = derivedStore(settingsStore, () => {
-    let options = [
+    const localeDefault = toSupportedWeekStart(window.moment.localeData().firstDayOfWeek());
+    return [
       {
-        label: `Locale default - ${
-          window.moment.localeData().weekdays()[
-            window.moment.localeData().firstDayOfWeek()
-          ]
-        }`,
-        value: defaultWeekdays[window.moment.localeData().firstDayOfWeek()],
+        label: `Locale default - ${window.moment.localeData().weekdays()[localeDefault]}`,
+        value: defaultWeekdays[localeDefault],
       },
+      ...[6, 0, 1].map((i) => ({
+        label: window.moment.localeData().weekdays()[i],
+        value: defaultWeekdays[i],
+      })),
     ];
-    window.moment
-      .localeData()
-      .weekdays()
-      .forEach((localizedDay, i) => {
-        options.push({
-          label: localizedDay,
-          value: defaultWeekdays[i],
-        });
-      });
-
-    return options;
   });
 </script>
 

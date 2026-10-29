@@ -15,6 +15,7 @@ vi.mock("@/settings", () => {
                 quarter: { formats: format("q", "YYYY-[Q]Q") },
                 year: { formats: format("y", "YYYY") },
             },
+            localeSettings: { weekStartId: 1, weekNumbering: "iso" },
         }),
     };
 });
@@ -42,12 +43,25 @@ describe("isValidPeriodicNote: ファイル名から周期と日付を読む", (
         expect(parse("2026-1-5")).toEqual(notPeriodic); // not zero-padded
     });
 
-    it("【気になる点】週次ノートの日付は週の始まりではなく、今日と同じ曜日になる", () => {
-        // the parser takes today and swaps in the note's year and week number
+    it("週次ノートの日付は、その週（カレンダーの行）の最初の日。今日が何曜日でも同じ", () => {
+        // fixed 2026-10-29: the parser used to take today and swap in the year and week number (docs/periods.md)
         vi.useFakeTimers({ now: new Date(2026, 9, 29) }); // a Thursday
-        expect(parse("2026-W44")).toEqual({ isValid: true, granularity: "week", date: "2026-10-29" });
+        expect(parse("2026-W44")).toEqual({ isValid: true, granularity: "week", date: "2026-10-26" });
 
         vi.useFakeTimers({ now: new Date(2026, 10, 2) }); // a Monday
         expect(parse("2026-W44")).toEqual({ isValid: true, granularity: "week", date: "2026-10-26" });
+    });
+
+    it("【気になる点】YYYY と ww を混ぜた週の書式は、年をまたぐ週の名前を読めない（書式を GGGG-[W]WW にすれば読める）", () => {
+        // week 1 of 2026 starts Mon 2025-12-29, and YYYY writes its Monday's calendar year: "2025-W01".
+        // But moment reads "2025-W01" as week 1 of 2025, so the name doesn't round-trip. Neither name is read as a weekly note
+        expect(parse("2025-W01").isValid).toBeNull();
+        expect(parse("2026-W01").isValid).toBeNull();
+    });
+
+    it("周期の名前（period）も返す", () => {
+        expect(isValidPeriodicNote("2026-W44").period).toEqual({ granularity: "week", weekYear: 2026, week: 44 });
+        expect(isValidPeriodicNote("2026-10").period).toEqual({ granularity: "month", year: 2026, month: 10 });
+        expect(isValidPeriodicNote("メモ").period).toBeNull();
     });
 });

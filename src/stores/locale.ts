@@ -2,6 +2,7 @@ import { defaultWeekdays, defaultWeekdaysShort } from '@/localization';
 import { get, writable } from 'svelte/store';
 import { settingsStore } from '@/settings';
 import { displayedDateStore } from './dates';
+import { toSupportedWeekStart } from "@/weeks";
 
 type TLocaleData = {
     weekdays: string[];
@@ -35,7 +36,8 @@ export function updateWeekStartSetting(weekStartId: number = window.moment.local
         ...settings,
         localeSettings: {
             ...settings.localeSettings,
-            weekStartId
+            // Calendared: weeks start on Saturday, Sunday or Monday only (docs/periods.md, ADR-003)
+            weekStartId: toSupportedWeekStart(weekStartId)
         }
     }))
 

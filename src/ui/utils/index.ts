@@ -29,13 +29,13 @@ export function getStartOfWeek(days: moment.Moment[]): moment.Moment {
  * Generate a 2D array of daily information to power
  * the calendar view.
  */
-export function getMonth(displayedDate: moment.Moment): IMonth {
+export function getMonth(displayedDate: moment.Moment, weekdays: string[] = get(localeDataStore).weekdays): IMonth {
   const locale = displayedDate.locale();
   const month = [];
   let week: IWeek = { days: [], weekNum: 0 };
 
   const startOfMonth = displayedDate.clone().locale(locale).date(1);
-  const startOffset = get(localeDataStore).weekdays.indexOf(startOfMonth.format('dddd'));
+  const startOffset = weekdays.indexOf(startOfMonth.format('dddd'));
   let date: moment.Moment = startOfMonth.clone().subtract(startOffset, 'days');
 
   for (let _day = 0; _day < 42; _day++) {

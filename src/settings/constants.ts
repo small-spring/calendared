@@ -1,6 +1,7 @@
 import { DEFAULT_FORMATS_PER_GRANULARITY, granularities } from "@/constants";
 import { type IGranularity } from "@/io";
 import { sysLocaleKey, sysWeekStartId } from "../localization";
+import { toSupportedWeekStart } from "../weeks";
 import { v4 as uuidv4 } from "uuid";
 
 export type TFormat = {
@@ -67,8 +68,11 @@ export interface ISettings {
     /** Override for the default locale */
     localeOverride: string;
 
-    /** ID of the day to start the week (0 for Sunday, 1 for Monday, etc.) */
+    /** ID of the day to start the week (0 for Sunday, 1 for Monday, etc.). Calendared: only 6, 0 or 1 (Sat, Sun, Mon) */
     weekStartId: number;
+
+    /** Calendared: how weeks are numbered (docs/periods.md, ADR-006). Only "iso" exists so far; not shown in the settings */
+    weekNumbering: "iso";
   };
 
   /** Settings for closing popovers */
@@ -152,7 +156,8 @@ export const DEFAULT_SETTINGS: ISettings = Object.freeze({
 
   localeSettings: {
     localeOverride: sysLocaleKey,
-    weekStartId: sysWeekStartId,
+    weekStartId: toSupportedWeekStart(sysWeekStartId),
+    weekNumbering: "iso" as const,
   },
 
   popoversClosing: {

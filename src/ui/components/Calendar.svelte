@@ -22,7 +22,9 @@
     import { settingsStore } from "@/settings";
 
     let { weekdaysShort } = $derived($localeDataStore);
-    let month = $derived(getMonth($displayedDateStore));
+    // Calendared: also rebuild when the week start changes (upstream only did on month changes, so the dates
+    // stayed in the old order under the new weekday header)
+    let month = $derived(getMonth($displayedDateStore, $localeDataStore.weekdays));
 
     let crrTab = $derived($crrTabStore);
     let tabs: typeof periodTabs = $state(periodTabs);

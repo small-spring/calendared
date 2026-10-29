@@ -4,6 +4,7 @@ import { get } from "svelte/store";
 import { getPeriodicityFromGranularity } from "../parse";
 import { type IGranularity } from "../types";
 import { DUP_ERROR_PREFIX } from "./constants";
+import { weekSchemeFor } from "@/weeks";
 
 // https://github.com/liamcain/obsidian-periodic-notes/blob/a8aa7e4e368ac344282b17e381b9101af12af0d1/src/settings/validation.ts#L20
 function validateFilename(filename: string): boolean {
@@ -94,8 +95,9 @@ function isAmbiguousFormat(
   const missingInfo = (() => {
     if (containsValidToken(["x", "X"])) return null;
     if (containsValidToken(["l", "L"]) && value !== "LT" && value !== "LTS") return null;
-    // dropped support for GG, it is ambiguous for some dates (e.g. 2020, 2030), dont know why
-    if (!containsValidToken(["Y", "y", "g"])) return "year (Y, y, or gg)";
+    // Calendared: G (ISO week-based year) is allowed again. Upstream dropped it as "ambiguous for some dates": its week
+    // check compared moment's language weeks and calendar years, which don't match ISO weeks around New Year
+    if (!containsValidToken(["Y", "y", "g", "G"])) return "year (Y, y, gg or GG)";
 
     switch (granularity) {
       case "quarter":
@@ -145,15 +147,18 @@ function isAmbiguousFormat(
           }`;
       }
       break;
-    case "week":
-      if (
-        parsedDate.week() !== currentDate.week() ||
-        parsedDate.year() !== currentDate.year()
-      ) {
-        return `${errorMessage} It doesn't uniquely identify a week. 
-                    Current: Week ${currentDate.week()} of ${currentDate.year()}, Parsed: Week ${parsedDate.week()} of ${parsedDate.year()}`;
+    case "week": {
+      // Calendared: weeks are the calendar's rows, named by the week scheme (docs/periods.md). This week's name must read
+      // back as this week. Formats that only break around New Year are warned about in the settings, not rejected here
+      const weeks = weekSchemeFor(get(settingsStore).localeSettings);
+      const week = weeks.weekOf(currentDate);
+      const name = weeks.format(week, value);
+      const readBack = weeks.parse(name, value);
+      if (!readBack || readBack.weekYear !== week.weekYear || readBack.week !== week.week) {
+        return `${errorMessage} It doesn't uniquely identify a week. This week is written "${name}", which doesn't read back as it.`;
       }
       break;
+    }
     case "day":
       if (!parsedDate.isSame(currentDate, "day")) {
         return `${errorMessage} It doesn't uniquely identify a day. 

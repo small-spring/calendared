@@ -2,7 +2,6 @@
   import { DEFAULT_FORMATS_PER_GRANULARITY } from "@/constants";
   import {
     ensureFolderExists,
-    getNotePath,
     storeAllVaultPeriodicFilepaths,
     type IGranularity,
   } from "@/io";
@@ -13,7 +12,9 @@
   import { createConfirmationDialog } from "@/ui/modals/confirmation";
   import { INotesContext } from "@/ui/types";
   import { cn, genNoticeFragment } from "@/ui/utils";
-  import { Notice, debounce, setIcon, TFile } from "obsidian";
+  import { Notice, debounce, normalizePath, setIcon, TFile } from "obsidian";
+  import { renameForFormat } from "@/periods";
+  import { weekSchemeFor } from "@/weeks";
   import { getContext, onMount } from "svelte";
   import { type Writable } from "svelte/store";
   import DeleteFormatText from "./DeleteFormatText.svelte";
@@ -54,6 +55,18 @@
   let value = $state(format.value || "");
   // svelte-ignore state_referenced_locally
   let error = $state(format.error || "");
+  // Calendared: follow the saved format when it changes from elsewhere (e.g. the weekly "Use GGGG-[W]WW" button),
+  // except while this field is being edited, so typing is never overwritten
+  let textInputEl: HTMLInputElement | undefined = $state();
+  // svelte-ignore state_referenced_locally
+  let lastSavedValue = format.value;
+  $effect.pre(() => {
+    if (format.value === lastSavedValue) return;
+    lastSavedValue = format.value;
+    if (textInputEl && document.activeElement === textInputEl) return;
+    value = format.value;
+    error = format.error;
+  });
   let selected = $state(false);
   $effect.pre(() => {
     selected =
@@ -66,6 +79,22 @@
     $settingsStore.filepathsByFormatValue[format.value] || {},
   );
   let filesCount = $derived(Object.keys(filepaths).length);
+
+  // Calendared: weekly names come from the week scheme (the row's Monday), not from today's date
+  const previewName = (formatValue: string) => {
+    if (granularity !== "week") return window.moment().format(formatValue);
+    const weeks = weekSchemeFor($settingsStore.localeSettings);
+    return weeks.format(weeks.weekOf(window.moment()), formatValue);
+  };
+  // Calendared: say what each format is for. The selected one names new notes; the others only let notes named with
+  // them be recognized, and clicking one makes it the format for new notes
+  let formatRole = $derived(
+    type === "skeleton" || !value.trim()
+      ? ""
+      : selected
+        ? "used for new notes"
+        : "also recognized · click to use for new notes",
+  );
 
   function setLoading(loading: boolean, all: boolean = false) {
     if (all) {
@@ -92,6 +121,8 @@
       triggerRerender?.update((n) => n + 1);
 
       settings.update((s) => {
+        // Calendared: the row may have been removed meanwhile (an empty row is removed on blur)
+        if (!s.formats[format.id]) return s;
         const updatedFormat = {
           ...s.formats[format.id],
           value,
@@ -125,6 +156,9 @@
           error: "",
           loading: false,
         };
+      } else if (!value.trim()) {
+        // Calendared: an empty format can't name new notes (it would write a timestamp as the file name)
+        return s;
       } else {
         // revalidate format on select since on:input debounce validation may not be triggered yet
         error = validateFormat(value, granularity, format.id);
@@ -179,24 +213,20 @@
               return;
             }
             const oldFile = abstractFile;
-
-            const date = window.moment(
-              oldFile?.basename,
-              oldFormat.value,
-              true,
-            );
-            const newNormalizedPath = getNotePath(
-              granularity,
-              date,
-              format,
-              oldFile?.parent?.path,
-            );
-
-            await ensureFolderExists(newNormalizedPath);
             if (!oldFile) return;
 
+            // Calendared: read the old name as a period through the week scheme (moment alone reads a week name as the
+            // language's week, one week off in a Monday-first calendar), and rename with the file manager so links to
+            // the note are updated too (upstream used vault.rename, which leaves links pointing to the old name)
+            const weeks = weekSchemeFor($settingsStore.localeSettings);
+            const newBasename = renameForFormat(oldFile.basename, granularity, oldFormat.value, format.value, weeks);
+            if (!newBasename) return;
+            const newNormalizedPath = normalizePath(`${oldFile.parent?.path ?? ""}/${newBasename}.md`);
+
+            await ensureFolderExists(newNormalizedPath);
+
             try {
-              await PluginService.getPlugin()?.app.vault.rename(
+              await PluginService.getPlugin()?.app.fileManager.renameFile(
                 oldFile,
                 newNormalizedPath,
               );
@@ -354,6 +384,9 @@
   onMount(() => {
     if (type === "skeleton") return;
 
+    // Calendared: a row just added with "+" is empty; focus it so typing can start, and so leaving it removes it
+    if (!value.trim()) textInputEl?.focus();
+
     error = validateFormat(value, granularity, format.id);
     trySelectLastOnlyFormat();
 
@@ -456,6 +489,11 @@
     <div class="flex items-center mb-2">
       <input
         type="text"
+        bind:this={textInputEl}
+        onblur={(e) => {
+          // Calendared: an empty format means nothing (it recognizes no note), so it only lives while being typed in
+          if (!value.trim()) handleRemove(e);
+        }}
         bind:value
         spellcheck={false}
         placeholder={defaultFormat}
@@ -480,7 +518,7 @@
         <FilepathsCount {settings} {format} {selected} {error} />
         {#if error}
           <span class="text-[var(--text-error)]"
-            >{window.moment().format(value)} •
+            >{previewName(value)} •
           </span>
           <span class="text-[var(--text-error)]" id="format-error">
             {error}
@@ -488,9 +526,12 @@
         {:else}
           <span class={cn(selected ? "!text-[var(--text-on-accent)]" : "u-pop")}
             >{value.trim()
-              ? window.moment().format(value)
+              ? previewName(value)
               : "Empty format"}</span
           >
+        {/if}
+        {#if formatRole}
+          <span class={cn(selected ? "!text-[var(--text-on-accent)] font-semibold" : "opacity-70")}> · {formatRole}</span>
         {/if}
       </div>
       <div class="flex">

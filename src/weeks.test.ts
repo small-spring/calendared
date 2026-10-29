@@ -1,6 +1,6 @@
 import moment from "moment";
 import { describe, expect, it } from "vitest";
-import { createIsoWeekScheme, type WeekName, type WeekScheme } from "./weeks";
+import { checkWeekFormat, createIsoWeekScheme, isoWeekFormatFor, toSupportedWeekStart, weekSchemeFor, type WeekName, type WeekScheme } from "./weeks";
 
 // The week scheme decides what a "week" is (docs/periods.md, ADR-003/004/006).
 // Week starts use moment's day numbers: 6 = Saturday, 0 = Sunday, 1 = Monday
@@ -74,9 +74,59 @@ describe("ISO の週の決め方: 週次ノートのファイル名", () => {
         expect(monday.format(week(2026, 1), "GGGG-[W]WW")).toBe("2026-W01"); // its Monday is 2025-12-29
     });
 
+    it("言語の週の書式（ww, gggg）で作った名前も、同じ番号の行として読む（元の版で作ったノート）", () => {
+        // in Japanese, "2026-W44" in these formats means Sun 10-25 – Sat 10-31; read it as the row that shares most of its days
+        moment.locale("ja");
+        expect(monday.parse("2026-W44", "YYYY-[W]ww")).toEqual(week(2026, 44));
+        expect(monday.parse("2026-W44", "gggg-[W]ww")).toEqual(week(2026, 44));
+        expect(sunday.parse("2026-W44", "gggg-[W]ww")).toEqual(week(2026, 44));
+    });
+
     it("存在しない週や形式に合わない名前は読まない", () => {
         expect(monday.parse("2027-W53", "GGGG-[W]WW")).toBeNull();
         expect(monday.parse("2026-W44 memo", "GGGG-[W]WW")).toBeNull();
+    });
+});
+
+describe("設定から週の決め方を選ぶ", () => {
+    it("週の始まりは土・日・月だけ。ほかの曜日は近いほうへ寄せる", () => {
+        expect([0, 1, 2, 3, 4, 5, 6].map(toSupportedWeekStart)).toEqual([0, 1, 1, 1, 1, 6, 6]);
+    });
+
+    it("今の決め方は ISO だけ（決め方の欄がない古い設定も ISO）", () => {
+        expect(weekSchemeFor({ weekStartId: 0, weekNumbering: "iso" }).weekOf(d("2026-10-25"))).toEqual(week(2026, 44));
+        expect(weekSchemeFor({ weekStartId: 3 }).rangeOf(week(2026, 44))!.start.format("YYYY-MM-DD")).toBe("2026-10-26");
+    });
+});
+
+describe("週次ノートの書式の確かめ（設定画面の注意に使う）", () => {
+    it("ISO の書式（GGGG と WW）は、どの週も読めて、番号もカレンダーと同じ", () => {
+        expect(checkWeekFormat("GGGG-[W]WW", monday)).toEqual({ unreadable: null, mismatched: null });
+        expect(checkWeekFormat("GGGG-[W]WW", sunday)).toEqual({ unreadable: null, mismatched: null });
+        expect(checkWeekFormat("GGGG年第WW週", saturday)).toEqual({ unreadable: null, mismatched: null });
+    });
+
+    it("YYYY と ww を混ぜた書式は、年の変わり目に読めない週がある（例を返す）", () => {
+        moment.locale("ja");
+        const { unreadable } = checkWeekFormat("YYYY-[W]ww", monday);
+        // the earliest week checked that breaks: week 1 of 2025 starts Mon 2024-12-30 and is written "2024-W01"
+        expect(unreadable).toEqual({ week: week(2025, 1), name: "2024-W01" });
+    });
+
+    it("gggg と ww（言語の決まり）は読めるが、番号がカレンダーとずれる週がある（例を返す）", () => {
+        moment.locale("ja");
+        const { unreadable, mismatched } = checkWeekFormat("gggg-[W]ww", monday);
+        expect(unreadable).toBeNull();
+        expect(mismatched).not.toBeNull();
+        expect(mismatched!.name).not.toBe(mismatched!.expected);
+    });
+
+    it("おすすめの書式は、ユーザーの書式の文字だけを ISO に替えて作る（[] の中と、ほかの文字はそのまま）", () => {
+        expect(isoWeekFormatFor("YYYY-[W]ww")).toBe("GGGG-[W]WW");
+        expect(isoWeekFormatFor("gggg-[W]ww")).toBe("GGGG-[W]WW");
+        expect(isoWeekFormatFor("gggg年第ww週")).toBe("GGGG年第WW週");
+        expect(isoWeekFormatFor("[www] gg-w")).toBe("[www] GG-W");
+        expect(isoWeekFormatFor("GGGG-[W]WW")).toBe("GGGG-[W]WW");
     });
 });
 

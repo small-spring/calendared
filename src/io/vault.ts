@@ -2,9 +2,12 @@ import { normalizePath, Notice, TFile } from "obsidian";
 import { IGranularity } from "./types";
 import { getNormalizedPeriodSettings } from "./settings";
 import { getSticker, TSticker } from "@/ui/utils";
-import { PeriodSettings } from "@/settings";
+import { PeriodSettings, settingsStore } from "@/settings";
+import { get } from "svelte/store";
 import { PluginService } from "@/app-service";
 import type { IFoldInfo } from "./types";
+import { formatPeriod, periodOf } from '@/periods';
+import { weekSchemeFor } from '@/weeks';
 
 
 export type TFileData = {
@@ -71,7 +74,9 @@ export function getNotePath(
   customFolder?: string,
 ) {
   const { settings: { selectedFormat, folder } } = getNormalizedPeriodSettings(granularity);
-  let filename = date.format(customFormat?.value || selectedFormat.value);
+  // Calendared: name the period that contains the date (a week by the week scheme: its row's Monday), see docs/periods.md
+  const weeks = weekSchemeFor(get(settingsStore).localeSettings);
+  let filename = formatPeriod(periodOf(granularity, date, weeks), customFormat?.value || selectedFormat.value, weeks);
 
   if (!filename.endsWith(".md")) {
     filename += ".md";

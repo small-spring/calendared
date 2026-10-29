@@ -9,7 +9,8 @@ import { basename, createOrOpenNote, getFileData, getStartupNoteGranularity, isB
 import { getPeriodicityFromGranularity } from './io/parse';
 import type { IGranularity } from './io/types';
 import { isValidPeriodicNote } from './io/validation';
-import { getAdjacentPeriodDate, isNoteOnDisplayedMonth } from './periods';
+import { overlapsMonth, rangeOfPeriod, shiftPeriod } from './periods';
+import { toSupportedWeekStart, weekSchemeFor } from './weeks';
 import {
   activeFileStore,
   displayedDateStore,
@@ -119,12 +120,13 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
         checkCallback: (checking) => {
           const file = this.app.workspace.getActiveFile();
           if (!file) return false;
-          const { granularity, date } = isValidPeriodicNote(file.basename);
-          if (!granularity || !date) return false;
+          const { granularity, period } = isValidPeriodicNote(file.basename);
+          if (!granularity || !period) return false;
           if (checking) return true;
 
-          const targetDate = getAdjacentPeriodDate(granularity, date, pos);
-          const { file: target } = getFileData(granularity, targetDate);
+          const weeks = weekSchemeFor(get(settingsStore).localeSettings);
+          const targetPeriod = shiftPeriod(period, pos === 'next' ? 1 : -1, weeks);
+          const { file: target } = getFileData(granularity, rangeOfPeriod(targetPeriod, weeks)!.start);
           if (target) {
             this.app.workspace.getLeaf(false).openFile(target).catch(console.error);
           } else {
@@ -202,6 +204,12 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
       for (const key of REMOVED_SETTINGS) {
         delete (newSettings as Record<string, unknown>)[key];
       }
+      // Calendared: weeks start on Saturday, Sunday or Monday only, and are numbered by a week scheme (docs/periods.md)
+      newSettings.localeSettings = {
+        ...newSettings.localeSettings,
+        weekStartId: toSupportedWeekStart(newSettings.localeSettings.weekStartId),
+        weekNumbering: newSettings.localeSettings.weekNumbering ?? "iso",
+      };
       const periods = newSettings.periods
       Object.values(periods).forEach((periodSettings) => {
         for (const key of REMOVED_PERIOD_SETTINGS) {
@@ -340,18 +348,18 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
       activeFileStore.set({ file: null, date: null, granularity: null });
       return;
     }
-    const { isValid, granularity, date } = isValidPeriodicNote(file.basename);
-    if (typeof isValid !== "boolean" || !date || !granularity) {
+    const { isValid, granularity, date, period } = isValidPeriodicNote(file.basename);
+    if (typeof isValid !== "boolean" || !date || !granularity || !period) {
       activeFileStore.set({ file: null, date: null, granularity: null });
       return;
     }
 
     activeFileStore.set({ file, date, granularity });
 
-    // Calendared: always follow the open note, but only when the note isn't
-    // already on the displayed month. Otherwise clicking a year title would jump to January, or a week number to
-    // the month the week starts in
-    if (!isNoteOnDisplayedMonth(granularity, date, get(displayedDateStore))) {
+    // Calendared: always follow the open note, but only when no day of it is on the displayed month already.
+    // Otherwise clicking a year title would jump to January, or a week number to the month the week starts in.
+    // `date` is the period's first day (docs/periods.md)
+    if (!overlapsMonth(period, get(displayedDateStore), weekSchemeFor(get(settingsStore).localeSettings))) {
       displayedDateStore.set(date);
     }
   }
