@@ -9,6 +9,7 @@ Svelte 5 + TypeScript + Vite + Tailwind。作業ブランチは `custom`。`upst
 - `docs/todo.md`: これからやること（不具合・やりたいこと）
 - `docs/development.md`: ビルド・deploy・依存の更新・書き方の決まり
 - `docs/stickers.md`: ステッカー機能の仕様と ADR
+- `docs/periods.md`: 周期ノートの値の形と週の定義の設計と ADR
 - `README.md`: 先頭の告知以外は元の版のまま（英語）
 
 ## 決まり
