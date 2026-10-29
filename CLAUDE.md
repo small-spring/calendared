@@ -11,6 +11,7 @@ Svelte 5 + TypeScript + Vite + Tailwind。作業ブランチは `custom`。`upst
 - `docs/stickers.md`: ステッカー機能の仕様と ADR
 - `docs/device-testing.md`: Windows・iPhone の実機で試す手順
 - `docs/periods.md`: 周期ノートの値の形と週の定義の設計と ADR
+- `docs/state.md`: 状態（ストア）の一覧と、状態管理の作り直しの設計と ADR
 - `README.md`: 先頭の告知以外は元の版のまま（英語）
 
 ## 決まり
