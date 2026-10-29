@@ -1,6 +1,17 @@
 import moment from "moment";
 import { describe, expect, it } from "vitest";
-import { getAdjacentPeriodDate, isNoteOnDisplayedMonth } from "./periods";
+import {
+    formatPeriod,
+    getAdjacentPeriodDate,
+    isNoteOnDisplayedMonth,
+    overlapsMonth,
+    parsePeriod,
+    periodOf,
+    rangeOfPeriod,
+    shiftPeriod,
+    type PeriodName,
+} from "./periods";
+import { createIsoWeekScheme } from "./weeks";
 
 const d = (s: string) => moment(s, "YYYY-MM-DD");
 
@@ -51,5 +62,113 @@ describe("getAdjacentPeriodDate: 同じ周期の前・次", () => {
         const date = d("2026-10-29");
         getAdjacentPeriodDate("day", date, "next");
         expect(date.format("YYYY-MM-DD")).toBe("2026-10-29");
+    });
+});
+
+// ---- Period names and operations (docs/periods.md, ADR-001/002) ----
+
+const mondayWeeks = createIsoWeekScheme(1);
+const sundayWeeks = createIsoWeekScheme(0);
+const FORMATS = { day: "YYYY-MM-DD", week: "GGGG-[W]WW", month: "YYYY-MM", quarter: "YYYY-[Q]Q", year: "YYYY" } as const;
+const range = (p: PeriodName, weeks = mondayWeeks) => {
+    const r = rangeOfPeriod(p, weeks);
+    return r && [r.start.format("YYYY-MM-DD"), r.end.format("YYYY-MM-DD")];
+};
+
+describe("periodOf: ある日を含む区切りの名前", () => {
+    it("日・月・四半期・年は暦どおり（月は 1〜12）", () => {
+        const date = d("2026-10-29");
+        expect(periodOf("day", date, mondayWeeks)).toEqual({ granularity: "day", year: 2026, month: 10, day: 29 });
+        expect(periodOf("month", date, mondayWeeks)).toEqual({ granularity: "month", year: 2026, month: 10 });
+        expect(periodOf("quarter", date, mondayWeeks)).toEqual({ granularity: "quarter", year: 2026, quarter: 4 });
+        expect(periodOf("year", date, mondayWeeks)).toEqual({ granularity: "year", year: 2026 });
+    });
+
+    it("週は週の決め方に聞く", () => {
+        expect(periodOf("week", d("2026-10-25"), sundayWeeks)).toEqual({ granularity: "week", weekYear: 2026, week: 44 });
+        expect(periodOf("week", d("2026-10-25"), mondayWeeks)).toEqual({ granularity: "week", weekYear: 2026, week: 43 });
+    });
+});
+
+describe("rangeOfPeriod: 区切りの期間", () => {
+    it("各周期の最初の日と最後の日", () => {
+        expect(range({ granularity: "day", year: 2026, month: 10, day: 29 })).toEqual(["2026-10-29", "2026-10-29"]);
+        expect(range({ granularity: "month", year: 2026, month: 2 })).toEqual(["2026-02-01", "2026-02-28"]);
+        expect(range({ granularity: "quarter", year: 2026, quarter: 4 })).toEqual(["2026-10-01", "2026-12-31"]);
+        expect(range({ granularity: "year", year: 2026 })).toEqual(["2026-01-01", "2026-12-31"]);
+        expect(range({ granularity: "week", weekYear: 2026, week: 44 }, sundayWeeks)).toEqual(["2026-10-25", "2026-10-31"]);
+    });
+});
+
+describe("shiftPeriod: 前・次の区切り", () => {
+    it("年の変わり目をまたいでも正しい", () => {
+        expect(shiftPeriod({ granularity: "day", year: 2026, month: 12, day: 31 }, 1, mondayWeeks)).toEqual({ granularity: "day", year: 2027, month: 1, day: 1 });
+        expect(shiftPeriod({ granularity: "month", year: 2026, month: 1 }, -1, mondayWeeks)).toEqual({ granularity: "month", year: 2025, month: 12 });
+        expect(shiftPeriod({ granularity: "quarter", year: 2026, quarter: 4 }, 1, mondayWeeks)).toEqual({ granularity: "quarter", year: 2027, quarter: 1 });
+        expect(shiftPeriod({ granularity: "year", year: 2026 }, -1, mondayWeeks)).toEqual({ granularity: "year", year: 2025 });
+        expect(shiftPeriod({ granularity: "week", weekYear: 2027, week: 52 }, 1, mondayWeeks)).toEqual({ granularity: "week", weekYear: 2028, week: 1 });
+    });
+});
+
+describe("overlapsMonth: 表示中の月（2026 年 9 月）に見えているか", () => {
+    const september = d("2026-09-15");
+
+    it("期間が 9 月と重なっていれば見えている。日・週・月・期・年で同じ考え方", () => {
+        expect(overlapsMonth({ granularity: "day", year: 2026, month: 9, day: 1 }, september, mondayWeeks)).toBe(true);
+        expect(overlapsMonth({ granularity: "day", year: 2026, month: 10, day: 1 }, september, mondayWeeks)).toBe(false);
+        expect(overlapsMonth({ granularity: "month", year: 2025, month: 9 }, september, mondayWeeks)).toBe(false);
+        expect(overlapsMonth({ granularity: "quarter", year: 2026, quarter: 3 }, september, mondayWeeks)).toBe(true);
+        expect(overlapsMonth({ granularity: "year", year: 2026 }, september, mondayWeeks)).toBe(true);
+        expect(overlapsMonth({ granularity: "year", year: 2027 }, september, mondayWeeks)).toBe(false);
+    });
+
+    it("月をまたぐ週も、どれかの日が 9 月なら見えている", () => {
+        expect(overlapsMonth({ granularity: "week", weekYear: 2026, week: 36 }, september, mondayWeeks)).toBe(true); // Aug 31 – Sep 6
+        expect(overlapsMonth({ granularity: "week", weekYear: 2026, week: 40 }, september, mondayWeeks)).toBe(true); // Sep 28 – Oct 4
+        expect(overlapsMonth({ granularity: "week", weekYear: 2026, week: 35 }, september, mondayWeeks)).toBe(false); // Aug 24 – Aug 30
+    });
+});
+
+describe("formatPeriod / parsePeriod: ファイル名", () => {
+    it("各周期の書式で書いて読む", () => {
+        const cases: PeriodName[] = [
+            { granularity: "day", year: 2026, month: 10, day: 29 },
+            { granularity: "week", weekYear: 2026, week: 1 },
+            { granularity: "month", year: 2026, month: 10 },
+            { granularity: "quarter", year: 2026, quarter: 4 },
+            { granularity: "year", year: 2026 },
+        ];
+        expect(cases.map((p) => formatPeriod(p, FORMATS[p.granularity], mondayWeeks))).toEqual([
+            "2026-10-29", "2026-W01", "2026-10", "2026-Q4", "2026",
+        ]);
+        for (const p of cases) {
+            expect(parsePeriod(formatPeriod(p, FORMATS[p.granularity], mondayWeeks), p.granularity, FORMATS[p.granularity], mondayWeeks)).toEqual(p);
+        }
+    });
+
+    it("形式に合わない名前や、存在しない区切りは読まない", () => {
+        expect(parsePeriod("2026-13", "month", FORMATS.month, mondayWeeks)).toBeNull();
+        expect(parsePeriod("2027-W53", "week", FORMATS.week, mondayWeeks)).toBeNull();
+        expect(parsePeriod("メモ", "day", FORMATS.day, mondayWeeks)).toBeNull();
+    });
+});
+
+describe.each(["day", "week", "month", "quarter", "year"] as const)("どの周期でも守る約束（%s）", (granularity) => {
+    const days = Array.from({ length: 800 }, (_, i) => d("2025-11-01").add(i, "days"));
+
+    it("ある日を含む区切りの期間に、その日が入っている", () => {
+        for (const day of days) {
+            const r = rangeOfPeriod(periodOf(granularity, day, sundayWeeks), sundayWeeks)!;
+            expect(day.isBetween(r.start, r.end, "day", "[]")).toBe(true);
+        }
+    });
+
+    it("前の次は元に戻り、次は期間の最後の翌日を含む区切り", () => {
+        for (const day of days) {
+            const p = periodOf(granularity, day, sundayWeeks);
+            expect(shiftPeriod(shiftPeriod(p, -1, sundayWeeks), 1, sundayWeeks)).toEqual(p);
+            const next = periodOf(granularity, rangeOfPeriod(p, sundayWeeks)!.end.clone().add(1, "day"), sundayWeeks);
+            expect(shiftPeriod(p, 1, sundayWeeks)).toEqual(next);
+        }
     });
 });
