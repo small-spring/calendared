@@ -34,7 +34,6 @@
 | `yearsRanges` | 年のビューの範囲 | 年のビュー | 複雑だが、年のビューは日・月を無効にしたときだけ出る |
 | `spFileDataStore` | ステッカーのピッカーの対象 | ステッカーの操作 | 問題なし |
 | `themeStore` | ライト・ダーク | 起動時、テーマの変化 | 問題なし |
-| `rerenderStore` / `crrFileMenu` / `pluginClassStore` | — | `pluginClassStore` は起動時に入れるだけ | **どこからも読まれていない**（消せる） |
 
 ## 2. 問題のまとめ
 
@@ -44,7 +43,6 @@
   カレンダー全体が計算し直す
 - **全体で 1 つの値で、タブごとの状態を持っている**: タイムライン（不具合 (4)）
 - **合図と目印の兼用、乱数の合図**: `internalFileModStore`、`localeSwitched`
-- **使われていない状態**: `rerenderStore`、`crrFileMenu`、`pluginClassStore`
 - **隠れた依存**（2026-10-30 に見つけた）: パスの計算（`getNotePath`）、週の定義（`weekSchemeFor`）、ステッカーのボタン（`sticker-actions.ts`）が
   `get(settingsStore)` で設定を読んでいて、Svelte はこの依存を追えない。`notesChangedStore` が「設定が変わったら全部」と合図しているので、たまたま動いている
 - **1 つの変化が連鎖する**（2026-10-30 に見つけた）: ノートを 1 つ作ると、一覧の更新 → `data.json` の書き直し（`main.ts` の `saveSettings`）→
@@ -115,7 +113,7 @@
 
 ### 使われていない状態を消す
 
-`rerenderStore`、`crrFileMenu`、`pluginClassStore` を消す（決めることはない）
+`rerenderStore`、`crrFileMenu`、`pluginClassStore` を消す（決めることはない）。2026-10-30 に消した
 
 ## 4. 未解決: 表示中の月の謎
 
@@ -129,7 +127,7 @@
 
 ## 5. 進める順番（案）
 
-1. 使われていない状態を消す（小さい、決めることがない）
+1. ~~使われていない状態を消す~~（2026-10-30 に済んだ）
 2. ADR-S2 の土台: 今の `getNotePath`・`getFileData` の振る舞いをテストで固定し、パスの計算と週の定義を、設定を引数で受け取る純粋な関数にする
 3. ADR-S2 の窓口を作り、カレンダーのマス（`DateBttn.svelte`）から置き換える。測る仕掛けも入れる
 4. タイムラインと月・年の見出しも窓口に移し、`notesChangedStore`・`internalFileModStore`・`localeSwitched` を消す

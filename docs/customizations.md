@@ -130,3 +130,4 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 - Obsidian 本体へのアクセスを `PluginService.getPlugin()?.app` に統一〔2026-10-28〕
 - 再描画の合図を `notesChangedStore`（`src/stores/notes.ts`）に統一〔2026-10-28〕
 - `Menu.close()`（非推奨）を `hide()` に置き換え〔2026-10-28〕
+- どこからも読まれていないストア（`rerenderStore`・`crrFileMenu`・`pluginClassStore`）を削除〔2026-10-30〕

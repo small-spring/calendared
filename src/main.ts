@@ -15,7 +15,6 @@ import {
   activeFileStore,
   displayedDateStore,
   internalFileModStore,
-  pluginClassStore,
   setupLocale,
   themeStore,
 } from './stores';
@@ -50,8 +49,6 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
 
     await this.loadSettings();
     this.registerEvents()
-
-    pluginClassStore.set(this);
 
     // theme
     themeStore.set(this.getTheme());
