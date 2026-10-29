@@ -28,7 +28,8 @@
     class={cn(
         "bg-transparent w-max opacity-0 pointer-events-none absolute",
         Platform.isPhone
-            ? "!top-0 !left-1/2 [transform:translate(-50%,3%)_!important]"
+            ? // Calendared: below the status bar (Dynamic Island); upstream's top-0 hid the remove button under it
+              "!top-[calc(var(--safe-area-inset-top,0px)+var(--size-4-2))] !left-1/2 [transform:translateX(-50%)_!important]"
             : " top-0 left-0",
     )}
     data-popover={true}

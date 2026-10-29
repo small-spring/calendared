@@ -31,6 +31,8 @@
     isSide = null,
   }: Props = $props();
   let timelineEl: HTMLDivElement | null = $state(null);
+  let containerEl: HTMLDivElement | null = $state(null);
+  let toggleEl: HTMLDivElement | null = $state(null);
   let arrowEl: HTMLButtonElement | null = $state(null);
 
   // Calendared: the timeline keeps its own navigation state, seeded from the note it was mounted for.
@@ -248,16 +250,45 @@
     timelineEl?.parentElement && observer.observe(timelineEl.parentElement);
   });
 
+  /**
+   * Calendared: on phones the timeline sits under Obsidian's header and the note starts below it (app.css), instead of
+   * covering the note's first lines. The note's top padding needs the timeline's height: the box, plus the footer that
+   * hangs below it when expanded (collapsed, the chevron sits inside the box's top)
+   */
+  // svelte-ignore state_referenced_locally
+  const isPhoneMain = Platform.isPhone && !isSide;
+  let leafEl: HTMLElement | null = null;
+  $effect(() => {
+    if (!isPhoneMain || !timelineEl || !containerEl || !toggleEl) return;
+    leafEl = timelineEl.parentElement;
+    const container = containerEl;
+    const toggle = toggleEl;
+    const update = () => {
+      const height =
+        viewMode === "expanded"
+          ? container.offsetHeight + toggle.offsetHeight
+          : Math.max(container.offsetHeight, toggle.offsetHeight);
+      leafEl?.style.setProperty("--pnc-timeline-height", `${height}px`);
+    };
+    const heightObserver = new ResizeObserver(update);
+    heightObserver.observe(container);
+    heightObserver.observe(toggle);
+    update();
+    return () => heightObserver.disconnect();
+  });
+
   onDestroy(() => {
     if (observer) {
       observer.disconnect();
     }
+    leafEl?.style.removeProperty("--pnc-timeline-height");
   });
 </script>
 
 <div id="pnc-container" data-type={TIMELINE_TYPE} bind:this={timelineEl}>
   <div
     id="timeline-container"
+    bind:this={containerEl}
     class={cn(
       `timeline-container-${granularity}`,
       "absolute right-[26px] z-10 flex gap-[0.15rem] flex-col p-1 rounded-[var(--radius-s)]",
@@ -269,7 +300,8 @@
         ? Platform.isPhone
           ? "top-[26px] bg-[var(--mobile-sidebar-background)]"
           : "top-[26px] bg-[var(--background-secondary)]"
-        : "top-[56px] bg-[var(--background-primary)]",
+        : // Calendared: on phones the header is taller and its height varies; app.css places it (pnc-timeline-phone)
+          cn(isPhoneMain ? "pnc-timeline-phone" : "top-[56px]", "bg-[var(--background-primary)]"),
     )}
   >
     {#if viewMode === "expanded"}
@@ -368,6 +400,7 @@
     {/if}
     <div
       id="timeline-toggle-button"
+      bind:this={toggleEl}
       class={cn(
         "absolute flex justify-end items-center pl-1 transition-all duration-400 ease-out right-0",
         "rounded-[var(--radius-s)]",

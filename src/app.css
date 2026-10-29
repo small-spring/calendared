@@ -60,3 +60,21 @@
   font-size: var(--icon-size);
   line-height: 1;
 }
+
+/*
+  Calendared: on phones Obsidian's note header starts below the status bar (the Dynamic Island) and floats over the note,
+  which starts below it. The timeline goes right under the header, and the note starts below the timeline
+  (--pnc-timeline-height, set by Timeline.svelte). It hides along with the header when you scroll down
+*/
+.is-phone #timeline-container.pnc-timeline-phone {
+  top: calc(var(--view-header-top-offset) + var(--view-header-height) + var(--size-4-1));
+  transition: opacity 0.2s ease-in-out;
+}
+.is-phone.is-hidden-nav #timeline-container.pnc-timeline-phone {
+  opacity: 0;
+  pointer-events: none;
+}
+.is-phone .mod-root .workspace-leaf-content:has(> [data-type="periodic-notes-calendar-timeline"]) .view-content .markdown-reading-view > .markdown-preview-view,
+.is-phone .mod-root .workspace-leaf-content:has(> [data-type="periodic-notes-calendar-timeline"]) .view-content .markdown-source-view > .cm-editor > .cm-scroller {
+  padding-top: calc(var(--view-top-spacing-markdown) + var(--pnc-timeline-height, 0px) + var(--size-4-2));
+}

@@ -21,6 +21,9 @@
     direction === "right" && "[transform:rotate(180deg)]",
     Platform.isPhone ? "[&>svg]:w-3.5" : "[&>svg]:w-2.5",
     className,
+    // Calendared: easier to hit with a finger. Wider for real; taller only by an invisible area, so the header keeps its height
+    Platform.isPhone &&
+      "relative !px-2.5 [&>svg]:w-2 after:absolute after:inset-x-0 after:-inset-y-2.5 after:content-['']",
   )}
   id="arrow"
   onclick={onClick}
