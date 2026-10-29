@@ -10,6 +10,7 @@ import { type IGranularity } from "./types";
 import { ensureFolderExists, getNotePath, getTemplateInfo } from "./vault";
 import { PluginService } from "@/app-service";
 import { capitalize } from "@/utils";
+import { weekSchemeFor } from "@/weeks";
 
 export async function createOrOpenNote({
   leaf,
@@ -107,7 +108,7 @@ export async function createNote(granularity: IGranularity, date: moment.Moment)
 
     const file = await PluginService.getPlugin()?.app.vault.create(
       normalizedPath,
-      replaceTemplateContents(date, selectedFormat.value, templateContents)
+      replaceTemplateContents(date, selectedFormat.value, templateContents, weekSchemeFor(get(settingsStore).localeSettings))
     );
     if (!file || !(file instanceof TFile)) return;
 

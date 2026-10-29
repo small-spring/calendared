@@ -4,7 +4,6 @@ import { get } from 'svelte/store';
 
 export interface IWeek {
   days: moment.Moment[];
-  weekNum: number;
 }
 
 export type IMonth = IWeek[];
@@ -32,7 +31,7 @@ export function getStartOfWeek(days: moment.Moment[]): moment.Moment {
 export function getMonth(displayedDate: moment.Moment, weekdays: string[] = get(localeDataStore).weekdays): IMonth {
   const locale = displayedDate.locale();
   const month = [];
-  let week: IWeek = { days: [], weekNum: 0 };
+  let week: IWeek = { days: [] };
 
   const startOfMonth = displayedDate.clone().locale(locale).date(1);
   const startOffset = weekdays.indexOf(startOfMonth.format('dddd'));
@@ -40,10 +39,7 @@ export function getMonth(displayedDate: moment.Moment, weekdays: string[] = get(
 
   for (let _day = 0; _day < 42; _day++) {
     if (_day % 7 === 0) {
-      week = {
-        days: [],
-        weekNum: date.week()
-      };
+      week = { days: [] };
       month.push(week);
     }
 

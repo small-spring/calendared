@@ -20,11 +20,13 @@
     import YearsHeader from "./YearsHeader.svelte";
     import DateBttn from "./core/DateBttn.svelte";
     import { settingsStore } from "@/settings";
+    import { weekSchemeFor } from "@/weeks";
 
     let { weekdaysShort } = $derived($localeDataStore);
     // Calendared: also rebuild when the week start changes (upstream only did on month changes, so the dates
     // stayed in the old order under the new weekday header)
     let month = $derived(getMonth($displayedDateStore, $localeDataStore.weekdays));
+    let weeks = $derived(weekSchemeFor($settingsStore.localeSettings));
 
     let crrTab = $derived($crrTabStore);
     let tabs: typeof periodTabs = $state(periodTabs);
@@ -84,7 +86,7 @@
                 </tr>
             </thead>
             <tbody>
-                {#each month as week (week.weekNum)}
+                {#each month as week (week.days[0].format("YYYY-MM-DD"))}
                     <tr>
                         {#if enabledPeriods.week}
                             <td
@@ -100,9 +102,9 @@
                                     )}
                                     dotContainerClassName={"bottom-[.3rem]"}
                                 >
-                                    {getStartOfWeek(week.days).week() < 10
-                                        ? "0"
-                                        : ""}{getStartOfWeek(week.days).week()}
+                                    <!-- Calendared: the week scheme's number (ISO week of the row's Monday, docs/periods.md);
+                                         upstream showed moment's language week number -->
+                                    {String(weeks.weekOf(getStartOfWeek(week.days)).week).padStart(2, "0")}
                                 </DateBttn>
                             </td>
                         {/if}

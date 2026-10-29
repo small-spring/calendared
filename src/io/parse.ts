@@ -1,3 +1,4 @@
+import type { WeekScheme } from '@/weeks';
 import type { IGranularity, IPeriodicity } from './types';
 
 
@@ -48,21 +49,14 @@ const REGEX = (function generateRegex(): RegExp {
 export function replaceTemplateContents(
   date: moment.Moment,
   defaultFormat: string,
-  template: string
+  template: string,
+  weeks: WeekScheme,
 ): string {
   const now = window.moment();
-  const localeWeekdays = (function getLocaleWeekdays(): string[] {
-    const { moment } = window;
-    let weekStart = moment.localeData().firstDayOfWeek();
-    const weekdays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-
-    while (weekStart) {
-      weekdays.push(weekdays.shift() as string);
-      weekStart--;
-    }
-
-    return weekdays;
-  })()
+  // Calendared: weekdays are taken from the note's week as the calendar shows it (the week scheme's row,
+  // docs/periods.md). Upstream used moment's language week start (Sunday in Japanese)
+  const weekdays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  const rowStart = weeks.rangeOf(weeks.weekOf(date))!.start;
 
   return template.replace(REGEX,
     (match, type: string | undefined | null) => {
@@ -108,9 +102,10 @@ export function replaceTemplateContents(
           break;
 
         default:
-          if (localeWeekdays.includes(type.toLowerCase())) {
+          if (weekdays.includes(type.toLowerCase())) {
             // handle weekdays
-            momentDate = date.clone().weekday(localeWeekdays.indexOf(type.toLowerCase()));
+            const day = weekdays.indexOf(type.toLowerCase());
+            momentDate = rowStart.clone().add((day - rowStart.day() + 7) % 7, 'days');
           } else {
             return match; // Return unchanged if not recognized
           }

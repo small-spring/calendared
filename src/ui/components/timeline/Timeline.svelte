@@ -8,6 +8,7 @@
   import { localeSwitched, notesChangedStore } from "@/stores";
   import { Arrow } from "@/ui";
   import { cn } from "@/ui/utils";
+  import { weekSchemeFor } from "@/weeks";
   import { setIcon, Platform } from "obsidian";
   import { onDestroy, onMount } from "svelte";
   import DateBttn from "../core/DateBttn.svelte";
@@ -57,13 +58,13 @@
   let crrSelectedDate = $state(initialDate);
   let resetEl: HTMLButtonElement | null = $state(null);
   /**
-   * Calendared: start of the week as the calendar shows it (setting `localeSettings.weekStartId`).
-   * Upstream used moment's `startOf("week")`, i.e. the language's week start (Sunday in Japanese), so the timeline
-   * and the calendar could disagree. moment's own week start is left alone: Obsidian and other plugins share it
+   * Calendared: weeks as the calendar shows them, from the week scheme (docs/periods.md). Upstream used moment's
+   * `startOf("week")` and `week()`, i.e. the language's week (Sunday-first in Japanese), so the timeline and the calendar
+   * could disagree. moment's own week start is left alone: Obsidian and other plugins share it
    */
+  let weekScheme = $derived(weekSchemeFor($settingsStore.localeSettings));
   function startOfCalendarWeek(date: moment.Moment): moment.Moment {
-    const weekStartId = $settingsStore.localeSettings.weekStartId ?? date.localeData().firstDayOfWeek();
-    return date.clone().startOf("day").subtract((date.day() - weekStartId + 7) % 7, "days");
+    return weekScheme.rangeOf(weekScheme.weekOf(date))!.start;
   }
 
   let dates: moment.Moment[] = $derived.by(() => {
@@ -80,7 +81,7 @@
           crrDisplayedDate.month(),
           1,
         ]);
-        let startOfWeek = date.clone().startOf("week");
+        let startOfWeek = startOfCalendarWeek(date);
         const endOfMonth = date.clone().endOf("month");
 
         while (startOfWeek.isBefore(endOfMonth)) {
@@ -128,7 +129,7 @@
     return $settingsStore.periods[group].enabled;
   });
   let headingText = $derived(
-    derivedG === "day" ? `W${String(groupDate.week()).padStart(2, "0")}` : undefined,
+    derivedG === "day" ? `W${String(weekScheme.weekOf(groupDate).week).padStart(2, "0")}` : undefined,
   );
   let groupFileData = $derived.by(() => {
     $notesChangedStore; // recompute when notes change
@@ -356,7 +357,8 @@
                   dotContainerClassName="bottom-[.2rem]"
                   ignoreAdjacentMonth={true}
                 >
-                  {d.format(G_MAP[derivedG].format)}
+                  <!-- Calendared: week numbers from the week scheme, not moment's language week ("w") -->
+                  {derivedG === "week" ? weekScheme.weekOf(d).week : d.format(G_MAP[derivedG].format)}
                 </DateBttn>
               </div>
             </div>
