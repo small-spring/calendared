@@ -16,6 +16,7 @@
   // Used by the header and the month picker so every title follows the same rules.
   import { getPeriodicityFromGranularity } from "@/io";
   import { settingsStore } from "@/settings";
+  import { activeFileStore } from "@/stores";
   import { cn, eventHandlers, isControlPressed } from "@/ui/utils";
   import { capitalize } from "@/utils";
   import Button from "./Button.svelte";
@@ -54,6 +55,12 @@
   let canOpen = $derived(
     !!title.fileData.file || $settingsStore.periods[title.granularity].enabled,
   );
+  // the open note looks selected wherever it shows up on the calendar, like the date buttons.
+  // The background is drawn with a shadow so the selected title keeps its size and nothing shifts
+  let isActive = $derived(
+    !!title.fileData.file &&
+      $activeFileStore?.file?.path === title.fileData.file.path,
+  );
 </script>
 
 <!--
@@ -71,6 +78,8 @@
         textClassName,
         title.className,
         !canOpen && "!cursor-default hover:!shadow-none hover:!bg-transparent",
+        isActive &&
+          "!text-[--text-on-accent] !bg-[--interactive-accent] !shadow-[0px_0px_0_5px_var(--interactive-accent)] hover:!bg-[--interactive-accent-hover] hover:!shadow-[0px_0px_0_5px_var(--interactive-accent-hover)]",
       )}
       id={title.granularity}
       aria-label={canOpen

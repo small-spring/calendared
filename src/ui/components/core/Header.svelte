@@ -107,7 +107,7 @@
     />
   {/if}
 
-  <div class="flex items-end mb-[11px] -ml-0.5" id="nav-arrows">
+  <div class="flex items-end mb-[11px]" id="nav-arrows">
     <Arrow
       direction="left"
       onClick={nav.decrement}
