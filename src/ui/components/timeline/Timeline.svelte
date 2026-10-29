@@ -219,6 +219,9 @@
   });
 
   onMount(() => {
+    // Calendared: on phones the timeline doesn't cover the note (see isPhoneMain), so the width doesn't decide here
+    // (turning the phone would otherwise close it)
+    if (isPhoneMain) return;
     // check for enough room
     prevParentWidth =
       timelineEl?.parentElement?.getBoundingClientRect()?.width || 0;

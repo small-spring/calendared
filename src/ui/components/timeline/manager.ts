@@ -57,7 +57,9 @@ export default class TimelineManager {
       (leaf as WorkspaceLeaf & { containerEl: HTMLElement })?.containerEl?.closest(closestWorkspaceClassname)?.className;
 
     this.isMountedIn(leaf, true);
-    const enoughRoom = leaf.view.containerEl.getBoundingClientRect().width > 640;
+    const isSide = leafContainerClassname?.includes(`mod-left`) || leafContainerClassname?.includes(`mod-right`);
+    // Calendared: a phone's note is narrow, but the timeline no longer covers it there (app.css), so the setting applies
+    const enoughRoom = (Platform.isPhone && !isSide) || leaf.view.containerEl.getBoundingClientRect().width > 640;
 
     TimelineManager.components[file.path] = mount(Timeline, {
       target: leaf.view.containerEl,
@@ -65,7 +67,7 @@ export default class TimelineManager {
         granularity: periodicData?.granularity || "day",
         initialDate: periodicData?.date || window.moment(),
         isPeriodic: periodicData?.isPeriodic,
-        isSide: leafContainerClassname?.includes(`mod-left`) || leafContainerClassname?.includes(`mod-right`),
+        isSide,
         viewModeOverride: enoughRoom ? (periodicData?.isPeriodic ? get(settingsStore).timeline.viewMode : get(settingsStore).timeline.restViewMode) : 'collapsed'
       },
     })
