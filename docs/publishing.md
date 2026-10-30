@@ -142,7 +142,14 @@ Thank you,
     通信は README に書けば許される。送るのは欲しい言語だけ
   - 決めること: ダウンロード元。案は A. リポジトリにファイルを入れ、jsDelivr（GitHub 用）からタグを固定して取る（おすすめ）、
     B. データ専用の Release に添付する、C. jsDelivr の npm から CLDR の元データを取ってプラグインの中で変換する。どれでもリポジトリは公開にする
-  - 通信するので、README に、いつ・どこへ通信するかを書く（開発者ポリシーの開示事項）。Unicode のライセンス表示（2.）もダウンロードするデータに合わせる
+  - 通信するので、README に、いつ・どこへ通信するかを書く（開発者ポリシーの開示事項）。jsDelivr を使うなら、その名前とアドレスも書く
+    （jsDelivr 自体に表示の義務はない）
+  - 明記すること（2026-10-30 に確認）: 検索の言葉は Unicode CLDR 48.2.0（npm の `cldr-annotations-full`・`cldr-annotations-derived-full`）から作った
+    データで、ライセンスは Unicode License v3。手を加えて配ってよいが、コピーと一緒に、または付属の文書に、Unicode の著作権表示と許諾文を載せる
+    - データを置くフォルダに、Unicode のライセンス文（`LICENSE`）と、元のデータの名前・版・スクリプトで作り直したことの説明を置く
+    - `THIRD_PARTY_NOTICES.md` と README のクレジットにも載せる（2.）
+    - Unicode の名前を宣伝に使わない（「Unicode 公式」に見える書き方をしない）
+    - ファイルの中の絵文字の id は emoji-mart（MIT）のもの。`THIRD_PARTY_NOTICES.md` の emoji-mart の表示でまかなえる
 - [x] 開発用の版の警告 `lifecycle_double_unmount`。部品を外す処理を、2 回目は何もしない形にした — Claude〔2026-10-30〕
 - [ ] 書式を消すときの確認で、ファイル数が実際より多く出る（同じ名前になる書式が 2 つあるとき。[todo.md](todo.md) の「2. 公開後、早めに」）。
   小さな問題なので、公開の前にやるかは決める — 自分
