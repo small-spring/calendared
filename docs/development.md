@@ -68,7 +68,7 @@ Vitest 3 には critical が 2 件あった（テスト用サーバー経由の�
 
 `data/emoji-keywords/<言語>.json` は `node scripts/build-emoji-keywords.mjs` で、Unicode CLDR の注釈
 （開発用の依存 `cldr-annotations-full` / `cldr-annotations-derived-full`）から生成する。プラグインには同梱せず、
-ユーザーが設定で言語を追加したときに、jsDelivr 経由でこのリポジトリから取る（[stickers.md](stickers.md) の 10 章）。
+ユーザーが設定で言語を追加したときに、jsDelivr 経由でこのリポジトリから取る（[stickers.md](spec/stickers.md) の 10 章）。
 
 - 作り直したら、`src/emoji-search.ts` の `EMOJI_DATA_SIZES_KB`（言語ごとの大きさ）を直す。ずれているとテストが落ちる
 - 作り直したファイルをコミットして push してから、そのコミットの ID を `EMOJI_DATA_REF` に書く（プラグインはそのコミットから取る）。

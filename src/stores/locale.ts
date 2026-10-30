@@ -35,7 +35,7 @@ export function updateWeekStartSetting(weekStartId: number = localeWeekStart(cal
         ...settings,
         localeSettings: {
             ...settings.localeSettings,
-            // Calendared: weeks start on Saturday, Sunday or Monday only (docs/periods.md, ADR-003)
+            // Calendared: weeks start on Saturday, Sunday or Monday only (docs/adr/0011)
             weekStartId: toSupportedWeekStart(weekStartId)
         }
     }))

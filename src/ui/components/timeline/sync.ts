@@ -15,7 +15,7 @@ type NoteInfo = { isPeriodic: boolean; granularity: IGranularity | null; date: m
 type Kind = "periodic" | "rest";
 
 /**
- * Calendared: which timeline each tab (leaf) shows (docs/state.md, ADR-S3), apart from Obsidian so it can be tested.
+ * Calendared: which timeline each tab (leaf) shows (docs/adr/0017), apart from Obsidian so it can be tested.
  * Upstream remembered a single "note the timeline belongs to" for the whole app, only for periodic notes, and removed
  * timelines by deleting their elements without unmounting them, so a tab could keep another note's timeline, a note
  * could lose its own, and every removed timeline kept its observers (docs/todo.md, bug (4)).

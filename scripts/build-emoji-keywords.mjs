@@ -3,7 +3,7 @@
 // Output: data/emoji-keywords/<locale>.json, mapping each emoji-mart emoji id to the locale's keywords,
 // e.g. { "+1": ["いいね", "グッド", "サムズアップ", "親指", ...] }. The plugin downloads the file for Obsidian's
 // language when the user turns on searching in it, and merges it into emoji-mart's data (src/ui/utils/emoji-locale.ts,
-// docs/stickers.md). The files are not bundled: all languages together are about 3.4 MB.
+// docs/spec/stickers.md). The files are not bundled: all languages together are about 3.4 MB.
 //
 // Usage: node scripts/build-emoji-keywords.mjs [locale ...]   (default: every language emoji-mart translates its text to)
 // Needs the dev dependencies cldr-annotations-full and cldr-annotations-derived-full (flags, keycaps, skin tones).

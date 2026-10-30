@@ -1,6 +1,6 @@
 // Calendared: sticker button in the header of open periodic notes, next to the reading-view icon
 // (Obsidian's `view.addAction`), plus the helpers shared with the commands and the right-click menu.
-// See docs/stickers.md.
+// See docs/spec/stickers.md.
 import { PluginService } from "@/app-service";
 import { isValidPeriodicNote } from "@/io/validation";
 import { openStickerPicker } from "@/ui/sticker-picker";

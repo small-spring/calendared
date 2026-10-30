@@ -36,7 +36,7 @@
         }
     }
 
-    // Calendared: weekly formats are checked against the week scheme (docs/periods.md). Formats whose names break around
+    // Calendared: weekly formats are checked against the week scheme (docs/spec/periods.md). Formats whose names break around
     // New Year, or don't match the calendar's week numbers, get a warning and a one-click switch to the ISO version
     let weeks = $derived(weekSchemeFor($settingsStore.localeSettings));
     let weekFormat = $derived(granularity === "week" && !$settings.selectedFormat.error ? $settings.selectedFormat.value.trim() : "");

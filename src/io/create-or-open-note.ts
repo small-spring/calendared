@@ -41,7 +41,7 @@ export async function createOrOpenNote({
 
   async function openFile(file: TFile | undefined | null) {
     if (file) {
-      // Calendared: the calendar's selection follows from opening the note (docs/state.md, ADR-S1)
+      // Calendared: the calendar's selection follows from opening the note (docs/adr/0015)
       await leaf?.openFile(file, openState);
     }
   }

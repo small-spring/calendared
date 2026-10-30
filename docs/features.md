@@ -2,7 +2,7 @@
 
 Calendared に **今ある機能** と、それぞれの **設定項目**、設定画面の整理（[todo.md](todo.md) の「1. 公開までに」）で
 それぞれを **どう変えるか** をまとめる。整理のあとの目指す姿だけを見たいときは [plan.md](plan.md)。
-元の版との違いは [customizations.md](customizations.md)、各機能の細かい仕様は [stickers.md](stickers.md)・[periods.md](periods.md) にある。
+元の版との違いは [customizations.md](customizations.md)、各機能の細かい仕様は [stickers.md](spec/stickers.md)・[periods.md](spec/periods.md) にある。
 
 中心は **周期ノート**（日・週・月・四半期・年のノート）を作って行き来すること。カレンダー・タイムライン・ステッカーは、その入口や飾りにあたる。
 
@@ -32,7 +32,7 @@ Calendared に **今ある機能** と、それぞれの **設定項目**、設�
   - 件数（「N Files」）を押すと、ファイルの一覧が開き、1 件ずつ・全部を、別のフォルダへ移したり消したりできる（元の版の機能）
 - テンプレート: `{{title}}`・`{{date}}`（ノートの日付）、`{{time}}`・`{{currentDate}}`（今）、`{{monday}}` などの曜日を置き換える。
   `{{date+1d}}` のようにずらす、`{{date:YYYY-MM-DD}}` のように書式を付けることもできる
-- 週の決め方: Google カレンダーと同じ。週の始まりは土・日・月から選び、週番号は ISO 8601（[periods.md](periods.md)）。
+- 週の決め方: Google カレンダーと同じ。週の始まりは土・日・月から選び、週番号は ISO 8601（[periods.md](spec/periods.md)）。
   ファイル名、週番号の列、タイムライン、テンプレートの曜日のすべてに効く
 - 起動時に周期ノートを 1 つ開ける（どれかをオンにするとほかはオフになる）
 - ノートを作る前に確認を出せる
@@ -129,7 +129,7 @@ Calendared に **今ある機能** と、それぞれの **設定項目**、設�
 | Non-periodic notes timeline view mode | Calendar › Timeline | `timeline.restViewMode` | 閉じた状態 | 周期ノート以外で、どちらの状態で始めるか | 残す。上がオンのときだけ見せる |
 | Show timeline stickers | Calendar › Timeline | `timeline.displayStickers` | オン | 帯にステッカーを出すか | 残す |
 
-## 5. ステッカー（[stickers.md](stickers.md)）
+## 5. ステッカー（[stickers.md](spec/stickers.md)）
 
 - ノートのプロパティ 1 つに絵文字を 1 つ保存する
 - 出る場所: カレンダーのマス、月・年の表記、タイムライン
@@ -172,7 +172,7 @@ Calendared に **今ある機能** と、それぞれの **設定項目**、設�
 - 書式の付け替え: 書式の行のボタンで、ほかの書式のノートを、新しいノートに使う書式の名前にする（リンクも更新する）
 - ファイルの一覧: 書式の件数から開き、ノートを別のフォルダへ移したり消したりする（見るだけの一覧にし、移動・削除はなくす。[plan.md](plan.md)）
 
-今は、ステッカーのプロパティの名前を変えると、それまでのステッカーが見えなくなる（前のプロパティを読まない。[stickers.md](stickers.md) の ADR-002）。
+今は、ステッカーのプロパティの名前を変えると、それまでのステッカーが見えなくなる（前のプロパティを読まない。[ADR-0002](adr/0002-read-only-configured-property.md)）。
 
 ## 今の設定画面との対応
 

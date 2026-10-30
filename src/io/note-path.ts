@@ -28,8 +28,8 @@ export function join(...partSegments: string[]): string {
 
 /**
  * Calendared: the path of the note for the period that contains the date (a week by the week scheme: its row's Monday,
- * see docs/periods.md). Everything it depends on is an argument, so a caller that reads the settings reactively
- * recomputes it when they change (docs/state.md, ADR-S2)
+ * see docs/spec/periods.md). Everything it depends on is an argument, so a caller that reads the settings reactively
+ * recomputes it when they change (docs/adr/0016)
  */
 export function notePath(
   granularity: IGranularity,

@@ -2,7 +2,7 @@ import moment from "moment";
 import { describe, expect, it } from "vitest";
 import { checkWeekFormat, createIsoWeekScheme, isoWeekFormatFor, toSupportedWeekStart, weekSchemeFor, type WeekName, type WeekScheme } from "./weeks";
 
-// The week scheme decides what a "week" is (docs/periods.md, ADR-003/004/006).
+// The week scheme decides what a "week" is (docs/adr/0011, 0012, 0014).
 // Week starts use moment's day numbers: 6 = Saturday, 0 = Sunday, 1 = Monday
 
 const d = (s: string) => moment(s, "YYYY-MM-DD");
@@ -130,7 +130,7 @@ describe("週次ノートの書式の確かめ（設定画面の注意に使う�
     });
 });
 
-// Promises every week scheme must keep (ADR-006). A new scheme only needs to be added to this list
+// Promises every week scheme must keep (docs/adr/0014). A new scheme only needs to be added to this list
 describe.each([
     ["月曜はじまり", monday],
     ["日曜はじまり", sunday],

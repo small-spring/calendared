@@ -61,7 +61,7 @@
   let crrSelectedDate = $state(initialDate);
   let resetEl: HTMLButtonElement | null = $state(null);
   /**
-   * Calendared: weeks as the calendar shows them, from the week scheme (docs/periods.md). Upstream used moment's
+   * Calendared: weeks as the calendar shows them, from the week scheme (docs/spec/periods.md). Upstream used moment's
    * `startOf("week")` and `week()`, i.e. the language's week (Sunday-first in Japanese), so the timeline and the calendar
    * could disagree. moment's own week start is left alone: Obsidian and other plugins share it
    */
@@ -133,7 +133,7 @@
   let headingText = $derived(
     derivedG === "day" ? `W${String(weekScheme.weekOf(groupDate).week).padStart(2, "0")}` : undefined,
   );
-  // Calendared: read through the vault source with the settings read reactively (docs/state.md, ADR-S2)
+  // Calendared: read through the vault source with the settings read reactively (docs/adr/0016)
   let groupFileData = $derived(noteAt(G_MAP[derivedG].group, groupDate, $settingsStore));
 
   let startOfDate = $derived(dates[0]);
@@ -286,7 +286,7 @@
               "relative flex flex-col items-center text-center",
               derivedG === "year"
                 ? "justify-center text-[0.7em] pt-0.5"
-                : // pr-3.5: room for the heading's sticker, which sits past the top-right of the text (ADR-008)
+                : // pr-3.5: room for the heading's sticker, which sits past the top-right of the text (docs/adr/0008)
                   "justify-end !pl-1.5 !pr-3.5 pt-1 pb-2.5 text-xs leading-4 [border-right:1px_solid_var(--background-modifier-border)]",
             )}
           >

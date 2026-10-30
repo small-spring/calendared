@@ -4,7 +4,7 @@
 > What changed: [docs/customizations.md](docs/customizations.md) (Japanese). The rest of this README is the original's.
 >
 > 元の Periodic Notes Calendar を改造した個人用の版です。元の版との違いは [docs/customizations.md](docs/customizations.md)、
-> 開発のしかたは [docs/development.md](docs/development.md)、これからやることは [docs/todo.md](docs/todo.md)。
+> 開発向けの文書の目次は [docs/README.md](docs/README.md)。
 
 # 📅 Periodic Notes Calendar Plugin for Obsidian
 

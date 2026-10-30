@@ -131,7 +131,7 @@ Thank you,
 - [x] **言語の扱いを直す**。カレンダーの中だけで言語を付けた日付の複製で書き、Obsidian 全体の moment は変えない — Claude〔2026-10-30〕
 - [x] **絵文字を自分の言語で検索できるようにする** — Claude〔2026-10-30〕
   - 設定の「Emoji search languages」で、20 言語から選んで追加する。「Add languages」で選んで「Download」を押したときだけダウンロードし、
-    プラグインのフォルダに保存する。仕組みは [stickers.md](stickers.md) の 10 章、データの作り方は [development.md](development.md)
+    プラグインのフォルダに保存する。仕組みは [stickers.md](spec/stickers.md) の 10 章、データの作り方は [development.md](development.md)
   - データは `data/emoji-keywords/` に置き、jsDelivr（取れなければ GitHub の raw）からコミットを固定して取る。リポジトリを公開にするまで、
     本番の版のダウンロードは失敗する（7. で、公開にしたあとに通しで確かめる）
   - README に、いつ・どこへ通信するかを書く（5.）。Unicode のライセンス表示は `data/emoji-keywords/` と `THIRD_PARTY_NOTICES.md` に置いた（2.）

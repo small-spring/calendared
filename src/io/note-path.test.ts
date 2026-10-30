@@ -4,7 +4,7 @@ import { createIsoWeekScheme } from "@/weeks";
 import { notePath } from "./note-path";
 
 // notePath gets everything it depends on as arguments (no settings store, no Obsidian), so a caller that reads the
-// settings reactively recomputes the path whenever they change (docs/state.md, ADR-S2)
+// settings reactively recomputes the path whenever they change (docs/adr/0016)
 
 const mondayWeeks = createIsoWeekScheme(1);
 const sundayWeeks = createIsoWeekScheme(0);

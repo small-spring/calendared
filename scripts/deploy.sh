@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Build the plugin and copy it into an Obsidian vault.
 # Usage: scripts/deploy.sh [vault_path]   (or set OBSIDIAN_VAULT)
-#   DEPLOY_MODE=development: a development build (logs timings, e.g. the vault source's re-reads; see docs/state.md)
+#   DEPLOY_MODE=development: a development build (logs timings, e.g. the vault source's re-reads; see docs/spec/state.md)
 set -euo pipefail
 
 cd "$(dirname "$0")/.."

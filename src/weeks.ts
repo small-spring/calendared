@@ -1,4 +1,4 @@
-// Calendared: the week scheme decides what a "week" is (docs/periods.md, ADR-003/004/006).
+// Calendared: the week scheme decides what a "week" is (docs/adr/0011, 0012, 0014).
 // Everything else asks it instead of counting weeks itself, so another scheme can be added later
 
 /** A week by its name, as a weekly note's file name says it: week `week` of week-based year `weekYear` */
@@ -65,7 +65,7 @@ export function toSupportedWeekStart(weekStartId: number): number {
     return weekStartId === 5 ? 6 : 1;
 }
 
-/** The week scheme for the settings: always the ISO one, starting on the set day (ADR-006) */
+/** The week scheme for the settings: always the ISO one, starting on the set day (docs/adr/0014) */
 export function weekSchemeFor(settings: { weekStartId: number }): WeekScheme {
     return createIsoWeekScheme(toSupportedWeekStart(settings.weekStartId));
 }

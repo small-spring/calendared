@@ -34,7 +34,7 @@ export interface ISettings {
   };
 
 
-  /** Calendared: property that holds a note's sticker emoji (see docs/stickers.md) */
+  /** Calendared: property that holds a note's sticker emoji (see docs/spec/stickers.md) */
   stickerProperty: string;
   /** Calendared: turns the whole sticker feature on/off (display, header button, menu item, commands) */
   stickersEnabled: boolean;
@@ -107,7 +107,7 @@ export const REMOVED_SETTINGS = [
   "crrNldModalGranularity",
   "crrNldModalgranularityInputVal",
   "syncCalendar",
-  // Calendared: the list of periodic notes, now counted from the vault when the settings show it (docs/state.md, ADR-S2)
+  // Calendared: the list of periodic notes, now counted from the vault when the settings show it (docs/adr/0016)
   "filepaths",
   "filepathsByFormatValue",
   // Calendared: an unreleased toggle for the emoji search language; installed languages are now the files in the plugin's folder

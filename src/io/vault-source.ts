@@ -5,7 +5,7 @@ import { createSubscriber } from "svelte/reactivity";
 import type { DnPluginSettings } from "./settings";
 
 /**
- * Calendared: the one place the UI reads what Obsidian knows (docs/state.md, ADR-S2). It keeps no copies: every read
+ * Calendared: the one place the UI reads what Obsidian knows (docs/adr/0016). It keeps no copies: every read
  * asks Obsidian as it is now. Reads made while rendering (in `$derived`, templates, effects) are tracked, and run
  * again once Obsidian reports a change.
  */
@@ -17,7 +17,7 @@ export type VaultSource = {
     metadataOf(file: TFile): CachedMetadata | null;
     /**
      * The note Obsidian counts as open: the current tab's, or the last one used while another kind of view (such as the
-     * calendar) has the focus. The calendar's selection is this note (docs/state.md, ADR-S1)
+     * calendar) has the focus. The calendar's selection is this note (docs/adr/0015)
      */
     activeFile(): TFile | null;
     /** Every Markdown file in the vault (for counting notes in the settings; the calendar looks notes up by path) */
@@ -98,7 +98,7 @@ export function createVaultSource(app: App, schedule: Schedule = nextFrame): Vau
 
 /**
  * Calendared: development builds only (`DEPLOY_MODE=development npm run deploy`): log how long the
- * readers take to read again and redraw. ADR-S2 aims for one frame (about 16 ms); past that, the source would switch
+ * readers take to read again and redraw. docs/adr/0016 aims for one frame (about 16 ms); past that, the source would switch
  * to telling only the readers of a changed path
  */
 function measure(update: () => void) {

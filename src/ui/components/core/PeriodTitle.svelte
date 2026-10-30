@@ -37,7 +37,7 @@
     showDot?: boolean;
     /** text to show instead of `date.format(title.formatValue)` (e.g. a month name formatted with Intl) */
     text?: string;
-    /** show the note's sticker at the top-right of the label, like on the date buttons (see docs/stickers.md ADR-008) */
+    /** show the note's sticker at the top-right of the label, like on the date buttons (see docs/adr/0008) */
     showSticker?: boolean;
   }
   let {
@@ -58,7 +58,7 @@
   );
   // the open note looks selected wherever it shows up on the calendar, like the date buttons.
   // The background is drawn with a shadow so the selected title keeps its size and nothing shifts
-  // Calendared: the open note as Obsidian knows it (docs/state.md, ADR-S1)
+  // Calendared: the open note as Obsidian knows it (docs/adr/0015)
   let isActive = $derived(
     !!title.fileData.file &&
       vaultSource().activeFile()?.path === title.fileData.file.path,

@@ -3,7 +3,7 @@ import type { WeekName, WeekScheme } from "./weeks";
 
 // Calendared: plain date calculations about periods (no Obsidian), unit tested in periods.test.ts
 
-// ---- Period names and operations (docs/periods.md, ADR-001/002) ----
+// ---- Period names and operations (docs/adr/0009, 0010) ----
 
 /**
  * A periodic note by its name, as its file name says it ("week 44 of 2026", "October 2026").

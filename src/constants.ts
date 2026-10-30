@@ -21,7 +21,7 @@ export const STICKER_PICKER_ID = 'sticker-picker';
 export const MODAL_CLASS = 'modal';
 
 export const DEFAULT_DAILY_NOTE_FORMAT = "YYYY-MM-DD";
-// Calendared: ISO week-based year and week (docs/periods.md, ADR-004). Upstream: "YYYY-[W]ww"
+// Calendared: ISO week-based year and week (docs/adr/0012). Upstream: "YYYY-[W]ww"
 export const DEFAULT_WEEKLY_NOTE_FORMAT = "GGGG-[W]WW";
 export const DEFAULT_MONTHLY_NOTE_FORMAT = "YYYY-MM";
 export const DEFAULT_QUARTERLY_NOTE_FORMAT = "YYYY-[Q]Q";

@@ -54,7 +54,7 @@ export function getNotePath(granularity: IGranularity, date: moment.Moment) {
 
 /**
  * Calendared: getNotePath with what it reads as arguments, for the UI to pass the settings it reads reactively and the
- * Daily notes plugin from the vault source (docs/state.md, ADR-S2)
+ * Daily notes plugin from the vault source (docs/adr/0016)
  */
 export function periodNotePath(
   granularity: IGranularity,
@@ -77,7 +77,7 @@ export function getFileData(
 /**
  * Calendared: the period's note and its sticker, read through the vault source with the settings passed in.
  * Called while rendering with `$settingsStore`, it runs again when the settings change or Obsidian reports a change
- * (docs/state.md, ADR-S2); upstream's views re-read on a store emitting a random number instead
+ * (docs/adr/0016); upstream's views re-read on a store emitting a random number instead
  */
 export function noteAt(
   granularity: IGranularity,
@@ -92,7 +92,7 @@ export function noteAt(
 /**
  * Calendared: the notes a format of a period reads, for the settings' file counts and lists. Read while rendering with
  * `$settingsStore`, it is counted from the vault only while the settings show it, and again when Obsidian reports a
- * change (docs/state.md, ADR-S2)
+ * change (docs/adr/0016)
  */
 export function notesWithFormatIn(
   granularity: IGranularity,

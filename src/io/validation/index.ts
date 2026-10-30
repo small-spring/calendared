@@ -21,7 +21,7 @@ export function getBasename(format: string): string {
 
 export function isValidPeriodicNote(fileName: string, customGranularities = granularities as unknown as IGranularity[], customFormats?: Record<string, TFormat>)
     : { isValid: boolean, granularity: IGranularity, date: moment.Moment, period: PeriodName, format: PeriodSettings['formats'][0] } | { isValid: null, granularity: null, date: null, period: null, format: null } {
-    // Calendared: every granularity is read as a period name through the week scheme (docs/periods.md).
+    // Calendared: every granularity is read as a period name through the week scheme (docs/spec/periods.md).
     // Upstream built a weekly note's date from today, so it fell on today's weekday instead of the week's first day
     const weeks = weekSchemeFor(get(settingsStore).localeSettings);
 

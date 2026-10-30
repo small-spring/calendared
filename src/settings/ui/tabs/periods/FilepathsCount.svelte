@@ -30,7 +30,7 @@
         filepaths: given,
     }: Props = $props();
 
-    // Calendared: counted from the vault while shown (docs/state.md, ADR-S2); upstream kept the list in data.json
+    // Calendared: counted from the vault while shown (docs/adr/0016); upstream kept the list in data.json
     let filepaths = $derived(given ?? notesWithFormatIn(granularity, format.value, $settingsStore));
     let filesCount = $derived(filepaths.length);
     let _selected = $derived(selected);

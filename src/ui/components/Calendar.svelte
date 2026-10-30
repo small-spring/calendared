@@ -115,7 +115,7 @@
                                     )}
                                     dotContainerClassName={"bottom-[.3rem]"}
                                 >
-                                    <!-- Calendared: the week scheme's number (ISO week of the row's Monday, docs/periods.md);
+                                    <!-- Calendared: the week scheme's number (ISO week of the row's Monday, docs/spec/periods.md);
                                          upstream showed moment's language week number -->
                                     {String(weeks.weekOf(getStartOfWeek(week.days)).week).padStart(2, "0")}
                                 </DateBttn>

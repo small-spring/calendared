@@ -47,10 +47,10 @@
     compactDot = false,
   }: Props = $props();
 
-  // Calendared: read through the vault source, with the settings read reactively (docs/state.md, ADR-S2);
+  // Calendared: read through the vault source, with the settings read reactively (docs/adr/0016);
   // upstream re-read everything on a store emitting a random number
   let { file, sticker } = $derived(noteAt(granularity, date, $settingsStore));
-  // Calendared: selected when its note is the open one, read from Obsidian (docs/state.md, ADR-S1); upstream kept the
+  // Calendared: selected when its note is the open one, read from Obsidian (docs/adr/0015); upstream kept the
   // selection in a store that several places wrote, which could drift from the open note
   let isActive = $derived.by(() => {
     const openFile = vaultSource().activeFile();

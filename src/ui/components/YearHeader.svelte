@@ -5,7 +5,7 @@
     import { todayStore } from "@/stores/dates";
     import { Header } from "./core";
 
-    // Calendared: read through the vault source with the settings read reactively (docs/state.md, ADR-S2)
+    // Calendared: read through the vault source with the settings read reactively (docs/adr/0016)
     let fileData = $derived(noteAt("year", $displayedDateStore, $settingsStore));
     let isToday = $derived($displayedDateStore.isSame($todayStore, "year"));
 

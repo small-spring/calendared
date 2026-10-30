@@ -3,7 +3,7 @@
 // emoji-mart only searches its English names and keywords, and fetches non-English interface text from a CDN unless
 // given it. Its interface text is bundled for every language it translates to, and shown in Obsidian's language. Search
 // words in those languages are downloaded when the user adds the language in the settings (src/emoji-search.ts,
-// docs/stickers.md), and the picker searches in every installed language besides English.
+// docs/spec/stickers.md), and the picker searches in every installed language besides English.
 //
 // emoji-mart keeps the data object it is first given and builds each emoji's search string only when it's missing, every
 // time a picker is created. So the picker is always given the same object, and changing the keywords edits it in place

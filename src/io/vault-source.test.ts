@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { createVaultSource, watchVault } from "./vault-source";
 
 // The vault source reads Obsidian as it is (no copies) and tells its readers to read again when Obsidian reports a
-// change (docs/state.md, ADR-S2). Obsidian is a stand-in that records listeners and lets a test fire its events.
+// change (docs/adr/0016). Obsidian is a stand-in that records listeners and lets a test fire its events.
 
 type Listener = (...args: unknown[]) => void;
 

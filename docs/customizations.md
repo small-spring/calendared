@@ -5,7 +5,7 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 
 ここには **今どう違うか** だけを短く書きます。
 
-- なぜそうしたか・不具合の原因: コミットメッセージの本文。機能の設計判断は各機能の仕様書（[stickers.md](stickers.md) の ADR など）
+- なぜそうしたか・不具合の原因: コミットメッセージの本文。機能の設計判断は [adr/](adr/)（1 決定 1 ファイル）、各機能の仕様は [spec/](spec/)
 - コード中の変更箇所: `Calendared:` というコメント
 - 2026-10-29 までの詳しい経緯（原因の分析、細かい寸法など）: 前のファイル `CUSTOMIZATIONS.md` の履歴にある
   （`git log -p -- CUSTOMIZATIONS.md`）
@@ -64,7 +64,7 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
   （その日・その週のどれかの日が表示中の月にある、表示中の月がその月・期・年に入っている）。
   元は設定（`syncCalendar`）で付いてくるかを選べ、付いてくるときは見えていても動いたので、年の表記を押すと 1 月へ、
   週番号を押すと週の始まりの月へ飛んでいた〔2026-10-29〕
-- 週の決め方を Google カレンダーと同じにした（[periods.md](periods.md)）。週の始まりは土・日・月から選び（ほかの曜日は近いほうへ寄せる）、
+- 週の決め方を Google カレンダーと同じにした（[periods.md](spec/periods.md)）。週の始まりは土・日・月から選び（ほかの曜日は近いほうへ寄せる）、
   週番号は行の月曜日の ISO 8601 の週番号。週次ノートの日付は、今日の曜日ではなくその週（カレンダーの行）の最初の日になった。
   新しく入れたときの週次の書式は `GGGG-[W]WW`（元: `YYYY-[W]ww`）。周期ノートのファイル名の読み書き・ノートを開いたときの月の追従・前後のコマンドは、
   周期の名前と期間の操作（`src/periods.ts`、`src/weeks.ts`）を使う〔2026-10-29〕
@@ -113,7 +113,7 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 
 ## ステッカー
 
-仕様の全体は [stickers.md](stickers.md)。
+仕様の全体は [stickers.md](spec/stickers.md)。
 
 - 保存先を本文のタグから **プロパティ 1 つ**（標準は `sticker`）に変更。元の版のタグ形式は読まない〔2026-10-28〕
 - 周期ノートの見出しバーのボタン、コマンド「Manage sticker」「Remove sticker」を追加〔2026-10-28〕
@@ -143,7 +143,7 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 - 書式の行に、ノートが 0 件でも「0 Files」と出すようにした〔2026-10-30〕
 - 設定のフォルダ欄の「Folder not found in vault」を、フォルダの名前が変わったり消えたりした時点で出すようにした（前は欄を編集したときだけ判定していた）。ファイルのパスも通さない〔2026-10-30〕
 - カレンダーの選択を別の値（`activeFileStore`）として持つのをやめ、Obsidian が開いているとするノートから求めるようにした（ずれようがない）〔2026-10-30〕
-- 状態管理の作り直し（[state.md](state.md)）を終えた。表示中の月の謎（年次ノートを作っても月が移ったり移らなかったりした）は、Obsidian がアクティブでないタブにノートを開いたときに `file-open` を遅らせることが原因と分かった〔2026-10-30〕
+- 状態管理の作り直し（[state.md](spec/state.md)）を終えた。表示中の月の謎（年次ノートを作っても月が移ったり移らなかったりした）は、Obsidian がアクティブでないタブにノートを開いたときに `file-open` を遅らせることが原因と分かった〔2026-10-30〕
 - Vault `private` のショートカットを Calendared のコマンドに移した（Cmd+D: 今日のノート、Cmd+← / →: 前後のノート、Cmd+M: 今月のノート）。既定のホットキーは付けない（公開のガイドラインに従う）〔2026-10-30〕
 - カレンダーの言語の設定で、Obsidian 全体の moment の言語を書き換えないようにした。カレンダーの中で文字にするときだけ、その言語を付けた日付の複製で書く（`src/calendar-locale.ts`）。前は Obsidian 本体やほかのプラグインの日付の言葉まで変わり、プラグインを切っても戻らなかった。ファイル名とテンプレートの日付は Obsidian の言語で書く〔2026-10-30〕
 - カレンダーの画面・設定画面・ステッカーのピッカーの部品を外す処理を、2 回目は何もしない形にした（開発用の版で Svelte の警告 `lifecycle_double_unmount` が出ていた）。設定画面を隠さずにもう一度表示したとき、前の部品が残るのも直した〔2026-10-30〕
@@ -161,3 +161,5 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 - ステッカーのピッカーで、検索欄の ↑ でゴミ箱に移り、ゴミ箱の ↓ で検索欄に戻れるようにした（絵文字を選んでいないときだけ）。
   キーボードで移ったゴミ箱も、ホバーと同じ赤い見た目にする〔2026-10-30〕
 - 画面に出していなかった設定「週の決め方」（`localeSettings.weekNumbering`。値は `iso` だけ）を消した。週番号はいつも ISO〔2026-10-30〕
+- 文書を組み直した。目次を `docs/README.md` に置き、機能の仕様を `docs/spec/`、設計判断（ADR）を 1 決定 1 ファイルの `docs/adr/` に分けた。
+  ADR の番号は全体で 1 本（0001〜）にし、一覧は各ファイルのプロパティから `npm run adr` で作る（`npm run build` で古くないか確かめる）〔2026-10-30〕

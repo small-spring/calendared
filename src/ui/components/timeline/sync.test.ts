@@ -2,7 +2,7 @@ import moment from "moment";
 import { beforeEach, describe, expect, it } from "vitest";
 import { TimelineSync, type TimelineMountProps } from "./sync";
 
-// Which timeline each tab (leaf) shows, kept apart from Obsidian (docs/state.md, ADR-S3). Tabs, their notes and
+// Which timeline each tab (leaf) shows, kept apart from Obsidian (docs/adr/0017). Tabs, their notes and
 // mounting are stand-ins: a "component" records the props it was mounted with and whether it was unmounted.
 
 type Leaf = { name: string };

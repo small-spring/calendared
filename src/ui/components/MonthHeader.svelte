@@ -7,7 +7,7 @@
     import { Header } from "./core";
     import MonthPicker from "./MonthPicker.svelte";
 
-    // Calendared: read through the vault source with the settings read reactively (docs/state.md, ADR-S2)
+    // Calendared: read through the vault source with the settings read reactively (docs/adr/0016)
     let monthFileData = $derived(noteAt("month", $displayedDateStore, $settingsStore));
     let yearFileData = $derived(noteAt("year", $displayedDateStore.clone().startOf("year"), $settingsStore));
     let isToday = $derived($displayedDateStore.isSame($todayStore, "month"));

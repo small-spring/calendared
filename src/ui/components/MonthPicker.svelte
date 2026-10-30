@@ -18,7 +18,7 @@
     let { onPick }: Props = $props();
 
     let pickerYear = $state($displayedDateStore.clone().startOf("year"));
-    // Calendared: read through the vault source with the settings read reactively (docs/state.md, ADR-S2)
+    // Calendared: read through the vault source with the settings read reactively (docs/adr/0016)
     let yearFileData = $derived(noteAt("year", pickerYear, $settingsStore));
 </script>
 

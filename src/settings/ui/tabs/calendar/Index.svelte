@@ -129,7 +129,7 @@
 
     updateWeekStartSetting(newWeekStartId);
   };
-  // Calendared: Saturday, Sunday or Monday only, like Google Calendar (docs/periods.md, ADR-003)
+  // Calendared: Saturday, Sunday or Monday only, like Google Calendar (docs/adr/0011)
   // Calendared: named in the calendar's language (upstream read Obsidian's moment, which it had switched to that language)
   const weekdayOptionsStore = derivedStore(settingsStore, (settings) => {
     const locale = settings.localeSettings.localeOverride;

@@ -1,9 +1,9 @@
-// Calendared: reading a note's sticker (docs/stickers.md). The settings are arguments, so a caller that reads them
-// reactively recomputes when they change (docs/state.md, ADR-S2); writing stickers stays in ui/utils/emoji-picker.ts
+// Calendared: reading a note's sticker (docs/spec/stickers.md). The settings are arguments, so a caller that reads them
+// reactively recomputes when they change (docs/adr/0016); writing stickers stays in ui/utils/emoji-picker.ts
 import emojiRegex from "emoji-regex";
 import type { CachedMetadata } from "obsidian";
 
-/** Calendared: a note's sticker (one emoji kept in the sticker property; see docs/stickers.md) */
+/** Calendared: a note's sticker (one emoji kept in the sticker property; see docs/spec/stickers.md) */
 export type TSticker = { emoji: string };
 
 function asEmoji(value: unknown): string | null {

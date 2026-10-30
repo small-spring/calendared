@@ -9,7 +9,7 @@ import Timeline from "./Timeline.svelte";
 import { TimelineSync } from "./sync";
 
 /**
- * Calendared: puts each note tab's timeline in place (which one is decided by TimelineSync, docs/state.md ADR-S3).
+ * Calendared: puts each note tab's timeline in place (which one is decided by TimelineSync, docs/adr/0017).
  * Exists while the timeline is enabled in the settings
  */
 export default class TimelineManager {

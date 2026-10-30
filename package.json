@@ -8,7 +8,7 @@
   "license": "GPL-3.0-only",
   "scripts": {
     "dev": "vite build --mode development --watch",
-    "build": "npm run lint && vite build --mode production",
+    "build": "npm run lint && npm run adr -- --check && vite build --mode production",
     "check": "svelte-check --tsconfig ./tsconfig.json --threshold error",
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --threshold error --watch",
     "test": "vitest run",
@@ -17,7 +17,8 @@
     "biome-lint": "npm run check && biome lint --apply-unsafe ./src",
     "lint": "eslint ./src",
     "lint-fix": "npm run check && eslint --fix ./src",
-    "deploy": "scripts/deploy.sh"
+    "deploy": "scripts/deploy.sh",
+    "adr": "node scripts/adr-index.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",

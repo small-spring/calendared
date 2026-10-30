@@ -27,7 +27,7 @@ export function getNormalizedPeriodSettings(granularity: IGranularity): TNormali
 
 /**
  * Calendared: getNormalizedPeriodSettings with what it reads as arguments: the plugin's period settings and
- * Obsidian's core Daily notes plugin (read through the vault source, docs/state.md ADR-S2)
+ * Obsidian's core Daily notes plugin (read through the vault source, docs/adr/0016)
  */
 export function normalizePeriodSettings(
   granularity: IGranularity,

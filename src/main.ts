@@ -42,7 +42,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
 
   async onload() {
     PluginService.init(this);
-    // Calendared: the UI reads notes and stickers through the vault source (docs/state.md, ADR-S2)
+    // Calendared: the UI reads notes and stickers through the vault source (docs/adr/0016)
     initVaultSource(this.app);
 
     await this.loadSettings();
@@ -197,12 +197,12 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
       for (const key of REMOVED_SETTINGS) {
         delete (newSettings as Record<string, unknown>)[key];
       }
-      // Calendared: weeks start on Saturday, Sunday or Monday only (docs/periods.md)
+      // Calendared: weeks start on Saturday, Sunday or Monday only (docs/spec/periods.md)
       newSettings.localeSettings = {
         ...newSettings.localeSettings,
         weekStartId: toSupportedWeekStart(newSettings.localeSettings.weekStartId),
       };
-      // Calendared: weeks are always numbered the ISO way; drop the field that was kept for other ways (ADR-006)
+      // Calendared: weeks are always numbered the ISO way; drop the field that was kept for other ways (docs/adr/0014)
       delete (newSettings.localeSettings as Record<string, unknown>).weekNumbering;
       const periods = newSettings.periods
       Object.values(periods).forEach((periodSettings) => {
@@ -316,7 +316,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     this.registerEvent(this.app.metadataCache.on('changed', () => this.stickerActions.refresh()))
     // Calendared: upstream re-mounted the timeline only on workspace `resize`, so opening another note in the same tab
     // kept the previous note's timeline (e.g. a monthly note's Q1 view on a daily note).
-    // Each tab keeps its timeline while it shows the same note (docs/state.md, ADR-S3); tabs opened, closed or moved
+    // Each tab keeps its timeline while it shows the same note (docs/adr/0017); tabs opened, closed or moved
     // and renamed notes are picked up too
     this.registerEvent(this.app.workspace.on('file-open', () => TimelineManager.instance?.syncAll()))
     this.registerEvent(this.app.workspace.on('layout-change', () => TimelineManager.instance?.syncAll()))
@@ -327,7 +327,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
    * Calendared: keep the displayed month in step with whichever note is open, however it was opened
    * (file explorer, a hotkey, links, switching tabs...). Upstream followed other opens (`syncCalendar`) inside
    * TimelineManager, so nothing happened while the timeline was disabled. The selection needs nothing here: the
-   * calendar reads the open note itself (docs/state.md, ADR-S1)
+   * calendar reads the open note itself (docs/adr/0015)
    */
   private onFileOpen(file: TFile | null) {
     if (!file) return;
@@ -336,7 +336,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
 
     // Calendared: always follow the open note, but only when no day of it is on the displayed month already.
     // Otherwise clicking a year title would jump to January, or a week number to the month the week starts in.
-    // `date` is the period's first day (docs/periods.md)
+    // `date` is the period's first day (docs/spec/periods.md)
     if (!overlapsMonth(period, get(displayedDateStore), weekSchemeFor(get(settingsStore).localeSettings))) {
       displayedDateStore.set(date);
     }
@@ -345,7 +345,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
   /**
    * Calendared: tell when a note is named like a periodic note but with a format that has an error. Upstream also kept
    * a list of the vault's periodic notes in the settings (data.json) up to date here; the views and the settings now
-   * read the vault itself (docs/state.md, ADR-S2)
+   * read the vault itself (docs/adr/0016)
    */
   private onFileCreated(file: TAbstractFile) {
     if (!(file instanceof TFile)) return;

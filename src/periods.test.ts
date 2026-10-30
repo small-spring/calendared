@@ -14,7 +14,7 @@ import { createIsoWeekScheme } from "./weeks";
 
 const d = (s: string) => moment(s, "YYYY-MM-DD");
 
-// ---- Period names and operations (docs/periods.md, ADR-001/002) ----
+// ---- Period names and operations (docs/adr/0009, 0010) ----
 
 const mondayWeeks = createIsoWeekScheme(1);
 const sundayWeeks = createIsoWeekScheme(0);

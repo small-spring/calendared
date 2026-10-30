@@ -48,7 +48,7 @@
     <div
         class="overflow-hidden rounded-[--radius-l] bg-[--background-primary] [border:1px_solid_var(--background-modifier-border)] [box-shadow:var(--shadow-s)]"
     >
-        <!-- the current sticker and a way to take it off, at the top but low-key (ADR-006). Icons only: no text to translate -->
+        <!-- the current sticker and a way to take it off, at the top but low-key (docs/adr/0006). Icons only: no text to translate -->
         {#if $stickerPickerNoteStore?.sticker}
             <div
                 class="flex items-center justify-between px-3 py-1.5 [border-bottom:1px_solid_var(--background-modifier-border)]"

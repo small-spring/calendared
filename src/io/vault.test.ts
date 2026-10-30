@@ -4,7 +4,7 @@ import { writable } from "svelte/store";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Characterization tests: they pin down which file a calendar cell looks for today, so the lookup can be reworked
-// (docs/state.md, ADR-S2). Obsidian (the vault, the metadata cache, the core Daily notes plugin) and the settings
+// (docs/adr/0016). Obsidian (the vault, the metadata cache, the core Daily notes plugin) and the settings
 // store are stand-ins; the path calculation, the vault source and reading stickers are the real code.
 
 const fake = vi.hoisted(() => ({
