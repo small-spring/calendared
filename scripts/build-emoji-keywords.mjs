@@ -1,10 +1,11 @@
 // Generate localized search keywords for the emoji picker from Unicode CLDR annotations.
 //
-// Output: src/ui/utils/emoji-keywords/<locale>.json, mapping each emoji-mart emoji id to the locale's keywords,
-// e.g. { "+1": ["いいね", "グッド", "サムズアップ", "親指", ...] }. The plugin merges these into emoji-mart's
-// data so the picker can be searched in that language (see src/ui/utils/emoji-locale.ts).
+// Output: data/emoji-keywords/<locale>.json, mapping each emoji-mart emoji id to the locale's keywords,
+// e.g. { "+1": ["いいね", "グッド", "サムズアップ", "親指", ...] }. The plugin downloads the file for Obsidian's
+// language when the user turns on searching in it, and merges it into emoji-mart's data (src/ui/utils/emoji-locale.ts,
+// docs/stickers.md). The files are not bundled: all languages together are about 3.4 MB.
 //
-// Usage: node scripts/build-emoji-keywords.mjs [locale ...]   (default: ja)
+// Usage: node scripts/build-emoji-keywords.mjs [locale ...]   (default: every language emoji-mart translates its text to)
 // Needs the dev dependencies cldr-annotations-full and cldr-annotations-derived-full (flags, keycaps, skin tones).
 import { mkdirSync, readFileSync, writeFileSync } from "fs";
 import { createRequire } from "module";
@@ -13,8 +14,10 @@ import { fileURLToPath } from "url";
 
 const require = createRequire(import.meta.url);
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const outDir = join(root, "src/ui/utils/emoji-keywords");
-const locales = process.argv.slice(2).length ? process.argv.slice(2) : ["ja"];
+const outDir = join(root, "data/emoji-keywords");
+// keep in step with EMOJI_SEARCH_LANGUAGES in src/emoji-search.ts
+const ALL = ["ar", "be", "cs", "de", "es", "fa", "fi", "fr", "hi", "it", "ja", "ko", "nl", "pl", "pt", "ru", "sa", "tr", "uk", "vi", "zh"];
+const locales = process.argv.slice(2).length ? process.argv.slice(2) : ALL;
 
 const emojiMart = JSON.parse(readFileSync(require.resolve("@emoji-mart/data/sets/15/native.json"), "utf8"));
 
