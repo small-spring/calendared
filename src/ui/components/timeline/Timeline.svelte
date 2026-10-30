@@ -8,6 +8,7 @@
   import { Arrow } from "@/ui";
   import { cn } from "@/ui/utils";
   import { weekSchemeFor } from "@/weeks";
+  import { inLocale } from "@/calendar-locale";
   import { setIcon, Platform } from "obsidian";
   import { onDestroy } from "svelte";
   import DateBttn from "../core/DateBttn.svelte";
@@ -53,14 +54,9 @@
 
   // svelte-ignore state_referenced_locally
   let crrDisplayedDate = $state(initialDate);
-  // Calendared: the calendar's language (set in the settings, applied to moment by switchLocale). A $derived, so
-  // other settings changes don't rebuild the dates; upstream signalled a switch with a store emitting a random number
+  // Calendared: the calendar's language (a setting). Dates stay in Obsidian's language and are formatted in this one
+  // (calendar-locale.ts); upstream switched Obsidian's shared moment to it and re-localized the dates here
   let locale = $derived($settingsStore.localeSettings.localeOverride);
-  $effect.pre(() => {
-    locale;
-    // this is crucial, existing moment objects keep their existing locale, so we need to re-locale them
-    crrDisplayedDate = crrDisplayedDate.locale(window.moment.locale());
-  });
   // svelte-ignore state_referenced_locally
   let crrSelectedDate = $state(initialDate);
   let resetEl: HTMLButtonElement | null = $state(null);
@@ -75,7 +71,6 @@
   }
 
   let dates: moment.Moment[] = $derived.by(() => {
-    locale; // moment objects don't track the locale; rebuild when it changes
 
     let dates: moment.Moment[] = [];
 
@@ -154,7 +149,6 @@
   let contextUnit = $derived<"month" | "year">(derivedG === "day" ? "month" : "year");
   /** the label's parts: one month/year, or the two ends of a range ("9月", "10月"), each opening its own note */
   let contextParts = $derived.by((): { date: moment.Moment; text: string }[] => {
-    locale;
     if (!startOfDate || !endOfDate || derivedG === "year") return [];
 
     const today = window.moment();
@@ -165,7 +159,7 @@
       [start, end] = [String(startOfDate.year()), String(endOfDate.year())];
     } else {
       const showYear = !(startOfDate.isSame(today, "year") && endOfDate.isSame(today, "year"));
-      const format = new Intl.DateTimeFormat(window.moment.locale(), {
+      const format = new Intl.DateTimeFormat(locale, {
         month: "long",
         ...(showYear && { year: "numeric" }),
       });
@@ -297,9 +291,7 @@
             )}
           >
             {#if derivedG === "year" && startOfDate && endOfDate}
-              {startOfDate
-                .clone()
-                .format(G_MAP.year.titleFormat)}-{endOfDate.format(
+              {inLocale(startOfDate, locale).format(G_MAP.year.titleFormat)}-{inLocale(endOfDate, locale).format(
                 G_MAP.year.titleFormat,
               )}
             {:else}
@@ -338,7 +330,7 @@
                       "text-[var(--text-normal)]",
                   )}
                 >
-                  {d.format(G_MAP[derivedG].titleFormat)}
+                  {inLocale(d, locale).format(G_MAP[derivedG].titleFormat)}
                 </div>
               {/if}
               <div
@@ -358,7 +350,7 @@
                   ignoreAdjacentMonth={true}
                 >
                   <!-- Calendared: week numbers from the week scheme, not moment's language week ("w") -->
-                  {derivedG === "week" ? weekScheme.weekOf(d).week : d.format(G_MAP[derivedG].format)}
+                  {derivedG === "week" ? weekScheme.weekOf(d).week : inLocale(d, locale).format(G_MAP[derivedG].format)}
                 </DateBttn>
               </div>
             </div>

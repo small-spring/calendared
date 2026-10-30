@@ -1,0 +1,85 @@
+import moment from "moment";
+import "moment/locale/en-gb";
+import { describe, expect, it } from "vitest";
+import { inLocale, localeWeekStart, monthGrid, weekdayNames } from "./calendar-locale";
+
+// loading a locale switches moment to it; go back to English like test-setup.ts does
+moment.locale("en");
+
+// The calendar shows dates in its own language (the "Language" setting) without changing the moment that Obsidian
+// and other plugins share (docs/todo.md, "言語の扱い").
+
+const date = (d: string) => moment(d, "YYYY-MM-DD");
+const ymd = (m: moment.Moment) => m.format("YYYY-MM-DD");
+
+describe("inLocale: その言語で書くための日付の複製", () => {
+    it("指定した言語で書ける", () => {
+        expect(inLocale(date("2026-10-30"), "ja").format("MMM")).toBe("10月");
+        expect(inLocale(date("2026-10-30"), "en").format("MMM")).toBe("Oct");
+    });
+
+    it("元の日付も、Obsidian 全体の moment の言語も変えない", () => {
+        const original = date("2026-10-30");
+        inLocale(original, "ja");
+        expect(original.locale()).toBe("en");
+        expect(moment.locale()).toBe("en");
+        expect(moment().format("MMM")).toBe(moment().locale("en").format("MMM"));
+    });
+});
+
+describe("weekdayNames: 週の始まりから並べた、その言語の曜日の名前", () => {
+    it("月曜始まりの日本語", () => {
+        expect(weekdayNames("ja", 1).weekdaysShort).toEqual(["月", "火", "水", "木", "金", "土", "日"]);
+        expect(weekdayNames("ja", 1).weekdays[0]).toBe("月曜日");
+    });
+
+    it("日曜始まりの英語", () => {
+        expect(weekdayNames("en", 0).weekdaysShort).toEqual(["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]);
+    });
+
+    it("土曜始まり", () => {
+        expect(weekdayNames("en", 6).weekdays[0]).toBe("Saturday");
+        expect(weekdayNames("en", 6).weekdays[6]).toBe("Friday");
+    });
+
+    it("Obsidian 全体の moment の言語は変えない", () => {
+        weekdayNames("ja", 1);
+        expect(moment.locale()).toBe("en");
+    });
+
+    it("moment が知らない言語なら、英語の名前", () => {
+        expect(weekdayNames("xx-unknown", 0).weekdaysShort[0]).toBe("Su");
+    });
+});
+
+describe("localeWeekStart: その言語のふつうの週の始まり（0 = 日曜）", () => {
+    it("言語ごとに決まっている週の始まりを返す", () => {
+        expect(localeWeekStart("en")).toBe(0);
+        expect(localeWeekStart("ja")).toBe(0);
+        expect(localeWeekStart("en-gb")).toBe(1);
+    });
+});
+
+describe("monthGrid: カレンダーに並べる 6 週・42 日", () => {
+    it("月の 1 日を含む週の始まりから、42 日を 7 日ずつ並べる", () => {
+        const grid = monthGrid(date("2026-10-15"), 1); // 2026-10-01 is a Thursday
+        expect(grid).toHaveLength(6);
+        expect(grid.every((week) => week.days.length === 7)).toBe(true);
+        expect(ymd(grid[0].days[0])).toBe("2026-09-28");
+        expect(ymd(grid[5].days[6])).toBe("2026-11-08");
+    });
+
+    it("週の始まりに合わせて、最初の日がずれる", () => {
+        expect(ymd(monthGrid(date("2026-10-15"), 0)[0].days[0])).toBe("2026-09-27");
+        expect(ymd(monthGrid(date("2026-10-15"), 6)[0].days[0])).toBe("2026-09-26");
+    });
+
+    it("1 日が週の始まりの曜日なら、1 日から始まる", () => {
+        expect(ymd(monthGrid(date("2026-06-20"), 1)[0].days[0])).toBe("2026-06-01"); // a Monday
+    });
+
+    it("日付の言語に関係なく同じ（曜日の名前で探さない）", () => {
+        const ja = monthGrid(date("2026-10-15").locale("ja"), 1);
+        expect(ymd(ja[0].days[0])).toBe("2026-09-28");
+    });
+});

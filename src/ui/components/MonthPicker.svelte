@@ -6,6 +6,7 @@
     import { settingsStore } from "@/settings";
     import { displayedDateStore, todayStore } from "@/stores";
     import { cn } from "@/ui/utils";
+    import { inLocale } from "@/calendar-locale";
     import Arrow from "./core/Arrow.svelte";
     import DateBttn from "./core/DateBttn.svelte";
     import PeriodTitle from "./core/PeriodTitle.svelte";
@@ -65,7 +66,7 @@
                 onPick();
             }}
         >
-            {month.format("MMM")}
+            {inLocale(month, $settingsStore.localeSettings.localeOverride).format("MMM")}
         </DateBttn>
     {/each}
 </div>

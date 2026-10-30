@@ -1,19 +1,9 @@
-import { localeDataStore } from '@/stores';
 import { Platform, setIcon } from 'obsidian';
-import { get } from 'svelte/store';
 
-export interface IWeek {
-  days: moment.Moment[];
-}
-
-export type IMonth = IWeek[];
+export type { IMonth, IWeek } from '@/calendar-locale';
 
 export function isControlPressed(e: MouseEvent | KeyboardEvent): boolean {
   return Platform.isMacOS ? e.metaKey : e.ctrlKey;
-}
-
-export function getDaysOfWeek(): string[] {
-  return window.moment.weekdaysShort(true);
 }
 
 export function isWeekend(date: moment.Moment): boolean {
@@ -22,32 +12,6 @@ export function isWeekend(date: moment.Moment): boolean {
 
 export function getStartOfWeek(days: moment.Moment[]): moment.Moment {
   return days[0];
-}
-
-/**
- * Generate a 2D array of daily information to power
- * the calendar view.
- */
-export function getMonth(displayedDate: moment.Moment, weekdays: string[] = get(localeDataStore).weekdays): IMonth {
-  const locale = displayedDate.locale();
-  const month = [];
-  let week: IWeek = { days: [] };
-
-  const startOfMonth = displayedDate.clone().locale(locale).date(1);
-  const startOffset = weekdays.indexOf(startOfMonth.format('dddd'));
-  let date: moment.Moment = startOfMonth.clone().subtract(startOffset, 'days');
-
-  for (let _day = 0; _day < 42; _day++) {
-    if (_day % 7 === 0) {
-      week = { days: [] };
-      month.push(week);
-    }
-
-    week.days.push(date);
-    date = date.clone().add(1, 'days');
-  }
-
-  return month;
 }
 
 type IYears = [number, number, number];

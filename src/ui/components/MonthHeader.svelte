@@ -1,5 +1,6 @@
 <script lang="ts">
     import { noteAt } from "@/io";
+    import { inLocale } from "@/calendar-locale";
     import { settingsStore } from "@/settings";
     import { displayedDateStore, yearsRanges } from "@/stores";
     import { todayStore } from "@/stores/dates";
@@ -19,7 +20,7 @@
         fileData: monthFileData,
         formatValue: "MMM",
         widthSamples: Array.from({ length: 12 }, (_, i) =>
-            $displayedDateStore.clone().month(i).format("MMM"),
+            inLocale($displayedDateStore, $settingsStore.localeSettings.localeOverride).month(i).format("MMM"),
         ),
     }}
     rightDate={$displayedDateStore.clone().startOf("year")}

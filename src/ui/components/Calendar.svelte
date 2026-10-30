@@ -10,7 +10,6 @@
     import { onMount } from "svelte";
     import {
         cn,
-        getMonth,
         getStartOfWeek,
         getYears,
         isWeekend,
@@ -21,11 +20,14 @@
     import DateBttn from "./core/DateBttn.svelte";
     import { settingsStore } from "@/settings";
     import { weekSchemeFor } from "@/weeks";
+    import { inLocale, monthGrid } from "@/calendar-locale";
 
     let { weekdaysShort } = $derived($localeDataStore);
     // Calendared: also rebuild when the week start changes (upstream only did on month changes, so the dates
     // stayed in the old order under the new weekday header)
-    let month = $derived(getMonth($displayedDateStore, $localeDataStore.weekdays));
+    let month = $derived(monthGrid($displayedDateStore, $settingsStore.localeSettings.weekStartId));
+    // Calendared: names and numbers in the calendar's language, without switching Obsidian's moment (calendar-locale.ts)
+    let locale = $derived($settingsStore.localeSettings.localeOverride);
     let weeks = $derived(weekSchemeFor($settingsStore.localeSettings));
 
     let crrTab = $derived($crrTabStore);
@@ -125,7 +127,7 @@
                                     )}
                                     dotContainerClassName={"bottom-[.3rem]"}
                                 >
-                                    {day.format("D")}
+                                    {inLocale(day, locale).format("D")}
                                 </DateBttn>
                             </td>
                         {/each}
@@ -192,8 +194,7 @@
                                         "bottom-[calc(1rem/2)]",
                                     )}
                                 >
-                                    {$displayedDateStore
-                                        .clone()
+                                    {inLocale($displayedDateStore, locale)
                                         .month(monthIndex)
                                         .format("MMM")}
                                 </DateBttn>
