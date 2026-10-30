@@ -128,7 +128,11 @@
 ## 5. 進める順番（案）
 
 1. ~~使われていない状態を消す~~（2026-10-30 に済んだ）
-2. ADR-S2 の土台: 今の `getNotePath`・`getFileData` の振る舞いをテストで固定し、パスの計算と週の定義を、設定を引数で受け取る純粋な関数にする
+2. ~~ADR-S2 の土台: 今の `getNotePath`・`getFileData` の振る舞いをテストで固定し、パスの計算を、設定を引数で受け取る純粋な関数にする~~
+   （2026-10-30 に済んだ。`src/io/note-path.ts` の `notePath`。週の定義の `weekSchemeFor` は前から純粋な関数）。
+   残る隠れた依存は窓口に移すときに片付ける: どの設定を使うか（`getNormalizedPeriodSettings`）はプラグインの設定に加えて
+   Obsidian のコアプラグイン「デイリーノート」の設定も読む（これも Obsidian が持つデータなので窓口から読む）。ステッカー（`getSticker`）も
+   設定（ステッカーのオン・オフ、プロパティの名前）を `get(settingsStore)` で読む
 3. ADR-S2 の窓口を作り、カレンダーのマス（`DateBttn.svelte`）から置き換える。測る仕掛けも入れる
 4. タイムラインと月・年の見出しも窓口に移し、`notesChangedStore`・`internalFileModStore`・`localeSwitched` を消す
 5. 設定画面のファイル数を「周期」タブを開いたときに数える形にし、`data.json` から一覧を消す

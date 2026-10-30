@@ -2,40 +2,17 @@ import { normalizePath, Notice, TFile } from "obsidian";
 import { IGranularity } from "./types";
 import { getNormalizedPeriodSettings } from "./settings";
 import { getSticker, TSticker } from "@/ui/utils";
-import { PeriodSettings, settingsStore } from "@/settings";
+import { settingsStore } from "@/settings";
 import { get } from "svelte/store";
 import { PluginService } from "@/app-service";
 import type { IFoldInfo } from "./types";
-import { formatPeriod, periodOf } from '@/periods';
+import { join, notePath } from './note-path';
 import { weekSchemeFor } from '@/weeks';
 
 
 export type TFileData = {
   file: TFile | null;
   sticker: TSticker | null
-}
-
-// Credit: @creationix/path.js
-export function join(...partSegments: string[]): string {
-  // Split the inputs into a list of path commands.
-  let parts: string[] = [];
-  for (let i = 0, l = partSegments.length; i < l; i++) {
-    parts = parts.concat(partSegments[i].split("/"));
-  }
-  // Interpret the path commands to get the new resolved path.
-  const newParts = [];
-  for (let i = 0, l = parts.length; i < l; i++) {
-    const part = parts[i];
-    // Remove leading and trailing slashes
-    // Also remove "." segments
-    if (!part || part === ".") continue;
-    // Push new path segments.
-    else newParts.push(part);
-  }
-  // Preserve the initial slash if there was one.
-  if (parts[0] === "") newParts.unshift("");
-  // Turn back into a single string path.
-  return newParts.join("/");
 }
 
 export function basename(fullPath: string): string {
@@ -67,22 +44,9 @@ async function ensureTemplateExists(path: string) {
   }
 }
 
-export function getNotePath(
-  granularity: IGranularity,
-  date: moment.Moment,
-  customFormat?: PeriodSettings["formats"][0],
-  customFolder?: string,
-) {
+export function getNotePath(granularity: IGranularity, date: moment.Moment) {
   const { settings: { selectedFormat, folder } } = getNormalizedPeriodSettings(granularity);
-  // Calendared: name the period that contains the date (a week by the week scheme: its row's Monday), see docs/periods.md
-  const weeks = weekSchemeFor(get(settingsStore).localeSettings);
-  let filename = formatPeriod(periodOf(granularity, date, weeks), customFormat?.value || selectedFormat.value, weeks);
-
-  if (!filename.endsWith(".md")) {
-    filename += ".md";
-  }
-
-  return normalizePath(join(customFolder || folder, filename));
+  return notePath(granularity, date, { folder, format: selectedFormat.value }, weekSchemeFor(get(settingsStore).localeSettings));
 }
 
 export function getFileData(

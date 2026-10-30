@@ -3,10 +3,10 @@
 
 /** Like Obsidian's: one kind of slash, no slash at either end ("/" for the vault root), no non-breaking spaces, NFC */
 export const normalizePath = (path: string) =>
-    (path.replace(/[\\/]+/g, "/").replace(/^\/+|\/+$/g, "") || "/").replace(/ | /g, " ").normalize("NFC");
+    (path.replace(/[\\/]+/g, "/").replace(/^\/+|\/+$/g, "") || "/").replace(/\u00A0|\u202F/g, " ").normalize("NFC");
 
 export class TAbstractFile {
-    constructor(public path: string) {}
+    path = "";
 }
 export class TFile extends TAbstractFile {}
 export class TFolder extends TAbstractFile {}

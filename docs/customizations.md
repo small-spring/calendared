@@ -131,3 +131,4 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 - 再描画の合図を `notesChangedStore`（`src/stores/notes.ts`）に統一〔2026-10-28〕
 - `Menu.close()`（非推奨）を `hide()` に置き換え〔2026-10-28〕
 - どこからも読まれていないストア（`rerenderStore`・`crrFileMenu`・`pluginClassStore`）を削除〔2026-10-30〕
+- ノートのパスの計算を、設定を引数で受け取る関数（`src/io/note-path.ts` の `notePath`）に切り出し、テストを付けた〔2026-10-30〕

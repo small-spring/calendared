@@ -61,6 +61,7 @@ const { settingsStore } = await import("@/settings");
 const { getNotePath, getFileData } = await import("./vault");
 
 const date = (d: string) => moment(d, "YYYY-MM-DD");
+const fileAt = (path: string) => Object.assign(new TFile(), { path });
 
 beforeEach(() => {
     fake.files.clear();
@@ -135,14 +136,14 @@ describe("getNotePath: 周期と日付から、そのノートのパスを決め
 
 describe("getFileData: その日付の周期ノートと、そのステッカー", () => {
     it("パスにファイルがあれば、そのファイルとステッカーを返す", () => {
-        const file = new TFile("日記/2026-10-30.md");
+        const file = fileAt("日記/2026-10-30.md");
         fake.files.set(file.path, file);
         fake.caches.set(file.path, { sticker: "🍙" });
         expect(getFileData("day", date("2026-10-30"))).toEqual({ file, sticker: { emoji: "🍙" } });
     });
 
     it("ファイルがあってもステッカーがなければ、ステッカーは null", () => {
-        const file = new TFile("日記/2026-10-30.md");
+        const file = fileAt("日記/2026-10-30.md");
         fake.files.set(file.path, file);
         expect(getFileData("day", date("2026-10-30"))).toEqual({ file, sticker: null });
     });
@@ -152,7 +153,7 @@ describe("getFileData: その日付の周期ノートと、そのステッカー
     });
 
     it("パスにあるのがフォルダなら、ないのと同じ", () => {
-        fake.files.set("日記/2026-10-30.md", new TFolder("日記/2026-10-30.md"));
+        fake.files.set("日記/2026-10-30.md", Object.assign(new TFolder(), { path: "日記/2026-10-30.md" }));
         expect(getFileData("day", date("2026-10-30"))).toEqual({ file: null, sticker: null });
     });
 

@@ -10,5 +10,6 @@ declare global {
 export * from './create-or-open-note'
 export * from './parse';
 export * from './types';
+export * from './note-path';
 export * from './vault';
 export * from './utils';
