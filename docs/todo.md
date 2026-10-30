@@ -38,7 +38,7 @@
 - manifest.json と package.json
   - `description` を書き直す。今は 2026-10-30 に入れた仮の文（「Keep your days, weeks, months, and years calendared. …」）。
     機能を詰め終えたら、README と一緒に見直す — Claude、決めるのは自分
-  - `minAppVersion`（今は 1.7.7）を決める。設定画面を 1.13 の宣言で書く形にするなら上げるか、古い版向けの書き方も持つか — Claude
+  - `minAppVersion` を 1.13.1 にする（今は 1.7.7。2026-10-30 に決めた）。設定画面を宣言で書く形に作り直すときに一緒に上げる — Claude
 - README を英語で、今の仕様に合わせて書き直す（書くことは [guides/publishing.md](guides/publishing.md) の「README に書くこと」）。
   機能を詰め終えてから書く。スクリーンショットは自分 — Claude
   - おすすめのキーの割り当てを載せる（既定のホットキーは付けない。公開のガイドラインに従う）。例: 今日のノート Cmd+D、前後のノート Cmd+← / →、
