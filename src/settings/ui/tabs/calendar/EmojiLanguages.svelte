@@ -17,12 +17,10 @@
       folder. Only the language is sent.
     </p>
   {/snippet}
-  {#snippet control()}
-    <button onclick={() => new AddEmojiLanguagesModal().open()}>Add languages</button>
-  {/snippet}
 </SettingItem>
-<!-- the languages sit under the heading above, indented, one compact line each, so they don't read as settings of their own -->
-{#if $emojiSearchState.installed.length || $emojiSearchState.downloading.length}
+<!-- the languages sit in a box under the heading above, one compact line each, with "Add languages…" as the box's last
+     line (like a settings list's "Add item"), so the list and how to grow it read as one thing -->
+<div class="calendared-language-list-box">
   <div class="calendared-language-items">
     {#each $emojiSearchState.installed as language (language)}
       {@const names = languageNames(language)}
@@ -42,5 +40,8 @@
         <span class="calendared-language-name">{names.native}<span>{names.english} · Downloading…</span></span>
       </div>
     {/each}
+    <button class="calendared-language-item calendared-language-add" onclick={() => new AddEmojiLanguagesModal().open()}>
+      <span use:useIcon={"plus"}></span>Add languages…
+    </button>
   </div>
-{/if}
+</div>

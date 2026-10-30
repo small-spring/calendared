@@ -123,8 +123,11 @@
 
 /* Calendared: the installed emoji search languages, a small boxed list under "Emoji search languages"
    (EmojiLanguages.svelte). The side margins match Obsidian's setting items, so the box lines up with the settings */
+/* the space around the box is padding on a wrapper: a margin at the bottom would slip out of the settings card */
+.calendared-language-list-box {
+  padding: 0 var(--setting-items-padding-x, 0px) var(--setting-items-padding-x, var(--size-4-4));
+}
 .calendared-language-items {
-  margin: 0 var(--setting-items-padding-x, 0px) var(--size-4-3);
   border: var(--border-width) solid var(--background-modifier-border);
   border-radius: var(--radius-m);
   overflow: hidden;
@@ -140,11 +143,36 @@
 .calendared-language-item + .calendared-language-item {
   border-top: var(--border-width) solid var(--background-modifier-border);
 }
-/* only the remove button reacts; the row lights up with it, to show which language it removes */
-.calendared-language-item:has(.clickable-icon:hover) {
-  background-color: var(--background-modifier-hover);
+/* only the remove button reacts; the row it would remove turns faintly red with it (also when reached with the keyboard) */
+.calendared-language-item:has(.clickable-icon:hover),
+.calendared-language-item:has(.clickable-icon:focus-visible) {
+  background-color: rgba(var(--background-modifier-error-rgb), 0.1);
 }
 /* the remove button turns red on hover, to show that it deletes */
 .calendared-language-item .clickable-icon:hover {
   color: var(--text-error);
+}
+/* the box's last line, "Add languages…": a whole-row button shown as accent-colored text, like a settings list's
+   "Add item" line, not as a filled button. Two classes, to win over Obsidian's `button:not(.clickable-icon)` look */
+.calendared-language-items .calendared-language-add {
+  width: 100%;
+  justify-content: flex-start;
+  height: auto;
+  border-radius: 0;
+  box-shadow: none;
+  background-color: transparent;
+  color: var(--text-accent);
+  font-weight: var(--font-normal);
+  cursor: var(--cursor);
+}
+.calendared-language-items .calendared-language-add:hover {
+  background-color: var(--background-modifier-hover);
+  color: var(--text-accent-hover);
+}
+.calendared-language-add svg {
+  width: var(--icon-s);
+  height: var(--icon-s);
+}
+.calendared-language-add span {
+  display: flex;
 }
