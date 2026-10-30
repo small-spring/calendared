@@ -12,9 +12,7 @@
 <SettingItem name="Emoji search languages">
   {#snippet description()}
     <p class="m-0">
-      Search stickers in these languages as well as English. Each language's search words are downloaded once, when
-      you add it, from <code>cdn.jsdelivr.net</code> (or <code>raw.githubusercontent.com</code>), and kept in the plugin's
-      folder. Only the language is sent.
+      Search stickers in these languages too. Each one is downloaded once when added (from <code>cdn.jsdelivr.net</code>).
     </p>
   {/snippet}
 </SettingItem>

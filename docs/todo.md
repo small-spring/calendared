@@ -144,7 +144,6 @@
   - 今のカレンダーのホバー（`src/ui/utils/event-handlers.ts` の `onHover`）は、その標準機能を `hover-link` イベントで呼んでいるだけ。
     出所を `source: "preview"`（借り物）にしているので、ページプレビューの設定画面に Calendared の項目が出ない。
     `registerHoverLinkSource` で自分の出所を登録すれば、標準の設定画面でカレンダーのオン・オフ（Ctrl/Cmd 必須かどうか）を切り替えられるはず。
-    今ある設定「Hover preview」（`autoHoverPreview`）との関係も合わせて考える
 - 自然言語の日付（「来週の金曜」でノートを開く、テンプレートの `{{next friday}}`）を作り直す（2026-10-29 に一度削ると決めたもの。優先度低）
 - 絵文字ピッカーの乗り換え: 候補は emoji-picker-element（多言語のデータ emojibase で検索できる）。emoji-mart の更新が止まって困ったら
 

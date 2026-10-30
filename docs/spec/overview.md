@@ -96,7 +96,7 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 - 右クリックのメニュー
   - ノートがある: 新しいタブで開く、右に開く、複製、ステッカー、削除
   - ノートがない: 作成
-- ホバーで Obsidian 標準のページプレビュー（Ctrl/Cmd を押しながら。設定で押さなくても出せる）
+- ホバーで Obsidian 標準のページプレビュー（Ctrl/Cmd を押しながら）
   - 今は自分の出所を登録せず、閲覧ビューの出所（`source: "preview"`）を借りている
 - 表示の言語: Obsidian 全体を変えず、カレンダーの中だけ変えられる
 
@@ -105,7 +105,6 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 | 表示名 | 今の場所 | キー | 既定 | 内容 |
 | --- | --- | --- | --- | --- |
 | Open now button | Calendar › Interaction behavior | `openNowHeaderButton` | オン | ノートの見出しバーに Open now を出す |
-| Hover preview | Calendar › Interaction behavior | `autoHoverPreview` | オフ | Ctrl/Cmd を押さなくても、ホバーでプレビューを出す |
 | Calendar language | Calendar › Localization | `localeSettings.localeOverride` | Obsidian の言語 | カレンダーの中の言語 |
 | ― | ― | `yearsRangesStart` | `2020` | 年のビューの 12 年の区切りの起点 |
 
@@ -140,15 +139,15 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 
 | 表示名 | 今の場所 | キー | 既定 | 内容 |
 | --- | --- | --- | --- | --- |
-| Breadcrumbs | Calendar › Breadcrumbs（見出しのトグル） | `breadcrumbs.enabled` | オン | パンくずを出すか |
-| Show on | Calendar › Breadcrumbs | `breadcrumbs.placement` | Always | パンくずを出す場所（Always / Phone only） |
-| Show on other notes | Calendar › Breadcrumbs | `breadcrumbs.onOtherNotes` | オン | 周期ノートでないノートにも出すか |
+| Period breadcrumbs | Calendar › Period breadcrumbs（見出しのトグル） | `breadcrumbs.enabled` | オン | パンくずを出すか |
+| Show on | Calendar › Period breadcrumbs | `breadcrumbs.placement` | Always | パンくずを出す場所（Always / Phone only） |
+| Show on non-periodic notes | Calendar › Period breadcrumbs | `breadcrumbs.onOtherNotes` | オン | 周期ノートでないノートにも出すか |
 | Mini calendar | Calendar › Mini calendar（見出しのトグル） | `miniCalendar.enabled` | オン | ミニカレンダーを出すか |
 | Show on | Calendar › Mini calendar | `miniCalendar.placement` | Always | ミニカレンダーを出す場所 |
-| Show on other notes | Calendar › Mini calendar | `miniCalendar.onOtherNotes` | オン | 周期ノートでないノートにも出すか |
-| Days | Calendar › Mini calendar | `miniCalendar.dayLayout` | Calendar week | 日の並べ方（Calendar week / Centered on the note） |
-| Show stickers | Calendar › Mini calendar | `miniCalendar.displayStickers` | オン | ステッカーを出すか |
-| Compact on desktop | Calendar › Mini calendar | `compactOnDesktop` | オフ | PC で右上の小さな箱にする（パンくずにも効く） |
+| Show on non-periodic notes | Calendar › Mini calendar | `miniCalendar.onOtherNotes` | オン | 周期ノートでないノートにも出すか |
+| Days shown | Calendar › Mini calendar | `miniCalendar.dayLayout` | Calendar week | 日のノートでの日の並べ方（Calendar week / 3 days each side） |
+| Show stickers | Calendar › Mini calendar | `miniCalendar.displayStickers` | オン | ステッカーを出すか（ステッカーがオフのときは隠す） |
+| Compact on desktop | Calendar（Mini calendar の下の、見出しのない段） | `compactOnDesktop` | オフ | PC で右上の小さな箱にする（パンくずにも効く） |
 
 前の `timeline.*` の設定は、起動したときに読み替えて消す（オフにしていれば両方オフ。ほかのノートにも出すか・ステッカーは引き継ぐ）。出す場所を 3 択で持っていたときの Never はオフに読み替える（[ADR-0033](../adr/0033-heading-toggles.md)）。
 
@@ -165,7 +164,7 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 | 表示名 | 今の場所 | キー | 既定 | 内容 |
 | --- | --- | --- | --- | --- |
 | Stickers | Calendar › Stickers | `stickersEnabled` | オン | ステッカー機能のすべて（表示、ボタン、メニュー、コマンド） |
-| Sticker button in note header | Calendar › Stickers | `stickerHeaderButton` | オン | 周期ノートの見出しバーにボタンを出す |
+| Sticker button | Calendar › Stickers | `stickerHeaderButton` | オン | 周期ノートの見出しバーにボタンを出す |
 | Sticker property | Calendar › Stickers | `stickerProperty` | `sticker` | 絵文字を入れるプロパティの名前 |
 | Emoji search languages | Calendar › Stickers | （プラグインのフォルダにあるファイル） | 英語だけ | 絵文字を検索する言語 |
 
@@ -177,7 +176,7 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 
 | 表示名 | 今の場所 | キー | 既定 | 内容 |
 | --- | --- | --- | --- | --- |
-| Creation confirmation | Calendar › Interaction behavior | `shouldConfirmBeforeCreate` | オン | ノートを作る前に確認する（カレンダー・パンくず・ミニカレンダー・Open now から作るとき。コマンドと起動時には出ない） |
+| Confirm before creating notes | Calendar › Interaction behavior | `shouldConfirmBeforeCreate` | オン | ノートを作る前に確認する（カレンダー・パンくず・ミニカレンダー・Open now から作るとき。コマンドと起動時には出ない） |
 | ― | ― | `shouldConfirmBeforeDeleteFormat` | オン | 書式を消す前に確認する（その書式でしか読めないノートがあるときだけ） |
 | ― | ― | `shouldConfirmBeforeReplaceAllFormats` | オン | 書式の一括の付け替えの前に確認する |
 | ― | ― | `shouldConfirmBeforeMoveFile`、`shouldConfirmBeforeMoveAllFiles` | オン | ファイルの一覧で、移動・一括の移動の前に確認する |
@@ -199,9 +198,10 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 | 今の場所 | 中身 | 本来の機能 |
 | --- | --- | --- |
 | Calendar › Stickers | オン・オフ、見出しバーのボタン、プロパティ、検索の言語 | 5. ステッカー |
-| Calendar › Breadcrumbs | オン・オフ、出す場所、周期ノート以外 | 4. パンくずとミニカレンダー |
-| Calendar › Mini calendar | オン・オフ、出す場所、周期ノート以外、日の並べ方、ステッカー、Compact on desktop | 4. パンくずとミニカレンダー |
-| Calendar › Interaction behavior | 作成の確認、Open now のボタン、ホバーのプレビュー | 6. 確認、3. カレンダー |
+| Calendar › Period breadcrumbs | オン・オフ、出す場所、周期ノート以外 | 4. パンくずとミニカレンダー |
+| Calendar › Mini calendar | オン・オフ、出す場所、周期ノート以外、日の並べ方、ステッカー | 4. パンくずとミニカレンダー |
+| Calendar（見出しのない段） | Compact on desktop | 4. パンくずとミニカレンダー |
+| Calendar › Interaction behavior | 作成の確認、Open now のボタン | 6. 確認、3. カレンダー |
 | Calendar › Localization | カレンダーの言語、週の始まり | 3. カレンダー、1. 周期ノート（週の決め方） |
 | Periods › 各周期 | オン・オフ、書式、フォルダ、テンプレート、起動時に開く | 1. 周期ノート |
 | （画面になし） | 確認 6 つ、`yearsRangesStart` | 6. 確認、3. カレンダー |

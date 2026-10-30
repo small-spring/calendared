@@ -1,8 +1,6 @@
 import type { IGranularity } from '@/io';
 import { createOrOpenNote } from "@/io";
-import { settingsStore } from '@/settings';
 import { TFile } from 'obsidian';
-import { get } from 'svelte/store';
 import { PluginService } from '@/app-service';
 import { openNoteMenu, type NoteMenuParams } from '../note-menu';
 
@@ -39,7 +37,7 @@ const onHover = ({
   isControlPressed,
   file,
 }: TOnHoverParams): void => {
-  if (event && file && (isControlPressed || get(settingsStore).autoHoverPreview)) {
+  if (event && file && isControlPressed) {
     // https://forum.obsidian.md/t/internal-links-dont-work-in-custom-view/90169/2
     PluginService.getPlugin()?.app.workspace.trigger("hover-link", {
       event,

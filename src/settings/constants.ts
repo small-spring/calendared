@@ -62,9 +62,6 @@ export interface ISettings {
   /** Starting year for the year range selector */
   yearsRangesStart: 2020;
 
-  /** Whether to automatically preview notes on hover */
-  autoHoverPreview: boolean;
-
   /** Locale and display settings */
   localeSettings: {
     /** Override for the default locale */
@@ -117,6 +114,7 @@ export const REMOVED_SETTINGS = [
   // Calendared: an unreleased toggle for the emoji search language; installed languages are now the files in the plugin's folder
   "emojiSearchInLanguage",
   "popoversClosing",
+  "autoHoverPreview",
 ] as const;
 /** Calendared: per-period settings of removed features (`periods.<granularity>.preview`: TODO / preview sections) */
 export const REMOVED_PERIOD_SETTINGS = ["preview"] as const;
@@ -140,7 +138,6 @@ export const DEFAULT_SETTINGS: ISettings = Object.freeze({
   shouldConfirmBeforeDeleteFile: true,
   shouldConfirmBeforeDeleteAllFiles: true,
   yearsRangesStart: 2020,
-  autoHoverPreview: false,
 
   localeSettings: {
     localeOverride: sysLocaleKey,

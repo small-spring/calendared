@@ -13,7 +13,7 @@
 ## 進め方（2026-10-31 に決めた）
 
 1. 間違い・誤解を招くもの、書き方の決まりに外れるものを先に直す（済んだ。下の「済んだもの」）
-2. Calendar タブの名前と説明（C・D・E・F・G）は、表の案に〇か✕を付けてもらって直す。組み直しのあとも文言はそのまま使える
+2. Calendar タブの名前と説明（C・D・E・F・G）は、表の案に〇か✕を付けてもらって直す。組み直しのあとも文言はそのまま使える（済んだ。残りは下の表の D2・E2・G2）
 3. 並び順と見出し（B）、タブの名前（A6）、書式まわり（H4）、Open on startup（H9）、Hover preview（G3）は、組み直しのときにまとめて直す。
    見出しバーの呼び方（A1）とアイコン（A2）は、宣言で書く設定で出せるかを確かめてから決める
 
@@ -24,6 +24,16 @@
 - 文の途中の「Daily」などを小文字にした（Folder、Open on startup）。Folder の説明は「Where new daily notes are created.」
 - 件数を「N files」「1 file」「0 files」にした
 - 選択肢を「Same as system (English)」「Language default (Sunday)」にした
+- Calendar タブの案を入れた: Stickers の見出しの説明、「Sticker button」、Sticker property と検索の言語の短い説明、見出し「Period breadcrumbs」と説明、
+  「Show on non-periodic notes」（説明なし）、Mini calendar の見出しの説明、「Days shown」（選択肢「Calendar week / 3 days each side」）、
+  ステッカーがオフのときは「Show stickers」を隠す、「Compact on desktop」を見出しのない別の段にして説明を書き直す、
+  「Confirm before creating notes」、Calendar language と Week starts on の説明
+- 見出しバーのボタンの呼び方は「tab title bar」にした（Obsidian 本体の外観の設定「Show tab title bar」の言葉。確かめた）
+- 見出しバーのボタンのツールチップを、コマンドと右クリックの項目に合わせて「Manage sticker」にした（前は「Add sticker」「Change sticker (😀)」）
+- 「Sticker button」と「Open now button」の名前の横に、ボタンと同じアイコンを出した。わかりやすくなるかは、Obsidian で見て決める
+- 見出しのトグル（Stickers・Period breadcrumbs・Mini calendar）を、説明が 2 行になっても見出しの右に置くようにした（`src/app.css`）。
+  Obsidian 本体の CSS では、説明が長いとトグルが説明の下に回り込む。組み直しのあと（宣言で書く設定）も同じ手当てが効くかは確かめること 3
+- 設定「Hover preview」を消した。Ctrl/Cmd を押しながらのホバーだけになる。ページプレビューに任せる形（ADR-0026）は組み直しで作る
 
 ## 全体に通じること
 
@@ -39,13 +49,13 @@
 
 ### 並び順と見出し
 
-今の並び: Stickers / Breadcrumbs / Mini calendar / Interaction behavior / Localization
+今の並び: Stickers / Period breadcrumbs / Mini calendar /（見出しなし）Compact on desktop / Interaction behavior / Localization
 
 案（組み直しの形（[settings.md](settings.md)）に近づける）:
 
 ```
 （見出しなし）    Week starts on / Calendar language / Confirm before creating notes / Open now button
-Breadcrumbs     （見出しのトグル）Show on / Show on non-periodic notes
+Period breadcrumbs（見出しのトグル）Show on / Show on non-periodic notes
 Mini calendar   （見出しのトグル）Show on / Show on non-periodic notes / Days shown / Show stickers
 （見出しなし）    Compact on desktop   … どちらかが PC に出るときだけ
 Stickers        （見出しのトグル）Sticker button / Sticker property / Emoji search languages
@@ -54,54 +64,26 @@ Stickers        （見出しのトグル）Sticker button / Sticker property / E
 | # | 今 | 案 | 理由 |
 | --- | --- | --- | --- |
 | B1 | 先頭が Stickers | 全体の設定（見出しなし）を先頭に、Stickers を最後に | ガイドラインは「全体の設定は見出しなしで一番上」。ステッカーは飾りで、周期ノートの土台より後でよい |
-| B2 | 見出し「Interaction behavior」に、作成の確認・Open now のボタン・ホバーのプレビューが入る | 見出しをなくし、確認と Open now のボタンは見出しなしの全体の設定へ。ホバーのプレビューは組み直しで消える（それまでは全体の設定の最後に） | 「Interaction behavior」では中身が想像できない。3 つに共通点がない |
+| B2 | 見出し「Interaction behavior」に、作成の確認と Open now のボタンが入る | 見出しをなくし、2 つとも見出しなしの全体の設定へ | 「Interaction behavior」では中身が想像できない。2 つに共通点がない |
 | B3 | 見出し「Localization」に、カレンダーの言語と週の始まりが入る | 見出しをなくし、全体の設定へ | 週の始まりは、表示だけでなく週次ノートの 7 日やファイル名にも効く。「Localization」の下だと見た目の設定に見える |
 
-### Stickers
+### Period breadcrumbs
 
 | # | 項目 | 今 | 案 | 理由 |
 | --- | --- | --- | --- | --- |
-| C1 | Stickers（見出しのトグル） | 説明なし | 説明を足す: 「An emoji for each periodic note, shown in the calendar.」 | 設定画面だけを見た人には「ステッカー」が何かわからない。ほかの 2 つの見出し（パンくず・ミニカレンダー）には説明がある |
-| C2 | Sticker button in note header | 説明「Show a button next to the reading-view icon of periodic notes. It shows the note's sticker, and opens the emoji picker.」 | 名前「Sticker button」＋アイコン（A2）。説明「In the tab title bar of periodic notes. Shows the note's sticker; click it to pick one.」 | 見出しが Stickers なので名前の「sticker」以外は説明に回せる。場所の言葉は A1 にそろえる |
-| C3 | Sticker property | 説明 2 段（プロパティの説明と、使えない名前の一覧） | 1 段目を「Property that holds the sticker. Adding a sticker replaces its value.」に縮める。2 段目は「Can't be one of Obsidian's built-in properties: …」 | 「(e.g. 'sticker', 'mood')」は欄の薄い文字（placeholder）と重なる。使えない名前の一覧は、入れてから断られるより先に見えたほうがよいので残す |
-| C4 | Emoji search languages | 説明がダウンロード元を 2 つ書き、3 文ある | 「Search stickers in these languages too. Each one is downloaded once when added (from cdn.jsdelivr.net).」 | 通信することは書いておく（使う人が知るべきこと）。予備の取得先や「言語だけ送る」は README に回してもよい |
-| C5 | ツールチップとの言葉 | 見出しバーのボタンの名前は「Add sticker」、コマンドは「Manage sticker」、設定は「Sticker button」 | 3 つをそろえる（例: どれも「Sticker」系の 1 つの動詞に）。設定画面の外なので、別に決める | 設定の名前から、画面のどのボタンかたどれるように |
-
-### Breadcrumbs
-
-| # | 項目 | 今 | 案 | 理由 |
-| --- | --- | --- | --- | --- |
-| D1 | Breadcrumbs（見出しのトグル） | 名前「Breadcrumbs」。説明「Where the note sits, such as 2026 › Q4 › Oct › W44 › 30, above the note. Click a period to open its note.」 | **名前「Period breadcrumbs」（2026-10-31 に決めた）**。説明「Shows where the note sits, such as 2026 › Q4 › Oct › W44 › 30, above the note. Click a period to open its note.」 | 「breadcrumbs」だけでは作る側の言葉で、コミュニティプラグイン「Breadcrumbs」とも紛れる。「Period」を付けて何のパンくずかを示しつつ、パートナーと同じ言葉（パンくず）で話せるように breadcrumbs は残す（「Period path」も考えた）。変えるのは画面の名前だけで、コードの名前・設定のキー・開発向けの文書の「パンくず」はそのまま。説明の 1 文目に動詞を足し、例は残す |
-| D2 | Show on | 選択肢「Always / Phone only」。説明「Phone only keeps desktop and tablets to the side calendar.」 | 選択肢を「All devices / Phones only」に。説明は「Tablets count as desktop.」だけ（またはなし） | 名前が「Show on」なので、選択肢は場所（機器）で答えるほうが読める。今の説明は「keeps … to the side calendar」が何を言っているかわかりにくい。わかりにくいのはタブレットの扱いだけ |
-| D3 | Show on other notes | 説明「Also show where today is on notes that aren't periodic notes.」 | 「Show on non-periodic notes」にして、説明をなくす（ユーザーの案） | 「other notes」は何の「ほか」かわからない。名前に入れれば 1 行で済む |
-| D4 | （D3 の別案） | | 「Show today on non-periodic notes」 | 周期ノートでないノートでは「今日」の位置を出す、ということまで名前でわかる。ただし、ミニカレンダーの同じ項目と名前がずれる。D3 を勧める |
+| D2 | Show on | 選択肢「Always / Phone only」。説明「Phone only keeps desktop and tablets to the side calendar.」 | 選択肢を「All devices / Phones only」に。説明は「Tablets count as desktop.」だけ（またはなし） | 名前が「Show on」なので、選択肢は場所（機器）で答えるほうが読める。今の説明は「keeps … to the side calendar」が何を言っているかわかりにくい。わかりにくいのはタブレットの扱いだけ。**保留**（2026-10-31）: 選択肢の代わりに、機器ごと（スマホ・タブレット・PC など）のチェックにする形に傾いている |
 
 ### Mini calendar
 
 | # | 項目 | 今 | 案 | 理由 |
 | --- | --- | --- | --- | --- |
-| E1 | Mini calendar（見出しのトグル） | 説明「The notes before and after the open one, above the note, with their stickers.」 | 「Shows the days (or weeks, months…) around the note, above it. Click one to open it.」 | 1 文目に動詞がない。「notes」だと、ノートがない日は出ないように読める。ステッカーは下の「Show stickers」があるので書かない |
 | E2 | Show on | パンくずと同じ | D2 と同じ | |
-| E3 | Show on other notes | 説明「Also show the days around today on notes that aren't periodic notes.」 | 「Show on non-periodic notes」、説明なし | D3 と同じ |
-| E4 | Days | 選択肢「Calendar week / Centered on the note」。説明「Show the calendar's week, or the note in the middle with 3 days on each side.」 | 名前「Days shown」、選択肢「Calendar week / 3 days each side」、説明「For daily notes. Other notes show 2 on each side.」 | 「Days」だけでは何の設定かわからない。日のノートにしか効かないことが書かれていない。選択肢に「3 日」と入れれば説明の言い換えが要らない |
-| E5 | Show stickers | ステッカーをオフにしても出ている | ステッカーがオフのときは隠す | 効かない項目が見えていると、オンにしたのに出ない、と迷う |
-
-### Compact on desktop
-
-| # | 今 | 案 | 理由 |
-| --- | --- | --- | --- |
-| F1 | Mini calendar の見出しの下にある。ミニカレンダーがオフでも、パンくずが PC に出ていれば、オフの見出しの下にこれだけ残る | Mini calendar のあとに、見出しなしの別の段として置く（出す条件は今と同じ: どちらかが PC に出るとき） | 見出しのトグルがオフなのに下に項目が残るのは、ADR-0033 の「オフなら中身を隠す」と食い違って見える。どちらにも効く項目を片方の見出しに入れると、もう片方には効かないように読める |
-| F2 | 説明「Applies to both. Show them in a small box at the top right of the note instead of a bar under its header. Phones always use the bar.」 | 「Show the breadcrumbs and mini calendar in a small box at the top right of the note, instead of a bar under the tab title bar. Phones always use the bar.」 | F1 で見出しの外に出すと「both」「them」が何を指すかわからなくなるので、名前で書く。「header」は A1 にそろえる |
 
 ### 全体の設定（今の Interaction behavior と Localization）
 
 | # | 項目 | 今 | 案 | 理由 |
 | --- | --- | --- | --- | --- |
-| G1 | Creation confirmation | 説明「Prompt before creating new periodic notes to prevent accidental entries.」 | 名前「Confirm before creating notes」。説明「From the calendar, breadcrumbs, mini calendar or Open now. Commands never ask.」 | 名前を動詞の形に（Obsidian 本体の「Confirm file deletion」と同じ形）。「to prevent accidental entries」は言わなくてもわかる。どこで聞かれ、どこで聞かれないかのほうが役に立つ |
-| G2 | Open now button | 説明「Show a button in every note's header that opens now's note: today's, or this week's if daily notes are off, and so on.」 | 名前はそのまま＋アイコン（A2）。説明「In the tab title bar of every note. Opens today's note, or this week's if daily notes are off.」 | 「now's note」は英語として不自然。「and so on」は削っても伝わる。カレンダーの中の Open now に効かないことは、書くなら「The calendar's button always shows.」 |
-| G3 | Hover preview | 説明「Instantly preview notes by hovering over dates (no modifier key needed).」 | 名前「Preview without Ctrl」（Mac では「Cmd」）。説明「Hover over a date in the calendar to preview its note.」 | 「Hover preview」だとオフにするとプレビューが出ないように読めるが、実際はオフでも Ctrl/Cmd を押せば出る。組み直しで消えるので、直すのは今だけの手当て |
-| G4 | Calendar language | 説明「Set a specific language for the calendar interface.」 | 説明「Month and weekday names in the calendar, breadcrumbs and mini calendar. File names use Obsidian's language.」 | 「calendar interface」がどこまでか、ファイル名に効くかがわからない |
-| G5 | Week starts on | 説明「Choose which day your week begins with.」 | 説明「Also sets which 7 days a weekly note covers.」 | 今の説明は名前の言い換え。週次ノートに効くことのほうが大事で、名前からはわからない |
+| G2 | Open now button | 説明「Show a button in every note's header that opens now's note: today's, or this week's if daily notes are off, and so on.」 | 名前はそのまま＋アイコン（A2）。説明「In the tab title bar of every note. Opens today's note, or this week's if daily notes are off.」 | 「now's note」は英語として不自然。「and so on」は削っても伝わる。カレンダーの中の Open now に効かないことは、書くなら「The calendar's button always shows.」。**保留**（2026-10-31）: アイコンは付けた。アイコンが役に立つか見てから、説明を決める |
 
 ## Periods タブ
 

@@ -9,8 +9,11 @@
   import { showsOn } from "@/navigation";
   import { localeWeekStart, weekdayNames } from "@/calendar-locale";
   import { derived as derivedStore } from "svelte/store";
-  import { Notice, Platform } from "obsidian";
+  import { Notice } from "obsidian";
   import { isReservedStickerProperty, RESERVED_STICKER_PROPERTIES } from "@/ui/utils/emoji-picker";
+  import { useIcon } from "@/ui/utils";
+  import { STICKER_BUTTON_ICON } from "@/ui/sticker-actions";
+  import { openNowIcon } from "@/ui/open-now";
   import EmojiLanguages from "./EmojiLanguages.svelte";
 
   // Sticker
@@ -40,13 +43,6 @@
     settingsStore.update((settings) => ({
       ...settings,
       shouldConfirmBeforeCreate,
-    }));
-  };
-
-  const handleConfirmAutoHoverPreview = (autoHoverPreview: boolean) => {
-    settingsStore.update((settings) => ({
-      ...settings,
-      autoHoverPreview,
     }));
   };
 
@@ -112,12 +108,23 @@
   });
 </script>
 
+<!-- Calendared: the settings for a button in the tab title bar show that button's icon next to their name, so the
+     setting can be matched with the button on screen -->
+{#snippet buttonName(icon: string, name: string)}
+  <span class="inline-flex items-center gap-1.5"><span class="inline-flex [--icon-size:var(--icon-s)]" use:useIcon={icon}></span>{name}</span>
+{/snippet}
+
 <!-- ------------------------------- -->
 <!-- ------ Sticker section ------- -->
 <!-- ------------------------------- -->
 <div class="setting-group">
   <!-- Calendared: turning stickers off hides everything about them (display, header button, menu item, commands) -->
-  <SettingItem isHeading={true} name="Stickers" type="toggle">
+  <SettingItem
+    isHeading={true}
+    name="Stickers"
+    type="toggle"
+    description="An emoji for each periodic note, shown in the calendar."
+  >
     {#snippet control()}
       <Toggle
         isEnabled={$settingsStore.stickersEnabled}
@@ -132,10 +139,10 @@
   {#if $settingsStore.stickersEnabled}
   <div class="setting-items">
     <SettingItem
-      name="Sticker button in note header"
-      description="Show a button next to the reading-view icon of periodic notes. It shows the note's sticker, and opens the emoji picker."
+      description="In the tab title bar of periodic notes. Shows the note's sticker; click it to pick one."
       type="toggle"
     >
+      {#snippet name()}{@render buttonName(STICKER_BUTTON_ICON, "Sticker button")}{/snippet}
       {#snippet control()}
         <Toggle
           isEnabled={$settingsStore.stickerHeaderButton}
@@ -153,12 +160,11 @@
     >
       {#snippet description()}
         <p class="m-0">
-          Property that holds a note's sticker emoji (e.g. 'sticker', 'mood').
-          Adding a sticker overwrites this property's value.
+          Property that holds the sticker. Adding a sticker replaces its value.
         </p>
         <!-- Calendared: always show which names are refused, from the same list the check uses -->
         <p class="m-0 mt-1">
-          Not allowed (Obsidian's built-in properties):
+          Can't be one of Obsidian's built-in properties:
           {#each RESERVED_STICKER_PROPERTIES as name, i}<code>{name}</code>{i < RESERVED_STICKER_PROPERTIES.length - 1 ? ", " : ""}{/each}
         </p>
       {/snippet}
@@ -178,14 +184,16 @@
   {/if}
 </div>
 
-<!-- --- Breadcrumbs section ---- -->
-<!-- ---------------------------- -->
+<!-- --- Period breadcrumbs section ---- -->
+<!-- ----------------------------------- -->
+<!-- Calendared: "Period breadcrumbs" on screen, so it isn't taken for the community plugin "Breadcrumbs"; the code
+     keeps calling it breadcrumbs -->
 <div class="setting-group">
   <SettingItem
     isHeading={true}
-    name="Breadcrumbs"
+    name="Period breadcrumbs"
     type="toggle"
-    description="Where the note sits, such as 2026 › Q4 › Oct › W44 › 30, above the note. Click a period to open its note."
+    description="Shows where the note sits, such as 2026 › Q4 › Oct › W44 › 30, above the note. Click a period to open its note."
   >
     {#snippet control()}
       <Toggle onChange={(enabled) => updateBreadcrumbs({ enabled })} isEnabled={$settingsStore.breadcrumbs.enabled} />
@@ -202,7 +210,7 @@
           />
         {/snippet}
       </SettingItem>
-      <SettingItem name="Show on other notes" description="Also show where today is on notes that aren't periodic notes.">
+      <SettingItem name="Show on non-periodic notes">
         {#snippet control()}
           <Toggle
             onChange={(onOtherNotes) => updateBreadcrumbs({ onOtherNotes })}
@@ -221,44 +229,45 @@
     isHeading={true}
     name="Mini calendar"
     type="toggle"
-    description="The notes before and after the open one, above the note, with their stickers."
+    description="Shows the days (or weeks, months…) around the note, above it. Click one to open it."
   >
     {#snippet control()}
       <Toggle onChange={(enabled) => updateMiniCalendar({ enabled })} isEnabled={$settingsStore.miniCalendar.enabled} />
     {/snippet}
   </SettingItem>
-  {#if $settingsStore.miniCalendar.enabled || showsOn($settingsStore.breadcrumbs, false)}
+  {#if $settingsStore.miniCalendar.enabled}
     <div class="setting-items">
-      {#if $settingsStore.miniCalendar.enabled}
-        <SettingItem name="Show on" description="Phone only keeps desktop and tablets to the side calendar.">
-          {#snippet control()}
-            <Dropdown
-              options={placementOptions}
-              onChange={(placement) => updateMiniCalendar({ placement: placement as ISettings["miniCalendar"]["placement"] })}
-              value={$settingsStore.miniCalendar.placement}
-            />
-          {/snippet}
-        </SettingItem>
-        <SettingItem name="Show on other notes" description="Also show the days around today on notes that aren't periodic notes.">
-          {#snippet control()}
-            <Toggle
-              onChange={(onOtherNotes) => updateMiniCalendar({ onOtherNotes })}
-              isEnabled={$settingsStore.miniCalendar.onOtherNotes}
-            />
-          {/snippet}
-        </SettingItem>
-        <SettingItem name="Days" description="Show the calendar's week, or the note in the middle with 3 days on each side.">
-          {#snippet control()}
-            <Dropdown
-              options={[
-                { label: "Calendar week", value: "week" },
-                { label: "Centered on the note", value: "centered" },
-              ]}
-              onChange={(dayLayout) => updateMiniCalendar({ dayLayout: dayLayout as ISettings["miniCalendar"]["dayLayout"] })}
-              value={$settingsStore.miniCalendar.dayLayout}
-            />
-          {/snippet}
-        </SettingItem>
+      <SettingItem name="Show on" description="Phone only keeps desktop and tablets to the side calendar.">
+        {#snippet control()}
+          <Dropdown
+            options={placementOptions}
+            onChange={(placement) => updateMiniCalendar({ placement: placement as ISettings["miniCalendar"]["placement"] })}
+            value={$settingsStore.miniCalendar.placement}
+          />
+        {/snippet}
+      </SettingItem>
+      <SettingItem name="Show on non-periodic notes">
+        {#snippet control()}
+          <Toggle
+            onChange={(onOtherNotes) => updateMiniCalendar({ onOtherNotes })}
+            isEnabled={$settingsStore.miniCalendar.onOtherNotes}
+          />
+        {/snippet}
+      </SettingItem>
+      <SettingItem name="Days shown" description="For daily notes. Other notes show 2 on each side.">
+        {#snippet control()}
+          <Dropdown
+            options={[
+              { label: "Calendar week", value: "week" },
+              { label: "3 days each side", value: "centered" },
+            ]}
+            onChange={(dayLayout) => updateMiniCalendar({ dayLayout: dayLayout as ISettings["miniCalendar"]["dayLayout"] })}
+            value={$settingsStore.miniCalendar.dayLayout}
+          />
+        {/snippet}
+      </SettingItem>
+      <!-- has no effect while stickers are off -->
+      {#if $settingsStore.stickersEnabled}
         <SettingItem name="Show stickers">
           {#snippet control()}
             <Toggle
@@ -268,23 +277,28 @@
           {/snippet}
         </SettingItem>
       {/if}
-      <!-- applies to both, so it also stays while only the breadcrumbs show on desktop -->
-      {#if showsOn($settingsStore.breadcrumbs, false) || showsOn($settingsStore.miniCalendar, false)}
-        <SettingItem
-          name="Compact on desktop"
-          description="Applies to both. Show them in a small box at the top right of the note instead of a bar under its header. Phones always use the bar."
-        >
-          {#snippet control()}
-            <Toggle
-              onChange={(compactOnDesktop) => settingsStore.update((s) => ({ ...s, compactOnDesktop }))}
-              isEnabled={$settingsStore.compactOnDesktop}
-            />
-          {/snippet}
-        </SettingItem>
-      {/if}
     </div>
   {/if}
 </div>
+
+<!-- applies to both, so it sits apart from both headings, and shows while either of them shows on desktop -->
+{#if showsOn($settingsStore.breadcrumbs, false) || showsOn($settingsStore.miniCalendar, false)}
+  <div class="setting-group">
+    <div class="setting-items">
+      <SettingItem
+        name="Compact on desktop"
+        description="Show the period breadcrumbs and mini calendar in a small box at the top right of the note, instead of a bar under the tab title bar. Phones always use the bar."
+      >
+        {#snippet control()}
+          <Toggle
+            onChange={(compactOnDesktop) => settingsStore.update((s) => ({ ...s, compactOnDesktop }))}
+            isEnabled={$settingsStore.compactOnDesktop}
+          />
+        {/snippet}
+      </SettingItem>
+    </div>
+  </div>
+{/if}
 
 <!-- ------------------------------------- -->
 <!-- --- Interaction behavior section ---- -->
@@ -293,9 +307,10 @@
   <SettingItem isHeading={true} name="Interaction behavior" />
 
   <div class="setting-items">
+    <!-- Calendared: named as an action, and says where it asks (upstream: "Creation confirmation") -->
     <SettingItem
-      name="Creation confirmation"
-      description="Prompt before creating new periodic notes to prevent accidental entries."
+      name="Confirm before creating notes"
+      description="From the calendar, period breadcrumbs, mini calendar or Open now. Commands never ask."
     >
       {#snippet control()}
         <Toggle
@@ -306,9 +321,9 @@
     </SettingItem>
 
     <SettingItem
-      name="Open now button"
       description="Show a button in every note's header that opens now's note: today's, or this week's if daily notes are off, and so on."
     >
+      {#snippet name()}{@render buttonName(openNowIcon(), "Open now button")}{/snippet}
       {#snippet control()}
         <Toggle
           onChange={(openNowHeaderButton) => settingsStore.update((s) => ({ ...s, openNowHeaderButton }))}
@@ -316,20 +331,6 @@
         />
       {/snippet}
     </SettingItem>
-
-    {#if !Platform.isPhone}
-      <SettingItem
-        name="Hover preview"
-        description="Instantly preview notes by hovering over dates (no modifier key needed)."
-      >
-        {#snippet control()}
-          <Toggle
-            onChange={handleConfirmAutoHoverPreview}
-            isEnabled={$settingsStore.autoHoverPreview}
-          />
-        {/snippet}
-      </SettingItem>
-    {/if}
   </div>
 </div>
 
@@ -339,9 +340,10 @@
 <div class="setting-group">
   <SettingItem isHeading={true} name="Localization" />
   <div class="setting-items">
+    <!-- Calendared: says where the language shows, and that file names don't follow it -->
     <SettingItem
       name="Calendar language"
-      description="Set a specific language for the calendar interface."
+      description="Month and weekday names in the calendar, period breadcrumbs and mini calendar. File names use Obsidian's language."
     >
       {#snippet control()}
         <Dropdown
@@ -352,9 +354,10 @@
       {/snippet}
     </SettingItem>
 
+    <!-- Calendared: the week start also decides a weekly note's days (docs/adr/0011), which the name doesn't tell -->
     <SettingItem
       name="Week starts on"
-      description="Choose which day your week begins with."
+      description="Also sets which 7 days a weekly note covers."
     >
       {#snippet control()}
         <Dropdown

@@ -9,7 +9,8 @@ import { settingsStore } from "@/settings";
 import { MarkdownView, TFile, setIcon } from "obsidian";
 import { get } from "svelte/store";
 
-const ICON = "smile-plus";
+/** also shown next to the setting that turns the button on and off */
+export const STICKER_BUTTON_ICON = "smile-plus";
 
 export function isPeriodicNote(file: TFile | null | undefined): file is TFile {
   if (!file || file.extension !== "md") return false;
@@ -61,7 +62,8 @@ export class StickerActions {
 
       if (!button) {
         // the click reads `view.file` then, so the button follows the note when the tab switches notes
-        button = view.addAction(ICON, "Add sticker", (event) => {
+        // Calendared: named like the command and the calendar's menu item ("Manage sticker"); it was "Add sticker"
+        button = view.addAction(STICKER_BUTTON_ICON, "Manage sticker", (event) => {
           // the picker closes on any click outside it; keep this click from reaching that listener
           event.stopPropagation();
           if (isPeriodicNote(view.file)) {
@@ -81,10 +83,10 @@ export class StickerActions {
         // show the sticker itself, so you can tell at a glance whether the note has one
         button.empty();
         button.createSpan({ text: sticker.emoji, cls: "pnc-sticker-action-emoji" });
-        button.setAttribute("aria-label", `Change sticker (${sticker.emoji})`);
+        button.setAttribute("aria-label", `Manage sticker (${sticker.emoji})`);
       } else {
-        setIcon(button, ICON);
-        button.setAttribute("aria-label", "Add sticker");
+        setIcon(button, STICKER_BUTTON_ICON);
+        button.setAttribute("aria-label", "Manage sticker");
       }
     }
   }
