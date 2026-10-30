@@ -1,7 +1,7 @@
 <script lang="ts">
   import locales from "@/locales";
   import { defaultWeekdays, sysLocaleKey } from "@/localization";
-  import { TimelineViewMode } from "@/settings/constants";
+  import type { TimelineViewMode } from "@/settings/constants";
   import { settingsStore } from "@/settings/store";
   import { Dropdown, SettingItem, Toggle } from "@/settings/ui";
   import { switchLocale, updateWeekStartSetting } from "@/stores";

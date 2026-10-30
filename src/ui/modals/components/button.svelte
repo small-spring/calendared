@@ -2,7 +2,7 @@
     import { LoadingCircle } from "@/settings";
     import { cn } from "@/ui/utils";
     import { setIcon } from "obsidian";
-    import { onMount, Snippet } from "svelte";
+    import { onMount, type Snippet } from "svelte";
 
     interface Props {
         onClick: (e?: MouseEvent | KeyboardEvent) => void;

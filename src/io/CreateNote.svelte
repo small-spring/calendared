@@ -1,8 +1,8 @@
 <script lang="ts">
     import { getDailyNotesPlugin } from "@/utils";
     import { getPeriodicityFromGranularity } from "./parse";
-    import { DnPluginSettings, getNormalizedPeriodSettings } from "./settings";
-    import { IGranularity } from "./types";
+    import { type DnPluginSettings, getNormalizedPeriodSettings } from "./settings";
+    import { type IGranularity } from "./types";
 
     interface Props {
         granularity: IGranularity;

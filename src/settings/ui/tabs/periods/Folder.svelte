@@ -8,7 +8,7 @@
     import { onDestroy, onMount } from "svelte";
     import { type PeriodSettings, FolderSuggest } from "@/settings";
     import { cn } from "@/ui/utils";
-    import { Writable } from "svelte/store";
+    import { type Writable } from "svelte/store";
 
     interface Props {
         settings: Writable<PeriodSettings>;

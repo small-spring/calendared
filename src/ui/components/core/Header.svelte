@@ -3,7 +3,7 @@
   import { capitalize } from "@/utils";
   import Arrow from "./Arrow.svelte";
   import PeriodTitle, { type TTitle } from "./PeriodTitle.svelte";
-  import { Snippet } from "svelte";
+  import { type Snippet } from "svelte";
   import { setIcon } from "obsidian";
 
   interface Props {

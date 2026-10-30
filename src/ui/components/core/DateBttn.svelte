@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { IGranularity } from "@/io";
+  import { type IGranularity } from "@/io";
 
   import { noteAt, vaultSource } from "@/io";
   import { settingsStore } from "@/settings";

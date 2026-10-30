@@ -2,7 +2,7 @@
     import { type IGranularity } from "@/io";
     import { type PeriodSettings } from "@/settings";
     import FilepathsCount from "./FilepathsCount.svelte";
-    import { Writable } from "svelte/store";
+    import { type Writable } from "svelte/store";
 
     interface Props {
         settings: Writable<PeriodSettings>;

@@ -1,7 +1,7 @@
 <script lang="ts">
-    import { Writable } from "svelte/store";
+    import { type Writable } from "svelte/store";
     import Button from "./button.svelte";
-    import { PeriodSettings, TFormat } from "@/settings";
+    import { type PeriodSettings, type TFormat } from "@/settings";
 
     interface Props {
         handleMoveAll: (e: MouseEvent | KeyboardEvent) => void;

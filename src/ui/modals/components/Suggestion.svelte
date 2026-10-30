@@ -1,7 +1,7 @@
 <script lang="ts">
-    import { PeriodSettings, TFormat } from "@/settings";
+    import { type PeriodSettings, type TFormat } from "@/settings";
     import Button from "./button.svelte";
-    import { Writable } from "svelte/store";
+    import { type Writable } from "svelte/store";
 
     interface Props {
         filepath?: string;

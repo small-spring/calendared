@@ -1,6 +1,6 @@
 <script lang="ts">
     import { monthsIndexesInQuarters } from "@/constants";
-    import { IGranularity } from "@/io";
+    import { type IGranularity } from "@/io";
     import { displayedDateStore, localeDataStore, yearsRanges } from "@/stores";
     import {
         crrTabStore,

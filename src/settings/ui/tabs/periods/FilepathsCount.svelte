@@ -7,7 +7,7 @@
     import { notesWithFormatIn, type IGranularity } from "@/io";
     import { FilepathModal } from "@/ui/modals/filepath-select";
     import { cn } from "@/ui/utils";
-    import { Writable } from "svelte/store";
+    import { type Writable } from "svelte/store";
 
     interface Props {
         settings: Writable<PeriodSettings>;

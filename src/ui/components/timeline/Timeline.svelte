@@ -2,8 +2,8 @@
   import { fly } from "svelte/transition";
 
   import { TIMELINE_TYPE } from "@/constants";
-  import { IGranularity } from "@/io";
-  import { settingsStore, TimelineViewMode } from "@/settings";
+  import { type IGranularity } from "@/io";
+  import { settingsStore, type TimelineViewMode } from "@/settings";
   import { noteAt } from "@/io";
   import { Arrow } from "@/ui";
   import { cn } from "@/ui/utils";

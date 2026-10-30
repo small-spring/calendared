@@ -1,6 +1,6 @@
 <script lang="ts">
   import { cn } from "@/ui/utils";
-  import { Snippet } from "svelte";
+  import { type Snippet } from "svelte";
 
   interface Props {
     name?: string | Snippet;

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { getPeriodicityFromGranularity, IGranularity } from "@/io";
+    import { getPeriodicityFromGranularity, type IGranularity } from "@/io";
     import { capitalize } from "@/utils";
 
     interface Props {

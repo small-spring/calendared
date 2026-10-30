@@ -1,7 +1,7 @@
 <script lang="ts">
     import {
         ConfirmationModal,
-        IConfirmationDialogParams,
+        type IConfirmationDialogParams,
     } from "@/ui/modals/confirmation";
 
     interface Props {

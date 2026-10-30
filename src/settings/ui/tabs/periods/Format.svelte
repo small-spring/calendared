@@ -6,10 +6,10 @@
     type IGranularity,
   } from "@/io";
   import { validateFormat } from "@/io/validation";
-  import { settingsStore, TFormat, type PeriodSettings } from "@/settings";
+  import { settingsStore, type TFormat, type PeriodSettings } from "@/settings";
   import { Button } from "@/ui/components/core";
   import { createConfirmationDialog } from "@/ui/modals/confirmation";
-  import { INotesContext } from "@/ui/types";
+  import { type INotesContext } from "@/ui/types";
   import { cn, genNoticeFragment } from "@/ui/utils";
   import { Notice, debounce, normalizePath, setIcon, TFile } from "obsidian";
   import { renameForFormat } from "@/periods";
