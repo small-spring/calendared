@@ -21,6 +21,7 @@
     import { settingsStore } from "@/settings";
     import { weekSchemeFor } from "@/weeks";
     import { inLocale, monthGrid } from "@/calendar-locale";
+    import { noteAt, vaultSource } from "@/io";
 
     let { weekdaysShort } = $derived($localeDataStore);
     // Calendared: also rebuild when the week start changes (upstream only did on month changes, so the dates
@@ -36,6 +37,12 @@
         {} as Record<IGranularity, boolean>,
     );
     let containerEl: HTMLDivElement | null = $state(null);
+
+    // Calendared: the row whose weekly note is the open note, read from Obsidian like the date buttons
+    const isOpenWeek = (days: moment.Moment[]) => {
+        const file = noteAt("week", getStartOfWeek(days), $settingsStore).file;
+        return !!file && vaultSource().activeFile()?.path === file.path;
+    };
 
     $effect.pre(() => {
         const enabledPeriodsRes = getEnabledPeriods($settingsStore.periods);
@@ -89,7 +96,11 @@
             </thead>
             <tbody>
                 {#each month as week (week.days[0].format("YYYY-MM-DD"))}
-                    <tr>
+                    <tr
+                        class:pnc-week-row={enabledPeriods.week}
+                        class:is-open-week={enabledPeriods.week &&
+                            isOpenWeek(week.days)}
+                    >
                         {#if enabledPeriods.week}
                             <td
                                 class="[border-right:1px_solid_var(--background-modifier-border)] pr-1"
@@ -272,5 +283,37 @@
 
     .weekend {
         background-color: var(--color-background-weekend);
+    }
+
+    /* Calendared: with weekly notes on, the open week's row is tinted, and hovering a week number shows the row it opens.
+       Each cell draws its part behind its contents (the first and last round the ends): cells in a collapsed table cannot
+       be rounded, and a shape on the row itself is laid out by the browser as an extra cell */
+    .pnc-week-row > td {
+        position: relative;
+        isolation: isolate;
+    }
+    .pnc-week-row > td::before {
+        content: "";
+        position: absolute;
+        inset: 1px 0;
+        pointer-events: none;
+        z-index: -1;
+        transition: background-color 0.15s;
+    }
+    .pnc-week-row > td:first-child::before {
+        left: 0.5rem;
+        border-radius: var(--radius-m) 0 0 var(--radius-m);
+    }
+    .pnc-week-row > td:last-child::before {
+        right: 0.5rem;
+        border-radius: 0 var(--radius-m) var(--radius-m) 0;
+    }
+    .pnc-week-row:has(> td:first-child :global(.date-bttn:hover)) > td::before {
+        background-color: var(--background-modifier-hover);
+    }
+    /* the open week keeps its tint while its number is hovered */
+    .pnc-week-row.is-open-week > td::before,
+    .pnc-week-row.is-open-week:has(> td:first-child :global(.date-bttn:hover)) > td::before {
+        background-color: color-mix(in srgb, var(--interactive-accent) 14%, transparent);
     }
 </style>
