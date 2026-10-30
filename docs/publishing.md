@@ -115,7 +115,7 @@ Thank you,
 ## 2. ライセンスとクレジット
 
 - [x] `LICENSE` は GPL-3.0（元の版のまま）。`package.json` の `license` も `GPL-3.0-only` にした〔2026-10-29〕
-- [ ] `THIRD_PARTY_NOTICES.md` を作る — Claude
+- [x] `THIRD_PARTY_NOTICES.md` を作る — Claude〔2026-10-30〕
   - ビルドした `main.js` に入る部品と、そのライセンス（2026-10-30 に確認。どれも MIT。MIT は著作権表示と許諾文を添えるのが条件）:
     emoji-mart 5.6.0、@emoji-mart/data 1.2.1、@floating-ui/dom 1.6.12（と @floating-ui/core・@floating-ui/utils）、clsx 2.1.1、
     emoji-regex 10.4.0、svelte 5.57.2、tailwind-merge 2.5.4、uuid 11.1.1、svelte-writable-derived 3.1.1
@@ -129,32 +129,12 @@ Thank you,
 わかっている不具合は直してから公開する。iPhone での確認（7.）で見つかったものもここに足す。
 
 - [x] **言語の扱いを直す**。カレンダーの中だけで言語を付けた日付の複製で書き、Obsidian 全体の moment は変えない — Claude〔2026-10-30〕
-- [ ] **絵文字を自分の言語で検索できるようにする**（2026-10-30 に、公開の前に必須と決めた）— Claude
-  - 今は日本語の検索の言葉だけを同梱していて、ほかの言語の人は英語でしか検索できない（元の版と同じ）
-  - 絵文字ピッカー（emoji-mart）が画面の文言を訳している 20 言語で、検索の言葉（Unicode CLDR から作る）を量ると、合わせて 3.4 MB。
-    全部同梱すると `main.js` が約 0.9 MB から約 4.3 MB になり、起動のたびに読み込む。配れるファイルは `main.js`・`manifest.json`・`styles.css`
-    だけなので、言語ごとの別ファイルは一緒に配れない
-  - 形: 設定に「絵文字を自分の言語で検索する」を置き、ボタンを押したときだけ、その言語のデータをダウンロードしてプラグインのフォルダに保存する。
-    2 回目からは通信しない。日本語も同梱をやめれば `main.js` が小さくなる。画面の文言の訳（言語ごとに数 KB）は 20 言語とも同梱してよい
-  - 決めたこと（2026-10-30）: 日本語も同梱しない。ダウンロードしたデータはプラグインのフォルダに保存し、設定をオフにしても消さない
-    （オンに戻したときに落とし直さない）。消すためのボタンは別に置く。プラグインを更新しても残る（置き換わるのは `main.js` などだけ）。端末ごとに 1 回ダウンロードする
-  - 規約: 開発者ポリシーが禁じるのは自分自身や依存部品（コード）を自分でインストール・更新することで、データのダウンロードは当たらない。
-    通信は README に書けば許される。送るのは欲しい言語だけ
-  - ダウンロード元（2026-10-30 に A に決めた）: このリポジトリの `data/emoji-keywords/` に言語ごとのファイルを入れ、jsDelivr
-    （`cdn.jsdelivr.net/gh/small-spring/calendared@<タグ>/data/emoji-keywords/<言語>.json`）から、プラグインの版のタグを指定して取る
-    - コードに「データを最後に変えた版」を 1 つ書き、そのタグから取る。保存したファイルにその版を記録し、変わったときだけ落とし直す
-    - jsDelivr から取れないときは、GitHub の raw（`raw.githubusercontent.com`）から取り直す
-    - 選ばなかった案: B. データ専用の Release に添付する（データの Release が「最新」になると、BRAT など最新の Release から入れる道具が
-      それを見てしまう）、C. jsDelivr の npm から CLDR の元データを取ってプラグインの中で変換する（ダウンロードが大きく、変換のコードが入る）
-    - jsDelivr は公開リポジトリしか配れないので、通しで試せるのはリポジトリを公開にしてから。それまでは開発用の版で手元のファイルに差し替えて確かめる
-  - 通信するので、README に、いつ・どこへ通信するかを書く（開発者ポリシーの開示事項）。jsDelivr を使うなら、その名前とアドレスも書く
-    （jsDelivr 自体に表示の義務はない）
-  - 明記すること（2026-10-30 に確認）: 検索の言葉は Unicode CLDR 48.2.0（npm の `cldr-annotations-full`・`cldr-annotations-derived-full`）から作った
-    データで、ライセンスは Unicode License v3。手を加えて配ってよいが、コピーと一緒に、または付属の文書に、Unicode の著作権表示と許諾文を載せる
-    - データを置くフォルダに、Unicode のライセンス文（`LICENSE`）と、元のデータの名前・版・スクリプトで作り直したことの説明を置く
-    - `THIRD_PARTY_NOTICES.md` と README のクレジットにも載せる（2.）
-    - Unicode の名前を宣伝に使わない（「Unicode 公式」に見える書き方をしない）
-    - ファイルの中の絵文字の id は emoji-mart（MIT）のもの。`THIRD_PARTY_NOTICES.md` の emoji-mart の表示でまかなえる
+- [x] **絵文字を自分の言語で検索できるようにする** — Claude〔2026-10-30〕
+  - 設定の「Emoji search languages」で、20 言語から選んで追加する。「Add languages」で選んで「Download」を押したときだけダウンロードし、
+    プラグインのフォルダに保存する。仕組みは [stickers.md](stickers.md) の 10 章、データの作り方は [development.md](development.md)
+  - データは `data/emoji-keywords/` に置き、jsDelivr（取れなければ GitHub の raw）からコミットを固定して取る。リポジトリを公開にするまで、
+    本番の版のダウンロードは失敗する（7. で、公開にしたあとに通しで確かめる）
+  - README に、いつ・どこへ通信するかを書く（5.）。Unicode のライセンス表示は `data/emoji-keywords/` と `THIRD_PARTY_NOTICES.md` に置いた（2.）
 - [x] 開発用の版の警告 `lifecycle_double_unmount`。部品を外す処理を、2 回目は何もしない形にした — Claude〔2026-10-30〕
 - [ ] 書式を消すときの確認で、ファイル数が実際より多く出る（同じ名前になる書式が 2 つあるとき。[todo.md](todo.md) の「2. 公開後、早めに」）。
   小さな問題なので、公開の前にやるかは決める — 自分
@@ -184,7 +164,8 @@ Thank you,
   - 何ができるか（カレンダー、タイムライン、ステッカー、周期ノートの設定と書式、週の決め方、コマンド）
   - 使い方、設定、スクリーンショット（撮るのは自分）
   - クレジットとライセンス（2. の内容）
-  - 外部への通信はしない（開発者ポリシーで README に書く必要があるのは、通信する場合などなので、書かなくてもよい）
+  - 通信すること（開発者ポリシーの開示事項）: 絵文字の検索の言語を追加したときだけ、その言語の検索の言葉を jsDelivr（`cdn.jsdelivr.net`）か
+    GitHub（`raw.githubusercontent.com`）からダウンロードする。送るのは言語だけ。それ以外は通信しない
 - [ ] 日本語の説明は `docs/` に残す（今のまま）
 
 ## 6. リポジトリの整理
@@ -203,6 +184,7 @@ Thank you,
 
 - [ ] `npm test`・`npm run build`・`npm run deploy` が通る — Claude
 - [ ] Release から入れて動くか。BRAT でこのリポジトリを指定して入れるのが手軽 — 自分
+- [ ] 絵文字の検索の言語を、本番の版で jsDelivr から追加できるか（リポジトリを公開にしてから。取れないときに GitHub の raw から取れるかも）— 自分
 - [ ] **iPhone での確認**（公開の前に必須）: 見え方、タップ、右クリックの代わり（長押し）、ホバーを前提にした機能 — 自分
   - 入れ方は [device-testing.md](device-testing.md)（Remotely Save で Calendared のフォルダだけを同期する）か、Release から BRAT で
   - 2026-10-30 に、タイムラインの見え方（見出しバーの下に出る、設定どおりの開閉で始まる）は確かめた

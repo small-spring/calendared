@@ -39,9 +39,9 @@
 
 プロパティ欄を直接編集して `sticker: 🎉` と書いても同じ。
 
-**絵文字の検索**: Obsidian の表示言語が日本語なら、ピッカーを日本語で検索できる（「いいね」→ 👍、「旅行」→ ✈️、「日本」→ 🗾 🇯🇵 など）。
-ピッカーの文言（「検索」「よく使う絵文字」など）も日本語になる。英語の名前でも引き続き検索できる。
-ほかの言語は今のところ英語のみ（追加のしかたは 10 章）
+**絵文字の検索**: 英語のほかに、設定の「Emoji search languages」で追加した言語でも検索できる（日本語なら「いいね」→ 👍、
+「旅行」→ ✈️、「日本」→ 🗾 🇯🇵 など）。追加できるのは 20 言語。追加した言語の検索の言葉は、そのとき 1 回だけダウンロードして
+プラグインのフォルダに保存する（10 章）。ピッカーの文言（「検索」「よく使う絵文字」など）は、追加しなくても Obsidian の表示言語になる
 
 ## 3. 設定
 
@@ -116,7 +116,7 @@ Calendared ではタグ形式を **読まない** ので、元の版で付けた
 | 内容 | 場所 |
 |---|---|
 | 付ける（`setSticker`）・読む（`getSticker`）・プロパティ名（`getStickerProperty`）・禁止リスト（`RESERVED_STICKER_PROPERTIES`） | `src/ui/utils/picker.ts` |
-| 絵文字ピッカーの表示言語・言語ごとのキーワード | `src/ui/utils/emoji-locale.ts`、`src/ui/utils/emoji-keywords/`、`scripts/build-emoji-keywords.mjs` |
+| 絵文字ピッカーの表示言語・検索の言語 | `src/ui/utils/emoji-locale.ts`、`src/emoji-search.ts`、`data/emoji-keywords/`、`scripts/build-emoji-keywords.mjs`、設定は `src/settings/ui/tabs/calendar/EmojiLanguages.svelte`・`AddEmojiLanguages.svelte` |
 | 絵文字ピッカーの表示 | `src/ui/utils/picker.ts`（`initializePicker`）、`src/ui/components/StickerPopover.svelte`、`src/ui/popovers/sticker.ts` |
 | 見出しバーのボタン（`StickerActions`）、ピッカーを開く・外す共通処理（`openStickerPicker`, `removeSticker`） | `src/ui/sticker-actions.ts`、`src/ui/utils/picker.ts`（`removeSticker`） |
 | ピッカーの「Remove sticker」ボタン | `src/ui/components/StickerPopover.svelte` |
@@ -155,16 +155,27 @@ Calendared ではタグ形式を **読まない** ので、元の版で付けた
 **絵文字の検索を表示言語に対応させる仕組み**（`src/ui/utils/emoji-locale.ts`）
 
 - emoji-mart の検索は、絵文字データの `id` `name` `keywords` `emoticons` だけを見る（英語）。各キーワードの「先頭一致」で探す
-- Unicode CLDR の注釈（言語ごとの絵文字の名前とキーワード）から、言語ごとのキーワード表を作ってプラグインに同梱し、
-  ピッカーに渡すデータの `keywords` に足している。Obsidian の表示言語は `getLanguage()`（古い版では localStorage の `language`）で読む
-- キーワード表は `scripts/build-emoji-keywords.mjs` で作る（`src/ui/utils/emoji-keywords/<言語>.json`、絵文字の id → キーワード）。
-  元データは開発用の依存 `cldr-annotations-full`（通常の絵文字）と `cldr-annotations-derived-full`（国旗・肌の色など）
+- Unicode CLDR の注釈（言語ごとの絵文字の名前とキーワード）から、言語ごとのキーワード表（`data/emoji-keywords/<言語>.json`、
+  絵文字の id → キーワード）を作ってこのリポジトリに置いている。プラグインには同梱しない（20 言語で約 3.4 MB）
+  - 作るのは `scripts/build-emoji-keywords.mjs`。元データは開発用の依存 `cldr-annotations-full`（通常の絵文字）と `cldr-annotations-derived-full`（国旗・肌の色など）
   - CLDR は絵文字の異体字セレクタ（U+FE0F）を省いた形で持っているので、それを無視して突き合わせる
   - 国旗の名前は「旗: 日本」のような形なので、`:` で分けて両方をキーワードにする
-- emoji-mart は、英語以外の文言を、渡されないとネットから取りに行く。それを避けるため、`@emoji-mart/data/i18n/<言語>.json` も同梱して渡す
-- **言語を足すには**: `node scripts/build-emoji-keywords.mjs <言語コード>` でキーワード表を作り、`emoji-locale.ts` の `LOCALES` に
-  キーワード表と emoji-mart の i18n を足す。1 言語あたりプラグインが 140 KB ほど大きくなる
-- CLDR のデータを新しい版にしたら、同じスクリプトでキーワード表を作り直す
+  - 対象は emoji-mart が文言を訳している言語。Sanskrit は CLDR にほとんど言葉がなく、表が空になるので外した
+  - 出どころとライセンス（Unicode License v3）は `data/emoji-keywords/README.md`・`LICENSE` と `THIRD_PARTY_NOTICES.md` に書いた
+- 設定の「Add languages」で言語を選んで「Download」を押したときだけ、その言語の表をダウンロードする（`src/emoji-search.ts` の `EmojiKeywordStore`）
+  - 取る先は jsDelivr（`cdn.jsdelivr.net/gh/small-spring/calendared@<コミット>/data/emoji-keywords/<言語>.json`）。取れなければ GitHub の raw。
+    コミットは `EMOJI_DATA_REF` で固定しているので、公開した版のプラグインが取る中身は変わらない。送るのはファイルの名前（言語）だけ
+  - 中身を確かめてから、データの版（`EMOJI_DATA_REF`）と一緒にプラグインのフォルダの `emoji-keywords/<言語>.json` に保存する。
+    どの言語を入れているかは、このファイルで決まる（設定には持たない。新しい端末で勝手にダウンロードしないため）
+  - 起動時は保存したファイルを読むだけで、通信しない。データの版が変わったファイルは使わない（入れ直しが要る）
+  - 設定には言語ごとの大きさを出す（`EMOJI_DATA_SIZES_KB`。実際のファイルとずれないことをテストで確かめている）
+- 入れた言語の表は、ピッカーに渡すデータの `keywords` に、英語の後ろに足す。emoji-mart は最初に受け取ったデータを持ち続け、
+  ピッカーを作るたびに `search`（検索用の文字列）がない絵文字だけ作り直すので、いつも同じデータを渡し、言語を足したり消したりしたら
+  その中の `keywords` を書き換えて `search` を消す。次にピッカーを開いたときから効く（プラグインを入れ直したあと、Obsidian を再起動するまでは、
+  前に読み込んだときのピッカーが使われるので効かない）
+- emoji-mart は、英語以外の文言を、渡されないとネットから取りに行く。それを避けるため、`@emoji-mart/data/i18n/<言語>.json`（20 言語、合わせて約 80 KB）を
+  同梱し、Obsidian の表示言語（`getLanguage()`、古い版では localStorage の `language`）のものを渡す
+- CLDR のデータを新しい版にしたら、同じスクリプトで表を作り直し、コミットしてから、そのコミットを `EMOJI_DATA_REF` に書く（[development.md](development.md)）
 
 **実装上の注意**
 

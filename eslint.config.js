@@ -23,9 +23,11 @@ export default defineConfig([
   },
   {
     // Calendared: unit tests run outside Obsidian, so they load moment from npm (same version Obsidian bundles)
+    // and may read the repository's files with Node.js (e.g. data/emoji-keywords/)
     files: ["src/**/*.test.ts", "src/test-*.ts"],
     rules: {
       "no-restricted-imports": "off",
+      "import/no-nodejs-modules": "off",
     },
   },
 ]);

@@ -20,6 +20,7 @@ import TimelineManager from './ui/components/timeline/manager';
 import { Popover } from './ui/popovers';
 import { getDailyNotesPlugin } from './utils';
 import { CalendarView } from './view';
+import { initEmojiSearch } from './ui/utils/emoji-locale';
 import { getNoteSticker, isPeriodicNote, openStickerPicker, removeSticker, StickerActions } from './ui/sticker-actions';
 
 export default class PeriodicNotesCalendarPlugin extends Plugin {
@@ -65,6 +66,8 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     this.addSettingTab(new SettingsTab());
 
     setupLocale()
+    // Calendared: the picker's search in Obsidian's language, from keywords downloaded on request (emoji-search.ts)
+    initEmojiSearch(this.app, this.manifest.dir ?? `${this.app.vault.configDir}/plugins/${this.manifest.id}`).catch(console.error);
     this.handleRibbon();
 
     // register view

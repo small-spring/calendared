@@ -11,6 +11,7 @@
   import { derived as derivedStore } from "svelte/store";
   import { Notice, Platform } from "obsidian";
   import { isReservedStickerProperty, RESERVED_STICKER_PROPERTIES } from "@/ui/utils/picker";
+  import EmojiLanguages from "./EmojiLanguages.svelte";
 
   // Sticker
   // Calendared: stickers live in one property. Upstream's prefix / migrate / backup settings were removed
@@ -208,6 +209,7 @@
         />
       {/snippet}
     </SettingItem>
+    <EmojiLanguages />
   </div>
   {/if}
 </div>

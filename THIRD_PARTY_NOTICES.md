@@ -271,7 +271,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 The emoji search keywords in [data/emoji-keywords](data/emoji-keywords) are derived from the emoji annotations of the
 Unicode Common Locale Data Repository (CLDR) 48.2.0 (npm: `cldr-annotations-full`, `cldr-annotations-derived-full`),
 and were modified by `scripts/build-emoji-keywords.mjs`. They are not bundled in `main.js`; Calendared downloads the
-file for one language when the user turns that on. This data is not an official Unicode product.
+file for a language when the user adds it. This data is not an official Unicode product.
 
 ```text
 UNICODE LICENSE V3

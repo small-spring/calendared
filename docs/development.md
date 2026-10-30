@@ -64,10 +64,23 @@
 どれも開発用サーバーや細工した入力が前提で、このプロジェクトでの実害はない。
 Vitest 3 には critical が 2 件あった（テスト用サーバー経由のファイル読み出しなど）ので、直っている Vitest 5 を使っている。
 
-## 絵文字の日本語キーワード
+## 絵文字の検索の言葉
 
-`src/ui/utils/emoji-keywords/ja.json` は `scripts/build-emoji-keywords.mjs` で、Unicode CLDR の注釈
-（開発用の依存 `cldr-annotations-full` / `cldr-annotations-derived-full`）から生成する。
+`data/emoji-keywords/<言語>.json` は `node scripts/build-emoji-keywords.mjs` で、Unicode CLDR の注釈
+（開発用の依存 `cldr-annotations-full` / `cldr-annotations-derived-full`）から生成する。プラグインには同梱せず、
+ユーザーが設定で言語を追加したときに、jsDelivr 経由でこのリポジトリから取る（[stickers.md](stickers.md) の 10 章）。
+
+- 作り直したら、`src/emoji-search.ts` の `EMOJI_DATA_SIZES_KB`（言語ごとの大きさ）を直す。ずれているとテストが落ちる
+- 作り直したファイルをコミットして push してから、そのコミットの ID を `EMOJI_DATA_REF` に書く（プラグインはそのコミットから取る）。
+  前のデータを保存している人は、版が変わるので入れ直しが要る
+- CLDR を新しい版にしたら、`data/emoji-keywords/README.md` と `THIRD_PARTY_NOTICES.md` の版も直す
+- 手元で試す: リポジトリを小さなサーバーで配り、ダウンロード先をそこに向けた開発用の版を入れる。終わったらサーバーを止める
+
+  ```bash
+  python3 -m http.server 8765 --bind 127.0.0.1
+  VITE_EMOJI_DATA_BASE=http://localhost:8765/ DEPLOY_MODE=development npm run deploy
+  ```
+- jsDelivr と GitHub の raw は公開リポジトリしか配れないので、本番の版のダウンロードは、リポジトリを公開にするまで失敗する
 
 ## 書き方の決まり
 

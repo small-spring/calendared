@@ -15,8 +15,8 @@ import { fileURLToPath } from "url";
 const require = createRequire(import.meta.url);
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const outDir = join(root, "data/emoji-keywords");
-// keep in step with EMOJI_SEARCH_LANGUAGES in src/emoji-search.ts
-const ALL = ["ar", "be", "cs", "de", "es", "fa", "fi", "fr", "hi", "it", "ja", "ko", "nl", "pl", "pt", "ru", "sa", "tr", "uk", "vi", "zh"];
+// keep in step with EMOJI_SEARCH_LANGUAGES in src/emoji-search.ts (Sanskrit is left out: CLDR has almost no emoji words in it)
+const ALL = ["ar", "be", "cs", "de", "es", "fa", "fi", "fr", "hi", "it", "ja", "ko", "nl", "pl", "pt", "ru", "tr", "uk", "vi", "zh"];
 const locales = process.argv.slice(2).length ? process.argv.slice(2) : ALL;
 
 const emojiMart = JSON.parse(readFileSync(require.resolve("@emoji-mart/data/sets/15/native.json"), "utf8"));

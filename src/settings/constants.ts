@@ -124,6 +124,8 @@ export const REMOVED_SETTINGS = [
   // Calendared: the list of periodic notes, now counted from the vault when the settings show it (docs/state.md, ADR-S2)
   "filepaths",
   "filepathsByFormatValue",
+  // Calendared: an unreleased toggle for the emoji search language; installed languages are now the files in the plugin's folder
+  "emojiSearchInLanguage",
 ] as const;
 /** Calendared: per-period settings of removed features (`periods.<granularity>.preview`: TODO / preview sections) */
 export const REMOVED_PERIOD_SETTINGS = ["preview"] as const;

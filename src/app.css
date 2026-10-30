@@ -78,3 +78,74 @@
 .is-phone .mod-root .workspace-leaf-content:has(> [data-type="periodic-notes-calendar-timeline"]) .view-content .markdown-source-view > .cm-editor > .cm-scroller {
   padding-top: calc(var(--view-top-spacing-markdown) + var(--pnc-timeline-height, 0px) + var(--size-4-2));
 }
+
+/* Calendared: the "Add emoji search languages" dialog (AddEmojiLanguages.svelte) */
+.calendared-language-search {
+  width: 100%;
+  margin-bottom: var(--size-4-2);
+}
+.calendared-language-list {
+  max-height: 50vh;
+  overflow-y: auto;
+}
+.calendared-language-heading {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+  margin: var(--size-4-3) 0 var(--size-4-1);
+}
+.calendared-language-row {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4-3);
+  padding: var(--size-4-2) var(--size-4-1);
+  border-radius: var(--radius-s);
+  cursor: var(--cursor);
+}
+.calendared-language-row:hover:not(.is-done) {
+  background-color: var(--background-modifier-hover);
+}
+.calendared-language-name {
+  flex: 1;
+}
+.calendared-language-name span,
+.calendared-language-size,
+.calendared-language-empty,
+.calendared-language-note {
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+}
+.calendared-language-name span {
+  margin-left: var(--size-4-2);
+}
+.calendared-language-note {
+  margin: var(--size-4-3) 0 0;
+}
+
+/* Calendared: the installed emoji search languages, listed under "Emoji search languages" (EmojiLanguages.svelte) */
+.calendared-language-items {
+  /* the same side padding as Obsidian's setting items, so the remove buttons end where the setting buttons do,
+     plus an indent on the left */
+  padding: 0 var(--setting-items-padding-x, 0px) var(--size-4-3) calc(var(--setting-items-padding-x, 0px) + var(--size-4-2));
+}
+/* the icon button's own padding would leave its icon short of the edge */
+.calendared-language-item .clickable-icon {
+  margin-inline-end: calc(-1 * var(--size-2-3));
+}
+.calendared-language-item {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4-2);
+  min-height: var(--input-height);
+  font-size: var(--font-ui-small);
+  /* the row lights up on hover, tying the remove button on the far right to its language */
+  margin-inline: calc(-1 * var(--size-4-2));
+  padding-inline: var(--size-4-2);
+  border-radius: var(--radius-s);
+}
+.calendared-language-item:hover {
+  background-color: var(--background-modifier-hover);
+}
+/* the remove button turns red on hover, to show that it deletes */
+.calendared-language-item .clickable-icon:hover {
+  color: var(--text-error);
+}

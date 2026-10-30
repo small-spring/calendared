@@ -3,9 +3,10 @@
 Search keywords for Calendared's sticker picker, one file per language (`<language>.json`). Each file maps an emoji-mart
 emoji id to the words that find it in that language, for example `{ "+1": ["いいね", "グッド", "サムズアップ", "親指", ...] }`.
 
-Calendared does not bundle these files. When you turn on "Search emoji in your language" in the settings, it downloads
-the file for Obsidian's display language once, from this repository through jsDelivr (`cdn.jsdelivr.net`), or from
-GitHub (`raw.githubusercontent.com`) if jsDelivr can't be reached, and keeps it in the plugin's folder.
+Calendared does not bundle these files. When you add a language under "Emoji search languages" in the settings, it
+downloads that language's file once, from this repository through jsDelivr (`cdn.jsdelivr.net`), or from GitHub
+(`raw.githubusercontent.com`) if jsDelivr can't be reached, and keeps it in the plugin's folder. Sanskrit, which
+emoji-mart also translates to, has no file: CLDR has almost no emoji words in it.
 
 ## Source
 
