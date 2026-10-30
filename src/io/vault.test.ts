@@ -41,7 +41,7 @@ const settings = vi.hoisted(() => {
             quarter: period(false, "YYYY-[Q]Q", "四半期"),
             year: period(true, "YYYY", "年"),
         },
-        localeSettings: { localeOverride: "en", weekStartId: 1, weekNumbering: "iso" as const },
+        localeSettings: { localeOverride: "en", weekStartId: 1 },
         stickersEnabled: true,
         stickerProperty: "sticker",
     });

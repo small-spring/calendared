@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { weekSchemeFor } from "@/weeks";
 import { isBackupPath, notesOnlyWithFormat, notesWithFormat } from "./notes-by-format";
 
-const weeks = weekSchemeFor({ weekStartId: 1, weekNumbering: "iso" });
+const weeks = weekSchemeFor({ weekStartId: 1 });
 const md = (path: string) => {
     const name = path.slice(path.lastIndexOf("/") + 1);
     const dot = name.lastIndexOf(".");

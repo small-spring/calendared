@@ -65,8 +65,8 @@ export function toSupportedWeekStart(weekStartId: number): number {
     return weekStartId === 5 ? 6 : 1;
 }
 
-/** The week scheme for the settings. Only "iso" exists so far (ADR-006); settings saved before the field existed use it too */
-export function weekSchemeFor(settings: { weekStartId: number; weekNumbering?: "iso" }): WeekScheme {
+/** The week scheme for the settings: always the ISO one, starting on the set day (ADR-006) */
+export function weekSchemeFor(settings: { weekStartId: number }): WeekScheme {
     return createIsoWeekScheme(toSupportedWeekStart(settings.weekStartId));
 }
 

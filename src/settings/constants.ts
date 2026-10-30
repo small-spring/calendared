@@ -68,9 +68,6 @@ export interface ISettings {
 
     /** ID of the day to start the week (0 for Sunday, 1 for Monday, etc.). Calendared: only 6, 0 or 1 (Sat, Sun, Mon) */
     weekStartId: number;
-
-    /** Calendared: how weeks are numbered (docs/periods.md, ADR-006). Only "iso" exists so far; not shown in the settings */
-    weekNumbering: "iso";
   };
 }
 
@@ -148,6 +145,5 @@ export const DEFAULT_SETTINGS: ISettings = Object.freeze({
   localeSettings: {
     localeOverride: sysLocaleKey,
     weekStartId: toSupportedWeekStart(sysWeekStartId),
-    weekNumbering: "iso" as const,
   },
 });

@@ -93,8 +93,8 @@ describe("設定から週の決め方を選ぶ", () => {
         expect([0, 1, 2, 3, 4, 5, 6].map(toSupportedWeekStart)).toEqual([0, 1, 1, 1, 1, 6, 6]);
     });
 
-    it("今の決め方は ISO だけ（決め方の欄がない古い設定も ISO）", () => {
-        expect(weekSchemeFor({ weekStartId: 0, weekNumbering: "iso" }).weekOf(d("2026-10-25"))).toEqual(week(2026, 44));
+    it("決め方はいつも ISO（週の始まりだけを設定から読む）", () => {
+        expect(weekSchemeFor({ weekStartId: 0 }).weekOf(d("2026-10-25"))).toEqual(week(2026, 44));
         expect(weekSchemeFor({ weekStartId: 3 }).rangeOf(week(2026, 44))!.start.format("YYYY-MM-DD")).toBe("2026-10-26");
     });
 });

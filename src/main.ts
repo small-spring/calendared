@@ -197,12 +197,13 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
       for (const key of REMOVED_SETTINGS) {
         delete (newSettings as Record<string, unknown>)[key];
       }
-      // Calendared: weeks start on Saturday, Sunday or Monday only, and are numbered by a week scheme (docs/periods.md)
+      // Calendared: weeks start on Saturday, Sunday or Monday only (docs/periods.md)
       newSettings.localeSettings = {
         ...newSettings.localeSettings,
         weekStartId: toSupportedWeekStart(newSettings.localeSettings.weekStartId),
-        weekNumbering: newSettings.localeSettings.weekNumbering ?? "iso",
       };
+      // Calendared: weeks are always numbered the ISO way; drop the field that was kept for other ways (ADR-006)
+      delete (newSettings.localeSettings as Record<string, unknown>).weekNumbering;
       const periods = newSettings.periods
       Object.values(periods).forEach((periodSettings) => {
         for (const key of REMOVED_PERIOD_SETTINGS) {

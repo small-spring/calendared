@@ -48,7 +48,6 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 | Template | Periods › 各周期 | `periods.<周期>.templatePath` | 空 | テンプレートのファイル | 残す |
 | Open on startup | Periods › 各周期 | `periods.<周期>.openAtStartup` | オフ | 起動時にこの周期の今のノートを開く（全体で 1 つだけ） | 周期ごとのトグルをやめ、全体の選択肢「なし / 日 / 週 / 月 / 四半期 / 年」1 つにする |
 | Week starts on | Calendar › Localization | `localeSettings.weekStartId` | Obsidian の言語の既定（土・日・月に寄せる） | 週の始まり | 残す。Obsidian 本体に同じ設定がないので要る。周期ノート全体の設定へ移す |
-| ― | ― | `localeSettings.weekNumbering` | `iso` | 週番号の付け方。今は ISO だけ | 画面に出さないまま（[periods.md](periods.md) の ADR-006） |
 | Creation confirmation | Calendar › Interaction behavior | `shouldConfirmBeforeCreate` | オン | ノートを作る前に確認する | 残す。周期ノート全体の設定へ移す |
 | ― | ― | `shouldConfirmBeforeDeleteFormat` | オン | 書式を消す前に確認する | 設定画面に出し、「次から聞かない」を戻せるようにする |
 | ― | ― | `shouldConfirmBeforeReplaceAllFormats` | オン | 書式の一括の付け替えの前に確認する | 設定画面に出し、戻せるようにする |
@@ -147,7 +146,7 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 | Calendar › Interaction behavior | 作成の確認、ホバーのプレビュー | 1. 周期ノート、3. カレンダー |
 | Calendar › Localization | カレンダーの言語、週の始まり | 3. カレンダー、1. 周期ノート（週の決め方） |
 | Periods › 各周期 | オン・オフ、書式、フォルダ、テンプレート、起動時に開く | 1. 周期ノート |
-| （画面になし） | 確認 6 つ、`yearsRangesStart`、`weekNumbering` | 1.・3. に散らばる |
+| （画面になし） | 確認 6 つ、`yearsRangesStart` | 1.・3. に散らばる |
 
 ## 設定画面の整理で決めること
 

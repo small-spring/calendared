@@ -15,7 +15,7 @@ vi.mock("@/settings", () => {
                 quarter: { formats: format("q", "YYYY-[Q]Q") },
                 year: { formats: format("y", "YYYY") },
             },
-            localeSettings: { weekStartId: 1, weekNumbering: "iso" },
+            localeSettings: { weekStartId: 1 },
         }),
     };
 });
