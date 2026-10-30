@@ -178,3 +178,4 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 - Calendar タブの名前と説明を、設定画面だけを見てもわかるように直した。パンくずの見出しは「Period breadcrumbs」（コミュニティプラグイン「Breadcrumbs」と紛れないように）、「Show on non-periodic notes」「Days shown」「Confirm before creating notes」など。見出しバーのボタンの設定には、ボタンと同じアイコンを名前の横に出し、場所は Obsidian 本体と同じ「tab title bar」と書く。「Compact on desktop」は見出しのない別の段にし、ステッカーがオフのときは「Show stickers」を隠す。見出しのトグルは、説明が 2 行になっても見出しの右に置く〔2026-10-31〕
 - 見出しバーのステッカーのボタンのツールチップを「Manage sticker」にした（コマンドと右クリックの項目と同じ）〔2026-10-31〕
 - 設定「Hover preview」（Ctrl/Cmd を押さなくてもホバーでプレビューを出す）を削った。カレンダーのホバーのプレビューは Ctrl/Cmd を押しながら〔2026-10-31〕
+- 設定画面の見出しのトグル（ステッカー・パンくず・ミニカレンダー）で、スマホのとき説明とトグルの間が大きく空いていたのを詰めた。説明が行の幅いっぱいまで使う〔2026-10-31〕

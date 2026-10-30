@@ -50,13 +50,17 @@
 
 /* Calendared: a heading with a toggle (Stickers, Period breadcrumbs, Mini calendar) keeps the toggle at the right of
    the heading. Obsidian lets the heading wrap and sizes its text to the description, so a two-line description pushed
-   the toggle below it, and a one-line one left the toggle touching the text */
+   the toggle below it, and a one-line one left the toggle touching the text. The toggle's box only takes the toggle's
+   width; otherwise it grows as much as the text and leaves a wide gap on phones */
 #pnc-settings-container .setting-group > .setting-item-heading.mod-toggle {
   flex-wrap: nowrap;
 }
 #pnc-settings-container .setting-group > .setting-item-heading.mod-toggle .setting-item-info {
   flex: 1 1 0;
   margin-inline-end: var(--size-4-4);
+}
+#pnc-settings-container .setting-group > .setting-item-heading.mod-toggle .setting-item-control {
+  flex: 0 0 auto;
 }
 
 /* settings suggestions are appended to body; keep them above the settings modal */
