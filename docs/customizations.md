@@ -166,3 +166,4 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 - 文書をさらに分けた。作業の一覧は `docs/todo.md` だけにし（公開の手続きのチェックリストもここへ）、設計は `docs/plans/`、
   やり方・参考は `docs/guides/`、調べたことは `docs/research/`、使い終わったものは `docs/archive/` に置いた。機能と設定の一覧は `docs/spec/overview.md`〔2026-10-30〕
 - `manifest.json` の `authorUrl` を small-spring の GitHub にし、元の作者の Ko-fi を指していた `fundingUrl` を消した〔2026-10-30〕
+- `manifest.json`・`package.json` の説明（`description`）を自分の版の文にした（仮。機能を詰め終えたら書き直す）〔2026-10-30〕

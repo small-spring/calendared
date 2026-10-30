@@ -2,7 +2,7 @@
   "id": "calendared",
   "name": "Calendared",
   "version": "0.1.0",
-  "description": "Organize periodic notes from daily to yearly with a calendar interface. Navigate and summarize entries using stickers in the calendar view.",
+  "description": "Keep your days, weeks, months, and years calendared. Every span of time gets its own note, a place on the calendar, and an emoji to remember it by.",
   "author": "small-spring",
   "authorUrl": "https://github.com/small-spring",
   "isDesktopOnly": false,
