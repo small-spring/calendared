@@ -58,7 +58,7 @@ vi.mock("@/settings", async () => {
 });
 
 const { settingsStore } = await import("@/settings");
-const { getNotePath, getFileData, noteAt, notesWithFormatIn } = await import("./vault");
+const { getNotePath, getFileData, noteAt, notesOnlyWithFormatIn, notesWithFormatIn } = await import("./vault");
 const { initVaultSource } = await import("./vault-source");
 const { PluginService } = await import("@/app-service");
 
@@ -219,5 +219,16 @@ describe("notesWithFormatIn: 設定画面の「書式ごとのファイル数」
         const passed = settings.initial();
         passed.periods.day.enabled = false;
         expect(notesWithFormatIn("day", "YYYY-MM-DD", passed)).toEqual(["Daily/2026-10-30.md"]);
+    });
+});
+
+describe("notesOnlyWithFormatIn: 書式を消すときの確認の数。その周期のフォルダで、ほかの書式では読めないノート", () => {
+    const note = (path: string) =>
+        Object.assign(new TFile(), { path, basename: path.slice(path.lastIndexOf("/") + 1, -3), extension: "md" });
+
+    it("同じ名前を書くほかの書式があれば、そのノートは数えない", () => {
+        fake.files.set("週/2026-W44.md", note("週/2026-W44.md"));
+        expect(notesOnlyWithFormatIn("week", "YYYY-[W]ww", ["GGGG-[W]WW"], settings.initial())).toEqual([]);
+        expect(notesOnlyWithFormatIn("week", "YYYY-[W]ww", [], settings.initial())).toEqual(["週/2026-W44.md"]);
     });
 });

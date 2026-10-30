@@ -2,6 +2,7 @@
   import { DEFAULT_FORMATS_PER_GRANULARITY } from "@/constants";
   import {
     ensureFolderExists,
+    notesOnlyWithFormatIn,
     notesWithFormatIn,
     type IGranularity,
   } from "@/io";
@@ -73,9 +74,6 @@
   });
   let { triggerRerender } = getContext<INotesContext>("notesContext");
   const formatId = $derived(format.id);
-
-  // Calendared: counted from the vault while shown (docs/state.md, ADR-S2); upstream kept the list in data.json
-  let filesCount = $derived(notesWithFormatIn(granularity, format.value, $settingsStore).length);
 
   // Calendared: weekly names come from the week scheme (the row's Monday), not from today's date
   const previewName = (formatValue: string) => {
@@ -319,14 +317,20 @@
       triggerRerender?.update((n) => n + 1);
     };
 
-    if (filesCount) {
+    // Calendared: confirm only when notes would stop being recognized, i.e. no other valid format of the period reads
+    // them; upstream counted every note the format reads, so two formats writing the same name each claimed them
+    const others = Object.values($settings.formats)
+      .filter((f) => f.id !== format.id && !f.error)
+      .map((f) => f.value);
+    const onlyHere = notesOnlyWithFormatIn(granularity, format.value, others, $settingsStore);
+    if (onlyHere.length) {
       const shouldConfirm = $settingsStore.shouldConfirmBeforeDeleteFormat;
       if (shouldConfirm) {
         createConfirmationDialog({
           title: `Delete format`,
           text: {
             Component: DeleteFormatText,
-            props: { settings, granularity, format },
+            props: { settings, granularity, format, filepaths: onlyHere },
           },
           note: {
             Component: DeleteFormatNote,

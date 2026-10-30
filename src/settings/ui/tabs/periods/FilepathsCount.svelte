@@ -16,6 +16,8 @@
         selected?: boolean;
         error?: string;
         separator?: string;
+        /** Calendared: the notes to count instead of all the format reads (deleting a format counts only its own) */
+        filepaths?: string[];
     }
 
     let {
@@ -25,10 +27,11 @@
         selected = false,
         error = "",
         separator = " • ",
+        filepaths: given,
     }: Props = $props();
 
     // Calendared: counted from the vault while shown (docs/state.md, ADR-S2); upstream kept the list in data.json
-    let filepaths = $derived(notesWithFormatIn(granularity, format.value, $settingsStore));
+    let filepaths = $derived(given ?? notesWithFormatIn(granularity, format.value, $settingsStore));
     let filesCount = $derived(filepaths.length);
     let _selected = $derived(selected);
 

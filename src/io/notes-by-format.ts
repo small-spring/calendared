@@ -36,3 +36,22 @@ export function notesWithFormat(
     })
     .map((file) => file.path);
 }
+
+/**
+ * Calendared: the notes only this format reads, for the confirmation before deleting it. Notes another format of the
+ * period also reads (two formats that write the same name, e.g. `YYYY-[W]ww` and `GGGG-[W]WW`) are still recognized
+ * after it is deleted, so they are not counted; upstream counted every note the format reads
+ */
+export function notesOnlyWithFormat(
+  files: { path: string; basename: string; extension: string }[],
+  granularity: IGranularity,
+  { folder, format, others }: { folder: string; format: string; others: string[] },
+  weeks: WeekScheme,
+): string[] {
+  const readByOthers = new Set(
+    others
+      .filter((other) => other.trim())
+      .flatMap((other) => notesWithFormat(files, granularity, { folder, format: other }, weeks)),
+  );
+  return notesWithFormat(files, granularity, { folder, format }, weeks).filter((path) => !readByOthers.has(path));
+}

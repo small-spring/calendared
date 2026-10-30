@@ -8,14 +8,16 @@
         settings: Writable<PeriodSettings>;
         granularity: IGranularity;
         format: PeriodSettings["formats"][number];
+        filepaths: string[];
     }
 
-    let { settings, granularity, format }: Props = $props();
+    let { settings, granularity, format, filepaths }: Props = $props();
 </script>
 
 Are you sure you want to delete this format? <FilepathsCount
     {settings}
     {granularity}
     {format}
+    {filepaths}
     separator=""
-/> using it.
+/> can only be read with it.
