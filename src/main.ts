@@ -5,7 +5,7 @@ import { mount, type SvelteComponent } from 'svelte';
 import { get } from 'svelte/store';
 import { PluginService } from './app-service';
 import { CALENDAR_LUCIDE_ICON, granularities, LEAF_TYPE } from './constants';
-import { basename, createOrOpenNote, getFileData, getStartupNoteGranularity, initVaultSource, isBackupPath, storeAllVaultPeriodicFilepaths } from './io';
+import { createOrOpenNote, getFileData, getStartupNoteGranularity, initVaultSource, isBackupPath } from './io';
 import { getPeriodicityFromGranularity } from './io/parse';
 import type { IGranularity } from './io/types';
 import { isValidPeriodicNote } from './io/validation';
@@ -14,7 +14,6 @@ import { toSupportedWeekStart, weekSchemeFor } from './weeks';
 import {
   activeFileStore,
   displayedDateStore,
-  internalFileModStore,
   setupLocale,
   themeStore,
 } from './stores';
@@ -184,9 +183,6 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
           confirmBeforeCreateOverride: false,
         });
       }
-
-      // index existing notes
-      storeAllVaultPeriodicFilepaths(true)
     });
   }
 
@@ -311,12 +307,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
       this.app.vault.on('create', (file) => this.onFileCreated(file))
     );
     this.registerEvent(
-      this.app.vault.on('delete', (file) => this.onFileDeleted(file))
-    );
-    this.registerEvent(
-      this.app.vault.on('rename', (file, oldPath) =>
-        this.onFileRenamed(file, oldPath)
-      )
+      this.app.vault.on('rename', (file) => this.onFileRenamed(file))
     );
     this.registerEvent(
       this.app.workspace.on('file-open', (file) => this.onFileOpen(file))
@@ -386,91 +377,40 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     }
   }
 
+  /**
+   * Calendared: tell when a note is named like a periodic note but with a format that has an error. Upstream also kept
+   * a list of the vault's periodic notes in the settings (data.json) up to date here; the views and the settings now
+   * read the vault itself (docs/state.md, ADR-S2)
+   */
   private onFileCreated(file: TAbstractFile) {
     if (!(file instanceof TFile)) return;
+    if (!this.app.workspace.layoutReady) return;
+    if (file.extension !== 'md' || isBackupPath(file.path)) return;
 
-    if (get(internalFileModStore) === 'created') return;
-
-
-    if (this.app.workspace.layoutReady) {
-      if (file.extension !== 'md') return;
-      if (isBackupPath(file.path)) return;
-
-      const { isValid, granularity, format } = isValidPeriodicNote(file.basename);
-
-      if (isValid === false) {
-        const fragment = document.createDocumentFragment();
-        mount(InvalidFormat, {
-          // @ts-ignore
-          target: fragment,
-          props: {
-            granularity,
-            filepath: file.path,
-            formatValue: format.value,
-            error: format.error
-          }
-        })
-        new Notice(fragment, 10000)
-      }
-      if (typeof isValid === "boolean") {
-        settingsStore.addFilepath(file.path, format.value)
-      }
-    }
+    this.noticeIfInvalidFormat(file);
   }
 
-  private async onFileDeleted(file: TAbstractFile): Promise<void> {
-    if (!(file instanceof TFile)) return;
-
-    if (get(internalFileModStore) === 'deleted') return;
-
-    if (this.app.workspace.layoutReady) {
-      if (file.extension !== 'md') return;
-
-      const { granularity, format } = isValidPeriodicNote(file.basename);
-
-      if (granularity && format) {
-        settingsStore.deleteFilepath(file.path, format.value)
-      }
-
-      // Calendared: upstream cleared the calendar's selection and the timeline's note here for any deleted note, so
-      // deleting an unrelated note from the file explorer dropped the open note's highlight. When the open note itself
-      // is deleted, Obsidian shows another file (or none) and `file-open` updates both (onFileOpen, layoutSync)
-    }
-  }
-
-  private async onFileRenamed(renamedFile: TAbstractFile, oldPath: string): Promise<void> {
+  private onFileRenamed(renamedFile: TAbstractFile) {
     if (!(renamedFile instanceof TFile)) return;
 
-    if (get(internalFileModStore) === 'renamed') return;
+    this.noticeIfInvalidFormat(renamedFile);
+  }
 
-    const _oldData = isValidPeriodicNote(basename(oldPath));
-    const _newData = isValidPeriodicNote(renamedFile.basename);
+  private noticeIfInvalidFormat(file: TFile) {
+    const { isValid, granularity, format } = isValidPeriodicNote(file.basename);
+    if (isValid !== false) return;
 
-    if (_newData.isValid === false) {
-      const fragment = document.createDocumentFragment();
-      mount(InvalidFormat, {
-        // @ts-ignore
-        target: fragment,
-        props: {
-          granularity: _newData.granularity,
-          filepath: renamedFile.path,
-          formatValue: _newData.format.value,
-          error: _newData.format.error
-        }
-      })
-      new Notice(fragment, 10000)
-    }
-    settingsStore.renameFilepath({
-      oldData: {
-        path: oldPath,
-        formatValue: _oldData.format?.value,
-        toBeDeleted: typeof _oldData.isValid === "boolean"
-      },
-      newData: {
-        path: renamedFile.path,
-        formatValue: _newData.format?.value,
-        toBeAdded: typeof _newData.isValid === 'boolean' && renamedFile.extension === 'md'
+    const fragment = document.createDocumentFragment();
+    mount(InvalidFormat, {
+      // @ts-ignore
+      target: fragment,
+      props: {
+        granularity,
+        filepath: file.path,
+        formatValue: format.value,
+        error: format.error
       }
     })
+    new Notice(fragment, 10000)
   }
 }

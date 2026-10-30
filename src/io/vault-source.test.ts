@@ -31,7 +31,10 @@ function fakeApp() {
     const files = new Map<string, unknown>();
     const caches = new Map<string, unknown>();
     let dailyNotes: unknown = null;
-    const vault = Object.assign(fakeEvents(), { getAbstractFileByPath: (path: string) => files.get(path) ?? null });
+    const vault = Object.assign(fakeEvents(), {
+        getAbstractFileByPath: (path: string) => files.get(path) ?? null,
+        getMarkdownFiles: () => [...files.values()].filter((f) => f instanceof TFile && f.path.endsWith(".md")),
+    });
     const metadataCache = Object.assign(fakeEvents(), { getFileCache: (file: TFile) => caches.get(file.path) ?? null });
     const workspace = fakeEvents();
     const internalPlugins = { getPluginById: (id: string) => (id === "daily-notes" ? dailyNotes : null) };
@@ -160,11 +163,30 @@ describe("createVaultSource: Obsidian にそのまま聞く", () => {
         expect(source.fileAt("a.md")).toBeNull();
     });
 
+    it("folderAt: パスにあるフォルダを返す（何もないか、ファイルなら null）", () => {
+        const folder = Object.assign(new TFolder(), { path: "日記" });
+        fake.files.set("日記", folder);
+        fake.files.set("a.md", fileAt("a.md"));
+        expect(source.folderAt("日記")).toBe(folder);
+        expect(source.folderAt("a.md")).toBeNull();
+        expect(source.folderAt("ない")).toBeNull();
+    });
+
     it("metadataOf: ファイルのメタデータを返す（なければ null）", () => {
         const cache = { frontmatter: { sticker: "👍" } };
         fake.caches.set("a.md", cache);
         expect(source.metadataOf(fileAt("a.md"))).toBe(cache);
         expect(source.metadataOf(fileAt("b.md"))).toBeNull();
+    });
+
+    it("markdownFiles: Vault の Markdown のファイルを全部返す（今のもの）", () => {
+        const a = fileAt("a.md");
+        const b = fileAt("日記/b.md");
+        fake.files.set(a.path, a);
+        fake.files.set(b.path, b);
+        expect(source.markdownFiles()).toEqual([a, b]);
+        fake.files.delete(a.path);
+        expect(source.markdownFiles()).toEqual([b]);
     });
 
     it("dailyNotes: Obsidian のコアプラグイン「デイリーノート」を返す（なければ null）", () => {

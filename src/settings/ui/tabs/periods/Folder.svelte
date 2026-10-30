@@ -1,7 +1,6 @@
 <script lang="ts">
     import {
         getPeriodicityFromGranularity,
-        storeAllVaultPeriodicFilepaths,
         type IGranularity,
     } from "@/io";
     import { validateFolder } from "@/io/validation";
@@ -9,7 +8,6 @@
     import { onDestroy, onMount } from "svelte";
     import { type PeriodSettings, FolderSuggest } from "@/settings";
     import { cn } from "@/ui/utils";
-    import { debounce } from "obsidian";
     import { Writable } from "svelte/store";
 
     interface Props {
@@ -24,24 +22,10 @@
     let error: string = $derived(validateFolder(value));
     let folderSuggestInstance: FolderSuggest;
 
+    // Calendared: the file counts follow the folder by themselves (counted from the vault while shown);
+    // upstream rebuilt the saved list of notes here, dropping the other periods' entries until a restart
     const handleInput = () => {
-        const setLoading = (loading: boolean) => {
-            settings.update((s) => {
-                Object.values(s.formats).forEach((format) => {
-                    s.formats[format.id].loading = loading;
-                });
-
-                return s;
-            });
-        };
-        setLoading(true);
         $settings.folder = value.trim();
-        debounce(() => {
-            if (error.trim() === "") {
-                storeAllVaultPeriodicFilepaths(true, [granularity]);
-                setLoading(false);
-            }
-        }, 1000)();
     };
 
     $effect.pre(() => {

@@ -1,7 +1,6 @@
 import { PluginService } from '@/app-service';
 import { join } from '@/io';
 import { PeriodSettings, settingsStore, TFormat } from '@/settings';
-import { internalFileModStore } from '@/stores/notes';
 import { FuzzyMatch, FuzzySuggestModal, normalizePath, Notice, TAbstractFile, TFile } from 'obsidian';
 import { mount } from "svelte";
 import { get, Writable } from 'svelte/store';
@@ -223,7 +222,7 @@ export class FilepathModal extends FuzzySuggestModal<string> {
 
     const deleteFile = async () => {
       try {
-        await this.deleteFile(file, filepath)
+        await this.deleteFile(file)
 
         this.filePaths = this.filePaths.filter(path => path !== filepath);
         this.updateSuggestions();
@@ -294,7 +293,7 @@ export class FilepathModal extends FuzzySuggestModal<string> {
         if (!isFileValid || !(file instanceof TFile)) continue;
 
         try {
-          await this.deleteFile(file, filepath);
+          await this.deleteFile(file);
           deletedFilesCountStore.update((count) => count + 1);
         } catch (error) {
           new Notice(
@@ -388,16 +387,8 @@ export class FilepathModal extends FuzzySuggestModal<string> {
     inputContainer?.insertAdjacentElement('afterend', this.topBarContainer);
   }
 
-  private async deleteFile(file: TFile, filePath: string) {
-    internalFileModStore.set("deleted")
-
-    // Calendared: clear the mark on failure too; upstream left it set, so later deletions by others were ignored
-    try {
-      await this.app.fileManager.trashFile(file);
-      settingsStore.deleteFilepath(filePath, this.format.value);
-    } finally {
-      internalFileModStore.set(null)
-    }
+  private async deleteFile(file: TFile) {
+    await this.app.fileManager.trashFile(file);
   }
 
   private isFileValid(filepath: string, file: TAbstractFile | null) {

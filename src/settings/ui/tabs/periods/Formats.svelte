@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { storeAllVaultPeriodicFilepaths, type IGranularity } from "@/io";
+    import { type IGranularity } from "@/io";
     import { validateFormat } from "@/io/validation";
     import { settingsStore, type PeriodSettings } from "@/settings";
     import { checkWeekFormat, isoWeekFormatFor, weekSchemeFor, type WeekName } from "@/weeks";
@@ -61,7 +61,6 @@
             s.selectedFormat = format;
             return s;
         });
-        storeAllVaultPeriodicFilepaths(false, [granularity], { [id]: format });
     }
 </script>
 

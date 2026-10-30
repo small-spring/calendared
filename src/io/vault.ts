@@ -4,6 +4,7 @@ import { type DnPluginSettings, normalizePeriodSettings } from "./settings";
 import { DAILY_NOTES_PLUGIN_ID } from "@/constants";
 import { stickerFrom, type TSticker } from "@/stickers";
 import { vaultSource } from "./vault-source";
+import { notesWithFormat } from "./notes-by-format";
 import { type ISettings, settingsStore } from "@/settings";
 import { get } from "svelte/store";
 import { PluginService } from "@/app-service";
@@ -86,6 +87,21 @@ export function noteAt(
   const vault = vaultSource();
   const file = vault.fileAt(periodNotePath(granularity, date, settings, vault.dailyNotes()));
   return { file, sticker: file && stickerFrom(vault.metadataOf(file), settings) };
+}
+
+/**
+ * Calendared: the notes a format of a period reads, for the settings' file counts and lists. Read while rendering with
+ * `$settingsStore`, it is counted from the vault only while the settings show it, and again when Obsidian reports a
+ * change (docs/state.md, ADR-S2)
+ */
+export function notesWithFormatIn(
+  granularity: IGranularity,
+  format: string,
+  settings: Pick<ISettings, "periods" | "localeSettings">,
+): string[] {
+  const vault = vaultSource();
+  const { settings: { folder } } = normalizePeriodSettings(granularity, settings.periods, vault.dailyNotes());
+  return notesWithFormat(vault.markdownFiles(), granularity, { folder, format }, weekSchemeFor(settings.localeSettings));
 }
 
 export async function getTemplateInfo(

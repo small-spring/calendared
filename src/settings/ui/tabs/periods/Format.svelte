@@ -2,12 +2,11 @@
   import { DEFAULT_FORMATS_PER_GRANULARITY } from "@/constants";
   import {
     ensureFolderExists,
-    storeAllVaultPeriodicFilepaths,
+    notesWithFormatIn,
     type IGranularity,
   } from "@/io";
   import { validateFormat } from "@/io/validation";
   import { settingsStore, TFormat, type PeriodSettings } from "@/settings";
-  import { internalFileModStore } from "@/stores/notes";
   import { Button } from "@/ui/components/core";
   import { createConfirmationDialog } from "@/ui/modals/confirmation";
   import { INotesContext } from "@/ui/types";
@@ -75,10 +74,8 @@
   let { triggerRerender } = getContext<INotesContext>("notesContext");
   const formatId = $derived(format.id);
 
-  let filepaths = $derived(
-    $settingsStore.filepathsByFormatValue[format.value] || {},
-  );
-  let filesCount = $derived(Object.keys(filepaths).length);
+  // Calendared: counted from the vault while shown (docs/state.md, ADR-S2); upstream kept the list in data.json
+  let filesCount = $derived(notesWithFormatIn(granularity, format.value, $settingsStore).length);
 
   // Calendared: weekly names come from the week scheme (the row's Monday), not from today's date
   const previewName = (formatValue: string) => {
@@ -136,14 +133,6 @@
         return s;
       });
     }, 500)();
-
-    setLoading(true);
-    debounce(() => {
-      storeAllVaultPeriodicFilepaths(false, [granularity], {
-        [format.id]: format,
-      });
-      setLoading(false);
-    }, 800)();
   }
 
   function handleSelect() {
@@ -179,8 +168,6 @@
     e.preventDefault();
 
     const replaceAll = () => {
-      internalFileModStore.set("renamed");
-
       const oldFormats = $settings.formats;
       settings.update((s) => {
         // 1. select format
@@ -195,15 +182,14 @@
 
         oldFormatsParsedCount += 1;
 
-        const oldFilepaths =
-          $settingsStore.filepathsByFormatValue[oldFormat.value] || {};
-        const oldFilesCount = Object.keys(oldFilepaths).length;
+        const oldFilepaths = notesWithFormatIn(granularity, oldFormat.value, $settingsStore);
+        const oldFilesCount = oldFilepaths.length;
 
         if (!oldFilesCount) return;
 
         setLoading(true, true);
 
-        Object.keys(oldFilepaths).forEach(
+        oldFilepaths.forEach(
           async (oldFilepath, oldFilepathIndex) => {
             const abstractFile =
               PluginService.getPlugin()?.app.vault.getAbstractFileByPath(
@@ -231,19 +217,6 @@
                 newNormalizedPath,
               );
 
-              settingsStore.renameFilepath({
-                oldData: {
-                  path: oldFilepath,
-                  formatValue: oldFormat.value,
-                  toBeDeleted: true,
-                },
-                newData: {
-                  path: newNormalizedPath,
-                  formatValue: format.value,
-                  toBeAdded: true,
-                },
-              });
-
               // set loading to false when reaching the last filepath of the last parsable format,
               // call here and not after the loop to ensure loading is updated after the last rename op is completed
               if (
@@ -251,7 +224,6 @@
                 oldFilepathIndex === oldFilesCount - 1
               ) {
                 setLoading(false, true);
-                internalFileModStore.set(null);
               }
             } catch (error) {
               new Notice(
@@ -269,7 +241,6 @@
                 oldFilepathIndex === oldFilesCount - 1
               ) {
                 setLoading(false, true);
-                internalFileModStore.set(null);
               }
             }
           },
@@ -355,7 +326,7 @@
           title: `Delete format`,
           text: {
             Component: DeleteFormatText,
-            props: { settings, format },
+            props: { settings, granularity, format },
           },
           note: {
             Component: DeleteFormatNote,
@@ -515,7 +486,7 @@
 
     <div class="flex items-center justify-between pl-[1px]">
       <div class="[font-size:calc(var(--font-ui-small)+1px)]">
-        <FilepathsCount {settings} {format} {selected} {error} />
+        <FilepathsCount {settings} {granularity} {format} {selected} {error} />
         {#if error}
           <span class="text-[var(--text-error)]"
             >{previewName(value)} •

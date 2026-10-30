@@ -17,7 +17,10 @@ vi.mock("@/app-service", () => ({
     PluginService: {
         getPlugin: () => ({
             app: {
-                vault: { getAbstractFileByPath: (path: string) => fake.files.get(path) ?? null },
+                vault: {
+                    getAbstractFileByPath: (path: string) => fake.files.get(path) ?? null,
+                    getMarkdownFiles: () => [...fake.files.values()].filter((f) => f instanceof TFile),
+                },
                 metadataCache: { getFileCache: (file: TFile) => fake.caches.get(file.path) ?? null },
                 internalPlugins: { getPluginById: () => fake.dailyNotes },
             },
@@ -55,7 +58,7 @@ vi.mock("@/settings", async () => {
 });
 
 const { settingsStore } = await import("@/settings");
-const { getNotePath, getFileData, noteAt } = await import("./vault");
+const { getNotePath, getFileData, noteAt, notesWithFormatIn } = await import("./vault");
 const { initVaultSource } = await import("./vault-source");
 const { PluginService } = await import("@/app-service");
 
@@ -192,5 +195,29 @@ describe("noteAt: 渡した設定で、その日付の周期ノートとステ�
         const passed = settings.initial();
         passed.periods.day.enabled = false;
         expect(noteAt("day", date("2026-10-30"), passed)).toEqual({ file, sticker: null });
+    });
+});
+
+describe("notesWithFormatIn: 設定画面の「書式ごとのファイル数」。その周期のフォルダで、書式に名前が合うノート", () => {
+    const note = (path: string) =>
+        Object.assign(new TFile(), { path, basename: path.slice(path.lastIndexOf("/") + 1, -3), extension: "md" });
+
+    it("周期の設定のフォルダから、窓口の今のファイルを数える", () => {
+        for (const path of ["日記/2026-10-30.md", "日記/メモ.md", "2026-10-31.md"]) fake.files.set(path, note(path));
+        expect(notesWithFormatIn("day", "YYYY-MM-DD", settings.initial())).toEqual(["日記/2026-10-30.md"]);
+    });
+
+    it("選んでいない書式でも、その書式で数える", () => {
+        fake.files.set("日記/20261030.md", note("日記/20261030.md"));
+        expect(notesWithFormatIn("day", "YYYYMMDD", settings.initial())).toEqual(["日記/20261030.md"]);
+    });
+
+    it("日次ノートを無効にしていれば、コアプラグイン「デイリーノート」のフォルダで数える", () => {
+        fake.files.set("Daily/2026-10-30.md", note("Daily/2026-10-30.md"));
+        fake.files.set("ほか/2026-10-31.md", note("ほか/2026-10-31.md"));
+        fake.dailyNotes = { enabled: true, instance: { options: { format: "YYYY-MM-DD", folder: "Daily" } } };
+        const passed = settings.initial();
+        passed.periods.day.enabled = false;
+        expect(notesWithFormatIn("day", "YYYY-MM-DD", passed)).toEqual(["Daily/2026-10-30.md"]);
     });
 });

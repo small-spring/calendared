@@ -6,6 +6,7 @@ import { normalizePath } from 'obsidian';
 import { formatPeriod, parsePeriod, rangeOfPeriod, type PeriodName } from '@/periods';
 import { weekSchemeFor } from '@/weeks';
 import { PluginService } from '@/app-service';
+import { vaultSource } from '../vault-source';
 
 export function removeEscapedCharacters(format: string): string {
     const withoutBrackets = format.replace(/\[[^\]]*\]/g, ''); // remove everything within brackets
@@ -44,7 +45,9 @@ export function validateFolder(folder: string): string {
         return "";
     }
 
-    if (!PluginService.getPlugin()?.app.vault.getAbstractFileByPath(normalizePath(folder))) {
+    // Calendared: read through the vault source, so the settings show the error as soon as the folder is renamed or
+    // deleted (upstream checked only while the field was edited, and accepted a file's path)
+    if (!vaultSource().folderAt(normalizePath(folder))) {
         return "Folder not found in vault";
     }
 

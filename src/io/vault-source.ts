@@ -1,5 +1,5 @@
 import { DAILY_NOTES_PLUGIN_ID } from "@/constants";
-import { type App, type CachedMetadata, type EventRef, TFile } from "obsidian";
+import { type App, type CachedMetadata, type EventRef, TFile, TFolder } from "obsidian";
 import { tick } from "svelte";
 import { createSubscriber } from "svelte/reactivity";
 import type { DnPluginSettings } from "./settings";
@@ -12,7 +12,11 @@ import type { DnPluginSettings } from "./settings";
 export type VaultSource = {
     /** The file at the path, or null (nothing there, or a folder) */
     fileAt(path: string): TFile | null;
+    /** The folder at the path, or null (nothing there, or a file) */
+    folderAt(path: string): TFolder | null;
     metadataOf(file: TFile): CachedMetadata | null;
+    /** Every Markdown file in the vault (for counting notes in the settings; the calendar looks notes up by path) */
+    markdownFiles(): TFile[];
     /** Obsidian's core Daily notes plugin, whose settings the day notes follow while the plugin's own are off */
     dailyNotes(): DnPluginSettings | null;
 };
@@ -63,9 +67,18 @@ export function createVaultSource(app: App, schedule: Schedule = nextFrame): Vau
             const file = app.vault.getAbstractFileByPath(path);
             return file instanceof TFile ? file : null;
         },
+        folderAt(path) {
+            subscribe();
+            const folder = app.vault.getAbstractFileByPath(path);
+            return folder instanceof TFolder ? folder : null;
+        },
         metadataOf(file) {
             subscribe();
             return app.metadataCache.getFileCache(file);
+        },
+        markdownFiles() {
+            subscribe();
+            return app.vault.getMarkdownFiles();
         },
         dailyNotes() {
             subscribe();

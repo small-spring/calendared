@@ -32,8 +32,6 @@ export interface ISettings {
     viewMode: TimelineViewMode;
     restViewMode: TimelineViewMode;
   };
-  filepaths: Record<string, string>;
-  filepathsByFormatValue: Record<string, Record<string, string> | undefined>;
 
 
   /** Calendared: property that holds a note's sticker emoji (see docs/stickers.md) */
@@ -123,6 +121,9 @@ export const REMOVED_SETTINGS = [
   "crrNldModalGranularity",
   "crrNldModalgranularityInputVal",
   "syncCalendar",
+  // Calendared: the list of periodic notes, now counted from the vault when the settings show it (docs/state.md, ADR-S2)
+  "filepaths",
+  "filepathsByFormatValue",
 ] as const;
 /** Calendared: per-period settings of removed features (`periods.<granularity>.preview`: TODO / preview sections) */
 export const REMOVED_PERIOD_SETTINGS = ["preview"] as const;
@@ -139,8 +140,6 @@ export const DEFAULT_SETTINGS: ISettings = Object.freeze({
     viewMode: 'expanded' as const,
     restViewMode: 'collapsed' as const,
   },
-  filepaths: {},
-  filepathsByFormatValue: {},
   stickerProperty: "sticker",
   stickersEnabled: true,
   stickerHeaderButton: true,

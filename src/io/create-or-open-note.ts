@@ -1,5 +1,5 @@
 import { settingsStore } from "@/settings";
-import { activeFileStore, internalFileModStore } from "@/stores/notes";
+import { activeFileStore } from "@/stores/notes";
 import { createConfirmationDialog } from "@/ui/modals/confirmation";
 import { Notice, TFile, WorkspaceLeaf } from "obsidian";
 import { get } from "svelte/store";
@@ -104,15 +104,11 @@ export async function createNote(granularity: IGranularity, date: moment.Moment)
   const [templateContents] = await getTemplateInfo(templatePath);
 
   try {
-    internalFileModStore.set("created");
-
     const file = await PluginService.getPlugin()?.app.vault.create(
       normalizedPath,
       replaceTemplateContents(date, selectedFormat.value, templateContents, weekSchemeFor(get(settingsStore).localeSettings))
     );
     if (!file || !(file instanceof TFile)) return;
-
-    settingsStore.addFilepath(normalizedPath, selectedFormat.value)
 
     return file;
   } catch (err) {
@@ -120,8 +116,5 @@ export async function createNote(granularity: IGranularity, date: moment.Moment)
     new Notice(`Failed to create file: '${normalizedPath}'`);
 
     return null
-  } finally {
-    // Calendared: clear the mark on failure too; upstream left it set, so later notes created by others were ignored
-    internalFileModStore.set(null)
   }
 }
