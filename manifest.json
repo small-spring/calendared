@@ -4,8 +4,7 @@
   "version": "0.1.0",
   "description": "Organize periodic notes from daily to yearly with a calendar interface. Navigate and summarize entries using stickers in the calendar view.",
   "author": "small-spring",
-  "authorUrl": "https://github.com/luiisca",
-  "fundingUrl": "https://ko-fi.com/luiscadillo",
+  "authorUrl": "https://github.com/small-spring",
   "isDesktopOnly": false,
   "minAppVersion": "1.7.7"
 }

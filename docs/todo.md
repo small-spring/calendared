@@ -33,10 +33,19 @@
 
 ## 2. パートナーに使ってもらう
 
+見せる前に、manifest と README を自分の版として整える（2026-10-30 に決めた）。
+
+- manifest.json と package.json
+  - `description` を自分の版の説明にする（`manifest.json`・`package.json`。英語の案を作る）— Claude、決めるのは自分
+  - `minAppVersion`（今は 1.7.7）を決める。設定画面を 1.13 の宣言で書く形にするなら上げるか、古い版向けの書き方も持つか — Claude
+- README を英語で、今の仕様に合わせて書き直す（書くことは [guides/publishing.md](guides/publishing.md) の「README に書くこと」）。
+  機能を詰め終えてから書く。スクリーンショットは自分 — Claude
+  - おすすめのキーの割り当てを載せる（既定のホットキーは付けない。公開のガイドラインに従う）。例: 今日のノート Cmd+D、前後のノート Cmd+← / →、
+    今月のノート Cmd+M、カレンダーの表示 Cmd+Shift+C（自分の Vault の割り当て）。Cmd+← / → は編集中の行頭・行末への移動と重なることも書き添える
 - 渡し方を決める。リポジトリは公開していないので、BRAT で入れるには GitHub のトークンが要る。
   手軽なのは、`main.js`・`manifest.json`・`styles.css` を Vault の `.obsidian/plugins/calendared/` に置く形（[guides/device-testing.md](guides/device-testing.md)）。
   リポジトリが非公開の間は、絵文字の検索の言語を追加できない（jsDelivr から取れない）ので、要るなら言語のファイルも一緒に渡す — 自分と Claude
-- 使い方の短い説明を用意する（日本語。何ができるか、おすすめのキーの割り当て）— Claude
+- 使い方の短い説明を用意する（日本語。README の要約でよい）— Claude
 - しばらく使ってもらい、感想を聞く。聞きたいこと: 何に使ったか、わかりにくかった所、要らない機能、欲しい機能 — 自分
 - もらった感想をこの一覧に振り分ける（直す・作る・見送る）— 自分と Claude
 
@@ -58,14 +67,7 @@
     下書きからリポジトリへのリンクを消す）— 自分
   - issue を出す — 自分
   - 返事を待つ。許可が出たら、issue へのリンクを README のクレジットに書く。30 日たっても返事がなければ、B の形で進める — 自分
-- manifest.json と package.json
-  - `authorUrl` を自分にする（今は元の作者の GitHub）— Claude
-  - `fundingUrl` を消す（今は元の作者の Ko-fi）— Claude
-  - `description` を自分の版の説明にする（`manifest.json`・`package.json`。英語の案を作る）— Claude、決めるのは自分
-  - `minAppVersion`（今は 1.7.7）を決める。設定画面を 1.13 の宣言で書く形にするなら上げるか、古い版向けの書き方も持つか — Claude
-  - `versions.json`（どの版がどの `minAppVersion` から動くかの対応表）を作るか決める。任意 — Claude
-- README を英語で、今の仕様に合わせて書き直す（書くことは guides/publishing.md の「README に書くこと」。ショートカットのおすすめは下の項目）。
-  スクリーンショットは自分 — Claude
+- `versions.json`（どの版がどの `minAppVersion` から動くかの対応表）を作るか決める。任意 — Claude
 - リポジトリの整理
   - `CHANGELOG.md`: 今は元の版の履歴。消して、自分の版の最初のバージョンから英語で書き始める案 — 決めるのは自分
   - release-please（`release-please-config.json`、`.release-please-manifest.json`）を使い続けるか決める。使わないなら消す — 自分
@@ -86,9 +88,6 @@
   - [customizations.md](customizations.md) を「公開までの改造の記録」として [archive/](archive/) に移し、以後の変更は英語の `CHANGELOG.md` に書く
     （GPL-3.0 の「改変したことと日付」は、README の告知・CHANGELOG・archive の記録で示し続ける）
   - [guides/publishing.md](guides/publishing.md) を archive/ に移し、毎回のリリースの手順を guides/release.md に書く
-- 〔文書〕ショートカットのおすすめを示す（2026-10-30 にメモ）: 既定のホットキーは付けない（公開のガイドラインに従う）代わりに、
-  README などに「おすすめのキーの割り当て」を載せる。例: 今日のノート Cmd+D、前後のノート Cmd+← / →、今月のノート Cmd+M、
-  カレンダーの表示 Cmd+Shift+C（自分の Vault の割り当て）。Cmd+← / → は編集中の行頭・行末への移動と重なることも書き添える
 
 ### 公開のあと、早めに
 
