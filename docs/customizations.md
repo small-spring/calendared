@@ -10,16 +10,16 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 - 2026-10-29 までの詳しい経緯（原因の分析、細かい寸法など）: 前のファイル `CUSTOMIZATIONS.md` の履歴にある
   （`git log -p -- CUSTOMIZATIONS.md`）
 
-各項目の末尾の〔日付〕は、その変更が入った日。コミットの探し方は [development.md](development.md)。
+各項目の末尾の〔日付〕は、その変更が入った日。コミットの探し方は [guides/development.md](guides/development.md)。
 
 ## 名前・ビルド
 
 - プラグイン id / 表示名を `calendared` / `Calendared` に変更（元: `periodic-notes-calendar` / `Periodic notes calendar`）〔2026-10-28〕
-- `npm run deploy` を追加。ビルドし、読み込み確認をしてから Vault にコピーする（[development.md](development.md)）〔2026-10-28〕
-- `.npmrc` に供給網攻撃への対策、依存パッケージの既知の脆弱性を解消（[development.md](development.md)）〔2026-10-28〕
+- `npm run deploy` を追加。ビルドし、読み込み確認をしてから Vault にコピーする（[guides/development.md](guides/development.md)）〔2026-10-28〕
+- `.npmrc` に供給網攻撃への対策、依存パッケージの既知の脆弱性を解消（[guides/development.md](guides/development.md)）〔2026-10-28〕
 - `package.json` の `license` を `GPL-3.0-only` に直した（元は LICENSE と食い違って `MIT` だった）〔2026-10-29〕
 - テストの仕組み（Vitest）を入れ、テンプレートの置き換え・ファイル名の読み取り・周期の日付の計算にテストを書いた。
-  `npm run deploy` はテストが通らないとコピーしない（[development.md](development.md) の「テスト」）〔2026-10-29〕
+  `npm run deploy` はテストが通らないとコピーしない（[guides/development.md](guides/development.md) の「テスト」）〔2026-10-29〕
 - ビルドの道具を更新: Vite 5 → 7、vite-plugin-svelte 4 → 6。`tsconfig.json` の `moduleResolution` を `bundler` に〔2026-10-29〕
 
 ## 不具合修正
@@ -163,3 +163,5 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 - 画面に出していなかった設定「週の決め方」（`localeSettings.weekNumbering`。値は `iso` だけ）を消した。週番号はいつも ISO〔2026-10-30〕
 - 文書を組み直した。目次を `docs/README.md` に置き、機能の仕様を `docs/spec/`、設計判断（ADR）を 1 決定 1 ファイルの `docs/adr/` に分けた。
   ADR の番号は全体で 1 本（0001〜）にし、一覧は各ファイルのプロパティから `npm run adr` で作る（`npm run build` で古くないか確かめる）〔2026-10-30〕
+- 文書をさらに分けた。作業の一覧は `docs/todo.md` だけにし（公開の手続きのチェックリストもここへ）、設計は `docs/plans/`、
+  やり方・参考は `docs/guides/`、調べたことは `docs/research/`、使い終わったものは `docs/archive/` に置いた。機能と設定の一覧は `docs/spec/overview.md`〔2026-10-30〕

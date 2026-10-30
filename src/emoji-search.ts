@@ -1,5 +1,5 @@
 /**
- * Calendared: searching the sticker picker in your own language (docs/publishing.md 3.). emoji-mart only searches
+ * Calendared: searching the sticker picker in your own language (docs/guides/publishing.md). emoji-mart only searches
  * English. Keywords for other languages (data/emoji-keywords/, made from Unicode CLDR) are not bundled: all of them
  * together are about 3.4 MB. When the user turns searching in Obsidian's language on, the file for that language is
  * downloaded once and kept in the plugin's folder; turning it off keeps the file, so turning it on again needs no
@@ -42,7 +42,7 @@ export const EMOJI_DATA_SIZES_KB: Record<EmojiSearchLanguage, number> = {
 
 /**
  * The commit of this repository whose data/emoji-keywords/ the plugin downloads. A commit, not a branch, so the files
- * never change under a released plugin; change it after regenerating the files (docs/development.md)
+ * never change under a released plugin; change it after regenerating the files (docs/guides/development.md)
  */
 export const EMOJI_DATA_REF = "2d499124d00c424818764ec4fd1d737f0d4aaed6";
 

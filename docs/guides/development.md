@@ -30,7 +30,7 @@
   テストは対象のファイルの隣に `<名前>.test.ts` で置く
 - 進め方は t-wada（和田卓人さん）の考え方に沿う
   - 既存のコードを作り直す前に、今の振る舞いをそのまま固定するテスト（仕様化テスト）を書く。おかしいと思った振る舞いも、
-    まずはそのまま固定し、テスト名に【気になる点】と書いて [todo.md](todo.md) に回す
+    まずはそのまま固定し、テスト名に【気になる点】と書いて [todo.md](../todo.md) に回す
   - 新しく作る・直すときは、先にテストを書いて失敗を確かめ（Red）、通るように作り（Green）、整える（Refactor）
   - テストを書いたら、一度コードをわざと壊して、そのテストが落ちることを確かめる（落ちないテストは何も守っていない）
   - テスト名は日本語で、何を確かめているか（仕様）が読んで分かるように書く。1 つのテストでは 1 つの振る舞いを確かめる
@@ -68,7 +68,7 @@ Vitest 3 には critical が 2 件あった（テスト用サーバー経由の�
 
 `data/emoji-keywords/<言語>.json` は `node scripts/build-emoji-keywords.mjs` で、Unicode CLDR の注釈
 （開発用の依存 `cldr-annotations-full` / `cldr-annotations-derived-full`）から生成する。プラグインには同梱せず、
-ユーザーが設定で言語を追加したときに、jsDelivr 経由でこのリポジトリから取る（[stickers.md](spec/stickers.md) の 10 章）。
+ユーザーが設定で言語を追加したときに、jsDelivr 経由でこのリポジトリから取る（[stickers.md](../spec/stickers.md) の 10 章）。
 
 - 作り直したら、`src/emoji-search.ts` の `EMOJI_DATA_SIZES_KB`（言語ごとの大きさ）を直す。ずれているとテストが落ちる
 - 作り直したファイルをコミットして push してから、そのコミットの ID を `EMOJI_DATA_REF` に書く（プラグインはそのコミットから取る）。
@@ -86,7 +86,7 @@ Vitest 3 には critical が 2 件あった（テスト用サーバー経由の�
 
 - 元の版から変えたコードには `Calendared:` で始まるコメントを付ける（何をなぜ変えたか）
 - なぜそうしたか・不具合の原因は、コミットメッセージの本文に書く
-- 元の版から変えたことは [customizations.md](customizations.md) に 1〜2 行で足す。末尾に〔日付〕を付ける
+- 元の版から変えたことは [customizations.md](../customizations.md) に 1〜2 行で足す。末尾に〔日付〕を付ける
 - 元の版の更新は取り込まない（2026-10-29 に決めた。独立してコミュニティプラグインとして公開するため）。
   元の版のファイル（README、CHANGELOG、release-please の設定、`.github/` など）も自由に変えてよい。
   `upstream` の remote は元のコードを見比べる参照用

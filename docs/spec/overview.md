@@ -1,8 +1,8 @@
 # 機能の一覧
 
-Calendared に **今ある機能** と、それぞれの **設定項目**、設定画面の整理（[todo.md](todo.md) の「1. 公開までに」）で
-それぞれを **どう変えるか** をまとめる。整理のあとの目指す姿だけを見たいときは [plan.md](plan.md)。
-元の版との違いは [customizations.md](customizations.md)、各機能の細かい仕様は [stickers.md](spec/stickers.md)・[periods.md](spec/periods.md) にある。
+Calendared に **今ある機能** と、それぞれの **設定項目** をまとめる。今どうなっているかだけを書く。
+設定画面の整理で変わる予定のことは [plans/settings.md](../plans/settings.md)（作り終えたら、ここを書き換える）。
+元の版との違いは [customizations.md](../customizations.md)、各機能の細かい仕様は [stickers.md](stickers.md)・[periods.md](periods.md) にある。
 
 中心は **周期ノート**（日・週・月・四半期・年のノート）を作って行き来すること。カレンダー・タイムライン・ステッカーは、その入口や飾りにあたる。
 
@@ -19,7 +19,6 @@ Calendared に **今ある機能** と、それぞれの **設定項目**、設�
 - 「表示名」は設定画面での名前。画面に出ていないものは「―」
 - 「今の場所」は、`Calendar` タブ・`Periods` タブと、その中の見出し
 - 「キー」は `data.json` での名前（`src/settings/constants.ts` の `ISettings`）。`periods.<周期>.` は周期ごとに持つ
-- 「どうする」は設定画面の整理での方針。**未定** はまだ決めていないもの（2026-10-30 に検討）
 
 ## 1. 周期ノート（土台）
 
@@ -32,7 +31,7 @@ Calendared に **今ある機能** と、それぞれの **設定項目**、設�
   - 件数（「N Files」）を押すと、ファイルの一覧が開き、1 件ずつ・全部を、別のフォルダへ移したり消したりできる（元の版の機能）
 - テンプレート: `{{title}}`・`{{date}}`（ノートの日付）、`{{time}}`・`{{currentDate}}`（今）、`{{monday}}` などの曜日を置き換える。
   `{{date+1d}}` のようにずらす、`{{date:YYYY-MM-DD}}` のように書式を付けることもできる
-- 週の決め方: Google カレンダーと同じ。週の始まりは土・日・月から選び、週番号は ISO 8601（[periods.md](spec/periods.md)）。
+- 週の決め方: Google カレンダーと同じ。週の始まりは土・日・月から選び、週番号は ISO 8601（[periods.md](periods.md)）。
   ファイル名、週番号の列、タイムライン、テンプレートの曜日のすべてに効く
 - 起動時に周期ノートを 1 つ開ける（どれかをオンにするとほかはオフになる）
 - ノートを作る前に確認を出せる
@@ -44,13 +43,13 @@ Calendared に **今ある機能** と、それぞれの **設定項目**、設�
 日・週・月・四半期・年の 5 つが、それぞれ同じ形の設定を持つ（`periods.<周期>.…`）。今の設定画面では「Periods」タブに周期ごとの見出しが並び、
 開くと下の 5 つが出る。
 
-| 表示名 | キー | 日 | 週 | 月 | 四半期 | 年 | 内容 | どうする |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| （周期の見出しのトグル） | `enabled` | オン | オン | オフ | オフ | オフ | その周期を使うか | 残す |
-| Format | `formats`、`selectedFormat` | `YYYY-MM-DD` | `GGGG-[W]WW` | `YYYY-MM` | `YYYY-[Q]Q` | `YYYY` | 書式の一覧と、新しいノートに使う書式 | 書式を 1 つだけにする。前の書式のノートは「移行」で今の書式に変換する（[plan.md](plan.md)） |
-| Folder | `folder` | `/` | `/` | `/` | `/` | `/` | ノートを置くフォルダ | 残す |
-| Template | `templatePath` | 空 | 空 | 空 | 空 | 空 | テンプレートのファイル | 残す。設定画面からそのファイルを開けるようにする |
-| Open on startup | `openAtStartup` | オフ | オフ | オフ | オフ | オフ | 起動時にこの周期の今のノートを開く（5 つのうち 1 つだけオンにできる） | 周期ごとのトグルをやめ、全体の選択肢「なし / 日 / 週 / 月 / 四半期 / 年」1 つにする |
+| 表示名 | キー | 日 | 週 | 月 | 四半期 | 年 | 内容 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| （周期の見出しのトグル） | `enabled` | オン | オン | オフ | オフ | オフ | その周期を使うか |
+| Format | `formats`、`selectedFormat` | `YYYY-MM-DD` | `GGGG-[W]WW` | `YYYY-MM` | `YYYY-[Q]Q` | `YYYY` | 書式の一覧と、新しいノートに使う書式 |
+| Folder | `folder` | `/` | `/` | `/` | `/` | `/` | ノートを置くフォルダ |
+| Template | `templatePath` | 空 | 空 | 空 | 空 | 空 | テンプレートのファイル |
+| Open on startup | `openAtStartup` | オフ | オフ | オフ | オフ | オフ | 起動時にこの周期の今のノートを開く（5 つのうち 1 つだけオンにできる） |
 
 周期によって違うところ
 
@@ -60,10 +59,10 @@ Calendared に **今ある機能** と、それぞれの **設定項目**、設�
 
 ### 周期ノート全体の設定
 
-| 表示名 | 今の場所 | キー | 既定 | 内容 | どうする |
-| --- | --- | --- | --- | --- | --- |
-| Week starts on | Calendar › Localization | `localeSettings.weekStartId` | Obsidian の言語の既定（土・日・月に寄せる） | 週の始まり | 残す。Obsidian 本体に同じ設定がないので要る。周期ノート全体の設定へ移す |
-| ― | ― | （コアのデイリーノートの設定） | ― | 周期「日」がオフのとき、日のノートに使う | 読むのをやめ、Calendared の設定だけにする（コアのデイリーノートをオフにして使えるように）。初めて入れたときに、コアのデイリーノートや Periodic Notes の設定を既定値として読み取る（[plan.md](plan.md) の「移行」） |
+| 表示名 | 今の場所 | キー | 既定 | 内容 |
+| --- | --- | --- | --- | --- |
+| Week starts on | Calendar › Localization | `localeSettings.weekStartId` | Obsidian の言語の既定（土・日・月に寄せる） | 週の始まり |
+| ― | ― | （コアのデイリーノートの設定） | ― | 周期「日」がオフのとき、日のノートに使う |
 
 起動時に開く周期（上の表の「Open on startup」をまとめたもの）も、整理のあとはここに入る。
 確認を出すかどうかの設定は「6. 確認」にまとめた。
@@ -100,11 +99,11 @@ Calendared に **今ある機能** と、それぞれの **設定項目**、設�
 
 ### 設定
 
-| 表示名 | 今の場所 | キー | 既定 | 内容 | どうする |
-| --- | --- | --- | --- | --- | --- |
-| Hover preview | Calendar › Interaction behavior | `autoHoverPreview` | オフ | Ctrl/Cmd を押さなくても、ホバーでプレビューを出す | 消す。`registerHoverLinkSource` で出所「Calendared」を登録し、コアプラグイン「ページプレビュー」の設定（Ctrl/Cmd が要るか）に任せる |
-| Calendar language | Calendar › Localization | `localeSettings.localeOverride` | Obsidian の言語 | カレンダーの中の言語 | 残す（日本語の Obsidian で、カレンダーだけ英語にしたい人など）。周期ノート全体の設定へ移す |
-| ― | ― | `yearsRangesStart` | `2020` | 年のビューの 12 年の区切りの起点 | 消す。保存はされるが、読まれているのは既定の値だけ |
+| 表示名 | 今の場所 | キー | 既定 | 内容 |
+| --- | --- | --- | --- | --- |
+| Hover preview | Calendar › Interaction behavior | `autoHoverPreview` | オフ | Ctrl/Cmd を押さなくても、ホバーでプレビューを出す |
+| Calendar language | Calendar › Localization | `localeSettings.localeOverride` | Obsidian の言語 | カレンダーの中の言語 |
+| ― | ― | `yearsRangesStart` | `2020` | 年のビューの 12 年の区切りの起点 |
 
 週の始まり（`Week starts on`）もカレンダーの並びに効くが、周期ノート全体の設定として 1. に置いた。
 
@@ -120,16 +119,16 @@ Calendared に **今ある機能** と、それぞれの **設定項目**、設�
 
 ### 設定
 
-| 表示名 | 今の場所 | キー | 既定 | 内容 | どうする |
-| --- | --- | --- | --- | --- | --- |
-| Timeline | Calendar › Timeline | `timeline.enabled` | オン | タイムラインを出すか | 残す |
-| Unique timelines for periodic notes | Calendar › Timeline | `timeline.granularityBased` | オン | 周期ごとの帯にするか（オフなら、どのノートでも日の帯） | 「並べるもの」（そのノートの周期 / いつも日 / 1 つ下の周期）の選択肢に替える。あわせて「中心」（ノートの日付 / いつも今）を足す（[plan.md](plan.md)） |
-| Periodic notes timeline view mode | Calendar › Timeline | `timeline.viewMode` | 開いた状態 | 周期ノートで、開いた・閉じた状態のどちらで始めるか | 残す |
-| Show timeline everywhere | Calendar › Timeline | `timeline.displayOnRestNotes` | オフ | 周期ノート以外のノートにも出すか | 残す（トグルのまま）。周期ノートでないノートでは、いつも今（今日・今週など）を基準にする |
-| Non-periodic notes timeline view mode | Calendar › Timeline | `timeline.restViewMode` | 閉じた状態 | 周期ノート以外で、どちらの状態で始めるか | 残す。上がオンのときだけ見せる |
-| Show timeline stickers | Calendar › Timeline | `timeline.displayStickers` | オン | 帯にステッカーを出すか | 残す |
+| 表示名 | 今の場所 | キー | 既定 | 内容 |
+| --- | --- | --- | --- | --- |
+| Timeline | Calendar › Timeline | `timeline.enabled` | オン | タイムラインを出すか |
+| Unique timelines for periodic notes | Calendar › Timeline | `timeline.granularityBased` | オン | 周期ごとの帯にするか（オフなら、どのノートでも日の帯） |
+| Periodic notes timeline view mode | Calendar › Timeline | `timeline.viewMode` | 開いた状態 | 周期ノートで、開いた・閉じた状態のどちらで始めるか |
+| Show timeline everywhere | Calendar › Timeline | `timeline.displayOnRestNotes` | オフ | 周期ノート以外のノートにも出すか |
+| Non-periodic notes timeline view mode | Calendar › Timeline | `timeline.restViewMode` | 閉じた状態 | 周期ノート以外で、どちらの状態で始めるか |
+| Show timeline stickers | Calendar › Timeline | `timeline.displayStickers` | オン | 帯にステッカーを出すか |
 
-## 5. ステッカー（[stickers.md](spec/stickers.md)）
+## 5. ステッカー（[stickers.md](stickers.md)）
 
 - ノートのプロパティ 1 つに絵文字を 1 つ保存する
 - 出る場所: カレンダーのマス、月・年の表記、タイムライン
@@ -139,12 +138,12 @@ Calendared に **今ある機能** と、それぞれの **設定項目**、設�
 
 ### 設定
 
-| 表示名 | 今の場所 | キー | 既定 | 内容 | どうする |
-| --- | --- | --- | --- | --- | --- |
-| Stickers | Calendar › Stickers | `stickersEnabled` | オン | ステッカー機能のすべて（表示、ボタン、メニュー、コマンド） | **未定**（まだ検討していない） |
-| Sticker button in note header | Calendar › Stickers | `stickerHeaderButton` | オン | 周期ノートの見出しバーにボタンを出す | **未定** |
-| Sticker property | Calendar › Stickers | `stickerProperty` | `sticker` | 絵文字を入れるプロパティの名前 | 残す。複数の種類に広げるときの形は [plan.md](plan.md) の「ステッカー」 |
-| Emoji search languages | Calendar › Stickers | （プラグインのフォルダにあるファイル） | 英語だけ | 絵文字を検索する言語 | **未定** |
+| 表示名 | 今の場所 | キー | 既定 | 内容 |
+| --- | --- | --- | --- | --- |
+| Stickers | Calendar › Stickers | `stickersEnabled` | オン | ステッカー機能のすべて（表示、ボタン、メニュー、コマンド） |
+| Sticker button in note header | Calendar › Stickers | `stickerHeaderButton` | オン | 周期ノートの見出しバーにボタンを出す |
+| Sticker property | Calendar › Stickers | `stickerProperty` | `sticker` | 絵文字を入れるプロパティの名前 |
+| Emoji search languages | Calendar › Stickers | （プラグインのフォルダにあるファイル） | 英語だけ | 絵文字を検索する言語 |
 
 タイムラインにステッカーを出すか（`timeline.displayStickers`）は 4. にある。
 
@@ -152,27 +151,24 @@ Calendared に **今ある機能** と、それぞれの **設定項目**、設�
 
 操作の前に確認の画面を出すかどうか。作成の確認のほかは、確認の画面の「次から聞かない」でオフになる。
 
-| 表示名 | 今の場所 | キー | 既定 | 内容 | どうする |
-| --- | --- | --- | --- | --- | --- |
-| Creation confirmation | Calendar › Interaction behavior | `shouldConfirmBeforeCreate` | オン | ノートを作る前に確認する（カレンダー・タイムラインから作るとき。コマンドと起動時には出ない） | 残す |
-| ― | ― | `shouldConfirmBeforeDeleteFormat` | オン | 書式を消す前に確認する（その書式でしか読めないノートがあるときだけ） | 消す（書式を 1 つだけにするので、消す操作がない） |
-| ― | ― | `shouldConfirmBeforeReplaceAllFormats` | オン | 書式の一括の付け替えの前に確認する | 消す（移行はいつも一覧を見せてから実行し、その一覧が確認を兼ねる） |
-| ― | ― | `shouldConfirmBeforeMoveFile`、`shouldConfirmBeforeMoveAllFiles` | オン | ファイルの一覧で、移動・一括の移動の前に確認する | 消す（一覧を見るだけにする） |
-| ― | ― | `shouldConfirmBeforeDeleteFile`、`shouldConfirmBeforeDeleteAllFiles` | オン | ファイルの一覧で、削除・一括の削除の前に確認する | 消す（一覧を見るだけにする。消すのはエクスプローラーで） |
+| 表示名 | 今の場所 | キー | 既定 | 内容 |
+| --- | --- | --- | --- | --- |
+| Creation confirmation | Calendar › Interaction behavior | `shouldConfirmBeforeCreate` | オン | ノートを作る前に確認する（カレンダー・タイムラインから作るとき。コマンドと起動時には出ない） |
+| ― | ― | `shouldConfirmBeforeDeleteFormat` | オン | 書式を消す前に確認する（その書式でしか読めないノートがあるときだけ） |
+| ― | ― | `shouldConfirmBeforeReplaceAllFormats` | オン | 書式の一括の付け替えの前に確認する |
+| ― | ― | `shouldConfirmBeforeMoveFile`、`shouldConfirmBeforeMoveAllFiles` | オン | ファイルの一覧で、移動・一括の移動の前に確認する |
+| ― | ― | `shouldConfirmBeforeDeleteFile`、`shouldConfirmBeforeDeleteAllFiles` | オン | ファイルの一覧で、削除・一括の削除の前に確認する |
 
 今は、作成以外の 6 つは設定画面に出ておらず、一度「次から聞かない」を選ぶとオンに戻せない。
-
-残すのは「ノートを作る前」だけで、「確認」の見出しは作らず全体の設定に置く（2026-10-30 に決めた。[plan.md](plan.md) の「確認」）。
 
 ## 7. 移行
 
 すでにあるノートを今の設定に合わせて書き換える操作。今あるのは次の 2 つだけ（どちらも元の版の機能）。
-ほかの移行と、まとめ方は [plan.md](plan.md) の「移行」。
 
 - 書式の付け替え: 書式の行のボタンで、ほかの書式のノートを、新しいノートに使う書式の名前にする（リンクも更新する）
-- ファイルの一覧: 書式の件数から開き、ノートを別のフォルダへ移したり消したりする（見るだけの一覧にし、移動・削除はなくす。[plan.md](plan.md)）
+- ファイルの一覧: 書式の件数から開き、ノートを別のフォルダへ移したり消したりする
 
-今は、ステッカーのプロパティの名前を変えると、それまでのステッカーが見えなくなる（前のプロパティを読まない。[ADR-0002](adr/0002-read-only-configured-property.md)）。
+今は、ステッカーのプロパティの名前を変えると、それまでのステッカーが見えなくなる（前のプロパティを読まない。[ADR-0002](../adr/0002-read-only-configured-property.md)）。
 
 ## 今の設定画面との対応
 
@@ -184,7 +180,3 @@ Calendared に **今ある機能** と、それぞれの **設定項目**、設�
 | Calendar › Localization | カレンダーの言語、週の始まり | 3. カレンダー、1. 周期ノート（週の決め方） |
 | Periods › 各周期 | オン・オフ、書式、フォルダ、テンプレート、起動時に開く | 1. 周期ノート |
 | （画面になし） | 確認 6 つ、`yearsRangesStart` | 6. 確認、3. カレンダー |
-
-## 設定画面の整理で決めること
-
-まだ決めていないことは、[plan.md](plan.md) の **未定** にまとめた。

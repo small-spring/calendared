@@ -15,7 +15,7 @@ if [ ! -d "$VAULT/.obsidian" ]; then
   exit 1
 fi
 
-# unit tests of the plain logic (see docs/development.md); refuse to deploy if any fails
+# unit tests of the plain logic (see docs/guides/development.md); refuse to deploy if any fails
 npx vitest run
 
 MODE="${DEPLOY_MODE:-production}"

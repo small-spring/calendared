@@ -16,5 +16,5 @@ Svelte 5 + TypeScript + Vite + Tailwind。作業ブランチは `custom`。`upst
 - 元の版の更新は取り込まない（独立して公開する方針）。元の版のファイルも自由に変えてよい。機能を削ったときはコードにコメントを残さない
 - 確認は `npm test`（Obsidian に関係しない処理のテスト）、`npm run build`（ESLint 込み）、`npm run deploy`（テストと読み込み確認をしてから Vault にコピー）。
   動作や見た目は Obsidian で確かめる必要がある
-- テストは t-wada の考え方に沿う（作り直す前に今の振る舞いを固定、新しく作るときは先にテスト）。詳しくは `docs/development.md` の「テスト」
+- テストは t-wada の考え方に沿う（作り直す前に今の振る舞いを固定、新しく作るときは先にテスト）。詳しくは `docs/guides/development.md` の「テスト」
 - 文書は日本語で、平易な言葉で書く

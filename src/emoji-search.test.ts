@@ -11,7 +11,7 @@ import {
 } from "./emoji-search";
 
 // Searching the sticker picker in your own language: the keywords are downloaded once on request and kept in the
-// plugin's folder (docs/publishing.md 3., data/emoji-keywords/README.md). Obsidian's file system and network are
+// plugin's folder (docs/guides/publishing.md, data/emoji-keywords/README.md). Obsidian's file system and network are
 // stand-ins here.
 
 describe("emojiSearchLanguage: Obsidian の表示言語から、検索の言葉のファイルの言語を決める", () => {

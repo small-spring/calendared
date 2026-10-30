@@ -176,7 +176,7 @@ Calendared ではタグ形式を **読まない** ので、元の版で付けた
   前に読み込んだときのピッカーが使われるので効かない）
 - emoji-mart は、英語以外の文言を、渡されないとネットから取りに行く。それを避けるため、`@emoji-mart/data/i18n/<言語>.json`（20 言語、合わせて約 80 KB）を
   同梱し、Obsidian の表示言語（`getLanguage()`、古い版では localStorage の `language`）のものを渡す
-- CLDR のデータを新しい版にしたら、同じスクリプトで表を作り直し、コミットしてから、そのコミットを `EMOJI_DATA_REF` に書く（[development.md](../development.md)）
+- CLDR のデータを新しい版にしたら、同じスクリプトで表を作り直し、コミットしてから、そのコミットを `EMOJI_DATA_REF` に書く（[guides/development.md](../guides/development.md)）
 
 **実装上の注意**
 
