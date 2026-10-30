@@ -8,6 +8,7 @@ Svelte 5 + TypeScript + Vite + Tailwind。作業ブランチは `custom`。`upst
 - `docs/customizations.md`: 元の版との違い（今どうなっているか）
 - `docs/features.md`: 今ある機能と、それぞれの設定項目の一覧（どう変えるかも）
 - `docs/plan.md`: これから作るもの（設定画面の整理のあとの目指す姿）
+- `docs/settings.md`: 設定画面と移行の設計判断（ADR）
 - `docs/todo.md`: これからやること（不具合・やりたいこと）
 - `docs/publishing.md`: コミュニティプラグインとして公開するまでにやること
 - `docs/development.md`: ビルド・deploy・依存の更新・書き方の決まり

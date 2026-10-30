@@ -1,7 +1,7 @@
 # これから作るもの
 
 設定画面の整理のあとの **目指す姿** だけを書く。今どうなっているか、そこからどう変えるかは [features.md](features.md)、
-作業の順番は [todo.md](todo.md) にある。**未定** はまだ決めていないもの。決めたら書き換え、作り終えたら features.md に移す。
+作業の順番は [todo.md](todo.md)、決めたことの理由（ADR）は [settings.md](settings.md) と [periods.md](periods.md) の ADR-007 にある。**未定** はまだ決めていないもの。決めたら書き換え、作り終えたら features.md に移す。
 
 ## 決めることの一覧
 
