@@ -1,7 +1,7 @@
 import { DEFAULT_SETTINGS, REMOVED_PERIOD_SETTINGS, REMOVED_SETTINGS, settingsStore, SettingsTab, type ISettings } from '@/settings';
 import { InvalidFormat, ViewManager } from '@/ui';
-import { MarkdownView, Menu, Notice, Plugin, TAbstractFile, TFile, WorkspaceLeaf, WorkspaceRoot } from 'obsidian';
-import { mount, type SvelteComponent } from 'svelte';
+import { MarkdownView, Notice, Plugin, TAbstractFile, TFile, WorkspaceLeaf, WorkspaceRoot } from 'obsidian';
+import { mount } from 'svelte';
 import { get } from 'svelte/store';
 import { PluginService } from './app-service';
 import { CALENDAR_LUCIDE_ICON, granularities, LEAF_TYPE } from './constants';
@@ -17,27 +17,25 @@ import {
   themeStore,
 } from './stores';
 import TimelineManager from './ui/components/timeline/manager';
-import { Popover } from './ui/popovers';
+import { closeNoteMenu } from './ui/note-menu';
+import { destroyStickerPicker } from './ui/sticker-picker';
 import { getDailyNotesPlugin } from './utils';
 import { CalendarView } from './view';
 import { initEmojiSearch } from './ui/utils/emoji-locale';
 import { getNoteSticker, isPeriodicNote, openStickerPicker, removeSticker, StickerActions } from './ui/sticker-actions';
 
 export default class PeriodicNotesCalendarPlugin extends Plugin {
-  popovers: Record<string, SvelteComponent | null> = {};
-  popoverAutoUpdateCleanup: (() => void) | null = null;
   /** Calendared: sticker button in the header of periodic notes */
   stickerActions = new StickerActions();
 
   /**
    * Calendared: upstream left this empty, so popovers mounted on document.body (calendar, sticker picker, ...)
-   * and timelines stayed in the page after the plugin was turned off. On the next load the new popovers looked
-   * themselves up by id and got the stale ones from the previous load instead.
+   * and timelines stayed in the page after the plugin was turned off. On the next load the new picker looked
+   * itself up by id and got the stale one from the previous load instead.
    */
   onunload() {
-    Popover.stickerSingleton?.cleanup();
-    Popover.fileMenuSingleton?.cleanup();
-    Popover.cleanup();
+    destroyStickerPicker();
+    closeNoteMenu();
     TimelineManager.destroy();
     this.stickerActions.removeAll();
   }
@@ -297,8 +295,6 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
   }
 
   registerEvents() {
-    this.registerEvent(this.app.workspace.on('file-menu', (menu, file, source) => this.onFileMenu(menu, file, source)))
-
     this.registerEvent(
       this.app.workspace.on('css-change', () => {
         themeStore.set(this.getTheme())
@@ -342,33 +338,6 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     // `date` is the period's first day (docs/periods.md)
     if (!overlapsMonth(period, get(displayedDateStore), weekSchemeFor(get(settingsStore).localeSettings))) {
       displayedDateStore.set(date);
-    }
-  }
-
-  private async onFileMenu(_menu: Menu, file: TAbstractFile, source?: string) {
-    if (!(file instanceof TFile)) return;
-
-    const menu = _menu as Menu & { dom: Element; bgEl: Element }
-
-    const { isValid, granularity, date } = isValidPeriodicNote(file.basename);
-    if (typeof isValid === 'boolean' && date && granularity) {
-      // Calendared: "Manage sticker" only in the calendar's own right-click menu ("custom-file-menu", see file-menu.ts),
-      // where it's the way to sticker a day without opening its note. Upstream added "Add sticker" to every file menu
-      // (file explorer, the note's "…" menu), which are shared and already long; the note header button and the
-      // "Manage sticker" command cover those
-      if (source === "custom-file-menu" && get(settingsStore).stickersEnabled) menu.addItem((item) =>
-        item.setSection("action")
-          .setTitle("Manage sticker")
-          .setIcon("lucide-smile-plus")
-          .onClick((evt) => {
-            evt.preventDefault()
-            evt.stopPropagation()
-
-            if (menu.dom || menu.bgEl) {
-              openStickerPicker(file, menu.dom || menu.bgEl)
-            }
-          })
-      );
     }
   }
 

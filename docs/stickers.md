@@ -78,6 +78,8 @@
 次のどれかで外す（ステッカーのプロパティが消える）。
 
 - 絵文字ピッカーの一番上の行のゴミ箱アイコン（ステッカーが付いているときだけ、今のステッカーと並んで出る）
+  - キーボードでは、検索欄で ↑ を押すとゴミ箱に移り、Enter で外す。ゴミ箱で ↓ を押すと検索欄に戻る。
+    絵文字を選んでいる（↓ で絵文字の一覧に入った）ときの ↑ は、今までどおり 1 段上へ移る（一番上の段からは検索欄へ戻る）
 - コマンド「Calendared: Remove sticker」（開いている周期ノートにステッカーがあるときだけパレットに出る）
 - カレンダーの日付の右クリック「Manage sticker」で開いたピッカーの「Remove sticker」
 - ノートのプロパティ欄から、ステッカーのプロパティを手で消す
@@ -115,11 +117,11 @@ Calendared ではタグ形式を **読まない** ので、元の版で付けた
 
 | 内容 | 場所 |
 |---|---|
-| 付ける（`setSticker`）・読む（`getSticker`）・プロパティ名（`getStickerProperty`）・禁止リスト（`RESERVED_STICKER_PROPERTIES`） | `src/ui/utils/picker.ts` |
+| 付ける（`setSticker`）・読む（`getSticker`）・プロパティ名（`getStickerProperty`）・禁止リスト（`RESERVED_STICKER_PROPERTIES`） | `src/ui/utils/emoji-picker.ts` |
 | 絵文字ピッカーの表示言語・検索の言語 | `src/ui/utils/emoji-locale.ts`、`src/emoji-search.ts`、`data/emoji-keywords/`、`scripts/build-emoji-keywords.mjs`、設定は `src/settings/ui/tabs/calendar/EmojiLanguages.svelte`・`AddEmojiLanguages.svelte` |
-| 絵文字ピッカーの表示 | `src/ui/utils/picker.ts`（`initializePicker`）、`src/ui/components/StickerPopover.svelte`、`src/ui/popovers/sticker.ts` |
-| 見出しバーのボタン（`StickerActions`）、ピッカーを開く・外す共通処理（`openStickerPicker`, `removeSticker`） | `src/ui/sticker-actions.ts`、`src/ui/utils/picker.ts`（`removeSticker`） |
-| ピッカーの「Remove sticker」ボタン | `src/ui/components/StickerPopover.svelte` |
+| 絵文字ピッカーの表示 | `src/ui/utils/emoji-picker.ts`（`initializePicker`）、`src/ui/components/StickerPicker.svelte`、`src/ui/sticker-picker.ts`（開く・閉じる・位置） |
+| 見出しバーのボタン（`StickerActions`）、ピッカーを開く・外す共通処理（`openStickerPicker`, `removeSticker`） | `src/ui/sticker-actions.ts`、`src/ui/sticker-picker.ts`（`openStickerPicker`）、`src/ui/utils/emoji-picker.ts`（`removeSticker`） |
+| ピッカーの「Remove sticker」ボタン | `src/ui/components/StickerPicker.svelte` |
 | 「Manage sticker」メニュー、コマンド（`manage-sticker`, `remove-sticker`）、ボタンの更新のきっかけ | `src/main.ts`（`onFileMenu`, `onload`, `registerEvents`） |
 | カレンダーでの表示 | `src/ui/components/core/DateBttn.svelte`、`src/ui/components/Sticker.svelte`、`src/io/vault.ts`（`getFileData`） |
 | 設定の型と初期値 | `src/settings/constants.ts`（`stickerProperty`, `stickersEnabled`, `stickerHeaderButton`） |
@@ -131,8 +133,8 @@ Calendared ではタグ形式を **読まない** ので、元の版で付けた
 
 0. `stickersEnabled` がオフなら、どの入口も出ない（`getSticker` も常に「なし」を返す）
 1. 見出しバーのボタン・コマンド・カレンダーの右クリックの「Manage sticker」が、どれも `openStickerPicker`（`src/ui/sticker-actions.ts`）を呼ぶ。
-   対象ノートの情報を `spFileDataStore` に入れ、絵文字ピッカーの吹き出しをボタン（やメニュー）の位置に開く
-2. 絵文字を選ぶと `initializePicker` の `onEmojiSelect` が、**その時点の** `spFileDataStore` からノートを取り、`setSticker` を呼ぶ
+   対象ノートの情報を `stickerPickerNoteStore` に入れ、絵文字ピッカーの吹き出しをボタン（やメニュー）の位置に開く
+2. 絵文字を選ぶと `initializePicker` の `onEmojiSelect` が、**その時点の** `stickerPickerNoteStore` からノートを取り、`setSticker` を呼ぶ
 3. `setSticker` が `app.fileManager.processFrontMatter` で、設定のプロパティに絵文字を書く
 
 **表示するとき**
@@ -182,7 +184,7 @@ Calendared ではタグ形式を **読まない** ので、元の版で付けた
 - 絵文字ピッカー（emoji-mart）はブラウザに `<em-emoji-picker>` を登録する。この登録は Obsidian を再起動するまで残るので、
   プラグインを読み込み直した後は、登録済みのクラス（`customElements.get("em-emoji-picker")`）を使って作る
 - 吹き出しは `document.body` に置かれる。プラグインを止めるとき（`onunload`）に片付けないと、次に読み込んだときに古い吹き出しを
-  id で拾ってしまう。作るときにも同じ id の残骸を消している（`src/ui/popovers/base-component-behavior.ts`）
+  id で拾ってしまう。作るときにも同じ id の残骸を消している（`src/ui/sticker-picker.ts`）
 
 ## 11. 設計判断の記録（ADR）
 
@@ -281,7 +283,7 @@ Calendared ではタグ形式を **読まない** ので、元の版で付けた
   - カレンダーの右クリックは「ノートを開かずにほかの日に付ける」唯一の入口なので残す価値がある。
     ほかの場所では見出しバーのボタンとコマンドで足りる
   - 共有のメニューを汚さない。良い初期値で解決できるので、設定（C）は作らない
-  - カレンダーの右クリックはプラグイン自身のメニュー（`file-menu` イベントの source が `custom-file-menu`）なので、判定が簡単
+  - カレンダーの右クリックはプラグイン自身のメニュー（`src/ui/note-menu.ts`）なので、そこで直接足せばよい
 - **関連**: 見出しバーのボタンは、ほかの見出しバーのアイコンと並ぶ常設の表示なので、設定で非表示にできるようにした（`stickerHeaderButton`）。
   機能全体のオン・オフ（`stickersEnabled`）を上位に置き、オフならすべての入口と表示が消える。コマンド名も「Set sticker」から
   「Manage sticker」に変えた（Obsidian のコマンド名は状態で変えられないので、Add / Change を分けず 1 つにまとめた）

@@ -1,3 +1,4 @@
+import { STICKER_PICKER_ID } from "@/constants";
 import { TFileData } from "@/io";
 import { settingsStore } from "@/settings";
 import { getEmojiPickerLocale } from "./emoji-locale";
@@ -5,9 +6,9 @@ import { Picker } from "emoji-mart";
 import { stickerFrom, stickerProperty, type TSticker } from "@/stickers";
 import { type CachedMetadata, type TFile } from "obsidian";
 import { get } from "svelte/store";
-import { Popover } from "../popovers";
 import { PluginService } from "@/app-service";
-import { spFileDataStore } from "@/stores/popovers";
+import { stickerPickerNoteStore } from "@/stores/sticker-picker";
+import { closeStickerPicker } from "../sticker-picker";
 
 type TEmoji = {
   aliases?: string[],
@@ -23,13 +24,24 @@ type TEmoji = {
 export { isReservedStickerProperty, RESERVED_STICKER_PROPERTIES, type TSticker } from "@/stickers";
 
 export const onInputKeydown = (ev: KeyboardEvent) => {
-  const input = document.querySelector('em-emoji-picker')?.shadowRoot?.querySelector('input');
-  const stickerInstance = Popover.stickerSingleton;
-
+  const input = ev.currentTarget as HTMLInputElement;
   if (ev.key === 'Escape') {
-    input?.blur();
-    stickerInstance?.close()
-    stickerInstance?.behaviors?.refHtmlEl?.focus();
+    input.blur();
+    closeStickerPicker({ returnFocus: true });
+  }
+
+  // Calendared: ↑ in the search box moves to the remove button above it, but only while no emoji is selected.
+  // With one selected, ↑ stays emoji-mart's (one row up, or back to the search box from the top row).
+  // This listener runs before emoji-mart's, which is on the same input without capture
+  if (ev.key === 'ArrowUp') {
+    const root = input.getRootNode();
+    const emojiSelected = root instanceof ShadowRoot && root.querySelector('.category button[aria-selected]');
+    const removeButton = document.getElementById(STICKER_PICKER_ID)?.querySelector<HTMLElement>('.pnc-sticker-remove');
+    if (!emojiSelected && removeButton) {
+      ev.preventDefault();
+      ev.stopImmediatePropagation();
+      removeButton.focus();
+    }
   }
 };
 
@@ -42,12 +54,11 @@ export function initializePicker(
     // Calendared: data with keywords in Obsidian's language, and the picker's own text in that language
     ...getEmojiPickerLocale(),
     onEmojiSelect: async (emoji: TEmoji) => {
-      const stickerInstance = Popover.stickerSingleton;
-      stickerInstance?.close()
+      closeStickerPicker();
 
       // Calendared: read the target note now rather than from `fileData` captured when the picker was built,
       // so the sticker always goes to the note the picker was opened for
-      const file = get(spFileDataStore)?.file ?? fileData.file;
+      const file = get(stickerPickerNoteStore)?.file ?? fileData.file;
       if (file) {
         await setSticker(file, emoji.native);
       }
@@ -68,7 +79,7 @@ export function initializePicker(
   const l = parseInt(style.getPropertyValue('--accent-l'));
 
   const accentRgb = hslToRgb(h / 360, s / 100, l / 100)
-  // Calendared: the picker sits inside the sticker popover's box (StickerPopover.svelte), which draws the border,
+  // Calendared: the picker sits inside the sticker picker's box (StickerPicker.svelte), which draws the border,
   // corners and shadow. Give the picker the box's background (Obsidian's) and drop its own frame so they read as one
   pickerEl.injectStyles(`
         section#root {

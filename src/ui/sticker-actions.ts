@@ -3,10 +3,8 @@
 // See docs/stickers.md.
 import { PluginService } from "@/app-service";
 import { isValidPeriodicNote } from "@/io/validation";
-import { spFileDataStore } from "@/stores/popovers";
-import StickerPopoverComponent from "@/ui/components/StickerPopover.svelte";
-import { createStickerPopover } from "@/ui/popovers/base";
-import { getSticker, removeSticker } from "@/ui/utils/picker";
+import { openStickerPicker } from "@/ui/sticker-picker";
+import { getSticker, removeSticker } from "@/ui/utils/emoji-picker";
 import { settingsStore } from "@/settings";
 import { MarkdownView, TFile, setIcon } from "obsidian";
 import { get } from "svelte/store";
@@ -21,12 +19,6 @@ export function isPeriodicNote(file: TFile | null | undefined): file is TFile {
 
 export function getNoteSticker(file: TFile) {
   return getSticker(PluginService.getPlugin()?.app.metadataCache.getFileCache(file));
-}
-
-/** Open the emoji picker for `file`, anchored to `anchorEl` */
-export function openStickerPicker(file: TFile, anchorEl: Element) {
-  spFileDataStore.set({ file, sticker: getNoteSticker(file) });
-  createStickerPopover({ view: { Component: StickerPopoverComponent } }).open(anchorEl);
 }
 
 export class StickerActions {
@@ -109,4 +101,4 @@ export class StickerActions {
   }
 }
 
-export { removeSticker };
+export { openStickerPicker, removeSticker };

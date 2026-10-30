@@ -1,5 +1,5 @@
 // Calendared: reading a note's sticker (docs/stickers.md). The settings are arguments, so a caller that reads them
-// reactively recomputes when they change (docs/state.md, ADR-S2); writing stickers stays in ui/utils/picker.ts
+// reactively recomputes when they change (docs/state.md, ADR-S2); writing stickers stays in ui/utils/emoji-picker.ts
 import emojiRegex from "emoji-regex";
 import type { CachedMetadata } from "obsidian";
 

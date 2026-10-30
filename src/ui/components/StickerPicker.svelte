@@ -1,22 +1,29 @@
 <script lang="ts">
-    import { STICKER_POPOVER_ID } from "@/constants";
+    import { STICKER_PICKER_ID } from "@/constants";
     import { cn, initializePicker, removeSticker } from "../utils";
-    import { themeStore, spFileDataStore } from "@/stores";
-    import { Popover } from "@/ui/popovers";
+    import { themeStore, stickerPickerNoteStore } from "@/stores";
     import { Platform, setIcon } from "obsidian";
+
+    let { close }: { close: () => void } = $props();
 
     let pickerContainerEl: HTMLDivElement | null = $state(null);
     $effect(() => {
-        if (pickerContainerEl && $themeStore && $spFileDataStore) {
-            initializePicker(pickerContainerEl, $themeStore, $spFileDataStore);
+        if (pickerContainerEl && $themeStore && $stickerPickerNoteStore) {
+            initializePicker(pickerContainerEl, $themeStore, $stickerPickerNoteStore);
         }
     });
 
     // Calendared: lets you take a sticker off from the same place you put it on
     const handleRemove = async () => {
-        const file = $spFileDataStore?.file;
-        Popover.stickerSingleton?.close();
+        const file = $stickerPickerNoteStore?.file;
+        close();
         if (file) await removeSticker(file);
+    };
+    // Calendared: ↓ on the remove button goes back to the search box below it (↑ there comes here, see onInputKeydown)
+    const handleRemoveKeydown = (event: KeyboardEvent) => {
+        if (event.key !== "ArrowDown") return;
+        event.preventDefault();
+        pickerContainerEl?.querySelector("em-emoji-picker")?.shadowRoot?.querySelector("input")?.focus();
     };
     let removeEl: HTMLButtonElement | null = $state(null);
     $effect(() => {
@@ -26,14 +33,13 @@
 
 <div
     class={cn(
-        "bg-transparent w-max opacity-0 pointer-events-none absolute",
+        "pnc-sticker-picker bg-transparent w-max opacity-0 pointer-events-none absolute",
         Platform.isPhone
             ? // Calendared: below the status bar (Dynamic Island); upstream's top-0 hid the remove button under it
               "!top-[calc(var(--safe-area-inset-top,0px)+var(--size-4-2))] !left-1/2 [transform:translateX(-50%)_!important]"
             : " top-0 left-0",
     )}
-    data-popover={true}
-    id={STICKER_POPOVER_ID}
+    id={STICKER_PICKER_ID}
 >
     <!--
         Calendared: one box holding the current sticker row and the picker, styled like an Obsidian popover.
@@ -43,17 +49,18 @@
         class="overflow-hidden rounded-[--radius-l] bg-[--background-primary] [border:1px_solid_var(--background-modifier-border)] [box-shadow:var(--shadow-s)]"
     >
         <!-- the current sticker and a way to take it off, at the top but low-key (ADR-006). Icons only: no text to translate -->
-        {#if $spFileDataStore?.sticker}
+        {#if $stickerPickerNoteStore?.sticker}
             <div
                 class="flex items-center justify-between px-3 py-1.5 [border-bottom:1px_solid_var(--background-modifier-border)]"
             >
                 <span class="text-xl leading-none" aria-label="Current sticker"
-                    >{$spFileDataStore.sticker.emoji}</span
+                    >{$stickerPickerNoteStore.sticker.emoji}</span
                 >
                 <button
                     class="pnc-sticker-remove clickable-icon"
                     aria-label="Remove sticker"
                     onclick={handleRemove}
+                    onkeydown={handleRemoveKeydown}
                     bind:this={removeEl}
                 ></button>
             </div>
@@ -73,7 +80,9 @@
     .pnc-sticker-remove {
         color: var(--text-error);
     }
-    .pnc-sticker-remove:hover {
+    /* Calendared: the same look when reached with the keyboard (Shift+Tab from the search box) */
+    .pnc-sticker-remove:hover,
+    .pnc-sticker-remove:focus-visible {
         color: var(--text-on-accent);
         background-color: var(--background-modifier-error);
     }

@@ -3,9 +3,8 @@ import { createOrOpenNote } from "@/io";
 import { settingsStore } from '@/settings';
 import { TFile } from 'obsidian';
 import { get } from 'svelte/store';
-import { FileMenuOpenParams } from '../popovers/file-menu';
 import { PluginService } from '@/app-service';
-import { createFileMenuPopover } from '../popovers/base';
+import { openNoteMenu, type NoteMenuParams } from '../note-menu';
 
 type TOnClickParams = {
   date: moment.Moment;
@@ -53,8 +52,8 @@ const onHover = ({
   }
 };
 
-const onContextMenu = ({ event, fileData, date, granularity }: FileMenuOpenParams): void => {
-  createFileMenuPopover().open({ event, fileData, date, granularity });
+const onContextMenu = (params: NoteMenuParams): void => {
+  openNoteMenu(params);
 };
 
 export const eventHandlers = {

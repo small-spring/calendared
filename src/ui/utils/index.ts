@@ -63,5 +63,5 @@ export const useIcon = (node: HTMLElement, iconId: string) => {
 
 export * from './cn';
 export * from './event-handlers';
-export * from './picker';
+export * from './emoji-picker';
 

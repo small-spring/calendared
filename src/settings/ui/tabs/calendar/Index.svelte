@@ -10,7 +10,7 @@
   import TimelineManager from "@/ui/components/timeline/manager";
   import { derived as derivedStore } from "svelte/store";
   import { Notice, Platform } from "obsidian";
-  import { isReservedStickerProperty, RESERVED_STICKER_PROPERTIES } from "@/ui/utils/picker";
+  import { isReservedStickerProperty, RESERVED_STICKER_PROPERTIES } from "@/ui/utils/emoji-picker";
   import EmojiLanguages from "./EmojiLanguages.svelte";
 
   // Sticker

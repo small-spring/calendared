@@ -26,11 +26,11 @@
 }
 
 
-.pnc-popover {
+.pnc-sticker-picker {
   @apply hidden opacity-0 z-[-9999] pointer-events-none;
 }
 
-.pnc-popover.visible {
+.pnc-sticker-picker.visible {
   @apply block opacity-100 z-[9999] pointer-events-auto;
 }
 

@@ -16,8 +16,7 @@ export const YEARS_RANGE_SIZE = 12
 
 export const STICKER_TAG_PREFIX = '#sticker-';
 
-export const STICKER_POPOVER_ID = 'sticker-popover';
-export const FILE_MENU_POPOVER_ID = 'file-menu-popover';
+export const STICKER_PICKER_ID = 'sticker-picker';
 
 export const MODAL_CLASS = 'modal';
 
