@@ -148,8 +148,10 @@ Thank you,
 
 - [x] `id`: `calendared`。2026-10-30 の時点で、一覧（9,660 件）のどれとも重ならない（id に `obsidian` は入れられない）
 - [x] `isDesktopOnly`: `false` のまま。Node.js・Electron の機能は使っていない（2026-10-30 に確認）
-- [ ] `version` を決める（例: 1.0.0、または元の版の続きとわかる 2.0.0）— 自分
-- [ ] `author`・`authorUrl` を自分にする — 自分が名前を決め、Claude が書く
+- [x] `version` を 0.1.0 にした（`manifest.json`・`package.json`・`package-lock.json`。元の版の続きの 1.2.1 だった）。
+  公開するときの版はそのときに決める。`.release-please-manifest.json` は 1.2.1 のまま（release-please を使うかは 6. で決める）— 自分〔2026-10-30〕
+- [x] `author` を small-spring にした（`manifest.json`・`package.json`）〔2026-10-30〕
+- [ ] `authorUrl` を自分にする（今は元の作者の GitHub）— Claude
 - [ ] `fundingUrl` を消す（今は元の作者の Ko-fi）— Claude
 - [ ] `description` を自分の版の説明にする（英語の案を作る）— Claude、決めるのは自分
 - [ ] `minAppVersion`（今は 1.7.7）が、使っている API に合っているか確かめる — Claude
