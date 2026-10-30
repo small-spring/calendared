@@ -28,9 +28,89 @@ Obsidian の開発者ポリシー（Developer policies の「Forks」）では�
 
 元の版の最後の更新は 2026-02-14（v1.2.1）なので、B の「6 か月」はもう満たしている。
 
-- [ ] 元の版のリポジトリ（luiisca/obsidian-periodic-notes-calendar）に出す issue の文面を下書きする（英語。日本語訳つき）— Claude
+- [x] 元の版のリポジトリ（luiisca/obsidian-periodic-notes-calendar）に出す issue の文面を下書きする（英語。日本語訳つき。下の「issue の下書き」）— Claude〔2026-10-30〕
+- [ ] 下書きを読んで直す。特に、自分の名前・リポジトリの URL・変えたことの一覧 — 自分
+- [ ] issue を出す前に、GitHub のリポジトリを公開にするか決める。元の作者が改変の中身を見られるほうが判断しやすい。
+  公開にしないなら、下書きからリポジトリへのリンクを消す — 自分
 - [ ] issue を出す — 自分
 - [ ] 返事を待つ。許可が出たら、issue へのリンクを README のクレジットに書く。30 日たっても返事がなければ、B の形で進める — 自分
+
+### issue の下書き
+
+元の版のリポジトリの Issues に出す。タイトルと本文は英語。`<...>` は出す前に埋める。
+
+**Title**: Permission to publish a modified fork as a separate community plugin
+
+```markdown
+Hi Luis,
+
+Thank you for Periodic Notes Calendar. I have been using it every day, and it became the base of my own setup.
+
+Since October 2026 I have been modifying a fork of v1.2.1 for my own use, and the changes have grown large enough
+that I would like to publish it as a separate community plugin named **Calendared** (plugin id: `calendared`).
+The repository is here: https://github.com/small-spring/calendared
+
+Main differences from the original:
+
+- Stickers are stored in a note property (`sticker: 👍`) instead of tags in the body
+- Weeks follow one week scheme (ISO week numbers by default) across the calendar, the timeline and templates
+- The timeline is kept per tab, and the calendar reads notes and the open note directly from Obsidian
+  (the list of notes is no longer saved in data.json)
+- Some features were removed to keep it maintainable: the preview panel, floating mode, minimal mode toggle,
+  carrying over TODOs and natural language dates
+
+Obsidian's developer policies ask forks in the community directory to have the original author's explicit,
+publicly verifiable permission, so I am asking here:
+
+**Would you allow me to publish this fork as a separate plugin in the Obsidian community directory?**
+
+If you agree, I will:
+
+- keep the GPL-3.0 license and your copyright notice,
+- credit you as the original author and a contributor in the README, with a link to this repository and to this issue,
+- make it clear that Calendared is a modified version and not maintained by you.
+
+If you would rather not, or if you would prefer that I contribute some of the changes back here instead,
+please let me know. Either answer is completely fine.
+
+Thank you,
+<名前>
+```
+
+日本語訳（自分が内容を確かめるため。出すのは英語だけ）:
+
+> Luis さん、こんにちは。
+>
+> Periodic Notes Calendar をありがとうございます。毎日使っていて、自分の使い方の土台になっています。
+>
+> 2026 年 10 月から、v1.2.1 をフォークして自分用に改造してきました。変更が大きくなったので、**Calendared** という名前
+> （プラグインの id は `calendared`）の別のコミュニティプラグインとして公開したいと考えています。
+> リポジトリはこちらです: https://github.com/small-spring/calendared
+>
+> 元の版との主な違い:
+>
+> - ステッカーを、本文のタグではなくノートのプロパティ（`sticker: 👍`）に保存する
+> - 週を、カレンダー・タイムライン・テンプレートで 1 つの決め方（既定は ISO の週番号）にそろえた
+> - タイムラインをタブごとに持ち、カレンダーはノートと開いているノートを Obsidian から直接読む
+>   （ノートの一覧を data.json に保存しなくなった）
+> - 手入れできる量に保つため、いくつかの機能を削った: プレビュー欄、フローティング表示、minimal mode の切り替え、
+>   TODO の引き継ぎ、自然言語の日付
+>
+> Obsidian の開発者ポリシーでは、コミュニティの一覧に載せるフォークには、元の作者のはっきりした、誰でも確かめられる許可が
+> 必要とされています。そこで、ここでお尋ねします。
+>
+> **このフォークを、別のプラグインとして Obsidian のコミュニティの一覧に公開してもよいでしょうか？**
+>
+> 許可していただけたら、次のようにします。
+>
+> - GPL-3.0 のライセンスと、あなたの著作権表示を残す
+> - README で、あなたを元の作者・貢献者として明記し、このリポジトリとこの issue へのリンクを載せる
+> - Calendared は改造版で、あなたが手入れしているものではないことを明記する
+>
+> 望まない場合や、変更の一部をこちらに還元してほしい場合は、教えてください。どちらの答えでもまったく構いません。
+>
+> よろしくお願いします。
+> <名前>
 
 ## 2. ライセンスとクレジット
 
