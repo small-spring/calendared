@@ -11,13 +11,6 @@
 
 2026-10-30 に、わかっている不具合を直してから公開すると決めた。
 
-- 〔不具合〕言語の扱い: Obsidian 全体の日付の言語を書き換えてしまう
-  - 今の作り: 起動時と設定で言語を変えたときに、`window.moment.locale()` で **Obsidian 全体の moment の言語** を書き換えている
-    （`src/stores/locale.ts`）。moment は Obsidian 本体とほかのプラグインが共有している
-  - 症状: Calendared の言語の設定が Obsidian の表示言語と同じなら何も変わらない（自分の Vault はこれ）。違う言語にすると、Obsidian 本体や
-    ほかのプラグイン（Templater の `tp.date` など）が出す日付の言葉までその言語に変わり、プラグインを切っても戻らない
-  - あるべき形: 全体は変えず、カレンダーの中だけで言語を指定した moment（`.locale()` を付けた複製）や `Intl.DateTimeFormat` を使う。
-    既定は Obsidian の表示言語に合わせ、設定で上書きできる。週の始まりは今どおりプラグインの設定で持つ
 - 〔不具合〕開発用の版で、Svelte の警告 `lifecycle_double_unmount`（外した部品をもう一度外そうとした）が出る（2026-10-30 に気づいた。どの操作で出たかは未確認）
   - 本番の版では出ない警告で、害は今のところ見えない。Svelte の `unmount` を呼んでいるのは `src/view.ts`・`src/settings/plugin-tab.ts`・
     `src/ui/popovers/sticker.ts`・`src/ui/components/timeline/manager.ts` の 4 か所（タイムラインは 2026-10-30 に作り直し、外すのは 1 回だけになった。

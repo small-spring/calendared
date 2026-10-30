@@ -143,3 +143,4 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 - カレンダーの選択を別の値（`activeFileStore`）として持つのをやめ、Obsidian が開いているとするノートから求めるようにした（ずれようがない）〔2026-10-30〕
 - 状態管理の作り直し（[state.md](state.md)）を終えた。表示中の月の謎（年次ノートを作っても月が移ったり移らなかったりした）は、Obsidian がアクティブでないタブにノートを開いたときに `file-open` を遅らせることが原因と分かった〔2026-10-30〕
 - Vault `private` のショートカットを Calendared のコマンドに移した（Cmd+D: 今日のノート、Cmd+← / →: 前後のノート、Cmd+M: 今月のノート）。既定のホットキーは付けない（公開のガイドラインに従う）〔2026-10-30〕
+- カレンダーの言語の設定で、Obsidian 全体の moment の言語を書き換えないようにした。カレンダーの中で文字にするときだけ、その言語を付けた日付の複製で書く（`src/calendar-locale.ts`）。前は Obsidian 本体やほかのプラグインの日付の言葉まで変わり、プラグインを切っても戻らなかった。ファイル名とテンプレートの日付は Obsidian の言語で書く〔2026-10-30〕
