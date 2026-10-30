@@ -123,10 +123,10 @@ Calendared に **今ある機能** と、それぞれの **設定項目**、設�
 | 表示名 | 今の場所 | キー | 既定 | 内容 | どうする |
 | --- | --- | --- | --- | --- | --- |
 | Timeline | Calendar › Timeline | `timeline.enabled` | オン | タイムラインを出すか | 残す |
-| Unique timelines for periodic notes | Calendar › Timeline | `timeline.granularityBased` | オン | 周期ごとの帯にするか（オフなら、どのノートでも日の帯） | 消す寄り。タイムラインのバリエーションを書き出してから決める |
+| Unique timelines for periodic notes | Calendar › Timeline | `timeline.granularityBased` | オン | 周期ごとの帯にするか（オフなら、どのノートでも日の帯） | 「並べるもの」（そのノートの周期 / いつも日 / 1 つ下の周期）の選択肢に替える。あわせて「中心」（ノートの日付 / いつも今）を足す（[plan.md](plan.md)） |
 | Periodic notes timeline view mode | Calendar › Timeline | `timeline.viewMode` | 開いた状態 | 周期ノートで、開いた・閉じた状態のどちらで始めるか | 残す |
-| Show timeline everywhere | Calendar › Timeline | `timeline.displayOnRestNotes` | オフ | 周期ノート以外のノートにも出すか | 機能は残す。トグルの形でよいかは、バリエーションを書き出してから決める |
-| Non-periodic notes timeline view mode | Calendar › Timeline | `timeline.restViewMode` | 閉じた状態 | 周期ノート以外で、どちらの状態で始めるか | 上と一緒に決める |
+| Show timeline everywhere | Calendar › Timeline | `timeline.displayOnRestNotes` | オフ | 周期ノート以外のノートにも出すか | 残す（トグルのまま）。周期ノートでないノートでは、いつも今（今日・今週など）を基準にする |
+| Non-periodic notes timeline view mode | Calendar › Timeline | `timeline.restViewMode` | 閉じた状態 | 周期ノート以外で、どちらの状態で始めるか | 残す。上がオンのときだけ見せる |
 | Show timeline stickers | Calendar › Timeline | `timeline.displayStickers` | オン | 帯にステッカーを出すか | 残す |
 
 ## 5. ステッカー（[stickers.md](stickers.md)）
@@ -155,14 +155,14 @@ Calendared に **今ある機能** と、それぞれの **設定項目**、設�
 | 表示名 | 今の場所 | キー | 既定 | 内容 | どうする |
 | --- | --- | --- | --- | --- | --- |
 | Creation confirmation | Calendar › Interaction behavior | `shouldConfirmBeforeCreate` | オン | ノートを作る前に確認する（カレンダー・タイムラインから作るとき。コマンドと起動時には出ない） | 残す |
-| ― | ― | `shouldConfirmBeforeDeleteFormat` | オン | 書式を消す前に確認する（その書式でしか読めないノートがあるときだけ） | 設定画面に出し、「次から聞かない」を戻せるようにする。書式を 1 つだけにしたら要らない |
-| ― | ― | `shouldConfirmBeforeReplaceAllFormats` | オン | 書式の一括の付け替えの前に確認する | 設定画面に出し、戻せるようにする |
-| ― | ― | `shouldConfirmBeforeMoveFile`、`shouldConfirmBeforeMoveAllFiles` | オン | ファイルの一覧で、移動・一括の移動の前に確認する | **未定**。ファイルの一覧を残すか次第。残すなら戻せるようにする |
-| ― | ― | `shouldConfirmBeforeDeleteFile`、`shouldConfirmBeforeDeleteAllFiles` | オン | ファイルの一覧で、削除・一括の削除の前に確認する | **未定**。案: 1 件の削除はエクスプローラーと同じく Obsidian の「ファイルを削除する前に確認する」に従い、一括の削除はいつも確認する。そうすれば 2 つとも消せる |
+| ― | ― | `shouldConfirmBeforeDeleteFormat` | オン | 書式を消す前に確認する（その書式でしか読めないノートがあるときだけ） | 消す（書式を 1 つだけにするので、消す操作がない） |
+| ― | ― | `shouldConfirmBeforeReplaceAllFormats` | オン | 書式の一括の付け替えの前に確認する | 消す（移行はいつも一覧を見せてから実行し、その一覧が確認を兼ねる） |
+| ― | ― | `shouldConfirmBeforeMoveFile`、`shouldConfirmBeforeMoveAllFiles` | オン | ファイルの一覧で、移動・一括の移動の前に確認する | 消す（一覧を見るだけにする） |
+| ― | ― | `shouldConfirmBeforeDeleteFile`、`shouldConfirmBeforeDeleteAllFiles` | オン | ファイルの一覧で、削除・一括の削除の前に確認する | 消す（一覧を見るだけにする。消すのはエクスプローラーで） |
 
 今は、作成以外の 6 つは設定画面に出ておらず、一度「次から聞かない」を選ぶとオンに戻せない。
 
-設定画面では「確認」の見出し 1 つにまとめる（2026-10-30 に決めた。[plan.md](plan.md) の「確認」）。
+残すのは「ノートを作る前」だけで、「確認」の見出しは作らず全体の設定に置く（2026-10-30 に決めた。[plan.md](plan.md) の「確認」）。
 
 ## 7. 移行
 
@@ -170,7 +170,7 @@ Calendared に **今ある機能** と、それぞれの **設定項目**、設�
 ほかの移行と、まとめ方は [plan.md](plan.md) の「移行」。
 
 - 書式の付け替え: 書式の行のボタンで、ほかの書式のノートを、新しいノートに使う書式の名前にする（リンクも更新する）
-- ファイルの一覧: 書式の件数から開き、ノートを別のフォルダへ移したり消したりする
+- ファイルの一覧: 書式の件数から開き、ノートを別のフォルダへ移したり消したりする（見るだけの一覧にし、移動・削除はなくす。[plan.md](plan.md)）
 
 今は、ステッカーのプロパティの名前を変えると、それまでのステッカーが見えなくなる（前のプロパティを読まない。[stickers.md](stickers.md) の ADR-002）。
 
