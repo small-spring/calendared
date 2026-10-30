@@ -9,7 +9,7 @@
   import { cn } from "@/ui/utils";
   import { weekSchemeFor } from "@/weeks";
   import { setIcon, Platform } from "obsidian";
-  import { onDestroy, onMount } from "svelte";
+  import { onDestroy } from "svelte";
   import DateBttn from "../core/DateBttn.svelte";
   import Dot from "../core/Dot.svelte";
   import PeriodTitle from "../core/PeriodTitle.svelte";
@@ -21,6 +21,8 @@
     isPeriodic?: boolean | null;
     isSide?: boolean | null;
     viewModeOverride?: TimelineViewMode | null;
+    /** Calendared: the user opened or closed it (TimelineSync starts the tab's next timeline the same way) */
+    onViewModeChange?: (viewMode: TimelineViewMode) => void;
   }
   const {
     granularity,
@@ -28,6 +30,7 @@
     viewModeOverride = "collapsed",
     isPeriodic = null,
     isSide = null,
+    onViewModeChange,
   }: Props = $props();
   let timelineEl: HTMLDivElement | null = $state(null);
   let containerEl: HTMLDivElement | null = $state(null);
@@ -35,7 +38,7 @@
   let arrowEl: HTMLButtonElement | null = $state(null);
 
   // Calendared: the timeline keeps its own navigation state, seeded from the note it was mounted for.
-  // TimelineManager.restart() unmounts and mounts a new one for a different note, so the props never change here.
+  // TimelineSync unmounts it and mounts a new one for a different note, so the props never change here.
   // svelte-ignore state_referenced_locally
   let viewMode = $state(viewModeOverride);
   // svelte-ignore state_referenced_locally
@@ -177,8 +180,6 @@
   let isInitial = $derived(
     derivedInitialDate.isSame(crrDisplayedDate, derivedG),
   );
-  let observer: ResizeObserver | null = $state(null);
-  let prevParentWidth: number | null = $state(null);
 
   function modDisplayedDate(ev: MouseEvent, type: "subtract" | "add") {
     ev.stopPropagation();
@@ -198,6 +199,7 @@
   function handleToggleViewMode() {
     const crrViewModeIndex = VIEW_MODES.findIndex((m) => m === viewMode);
     viewMode = VIEW_MODES[(crrViewModeIndex + 1) % VIEW_MODES.length];
+    onViewModeChange?.(viewMode);
   }
 
   $effect(() => {
@@ -215,40 +217,9 @@
     }
   });
 
-  onMount(() => {
-    // Calendared: on phones the timeline doesn't cover the note (see isPhoneMain), so the width doesn't decide here
-    // (turning the phone would otherwise close it)
-    if (isPhoneMain) return;
-    // check for enough room
-    prevParentWidth =
-      timelineEl?.parentElement?.getBoundingClientRect()?.width || 0;
-    const cb = () => {
-      const isParentActive =
-        (timelineEl?.parentElement?.offsetHeight || 0) > 0 &&
-        (timelineEl?.parentElement?.offsetWidth || 0) > 0;
-      if (isParentActive) {
-        const parentSize = timelineEl?.parentElement?.getBoundingClientRect();
-
-        const enoughRoomInParent = (parentSize?.width || 0) > 640;
-
-        if (prevParentWidth === null) {
-          prevParentWidth = parentSize?.width || 0;
-          return;
-        }
-
-        if (prevParentWidth < 660 && enoughRoomInParent) {
-          viewMode = isPeriodic
-            ? $settingsStore.timeline.viewMode
-            : $settingsStore.timeline.restViewMode;
-        } else if (prevParentWidth >= 620 && !enoughRoomInParent) {
-          viewMode = enoughRoomInParent ? "expanded" : "collapsed";
-        }
-        prevParentWidth = parentSize?.width || 0;
-      }
-    };
-    observer = new ResizeObserver(cb);
-    timelineEl?.parentElement && observer.observe(timelineEl.parentElement);
-  });
+  // Calendared: whether it starts open comes from the settings or how the tab's last timeline was left (TimelineSync).
+  // Upstream also opened and closed it as the pane got wider or narrower than about 640px, and started it closed when the
+  // pane wasn't laid out yet (width 0), so it often opened closed for no visible reason
 
   /**
    * Calendared: on phones the timeline sits under Obsidian's header and the note starts below it (app.css), instead of
@@ -278,9 +249,6 @@
   });
 
   onDestroy(() => {
-    if (observer) {
-      observer.disconnect();
-    }
     leafEl?.style.removeProperty("--pnc-timeline-height");
   });
 </script>

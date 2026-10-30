@@ -165,7 +165,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
 
     this.app.workspace.onLayoutReady(async () => {
       ViewManager.initView({ active: false });
-      TimelineManager.create()?.mountAll();
+      TimelineManager.create()?.syncAll();
 
       // Calendared: when the plugin is enabled while a note is already open, no `file-open` fires,
       // so pick up the current note once here (on app startup this just repeats what `file-open` does)
@@ -317,8 +317,11 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     this.registerEvent(this.app.metadataCache.on('changed', () => this.stickerActions.refresh()))
     // Calendared: upstream re-mounted the timeline only on workspace `resize`, so opening another note in the same tab
     // kept the previous note's timeline (e.g. a monthly note's Q1 view on a daily note).
-    // layoutSync() does nothing when the timeline already belongs to the open note
-    this.registerEvent(this.app.workspace.on('file-open', () => TimelineManager.instance?.layoutSync()))
+    // Each tab keeps its timeline while it shows the same note (docs/state.md, ADR-S3); tabs opened, closed or moved
+    // and renamed notes are picked up too
+    this.registerEvent(this.app.workspace.on('file-open', () => TimelineManager.instance?.syncAll()))
+    this.registerEvent(this.app.workspace.on('layout-change', () => TimelineManager.instance?.syncAll()))
+    this.registerEvent(this.app.vault.on('rename', () => TimelineManager.instance?.syncAll()))
   }
 
   /**

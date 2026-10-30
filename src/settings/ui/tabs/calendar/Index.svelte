@@ -55,7 +55,7 @@
       return s;
     });
     if (enabled) {
-      TimelineManager.create()?.mountAll();
+      TimelineManager.create()?.syncAll();
     } else {
       TimelineManager.destroy();
     }
