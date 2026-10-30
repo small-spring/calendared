@@ -2,7 +2,8 @@ import { normalizePath, Notice, TFile } from "obsidian";
 import { IGranularity } from "./types";
 import { type DnPluginSettings, normalizePeriodSettings } from "./settings";
 import { DAILY_NOTES_PLUGIN_ID } from "@/constants";
-import { getSticker, TSticker } from "@/ui/utils";
+import { stickerFrom, type TSticker } from "@/stickers";
+import { vaultSource } from "./vault-source";
 import { type ISettings, settingsStore } from "@/settings";
 import { get } from "svelte/store";
 import { PluginService } from "@/app-service";
@@ -68,20 +69,23 @@ export function getFileData(
   granularity: IGranularity | null,
   date: moment.Moment | null,
 ): TFileData {
-  const filePath = granularity && date && getNotePath(granularity, date);
-  const abstractFile = filePath ? PluginService.getPlugin()?.app.vault.getAbstractFileByPath(filePath) : null;
+  if (!granularity || !date) return { file: null, sticker: null };
+  return noteAt(granularity, date, get(settingsStore));
+}
 
-  let file = null;
-  let sticker = null;
-  if (abstractFile instanceof TFile) {
-    file = abstractFile
-    sticker = getSticker(PluginService.getPlugin()?.app.metadataCache.getFileCache(file))
-  }
-
-  return {
-    file,
-    sticker
-  }
+/**
+ * Calendared: the period's note and its sticker, read through the vault source with the settings passed in.
+ * Called while rendering with `$settingsStore`, it runs again when the settings change or Obsidian reports a change
+ * (docs/state.md, ADR-S2); upstream's views re-read on a store emitting a random number instead
+ */
+export function noteAt(
+  granularity: IGranularity,
+  date: moment.Moment,
+  settings: Pick<ISettings, "periods" | "localeSettings" | "stickersEnabled" | "stickerProperty">,
+): TFileData {
+  const vault = vaultSource();
+  const file = vault.fileAt(periodNotePath(granularity, date, settings, vault.dailyNotes()));
+  return { file, sticker: file && stickerFrom(vault.metadataOf(file), settings) };
 }
 
 export async function getTemplateInfo(

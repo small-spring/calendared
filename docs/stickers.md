@@ -138,8 +138,8 @@ Calendared ではタグ形式を **読まない** ので、元の版で付けた
 **表示するとき**
 
 1. Obsidian がノートのメタデータ（frontmatter を含む）を更新すると `metadataCache` の `changed` が来る
-2. `main.ts` が `internalFileModStore` を更新し、それを含む `notesChangedStore`（`src/stores/notes.ts`）が変化する
-3. 日付ボタン（`DateBttn.svelte`）などが `notesChangedStore` に反応して `getFileData` → `getSticker` を呼び直し、表示が変わる
+2. 窓口（`src/io/vault-source.ts`）がそれを受けて、次のコマで読んでいる場所に読み直させる（[state.md](state.md) の ADR-S2）
+3. 日付ボタン（`DateBttn.svelte`）や見出し、タイムラインが `noteAt` を呼び直し、窓口から読んだメタデータを `stickerFrom`（`src/stickers.ts`）でステッカーにして、表示が変わる
 
 **見出しバーのボタン**
 

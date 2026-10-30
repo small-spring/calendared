@@ -1,13 +1,12 @@
 <script lang="ts">
-    import { getFileData } from "@/io";
-    import { displayedDateStore, notesChangedStore, yearsRanges } from "@/stores";
+    import { noteAt } from "@/io";
+    import { settingsStore } from "@/settings";
+    import { displayedDateStore, yearsRanges } from "@/stores";
     import { todayStore } from "@/stores/dates";
     import { Header } from "./core";
 
-    let fileData = $derived.by(() => {
-        $notesChangedStore; // recompute when notes change
-        return getFileData("year", $displayedDateStore);
-    });
+    // Calendared: read through the vault source with the settings read reactively (docs/state.md, ADR-S2)
+    let fileData = $derived(noteAt("year", $displayedDateStore, $settingsStore));
     let isToday = $derived($displayedDateStore.isSame($todayStore, "year"));
 
     $effect.pre(() => {

@@ -2,8 +2,9 @@
     // Calendared: month picker shown as a popover from the header's year chevron.
     // Replaces upstream's "Month" tab (YearHeader + months table in Calendar.svelte).
     import { monthsIndexesInQuarters } from "@/constants";
-    import { getFileData } from "@/io";
-    import { displayedDateStore, notesChangedStore, todayStore } from "@/stores";
+    import { noteAt } from "@/io";
+    import { settingsStore } from "@/settings";
+    import { displayedDateStore, todayStore } from "@/stores";
     import { cn } from "@/ui/utils";
     import Arrow from "./core/Arrow.svelte";
     import DateBttn from "./core/DateBttn.svelte";
@@ -16,10 +17,8 @@
     let { onPick }: Props = $props();
 
     let pickerYear = $state($displayedDateStore.clone().startOf("year"));
-    let yearFileData = $derived.by(() => {
-        $notesChangedStore; // recompute when notes change
-        return getFileData("year", pickerYear);
-    });
+    // Calendared: read through the vault source with the settings read reactively (docs/state.md, ADR-S2)
+    let yearFileData = $derived(noteAt("year", pickerYear, $settingsStore));
 </script>
 
 <div class="flex items-center justify-between mb-1">

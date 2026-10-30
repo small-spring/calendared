@@ -16,7 +16,6 @@ export const localeDataStore = writable<TLocaleData>({
     weekdays: defaultWeekdays,
     weekdaysShort: defaultWeekdaysShort
 });
-export const localeSwitched = writable({ modified: Math.random() })
 
 function setMomentLocale(localeKey: string) {
     window.moment.locale(localeKey);
@@ -71,8 +70,6 @@ export function switchLocale(localeKey: string) {
 
     // trigger <Calendar /> rerender to use new locale
     displayedDateStore.set(get(displayedDateStore).locale(localeKey));
-    // force rerender on <Timeline />, same as displayedDateStore.set but avoids unnecessary <Timeline /> rerenders
-    localeSwitched.set({ modified: Math.random() });
 }
 
 export function setupLocale() {

@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Characterization tests: they pin down which file a calendar cell looks for today, so the lookup can be reworked
 // (docs/state.md, ADR-S2). Obsidian (the vault, the metadata cache, the core Daily notes plugin) and the settings
-// store are stand-ins; the path calculation itself is the real code.
+// store are stand-ins; the path calculation, the vault source and reading stickers are the real code.
 
 const fake = vi.hoisted(() => ({
     files: new Map<string, unknown>(),
@@ -25,11 +25,6 @@ vi.mock("@/app-service", () => ({
     },
 }));
 
-vi.mock("@/ui/utils", () => ({
-    // the real one reads the sticker property from the settings; here a cache simply holds its sticker
-    getSticker: (cache: { sticker?: string } | null) => (cache?.sticker ? { emoji: cache.sticker } : null),
-}));
-
 const settings = vi.hoisted(() => {
     const period = (enabled: boolean, format: string, folder: string) => {
         const selectedFormat = { id: "s", value: format, error: "", loading: false };
@@ -43,7 +38,9 @@ const settings = vi.hoisted(() => {
             quarter: period(false, "YYYY-[Q]Q", "四半期"),
             year: period(true, "YYYY", "年"),
         },
-        localeSettings: { weekStartId: 1, weekNumbering: "iso" as const },
+        localeSettings: { localeOverride: "en", weekStartId: 1, weekNumbering: "iso" as const },
+        stickersEnabled: true,
+        stickerProperty: "sticker",
     });
     return { period, initial };
 });
@@ -58,7 +55,13 @@ vi.mock("@/settings", async () => {
 });
 
 const { settingsStore } = await import("@/settings");
-const { getNotePath, getFileData } = await import("./vault");
+const { getNotePath, getFileData, noteAt } = await import("./vault");
+const { initVaultSource } = await import("./vault-source");
+const { PluginService } = await import("@/app-service");
+
+// the vault source asks the same stand-in Obsidian
+// @ts-expect-error the stand-in has only what the lookups use
+initVaultSource(PluginService.getPlugin().app);
 
 const date = (d: string) => moment(d, "YYYY-MM-DD");
 const fileAt = (path: string) => Object.assign(new TFile(), { path });
@@ -138,7 +141,7 @@ describe("getFileData: その日付の周期ノートと、そのステッカー
     it("パスにファイルがあれば、そのファイルとステッカーを返す", () => {
         const file = fileAt("日記/2026-10-30.md");
         fake.files.set(file.path, file);
-        fake.caches.set(file.path, { sticker: "🍙" });
+        fake.caches.set(file.path, { frontmatter: { sticker: "🍙" } });
         expect(getFileData("day", date("2026-10-30"))).toEqual({ file, sticker: { emoji: "🍙" } });
     });
 
@@ -160,5 +163,34 @@ describe("getFileData: その日付の周期ノートと、そのステッカー
     it("周期か日付がなければ、どちらも null", () => {
         expect(getFileData(null, date("2026-10-30"))).toEqual({ file: null, sticker: null });
         expect(getFileData("day", null)).toEqual({ file: null, sticker: null });
+    });
+});
+
+describe("noteAt: 渡した設定で、その日付の周期ノートとステッカーを読む（画面用。設定の変化を Svelte が追える）", () => {
+    it("ストアではなく、渡した設定のフォルダと書式で探す", () => {
+        const file = fileAt("別/2026-10-30.md");
+        fake.files.set(file.path, file);
+        const passed = settings.initial();
+        passed.periods.day.folder = "別";
+        expect(noteAt("day", date("2026-10-30"), passed)).toEqual({ file, sticker: null });
+    });
+
+    it("ストアではなく、渡した設定のステッカーのプロパティで読む", () => {
+        const file = fileAt("日記/2026-10-30.md");
+        fake.files.set(file.path, file);
+        fake.caches.set(file.path, { frontmatter: { sticker: "🍙", mood: "😀" } });
+        expect(noteAt("day", date("2026-10-30"), { ...settings.initial(), stickerProperty: "mood" })).toEqual({
+            file,
+            sticker: { emoji: "😀" },
+        });
+    });
+
+    it("日次ノートを無効にしていれば、窓口から読んだコアプラグイン「デイリーノート」の設定で探す", () => {
+        const file = fileAt("Daily/20261030.md");
+        fake.files.set(file.path, file);
+        fake.dailyNotes = { enabled: true, instance: { options: { format: "YYYYMMDD", folder: "Daily" } } };
+        const passed = settings.initial();
+        passed.periods.day.enabled = false;
+        expect(noteAt("day", date("2026-10-30"), passed)).toEqual({ file, sticker: null });
     });
 });

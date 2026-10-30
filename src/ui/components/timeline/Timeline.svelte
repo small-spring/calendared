@@ -4,8 +4,7 @@
   import { TIMELINE_TYPE } from "@/constants";
   import { IGranularity } from "@/io";
   import { settingsStore, TimelineViewMode } from "@/settings";
-  import { getFileData } from "@/io";
-  import { localeSwitched, notesChangedStore } from "@/stores";
+  import { noteAt } from "@/io";
   import { Arrow } from "@/ui";
   import { cn } from "@/ui/utils";
   import { weekSchemeFor } from "@/weeks";
@@ -51,8 +50,11 @@
 
   // svelte-ignore state_referenced_locally
   let crrDisplayedDate = $state(initialDate);
+  // Calendared: the calendar's language (set in the settings, applied to moment by switchLocale). A $derived, so
+  // other settings changes don't rebuild the dates; upstream signalled a switch with a store emitting a random number
+  let locale = $derived($settingsStore.localeSettings.localeOverride);
   $effect.pre(() => {
-    $localeSwitched;
+    locale;
     // this is crucial, existing moment objects keep their existing locale, so we need to re-locale them
     crrDisplayedDate = crrDisplayedDate.locale(window.moment.locale());
   });
@@ -70,7 +72,7 @@
   }
 
   let dates: moment.Moment[] = $derived.by(() => {
-    $localeSwitched; // moment objects don't track the locale; rebuild when it changes
+    locale; // moment objects don't track the locale; rebuild when it changes
 
     let dates: moment.Moment[] = [];
 
@@ -133,10 +135,8 @@
   let headingText = $derived(
     derivedG === "day" ? `W${String(weekScheme.weekOf(groupDate).week).padStart(2, "0")}` : undefined,
   );
-  let groupFileData = $derived.by(() => {
-    $notesChangedStore; // recompute when notes change
-    return getFileData(G_MAP[derivedG].group, groupDate);
-  });
+  // Calendared: read through the vault source with the settings read reactively (docs/state.md, ADR-S2)
+  let groupFileData = $derived(noteAt(G_MAP[derivedG].group, groupDate, $settingsStore));
 
   let startOfDate = $derived(dates[0]);
   let endOfDate = $derived(dates[dates.length - 1]);
@@ -151,7 +151,7 @@
   let contextUnit = $derived<"month" | "year">(derivedG === "day" ? "month" : "year");
   /** the label's parts: one month/year, or the two ends of a range ("9月", "10月"), each opening its own note */
   let contextParts = $derived.by((): { date: moment.Moment; text: string }[] => {
-    $localeSwitched;
+    locale;
     if (!startOfDate || !endOfDate || derivedG === "year") return [];
 
     const today = window.moment();
@@ -172,10 +172,7 @@
     if (!startOfDate.isSame(endOfDate, unit)) parts.push({ date: endOfDate.clone().startOf(unit), text: end });
     return parts;
   });
-  let contextFileData = $derived.by(() => {
-    $notesChangedStore; // recompute when notes change
-    return contextParts.map(({ date }) => getFileData(contextUnit, date));
-  });
+  let contextFileData = $derived(contextParts.map(({ date }) => noteAt(contextUnit, date, $settingsStore)));
 
   let isInitial = $derived(
     derivedInitialDate.isSame(crrDisplayedDate, derivedG),

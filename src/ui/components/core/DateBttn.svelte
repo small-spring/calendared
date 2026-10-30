@@ -1,9 +1,8 @@
 <script lang="ts">
   import { IGranularity } from "@/io";
 
-  import { periodNotePath, vaultSource } from "@/io";
+  import { noteAt } from "@/io";
   import { settingsStore } from "@/settings";
-  import { stickerFrom } from "@/stickers";
   import {
     activeFileStore,
     displayedDateStore,
@@ -51,11 +50,7 @@
 
   // Calendared: read through the vault source, with the settings read reactively (docs/state.md, ADR-S2);
   // upstream re-read everything on a store emitting a random number
-  const vault = vaultSource();
-  let file = $derived(
-    vault.fileAt(periodNotePath(granularity, date, $settingsStore, vault.dailyNotes())),
-  );
-  let sticker = $derived(file && stickerFrom(vault.metadataOf(file), $settingsStore));
+  let { file, sticker } = $derived(noteAt(granularity, date, $settingsStore));
   let isActive = $derived.by(() => {
     if (!$activeFileStore?.file?.path || !file?.path) {
       return false;

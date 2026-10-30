@@ -1,7 +1,6 @@
 import { IGranularity } from '@/io';
-import { settingsStore } from '@/settings';
 import { TFile } from 'obsidian';
-import { readable, writable } from 'svelte/store';
+import { writable } from 'svelte/store';
 
 type TActiveFile = {
     file: TFile | null;
@@ -10,22 +9,11 @@ type TActiveFile = {
 }
 const activeFileStore = writable<TActiveFile | null>({ file: null, date: null, granularity: null });
 const timelineParentFileStore = writable<TFile | null>(null);
-const internalFileModStore = writable<"created" | "renamed" | { modified: number } | "deleted" | null>(null);
-
 /**
- * Calendared: emits whenever something a note lookup (`getFileData`, metadata cache reads) depends on may have changed:
- * settings (folders, formats, the known-notes index) or a note being created, renamed, deleted or having its metadata updated.
- * Read it inside `$derived` to recompute note data, instead of reading `$settingsStore` / `$internalFileModStore` directly.
- *
- * `settingsStore` is only touched once someone subscribes: the bundle defines this module before the settings
- * module (import cycle), so referencing it at load time (e.g. `derived([settingsStore, ...])`) crashes the plugin.
+ * Marks the plugin's own create/rename/delete while it runs, so main.ts doesn't record the note in the settings' list
+ * twice. Calendared: views no longer read it; they read notes through the vault source (docs/state.md, ADR-S2).
+ * It goes with that list (step 5 there)
  */
-const notesChangedStore = readable({}, (set) => {
-    const unsubscribers = [
-        settingsStore.subscribe(() => set({})),
-        internalFileModStore.subscribe(() => set({})),
-    ];
-    return () => unsubscribers.forEach((unsubscribe) => unsubscribe());
-});
+const internalFileModStore = writable<"created" | "renamed" | "deleted" | null>(null);
 
-export { activeFileStore, timelineParentFileStore, internalFileModStore, notesChangedStore };
+export { activeFileStore, timelineParentFileStore, internalFileModStore };

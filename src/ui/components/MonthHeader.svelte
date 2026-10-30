@@ -1,18 +1,14 @@
 <script lang="ts">
-    import { getFileData } from "@/io";
-    import { displayedDateStore, notesChangedStore, yearsRanges } from "@/stores";
+    import { noteAt } from "@/io";
+    import { settingsStore } from "@/settings";
+    import { displayedDateStore, yearsRanges } from "@/stores";
     import { todayStore } from "@/stores/dates";
     import { Header } from "./core";
     import MonthPicker from "./MonthPicker.svelte";
 
-    let monthFileData = $derived.by(() => {
-        $notesChangedStore; // recompute when notes change
-        return getFileData("month", $displayedDateStore);
-    });
-    let yearFileData = $derived.by(() => {
-        $notesChangedStore; // recompute when notes change
-        return getFileData("year", $displayedDateStore.clone().startOf("year"));
-    });
+    // Calendared: read through the vault source with the settings read reactively (docs/state.md, ADR-S2)
+    let monthFileData = $derived(noteAt("month", $displayedDateStore, $settingsStore));
+    let yearFileData = $derived(noteAt("year", $displayedDateStore.clone().startOf("year"), $settingsStore));
     let isToday = $derived($displayedDateStore.isSame($todayStore, "month"));
 </script>
 

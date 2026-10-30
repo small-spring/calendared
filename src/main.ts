@@ -319,9 +319,6 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
       )
     );
     this.registerEvent(
-      this.app.metadataCache.on('changed', () => this.onMetadataChanged())
-    )
-    this.registerEvent(
       this.app.workspace.on('file-open', (file) => this.onFileOpen(file))
     )
     // Calendared: keep the header sticker buttons in step with the notes shown and their stickers
@@ -475,9 +472,5 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
         toBeAdded: typeof _newData.isValid === 'boolean' && renamedFile.extension === 'md'
       }
     })
-  }
-
-  private onMetadataChanged() {
-    internalFileModStore.set({ modified: Math.random() })
   }
 }

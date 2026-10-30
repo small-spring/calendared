@@ -26,10 +26,10 @@
 | `activeFileStore` | 選択中のノート（ファイル・日付・周期） | `onFileOpen`、ノートを開く処理（`create-or-open-note.ts`） | 開いているノートの写し。2 か所が書き換える。日付と周期はどこからも読まれていない |
 | `displayedDateStore` | カレンダーが表示している月 | ノートを開いたとき（`onFileOpen`）、‹ › と ⌖、月の吹き出し、月・年のビュー、日付が変わったとき（`View.svelte` の 1 分ごとの確認） | 書き換える場所は多いが、どれも「ユーザーの移動」か「開いたノートへの追従」か「日付の変化」。ただし謎が 1 つある（4.） |
 | `timelineParentFileStore` | タイムラインを出しているノート | `TimelineManager.layoutSync` | 全体で 1 つ。タブごとに持つべき（不具合 (4)） |
-| `internalFileModStore` | 「自分でファイルを作っている・名前を変えている・消している最中」の目印と、「メタデータが変わった」合図 | ノートの作成、書式の付け替え、一括削除、メタデータの変化（`Math.random()` の値を入れる） | 目印と合図という別の役目を 1 つの値で兼ねている。合図に乱数を使っている |
-| `notesChangedStore` | 「ノートの情報を描き直す」合図 | （`settingsStore` と `internalFileModStore` の変化から作る） | 設定のどこが変わっても発火する（ノートの一覧が設定に入っているため）。カレンダーの全マスが計算し直す |
+| `internalFileModStore` | 「自分でファイルを作っている・名前を変えている・消している最中」の目印と、「メタデータが変わった」合図 | ノートの作成、書式の付け替え、一括削除、メタデータの変化（`Math.random()` の値を入れる） | 目印と合図という別の役目を 1 つの値で兼ねている。合図に乱数を使っている。2026-10-30 に合図をやめ、目印だけ残した（5. で一覧と一緒に消す） |
+| `notesChangedStore` | 「ノートの情報を描き直す」合図 | （`settingsStore` と `internalFileModStore` の変化から作る） | 設定のどこが変わっても発火する（ノートの一覧が設定に入っているため）。カレンダーの全マスが計算し直す。2026-10-30 に消した（窓口から読む） |
 | `todayStore` | 今日 | `View.svelte` の 1 分ごとの確認 | 問題なし |
-| `localeDataStore` / `localeSwitched` | 曜日の名前、言語を変えた合図 | 言語・週の始まりの変更 | 合図に乱数（`Math.random()`）。言語の扱いの作り直しで見直す |
+| `localeDataStore` / `localeSwitched` | 曜日の名前、言語を変えた合図 | 言語・週の始まりの変更 | 合図に乱数（`Math.random()`）。2026-10-30 に `localeSwitched` を消した（タイムラインは設定の言語を読む）。`localeDataStore` は言語の扱いの作り直しで見直す |
 | `crrTabStore` | 日・月・年のどのビューか | カレンダー | 問題なし |
 | `yearsRanges` | 年のビューの範囲 | 年のビュー | 複雑だが、年のビューは日・月を無効にしたときだけ出る |
 | `spFileDataStore` | ステッカーのピッカーの対象 | ステッカーの操作 | 問題なし |
@@ -140,8 +140,11 @@
    （2026-10-30 に済んだ。`src/io/vault-source.ts`。窓口はステッカーではなくメタデータ（`metadataOf`）を返し、ステッカーの読み取りは
    設定を引数で受け取る `src/stickers.ts` の `stickerFrom` にした。コアプラグイン「デイリーノート」も窓口の `dailyNotes()` から読み、
    パスは `periodNotePath` で計算する。古い `getSticker`・`getNotePath`・`getNormalizedPeriodSettings` は、残りの呼び出し元が移るまで包みとして残す）
-4. タイムラインと月・年の見出しも窓口に移し、`notesChangedStore`・`internalFileModStore`・`localeSwitched` を消す
-5. 設定画面のファイル数を「周期」タブを開いたときに数える形にし、`data.json` から一覧を消す
+4. ~~タイムラインと月・年の見出しも窓口に移し、`notesChangedStore`・`internalFileModStore`・`localeSwitched` を消す~~
+   （2026-10-30 に済んだ。画面はどれも `noteAt(周期, 日付, $settingsStore)` で読む。`localeSwitched` の代わりに、タイムラインは設定の言語
+   `localeOverride` を `$derived` で読む。`internalFileModStore` は合図の役目だけ消し、自分の操作の目印として残した。目印は設定の中の
+   ノートの一覧を二重に書き換えないためのものなので、一覧と一緒に 5. で消す）
+5. 設定画面のファイル数を「周期」タブを開いたときに数える形にし、`data.json` から一覧を消す。自分の操作の目印（`internalFileModStore`）も消す
 6. ADR-S1 選択を開いているノートから求める（窓口の `activeFile` として）
 7. ADR-S3 タイムラインをタブごとに作り直す（不具合 (4)、「ふつうのノートにも出す」の作り直し）
 8. 4. の謎を確かめる（7 と同じく `file-open` まわりを触るので、そのとき）

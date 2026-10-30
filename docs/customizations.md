@@ -133,3 +133,4 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 - どこからも読まれていないストア（`rerenderStore`・`crrFileMenu`・`pluginClassStore`）を削除〔2026-10-30〕
 - ノートのパスの計算を、設定を引数で受け取る関数（`src/io/note-path.ts` の `notePath`）に切り出し、テストを付けた〔2026-10-30〕
 - Obsidian が知っていること（ファイル・メタデータ・コアのデイリーノート）を写しを持たずに読む窓口（`src/io/vault-source.ts`）を作り、カレンダーのマスをそこから読む形にした。ステッカーの読み取りを、設定を引数で受け取る関数（`src/stickers.ts`）に切り出した〔2026-10-30〕
+- 月・年の見出し、月の吹き出し、タイムラインも窓口から読むようにし、乱数で合図するストア（`notesChangedStore`・`localeSwitched`、`internalFileModStore` の合図の役目）を消した〔2026-10-30〕
