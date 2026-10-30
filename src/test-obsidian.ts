@@ -1,3 +1,15 @@
 // Calendared: stand-in for the `obsidian` module in unit tests. The npm package only has type definitions;
 // the real module comes from the Obsidian app. Add what a tested module needs at import time
-export const normalizePath = (path: string) => path;
+
+/** Like Obsidian's: one kind of slash, no slash at either end ("/" for the vault root), no non-breaking spaces, NFC */
+export const normalizePath = (path: string) =>
+    (path.replace(/[\\/]+/g, "/").replace(/^\/+|\/+$/g, "") || "/").replace(/ | /g, " ").normalize("NFC");
+
+export class TAbstractFile {
+    constructor(public path: string) {}
+}
+export class TFile extends TAbstractFile {}
+export class TFolder extends TAbstractFile {}
+export class Notice {
+    constructor(public message: unknown) {}
+}
