@@ -7,6 +7,7 @@ Svelte 5 + TypeScript + Vite + Tailwind。作業ブランチは `custom`。`upst
 
 - `docs/customizations.md`: 元の版との違い（今どうなっているか）
 - `docs/todo.md`: これからやること（不具合・やりたいこと）
+- `docs/publishing.md`: コミュニティプラグインとして公開するまでにやること
 - `docs/development.md`: ビルド・deploy・依存の更新・書き方の決まり
 - `docs/stickers.md`: ステッカー機能の仕様と ADR
 - `docs/device-testing.md`: Windows・iPhone の実機で試す手順
