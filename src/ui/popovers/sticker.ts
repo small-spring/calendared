@@ -1,9 +1,6 @@
 import { STICKER_POPOVER_ID } from '@/constants';
-import { settingsStore } from '@/settings';
 import { Component, unmount } from 'svelte';
-import { get } from 'svelte/store';
 import { WindowEventHandler, type TWindowEvents } from '../types';
-import { Popover } from './base';
 import { BaseComponentBehavior } from './base-component-behavior';
 import { Platform } from 'obsidian'
 
@@ -23,7 +20,7 @@ export class StickerPopoverBehavior extends BaseComponentBehavior {
 
   public open(refHtmlEl: HTMLElement) {
     this.refHtmlEl = refHtmlEl;
-    super.open(refHtmlEl, false, !Platform.isPhone);
+    super.open(refHtmlEl, !Platform.isPhone);
 
     this.getSearchInput()?.focus();
     this.addWindowListeners(this.getWindowEvents(), this.boundCallbacks);
@@ -65,8 +62,6 @@ export class StickerPopoverBehavior extends BaseComponentBehavior {
   };
 
   public handleWindowKeydown(event: KeyboardEvent) {
-    const settings = get(settingsStore);
-
     const focusableSelectors =
       ':is(a[href], button, input, textarea, select, details, [tabindex]):not([tabindex="-1"])';
 
@@ -89,11 +84,7 @@ export class StickerPopoverBehavior extends BaseComponentBehavior {
     }
 
     if (event.key === 'Escape') {
-      if (settings.popoversClosing.closePopoversOneByOneOnEscKeydown) {
-        this.close();
-      } else {
-        Popover.closeAll();
-      }
+      this.close();
       this.refHtmlEl?.focus();
 
       return;

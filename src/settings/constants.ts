@@ -72,18 +72,6 @@ export interface ISettings {
     /** Calendared: how weeks are numbered (docs/periods.md, ADR-006). Only "iso" exists so far; not shown in the settings */
     weekNumbering: "iso";
   };
-
-  /** Settings for closing popovers */
-  popoversClosing: {
-    /** Whether to close popovers one by one when clicking outside */
-    closePopoversOneByOneOnClickOut: boolean;
-
-    /** Whether to close popovers one by one when pressing Esc */
-    closePopoversOneByOneOnEscKeydown: boolean;
-
-    /** Close popovers when pressing Esc in the search input instead of default blur*/
-    closeOnEscStickerSearchInput: boolean;
-  };
 }
 
 export function getDefaultPeriodicNotesConfig(
@@ -110,7 +98,8 @@ export function getDefaultPeriodicNotesConfig(
 
 /**
  * Calendared: settings of removed features (preview panel, floating mode, minimal-mode toggle, natural language
- * date picker, TODO carry-over, calendar auto-sync toggle). Dropped from data.json on load so they don't linger.
+ * date picker, TODO carry-over, calendar auto-sync toggle, popover closing options). Dropped from data.json on load so they
+ * don't linger.
  */
 export const REMOVED_SETTINGS = [
   "preview",
@@ -126,6 +115,7 @@ export const REMOVED_SETTINGS = [
   "filepathsByFormatValue",
   // Calendared: an unreleased toggle for the emoji search language; installed languages are now the files in the plugin's folder
   "emojiSearchInLanguage",
+  "popoversClosing",
 ] as const;
 /** Calendared: per-period settings of removed features (`periods.<granularity>.preview`: TODO / preview sections) */
 export const REMOVED_PERIOD_SETTINGS = ["preview"] as const;
@@ -159,11 +149,5 @@ export const DEFAULT_SETTINGS: ISettings = Object.freeze({
     localeOverride: sysLocaleKey,
     weekStartId: toSupportedWeekStart(sysWeekStartId),
     weekNumbering: "iso" as const,
-  },
-
-  popoversClosing: {
-    closePopoversOneByOneOnClickOut: false,
-    closePopoversOneByOneOnEscKeydown: true,
-    closeOnEscStickerSearchInput: true,
   },
 });

@@ -46,6 +46,8 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
   （「カレンダー」の節）ので要らなくなった〔2026-10-29〕
 - 自然言語の日付: コマンド「Open periodic note from natural language date」と、テンプレートの `{{next friday}}` のような書き方。
   依存の chrono-node も外した。`{{date}}`、`{{title}}`、`{{date+1d}}`、`{{monday}}`、`:書式` などは今までどおり〔2026-10-29〕
+- 吹き出しの閉じ方の設定 3 つ（`popoversClosing`。画面には出ていなかった）と、フローティング表示の吹き出しの残りのコード。
+  吹き出しはステッカーのピッカーしか開かないので、Esc や外側を押すといつもそれを閉じる〔2026-10-30〕
 
 ## カレンダー
 

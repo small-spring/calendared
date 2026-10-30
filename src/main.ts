@@ -37,7 +37,6 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
   onunload() {
     Popover.stickerSingleton?.cleanup();
     Popover.fileMenuSingleton?.cleanup();
-    Popover.baseSingleton?.cleanup();
     Popover.cleanup();
     TimelineManager.destroy();
     this.stickerActions.removeAll();

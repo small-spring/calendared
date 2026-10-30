@@ -1,12 +1,9 @@
-import { BASE_POPOVER_ID } from "@/constants";
-import { BaseComponentBehavior, TBasePopoverParams } from "./base-component-behavior";
 import { FileMenuPopoverBehavior, type FileMenuOpenParams } from "./file-menu";
 import { StickerPopoverBehavior, type TStickerPopoverParams } from "./sticker";
 
-export class Popover<T extends StickerPopoverBehavior | FileMenuPopoverBehavior | BaseComponentBehavior> {
+export class Popover<T extends StickerPopoverBehavior | FileMenuPopoverBehavior> {
   static stickerSingleton: Popover<StickerPopoverBehavior> | null = null;
   static fileMenuSingleton: Popover<FileMenuPopoverBehavior> | null = null;
-  static baseSingleton: Popover<BaseComponentBehavior> | null = null;
   open: (param: FileMenuOpenParams | Element) => void;
   close: () => void;
   toggle: (param: FileMenuOpenParams | Element) => void;
@@ -24,7 +21,6 @@ export class Popover<T extends StickerPopoverBehavior | FileMenuPopoverBehavior 
   static cleanup() {
     Popover.stickerSingleton = null;
     Popover.fileMenuSingleton = null;
-    Popover.baseSingleton = null;
 
     Popover.mutationObserverStarted = false;
   }
@@ -32,7 +28,6 @@ export class Popover<T extends StickerPopoverBehavior | FileMenuPopoverBehavior 
   static closeAll() {
     Popover.stickerSingleton?.close();
     Popover.fileMenuSingleton?.close();
-    Popover.baseSingleton?.close();
   }
 }
 
@@ -47,10 +42,4 @@ export const createFileMenuPopover = () => {
     Popover.fileMenuSingleton = new Popover(new FileMenuPopoverBehavior())
   }
   return Popover.fileMenuSingleton
-}
-export const createBasePopover = (params: TBasePopoverParams) => {
-  if (!Popover.baseSingleton) {
-    Popover.baseSingleton = new Popover(new BaseComponentBehavior(BASE_POPOVER_ID, params.view, params.cbs))
-  }
-  return Popover.baseSingleton
 }

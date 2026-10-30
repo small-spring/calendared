@@ -1,22 +1,10 @@
 import { Component, mount } from "svelte";
 import { Popover } from "./base";
 import { arrow, autoUpdate, computePosition, flip } from "@floating-ui/dom";
-import { BASE_POPOVER_ID, MODAL_CLASS, STICKER_POPOVER_ID } from "@/constants";
+import { MODAL_CLASS } from "@/constants";
 import { type TWindowEvents, type WindowEventHandler } from "../types";
 
-export type TBasePopoverParams = {
-  view: {
-    Component: Component;
-    props?: Record<string, unknown>;
-  },
-  cbs?: {
-    onOpen?: () => void,
-    onClose?: () => void,
-  }
-}
-export type TBasePopoverId = typeof STICKER_POPOVER_ID | typeof BASE_POPOVER_ID
-
-export class BaseComponentBehavior {
+export abstract class BaseComponentBehavior {
   public componentHtmlEl: HTMLElement;
   public component: Record<string, unknown> | null;
   public autoUpdateCleanup: (() => void) | null | undefined;
@@ -24,7 +12,7 @@ export class BaseComponentBehavior {
   public opened = false;
 
   constructor(
-    public id: TBasePopoverId = BASE_POPOVER_ID,
+    public id: string,
     view: {
       Component: Component;
       props?: Record<string, unknown>;
@@ -57,7 +45,7 @@ export class BaseComponentBehavior {
     }
   }
 
-  public open(refHtmlEl: Element, addDefaultEvListners = true, positionFloatingUI = true) {
+  public open(refHtmlEl: Element, positionFloatingUI = true) {
     this.opened = true;
 
     // close all popovers when a new modal is displayed to prevent overlapping
@@ -111,9 +99,6 @@ export class BaseComponentBehavior {
       })
     }
 
-    if (addDefaultEvListners) {
-      this.addWindowListeners(this.getWindowEvents(), this.boundCallbacks);
-    }
     this.cbs?.onOpen?.();
   }
   public close() {
@@ -197,24 +182,7 @@ export class BaseComponentBehavior {
     )
   }
 
-  public getWindowEvents(): TWindowEvents {
-    return {
-      click: this.handleWindowClick.bind(this),
-    }
-  }
-  public handleWindowClick(event: MouseEvent) {
-    const ev = event as MouseEvent & { target: HTMLElement | null };
-
-
-    const baseElTouched =
-      this.componentHtmlEl.contains(ev.target) ||
-      ev.target?.closest(`[id*=${BASE_POPOVER_ID}]`)
-
-    // close base popover if user clicked anywhere but base popover
-    if (!baseElTouched) {
-      this.close();
-    }
-  };
+  public abstract getWindowEvents(): TWindowEvents;
 
   private show() {
     this.componentHtmlEl.addClass("visible")

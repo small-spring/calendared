@@ -24,18 +24,11 @@ export { isReservedStickerProperty, RESERVED_STICKER_PROPERTIES, type TSticker }
 
 export const onInputKeydown = (ev: KeyboardEvent) => {
   const input = document.querySelector('em-emoji-picker')?.shadowRoot?.querySelector('input');
-  const settings = get(settingsStore);
   const stickerInstance = Popover.stickerSingleton;
 
   if (ev.key === 'Escape') {
-    if (settings.popoversClosing.closePopoversOneByOneOnEscKeydown) {
-      if (input) {
-        input.blur();
-      }
-      stickerInstance?.close()
-    } else {
-      Popover.closeAll()
-    }
+    input?.blur();
+    stickerInstance?.close()
     stickerInstance?.behaviors?.refHtmlEl?.focus();
   }
 };
