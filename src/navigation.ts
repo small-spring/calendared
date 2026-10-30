@@ -5,25 +5,29 @@ import type { WeekScheme } from "./weeks";
 // Calendared: the breadcrumbs and the mini calendar above a note (docs/adr/0031, 0032), apart from Obsidian so they can
 // be tested. They replace upstream's timeline
 
-/** Where a feature shows: on every device, on phones only (tablets keep the side calendar in view), or nowhere */
-export type Placement = "always" | "phone" | "never";
+/** Where a feature shows when it is on: on every device, or on phones only (tablets keep the side calendar in view) */
+export type Placement = "always" | "phone";
 /** How the mini calendar lays out days: the calendar's week, or the note in the middle with 3 days each side */
 export type DayLayout = "week" | "centered";
 
 export interface BreadcrumbsSettings {
+    /** the toggle on the section's heading; turning it off keeps `placement` for when it comes back on */
+    enabled: boolean;
     placement: Placement;
     /** also show it on notes that aren't periodic notes (it then shows where now is) */
     onOtherNotes: boolean;
 }
 export interface MiniCalendarSettings {
+    enabled: boolean;
     placement: Placement;
     onOtherNotes: boolean;
     dayLayout: DayLayout;
     displayStickers: boolean;
 }
 
-export const DEFAULT_BREADCRUMBS: BreadcrumbsSettings = { placement: "always", onOtherNotes: true };
+export const DEFAULT_BREADCRUMBS: BreadcrumbsSettings = { enabled: true, placement: "always", onOtherNotes: true };
 export const DEFAULT_MINI_CALENDAR: MiniCalendarSettings = {
+    enabled: true,
     placement: "always",
     onOtherNotes: true,
     dayLayout: "week",
@@ -31,8 +35,8 @@ export const DEFAULT_MINI_CALENDAR: MiniCalendarSettings = {
 };
 
 /**
- * Saved settings with upstream's `timeline` read as the two features' settings: a timeline that was on shows both
- * everywhere, one that was off shows neither. Which notes it showed on and whether it showed stickers carry over;
+ * Saved settings with upstream's `timeline` read as the two features' settings: a timeline that was on turns both on
+ * everywhere, one that was off turns both off. Which notes it showed on and whether it showed stickers carry over;
  * the rest (unique timelines, open or closed at first) has no counterpart. Settings already saved the new way are kept
  */
 export function migrateTimelineSettings(saved: Record<string, unknown>): Record<string, unknown> {
@@ -40,13 +44,13 @@ export function migrateTimelineSettings(saved: Record<string, unknown>): Record<
     const { timeline, ...rest } = saved;
     if ("breadcrumbs" in rest || "miniCalendar" in rest) return rest;
     const old = (timeline ?? {}) as { enabled?: boolean; displayOnRestNotes?: boolean; displayStickers?: boolean };
-    const placement: Placement = old.enabled === false ? "never" : "always";
+    const enabled = old.enabled !== false;
     const onOtherNotes = old.displayOnRestNotes ?? DEFAULT_BREADCRUMBS.onOtherNotes;
     return {
-        breadcrumbs: { placement, onOtherNotes },
+        breadcrumbs: { enabled, placement: "always", onOtherNotes },
         miniCalendar: {
             ...DEFAULT_MINI_CALENDAR,
-            placement,
+            enabled,
             onOtherNotes,
             displayStickers: old.displayStickers ?? DEFAULT_MINI_CALENDAR.displayStickers,
         },
@@ -54,8 +58,23 @@ export function migrateTimelineSettings(saved: Record<string, unknown>): Record<
     };
 }
 
-export function showsOn(placement: Placement, isPhone: boolean): boolean {
-    return placement === "always" || (placement === "phone" && isPhone);
+/**
+ * Saved settings from when where each feature shows was one choice of three (Always / Phone only / Never) read as a
+ * toggle and a choice of two (docs/adr/0033): Never becomes off, shown everywhere once turned back on
+ */
+export function migratePlacementSettings(saved: Record<string, unknown>): Record<string, unknown> {
+    const migrated = { ...saved };
+    for (const key of ["breadcrumbs", "miniCalendar"]) {
+        const feature = saved[key] as { enabled?: boolean; placement?: string } | undefined;
+        if (!feature || "enabled" in feature) continue;
+        const never = feature.placement === "never";
+        migrated[key] = { ...feature, enabled: !never, placement: never ? "always" : feature.placement };
+    }
+    return migrated;
+}
+
+export function showsOn(feature: { enabled: boolean; placement: Placement }, isPhone: boolean): boolean {
+    return feature.enabled && (feature.placement === "always" || isPhone);
 }
 
 /** The finest period in use: a note that isn't a periodic note shows where now is in it (today, if days are used) */

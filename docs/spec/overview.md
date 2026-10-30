@@ -140,15 +140,17 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 
 | 表示名 | 今の場所 | キー | 既定 | 内容 |
 | --- | --- | --- | --- | --- |
-| Show on | Calendar › Breadcrumbs | `breadcrumbs.placement` | Always | パンくずを出す場所（Always / Phone only / Never） |
+| Breadcrumbs | Calendar › Breadcrumbs（見出しのトグル） | `breadcrumbs.enabled` | オン | パンくずを出すか |
+| Show on | Calendar › Breadcrumbs | `breadcrumbs.placement` | Always | パンくずを出す場所（Always / Phone only） |
 | Show on other notes | Calendar › Breadcrumbs | `breadcrumbs.onOtherNotes` | オン | 周期ノートでないノートにも出すか |
+| Mini calendar | Calendar › Mini calendar（見出しのトグル） | `miniCalendar.enabled` | オン | ミニカレンダーを出すか |
 | Show on | Calendar › Mini calendar | `miniCalendar.placement` | Always | ミニカレンダーを出す場所 |
 | Show on other notes | Calendar › Mini calendar | `miniCalendar.onOtherNotes` | オン | 周期ノートでないノートにも出すか |
 | Days | Calendar › Mini calendar | `miniCalendar.dayLayout` | Calendar week | 日の並べ方（Calendar week / Centered on the note） |
 | Show stickers | Calendar › Mini calendar | `miniCalendar.displayStickers` | オン | ステッカーを出すか |
 | Compact on desktop | Calendar › Mini calendar | `compactOnDesktop` | オフ | PC で右上の小さな箱にする（パンくずにも効く） |
 
-前の `timeline.*` の設定は、起動したときに読み替えて消す（オフにしていれば両方 Never、ほかの人のノートにも出すか・ステッカーは引き継ぐ）。
+前の `timeline.*` の設定は、起動したときに読み替えて消す（オフにしていれば両方オフ。ほかのノートにも出すか・ステッカーは引き継ぐ）。出す場所を 3 択で持っていたときの Never はオフに読み替える（[ADR-0033](../adr/0033-heading-toggles.md)）。
 
 ## 5. ステッカー（[stickers.md](stickers.md)）
 
@@ -197,8 +199,8 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 | 今の場所 | 中身 | 本来の機能 |
 | --- | --- | --- |
 | Calendar › Stickers | オン・オフ、見出しバーのボタン、プロパティ、検索の言語 | 5. ステッカー |
-| Calendar › Breadcrumbs | 出す場所、周期ノート以外 | 4. パンくずとミニカレンダー |
-| Calendar › Mini calendar | 出す場所、周期ノート以外、日の並べ方、ステッカー、Compact on desktop | 4. パンくずとミニカレンダー |
+| Calendar › Breadcrumbs | オン・オフ、出す場所、周期ノート以外 | 4. パンくずとミニカレンダー |
+| Calendar › Mini calendar | オン・オフ、出す場所、周期ノート以外、日の並べ方、ステッカー、Compact on desktop | 4. パンくずとミニカレンダー |
 | Calendar › Interaction behavior | 作成の確認、Open now のボタン、ホバーのプレビュー | 6. 確認、3. カレンダー |
 | Calendar › Localization | カレンダーの言語、週の始まり | 3. カレンダー、1. 周期ノート（週の決め方） |
 | Periods › 各周期 | オン・オフ、書式、フォルダ、テンプレート、起動時に開く | 1. 周期ノート |

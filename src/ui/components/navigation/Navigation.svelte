@@ -40,11 +40,11 @@
   );
 
   let showCrumbs = $derived(
-    showsOn($settingsStore.breadcrumbs.placement, Platform.isPhone) &&
+    showsOn($settingsStore.breadcrumbs, Platform.isPhone) &&
       (isPeriodic || $settingsStore.breadcrumbs.onOtherNotes),
   );
   let showMini = $derived(
-    showsOn($settingsStore.miniCalendar.placement, Platform.isPhone) &&
+    showsOn($settingsStore.miniCalendar, Platform.isPhone) &&
       (isPeriodic || $settingsStore.miniCalendar.onOtherNotes),
   );
 

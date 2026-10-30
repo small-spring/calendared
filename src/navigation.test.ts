@@ -5,6 +5,7 @@ import {
     crumbText,
     finestEnabled,
     isNowNote,
+    migratePlacementSettings,
     migrateTimelineSettings,
     showsOn,
     stripDates,
@@ -25,7 +26,7 @@ describe("migrateTimelineSettings: 今のタイムラインの設定を、パン
         expect(migrateTimelineSettings({ stickerProperty: "sticker" })).toEqual({ stickerProperty: "sticker" });
     });
 
-    it("オンだったタイムラインは、どちらも「いつも」。ほかのノートに出すか、ステッカーを出すかは引き継ぐ", () => {
+    it("オンだったタイムラインは、どちらもオンで「いつも」。ほかのノートに出すか、ステッカーを出すかは引き継ぐ", () => {
         const saved = {
             timeline: {
                 enabled: true,
@@ -37,15 +38,21 @@ describe("migrateTimelineSettings: 今のタイムラインの設定を、パン
             },
         };
         expect(migrateTimelineSettings(saved)).toEqual({
-            breadcrumbs: { placement: "always", onOtherNotes: false },
-            miniCalendar: { placement: "always", onOtherNotes: false, dayLayout: "week", displayStickers: false },
+            breadcrumbs: { enabled: true, placement: "always", onOtherNotes: false },
+            miniCalendar: { enabled: true, placement: "always", onOtherNotes: false, dayLayout: "week", displayStickers: false },
         });
     });
 
-    it("オフだったタイムラインは、どちらも「出さない」", () => {
+    it("オフだったタイムラインは、どちらもオフ（出す場所は「いつも」のまま）", () => {
         const migrated = migrateTimelineSettings({ timeline: { enabled: false, displayOnRestNotes: true, displayStickers: true } });
-        expect(migrated.breadcrumbs).toEqual({ placement: "never", onOtherNotes: true });
-        expect(migrated.miniCalendar).toEqual({ placement: "never", onOtherNotes: true, dayLayout: "week", displayStickers: true });
+        expect(migrated.breadcrumbs).toEqual({ enabled: false, placement: "always", onOtherNotes: true });
+        expect(migrated.miniCalendar).toEqual({
+            enabled: false,
+            placement: "always",
+            onOtherNotes: true,
+            dayLayout: "week",
+            displayStickers: true,
+        });
     });
 
     it("timeline は消し、ほかの設定には触れない", () => {
@@ -54,32 +61,64 @@ describe("migrateTimelineSettings: 今のタイムラインの設定を、パン
         expect(migrated.compactOnDesktop).toBe(true);
     });
 
-    it("項目が欠けていたら、既定値（いつも、ほかのノートにも出す、ステッカーを出す）にする", () => {
+    it("項目が欠けていたら、既定値（オン、いつも、ほかのノートにも出す、ステッカーを出す）にする", () => {
         expect(migrateTimelineSettings({ timeline: {} })).toEqual({
-            breadcrumbs: { placement: "always", onOtherNotes: true },
-            miniCalendar: { placement: "always", onOtherNotes: true, dayLayout: "week", displayStickers: true },
+            breadcrumbs: { enabled: true, placement: "always", onOtherNotes: true },
+            miniCalendar: { enabled: true, placement: "always", onOtherNotes: true, dayLayout: "week", displayStickers: true },
         });
     });
 
     it("新しい設定がもうあれば、そちらを残す（timeline だけ消す）", () => {
-        const breadcrumbs = { placement: "phone", onOtherNotes: false };
+        const breadcrumbs = { enabled: true, placement: "phone", onOtherNotes: false };
         expect(migrateTimelineSettings({ timeline: { enabled: false }, breadcrumbs })).toEqual({ breadcrumbs });
+    });
+});
+
+describe("migratePlacementSettings: 出す場所の 3 択（Never を含む）を、オン・オフと 2 択に読み替える", () => {
+    it("Never はオフにし、出す場所は「いつも」にする", () => {
+        const saved = {
+            breadcrumbs: { placement: "never", onOtherNotes: false },
+            miniCalendar: { placement: "never", onOtherNotes: true, dayLayout: "centered", displayStickers: false },
+        };
+        expect(migratePlacementSettings(saved)).toEqual({
+            breadcrumbs: { enabled: false, placement: "always", onOtherNotes: false },
+            miniCalendar: { enabled: false, placement: "always", onOtherNotes: true, dayLayout: "centered", displayStickers: false },
+        });
+    });
+
+    it("Always と Phone only はオンにして、出す場所はそのまま", () => {
+        const migrated = migratePlacementSettings({
+            breadcrumbs: { placement: "phone", onOtherNotes: true },
+            miniCalendar: { placement: "always", onOtherNotes: true, dayLayout: "week", displayStickers: true },
+        });
+        expect(migrated.breadcrumbs).toEqual({ enabled: true, placement: "phone", onOtherNotes: true });
+        expect(migrated.miniCalendar).toMatchObject({ enabled: true, placement: "always" });
+    });
+
+    it("オン・オフがもう保存されていれば、何もしない", () => {
+        const saved = { breadcrumbs: { enabled: false, placement: "phone", onOtherNotes: true }, compactOnDesktop: true };
+        expect(migratePlacementSettings(saved)).toEqual(saved);
+    });
+
+    it("どちらの設定もなければ、何もしない（初めて入れたとき）", () => {
+        expect(migratePlacementSettings({ stickerProperty: "sticker" })).toEqual({ stickerProperty: "sticker" });
     });
 });
 
 // ---- 出す場所 ----
 
-describe("showsOn: 出す場所の設定と、スマホかどうかから、出すかを決める", () => {
-    const cases: [Placement, boolean, boolean][] = [
-        ["always", true, true],
-        ["always", false, true],
-        ["phone", true, true],
-        ["phone", false, false],
-        ["never", true, false],
-        ["never", false, false],
+describe("showsOn: オン・オフと出す場所の設定、スマホかどうかから、出すかを決める", () => {
+    const cases: [boolean, Placement, boolean, boolean][] = [
+        [true, "always", true, true],
+        [true, "always", false, true],
+        [true, "phone", true, true],
+        [true, "phone", false, false],
+        [false, "always", true, false],
+        [false, "always", false, false],
+        [false, "phone", true, false],
     ];
-    it.each(cases)("%s・スマホ %s → %s", (placement, isPhone, expected) => {
-        expect(showsOn(placement, isPhone)).toBe(expected);
+    it.each(cases)("オン %s・%s・スマホ %s → %s", (enabled, placement, isPhone, expected) => {
+        expect(showsOn({ enabled, placement }, isPhone)).toBe(expected);
     });
 });
 

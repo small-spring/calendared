@@ -6,6 +6,7 @@
   import { Dropdown, SettingItem, Toggle } from "@/settings/ui";
   import { switchLocale, updateWeekStartSetting } from "@/stores";
   import { toSupportedWeekStart } from "@/weeks";
+  import { showsOn } from "@/navigation";
   import { localeWeekStart, weekdayNames } from "@/calendar-locale";
   import { derived as derivedStore } from "svelte/store";
   import { Notice, Platform } from "obsidian";
@@ -49,11 +50,11 @@
     }));
   };
 
-  // Calendared: the breadcrumbs and the mini calendar (docs/adr/0031, 0032). NavigationManager follows the settings
+  // Calendared: the breadcrumbs and the mini calendar (docs/adr/0031, 0032), each turned on and off by its heading's
+  // toggle (docs/adr/0033). NavigationManager follows the settings
   const placementOptions = [
     { label: "Always", value: "always" },
     { label: "Phone only", value: "phone" },
-    { label: "Never", value: "never" },
   ];
   const updateBreadcrumbs = (change: Partial<ISettings["breadcrumbs"]>) =>
     settingsStore.update((s) => ({ ...s, breadcrumbs: { ...s.breadcrumbs, ...change } }));
@@ -181,19 +182,24 @@
   <SettingItem
     isHeading={true}
     name="Breadcrumbs"
+    type="toggle"
     description="Where the note sits, such as 2026 › Q4 › Oct › W44 › 30, above the note. Click a period to open its note."
-  />
-  <div class="setting-items">
-    <SettingItem name="Show on" description="Phone only keeps desktop and tablets to the side calendar.">
-      {#snippet control()}
-        <Dropdown
-          options={placementOptions}
-          onChange={(placement) => updateBreadcrumbs({ placement: placement as ISettings["breadcrumbs"]["placement"] })}
-          value={$settingsStore.breadcrumbs.placement}
-        />
-      {/snippet}
-    </SettingItem>
-    {#if $settingsStore.breadcrumbs.placement !== "never"}
+  >
+    {#snippet control()}
+      <Toggle onChange={(enabled) => updateBreadcrumbs({ enabled })} isEnabled={$settingsStore.breadcrumbs.enabled} />
+    {/snippet}
+  </SettingItem>
+  {#if $settingsStore.breadcrumbs.enabled}
+    <div class="setting-items">
+      <SettingItem name="Show on" description="Phone only keeps desktop and tablets to the side calendar.">
+        {#snippet control()}
+          <Dropdown
+            options={placementOptions}
+            onChange={(placement) => updateBreadcrumbs({ placement: placement as ISettings["breadcrumbs"]["placement"] })}
+            value={$settingsStore.breadcrumbs.placement}
+          />
+        {/snippet}
+      </SettingItem>
       <SettingItem name="Show on other notes" description="Also show where today is on notes that aren't periodic notes.">
         {#snippet control()}
           <Toggle
@@ -202,8 +208,8 @@
           />
         {/snippet}
       </SettingItem>
-    {/if}
-  </div>
+    </div>
+  {/if}
 </div>
 
 <!-- --- Mini calendar section ---- -->
@@ -212,62 +218,70 @@
   <SettingItem
     isHeading={true}
     name="Mini calendar"
+    type="toggle"
     description="The notes before and after the open one, above the note, with their stickers."
-  />
-  <div class="setting-items">
-    <SettingItem name="Show on" description="Phone only keeps desktop and tablets to the side calendar.">
-      {#snippet control()}
-        <Dropdown
-          options={placementOptions}
-          onChange={(placement) => updateMiniCalendar({ placement: placement as ISettings["miniCalendar"]["placement"] })}
-          value={$settingsStore.miniCalendar.placement}
-        />
-      {/snippet}
-    </SettingItem>
-    {#if $settingsStore.miniCalendar.placement !== "never"}
-      <SettingItem name="Show on other notes" description="Also show the days around today on notes that aren't periodic notes.">
-        {#snippet control()}
-          <Toggle
-            onChange={(onOtherNotes) => updateMiniCalendar({ onOtherNotes })}
-            isEnabled={$settingsStore.miniCalendar.onOtherNotes}
-          />
-        {/snippet}
-      </SettingItem>
-      <SettingItem name="Days" description="Show the calendar's week, or the note in the middle with 3 days on each side.">
-        {#snippet control()}
-          <Dropdown
-            options={[
-              { label: "Calendar week", value: "week" },
-              { label: "Centered on the note", value: "centered" },
-            ]}
-            onChange={(dayLayout) => updateMiniCalendar({ dayLayout: dayLayout as ISettings["miniCalendar"]["dayLayout"] })}
-            value={$settingsStore.miniCalendar.dayLayout}
-          />
-        {/snippet}
-      </SettingItem>
-      <SettingItem name="Show stickers">
-        {#snippet control()}
-          <Toggle
-            onChange={(displayStickers) => updateMiniCalendar({ displayStickers })}
-            isEnabled={$settingsStore.miniCalendar.displayStickers}
-          />
-        {/snippet}
-      </SettingItem>
-    {/if}
-    {#if $settingsStore.breadcrumbs.placement === "always" || $settingsStore.miniCalendar.placement === "always"}
-      <SettingItem
-        name="Compact on desktop"
-        description="Applies to both. Show them in a small box at the top right of the note instead of a bar under its header. Phones always use the bar."
-      >
-        {#snippet control()}
-          <Toggle
-            onChange={(compactOnDesktop) => settingsStore.update((s) => ({ ...s, compactOnDesktop }))}
-            isEnabled={$settingsStore.compactOnDesktop}
-          />
-        {/snippet}
-      </SettingItem>
-    {/if}
-  </div>
+  >
+    {#snippet control()}
+      <Toggle onChange={(enabled) => updateMiniCalendar({ enabled })} isEnabled={$settingsStore.miniCalendar.enabled} />
+    {/snippet}
+  </SettingItem>
+  {#if $settingsStore.miniCalendar.enabled || showsOn($settingsStore.breadcrumbs, false)}
+    <div class="setting-items">
+      {#if $settingsStore.miniCalendar.enabled}
+        <SettingItem name="Show on" description="Phone only keeps desktop and tablets to the side calendar.">
+          {#snippet control()}
+            <Dropdown
+              options={placementOptions}
+              onChange={(placement) => updateMiniCalendar({ placement: placement as ISettings["miniCalendar"]["placement"] })}
+              value={$settingsStore.miniCalendar.placement}
+            />
+          {/snippet}
+        </SettingItem>
+        <SettingItem name="Show on other notes" description="Also show the days around today on notes that aren't periodic notes.">
+          {#snippet control()}
+            <Toggle
+              onChange={(onOtherNotes) => updateMiniCalendar({ onOtherNotes })}
+              isEnabled={$settingsStore.miniCalendar.onOtherNotes}
+            />
+          {/snippet}
+        </SettingItem>
+        <SettingItem name="Days" description="Show the calendar's week, or the note in the middle with 3 days on each side.">
+          {#snippet control()}
+            <Dropdown
+              options={[
+                { label: "Calendar week", value: "week" },
+                { label: "Centered on the note", value: "centered" },
+              ]}
+              onChange={(dayLayout) => updateMiniCalendar({ dayLayout: dayLayout as ISettings["miniCalendar"]["dayLayout"] })}
+              value={$settingsStore.miniCalendar.dayLayout}
+            />
+          {/snippet}
+        </SettingItem>
+        <SettingItem name="Show stickers">
+          {#snippet control()}
+            <Toggle
+              onChange={(displayStickers) => updateMiniCalendar({ displayStickers })}
+              isEnabled={$settingsStore.miniCalendar.displayStickers}
+            />
+          {/snippet}
+        </SettingItem>
+      {/if}
+      <!-- applies to both, so it also stays while only the breadcrumbs show on desktop -->
+      {#if showsOn($settingsStore.breadcrumbs, false) || showsOn($settingsStore.miniCalendar, false)}
+        <SettingItem
+          name="Compact on desktop"
+          description="Applies to both. Show them in a small box at the top right of the note instead of a bar under its header. Phones always use the bar."
+        >
+          {#snippet control()}
+            <Toggle
+              onChange={(compactOnDesktop) => settingsStore.update((s) => ({ ...s, compactOnDesktop }))}
+              isEnabled={$settingsStore.compactOnDesktop}
+            />
+          {/snippet}
+        </SettingItem>
+      {/if}
+    </div>
+  {/if}
 </div>
 
 <!-- ------------------------------------- -->

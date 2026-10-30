@@ -11,7 +11,7 @@ import type { IGranularity } from './io/types';
 import { isValidPeriodicNote } from './io/validation';
 import { overlapsMonth, rangeOfPeriod, shiftPeriod } from './periods';
 import { toSupportedWeekStart, weekSchemeFor } from './weeks';
-import { migrateTimelineSettings } from './navigation';
+import { migratePlacementSettings, migrateTimelineSettings } from './navigation';
 import {
   displayedDateStore,
   setupLocale,
@@ -201,8 +201,12 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     }
 
     settingsStore.update((old) => {
-      // Calendared: upstream's timeline settings become the breadcrumbs' and mini calendar's (docs/adr/0031)
-      const newSettings = { ...old, ...migrateTimelineSettings((loadedSettings || {}) as unknown as Record<string, unknown>) } as ISettings;
+      // Calendared: upstream's timeline settings become the breadcrumbs' and mini calendar's (docs/adr/0031), and their
+      // "Never" a toggle (docs/adr/0033)
+      const saved = migratePlacementSettings(
+        migrateTimelineSettings((loadedSettings || {}) as unknown as Record<string, unknown>),
+      );
+      const newSettings = { ...old, ...saved } as ISettings;
       // Calendared: drop the saved settings of removed features
       for (const key of REMOVED_SETTINGS) {
         delete (newSettings as unknown as Record<string, unknown>)[key];

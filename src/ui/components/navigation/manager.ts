@@ -41,8 +41,8 @@ export default class NavigationManager {
     if (!app) return;
 
     const { breadcrumbs, miniCalendar } = get(settingsStore);
-    const crumbs = showsOn(breadcrumbs.placement, Platform.isPhone);
-    const mini = showsOn(miniCalendar.placement, Platform.isPhone);
+    const crumbs = showsOn(breadcrumbs, Platform.isPhone);
+    const mini = showsOn(miniCalendar, Platform.isPhone);
     const show = {
       periodic: crumbs || mini,
       other: (crumbs && breadcrumbs.onOtherNotes) || (mini && miniCalendar.onOtherNotes),
