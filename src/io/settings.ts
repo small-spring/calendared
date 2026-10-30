@@ -1,5 +1,5 @@
 import { DAILY_NOTES_PLUGIN_ID, DEFAULT_FORMATS_PER_GRANULARITY } from '@/constants';
-import { getDefaultPeriodicNotesConfig, PeriodSettings, settingsStore } from '@/settings';
+import { getDefaultPeriodicNotesConfig, type ISettings, PeriodSettings, settingsStore } from '@/settings';
 import { get } from 'svelte/store';
 import { IGranularity } from './types';
 import { PluginService } from '@/app-service';
@@ -21,8 +21,19 @@ export type DnPluginSettings = {
  */
 type TNormalizedPeriodSettings = Record<IGranularity, { settings: PeriodSettings, type: "period" | "daily" | "default" }>
 export function getNormalizedPeriodSettings(granularity: IGranularity): TNormalizedPeriodSettings[IGranularity] {
-  const pluginSettings = get(settingsStore).periods;
   const dailyNotesPlugin = PluginService.getPlugin()?.app.internalPlugins?.getPluginById<DnPluginSettings>(DAILY_NOTES_PLUGIN_ID);
+  return normalizePeriodSettings(granularity, get(settingsStore).periods, dailyNotesPlugin);
+}
+
+/**
+ * Calendared: getNormalizedPeriodSettings with what it reads as arguments: the plugin's period settings and
+ * Obsidian's core Daily notes plugin (read through the vault source, docs/state.md ADR-S2)
+ */
+export function normalizePeriodSettings(
+  granularity: IGranularity,
+  pluginSettings: ISettings["periods"],
+  dailyNotesPlugin: DnPluginSettings | null | undefined,
+): TNormalizedPeriodSettings[IGranularity] {
   const dailyNotesPluginSettings = dailyNotesPlugin?.instance?.options;
 
   const settings = pluginSettings[granularity];

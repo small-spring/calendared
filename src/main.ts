@@ -5,7 +5,7 @@ import { mount, type SvelteComponent } from 'svelte';
 import { get } from 'svelte/store';
 import { PluginService } from './app-service';
 import { CALENDAR_LUCIDE_ICON, granularities, LEAF_TYPE } from './constants';
-import { basename, createOrOpenNote, getFileData, getStartupNoteGranularity, isBackupPath, storeAllVaultPeriodicFilepaths } from './io';
+import { basename, createOrOpenNote, getFileData, getStartupNoteGranularity, initVaultSource, isBackupPath, storeAllVaultPeriodicFilepaths } from './io';
 import { getPeriodicityFromGranularity } from './io/parse';
 import type { IGranularity } from './io/types';
 import { isValidPeriodicNote } from './io/validation';
@@ -46,6 +46,8 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
 
   async onload() {
     PluginService.init(this);
+    // Calendared: the UI reads notes and stickers through the vault source (docs/state.md, ADR-S2)
+    initVaultSource(this.app);
 
     await this.loadSettings();
     this.registerEvents()

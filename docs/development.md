@@ -9,6 +9,8 @@
 - `npm run build`: ESLint をかけてからビルドする
 - `npm run deploy`（`scripts/deploy.sh [Vault のパス]`）: ビルドして Vault の `.obsidian/plugins/calendared/` にコピーする。
   Vault の既定は `~/Documents/Obsidian/private`（環境変数 `OBSIDIAN_VAULT` でも指定できる）
+  - `DEPLOY_MODE=development npm run deploy` で開発用の版を入れる。窓口の読み直しの時間などを Console に出す（`import.meta.env.DEV`）。
+    Svelte の確認処理も入るので、本番の版より遅い。試し終わったら `npm run deploy` で本番の版に戻す
   - ビルドの前にテスト（`npm test`）を動かし、落ちたらコピーしない
   - コピーの前に読み込み確認（`scripts/check-load.cjs`）をする。ビルドした `main.js` を Node.js で、偽物の Obsidian
     （何を聞かれても何かを返す Proxy）を使って読み込み、読み込み中に落ちたらコピーしない。

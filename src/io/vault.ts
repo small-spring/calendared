@@ -1,8 +1,9 @@
 import { normalizePath, Notice, TFile } from "obsidian";
 import { IGranularity } from "./types";
-import { getNormalizedPeriodSettings } from "./settings";
+import { type DnPluginSettings, normalizePeriodSettings } from "./settings";
+import { DAILY_NOTES_PLUGIN_ID } from "@/constants";
 import { getSticker, TSticker } from "@/ui/utils";
-import { settingsStore } from "@/settings";
+import { type ISettings, settingsStore } from "@/settings";
 import { get } from "svelte/store";
 import { PluginService } from "@/app-service";
 import type { IFoldInfo } from "./types";
@@ -45,8 +46,22 @@ async function ensureTemplateExists(path: string) {
 }
 
 export function getNotePath(granularity: IGranularity, date: moment.Moment) {
-  const { settings: { selectedFormat, folder } } = getNormalizedPeriodSettings(granularity);
-  return notePath(granularity, date, { folder, format: selectedFormat.value }, weekSchemeFor(get(settingsStore).localeSettings));
+  const dailyNotesPlugin = PluginService.getPlugin()?.app.internalPlugins?.getPluginById<DnPluginSettings>(DAILY_NOTES_PLUGIN_ID);
+  return periodNotePath(granularity, date, get(settingsStore), dailyNotesPlugin);
+}
+
+/**
+ * Calendared: getNotePath with what it reads as arguments, for the UI to pass the settings it reads reactively and the
+ * Daily notes plugin from the vault source (docs/state.md, ADR-S2)
+ */
+export function periodNotePath(
+  granularity: IGranularity,
+  date: moment.Moment,
+  { periods, localeSettings }: Pick<ISettings, "periods" | "localeSettings">,
+  dailyNotesPlugin: DnPluginSettings | null | undefined,
+): string {
+  const { settings: { selectedFormat, folder } } = normalizePeriodSettings(granularity, periods, dailyNotesPlugin);
+  return notePath(granularity, date, { folder, format: selectedFormat.value }, weekSchemeFor(localeSettings));
 }
 
 export function getFileData(

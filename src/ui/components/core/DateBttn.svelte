@@ -1,12 +1,13 @@
 <script lang="ts">
   import { IGranularity } from "@/io";
 
-  import { getFileData } from "@/io";
+  import { periodNotePath, vaultSource } from "@/io";
+  import { settingsStore } from "@/settings";
+  import { stickerFrom } from "@/stickers";
   import {
     activeFileStore,
     displayedDateStore,
     todayStore,
-    notesChangedStore,
   } from "@/stores/";
   import { cn, eventHandlers, isControlPressed } from "@/ui/utils";
   import { Button } from "@/ui/components/core";
@@ -48,10 +49,13 @@
     compactDot = false,
   }: Props = $props();
 
-  let { file, sticker } = $derived.by(() => {
-    $notesChangedStore; // file or sticker may have changed
-    return getFileData(granularity, date);
-  });
+  // Calendared: read through the vault source, with the settings read reactively (docs/state.md, ADR-S2);
+  // upstream re-read everything on a store emitting a random number
+  const vault = vaultSource();
+  let file = $derived(
+    vault.fileAt(periodNotePath(granularity, date, $settingsStore, vault.dailyNotes())),
+  );
+  let sticker = $derived(file && stickerFrom(vault.metadataOf(file), $settingsStore));
   let isActive = $derived.by(() => {
     if (!$activeFileStore?.file?.path || !file?.path) {
       return false;

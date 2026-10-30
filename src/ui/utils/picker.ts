@@ -2,7 +2,7 @@ import { TFileData } from "@/io";
 import { settingsStore } from "@/settings";
 import { getEmojiPickerLocale } from "./emoji-locale";
 import { Picker } from "emoji-mart";
-import emojiRegex from "emoji-regex";
+import { stickerFrom, stickerProperty, type TSticker } from "@/stickers";
 import { type CachedMetadata, type TFile } from "obsidian";
 import { get } from "svelte/store";
 import { Popover } from "../popovers";
@@ -19,8 +19,8 @@ type TEmoji = {
   skin?: number,
   unified: string,
 }
-/** Calendared: a note's sticker (one emoji kept in the sticker property; see docs/stickers.md) */
-export type TSticker = { emoji: string }
+// Calendared: reading stickers moved to src/stickers.ts (settings as arguments); re-exported for the existing importers
+export { isReservedStickerProperty, RESERVED_STICKER_PROPERTIES, type TSticker } from "@/stickers";
 
 export const onInputKeydown = (ev: KeyboardEvent) => {
   const input = document.querySelector('em-emoji-picker')?.shadowRoot?.querySelector('input');
@@ -170,43 +170,14 @@ function hueToRgb(p: number, q: number, t: number) {
   return p;
 }
 
-/** The emoji if `value` is exactly one emoji */
-function asEmoji(value: unknown): string | null {
-  if (typeof value !== "string") return null;
-  const trimmed = value.trim();
-  return trimmed.match(emojiRegex())?.[0] === trimmed ? trimmed : null;
-}
-
-/**
- * Calendared: properties Obsidian itself gives meaning to (including the old singular names).
- * Stickers overwrite their property's value, so using one of these would wipe the user's tags, aliases or CSS classes.
- */
-export const RESERVED_STICKER_PROPERTIES = ["tags", "tag", "aliases", "alias", "cssclasses", "cssclass"];
-
-export function isReservedStickerProperty(property: string): boolean {
-  return RESERVED_STICKER_PROPERTIES.includes(property.trim().toLowerCase());
-}
-
-/** Calendared: the property stickers live in (setting `stickerProperty`, default "sticker"); never a reserved one */
+/** Calendared: the property stickers live in, from the current settings (see stickerProperty) */
 export function getStickerProperty(): string {
-  const property = get(settingsStore).stickerProperty?.trim();
-  return property && !isReservedStickerProperty(property) ? property : "sticker";
+  return stickerProperty(get(settingsStore).stickerProperty);
 }
 
-/**
- * Calendared: a note's sticker, read only from the sticker property (e.g. `sticker: 👍`).
- * If the property holds a list (e.g. edited by hand), its first single-emoji item is used.
- * Upstream stored stickers as `#prefix+emoji` tags in the body; those are no longer read.
- */
+/** Calendared: a note's sticker under the current settings (see stickerFrom) */
 export function getSticker(cache: CachedMetadata | null | undefined): TSticker | null {
-  // Calendared: with stickers turned off in the settings, no note has one as far as the plugin is concerned
-  if (!get(settingsStore).stickersEnabled) return null;
-
-  const value: unknown = cache?.frontmatter?.[getStickerProperty()];
-  const emoji = Array.isArray(value)
-    ? value.map(asEmoji).find((e) => e !== null) ?? null
-    : asEmoji(value);
-  return emoji ? { emoji } : null;
+  return stickerFrom(cache, get(settingsStore));
 }
 
 /**

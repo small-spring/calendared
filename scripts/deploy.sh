@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Build the plugin and copy it into an Obsidian vault.
 # Usage: scripts/deploy.sh [vault_path]   (or set OBSIDIAN_VAULT)
+#   DEPLOY_MODE=development: a development build (logs timings, e.g. the vault source's re-reads; see docs/state.md)
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -17,11 +18,13 @@ fi
 # unit tests of the plain logic (see docs/development.md); refuse to deploy if any fails
 npx vitest run
 
-npx vite build --mode production
+MODE="${DEPLOY_MODE:-production}"
+# import.meta.env.DEV follows NODE_ENV, not --mode
+NODE_ENV="$MODE" npx vite build --mode "$MODE"
 
 # smoke test: refuse to deploy a bundle that crashes while loading (see scripts/check-load.cjs)
 node scripts/check-load.cjs main.js
 
 mkdir -p "$DEST"
 cp manifest.json main.js styles.css "$DEST/"
-echo "Deployed $PLUGIN_ID to $DEST"
+echo "Deployed $PLUGIN_ID ($MODE) to $DEST"
