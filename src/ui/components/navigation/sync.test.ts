@@ -1,12 +1,12 @@
 import moment from "moment";
 import { beforeEach, describe, expect, it } from "vitest";
-import { TimelineSync, type TimelineMountProps } from "./sync";
+import { NavigationSync, type NavigationMountProps } from "./sync";
 
-// Which timeline each tab (leaf) shows, kept apart from Obsidian (docs/adr/0017). Tabs, their notes and
+// Which breadcrumbs and mini calendar each tab (leaf) shows, kept apart from Obsidian (docs/adr/0017). Tabs, their notes and
 // mounting are stand-ins: a "component" records the props it was mounted with and whether it was unmounted.
 
 type Leaf = { name: string };
-type Component = { leaf: string; props: TimelineMountProps; unmounted: boolean };
+type Component = { leaf: string; props: NavigationMountProps; unmounted: boolean };
 type Note = { path: string; basename: string };
 
 const note = (path: string): Note => ({ path, basename: path.slice(path.lastIndexOf("/") + 1, -3) });
@@ -19,11 +19,11 @@ const read = (file: Note) => {
     return { isPeriodic: false, granularity: null, date: null };
 };
 
-const settings = { displayOnRestNotes: false, viewMode: "expanded" as const, restViewMode: "collapsed" as const };
+const settings = { periodic: true, other: false };
 
-describe("TimelineSync: タブごとに、そのタブのノートのタイムラインを出す", () => {
+describe("NavigationSync: タブごとに、そのタブのノートのパンくずとミニカレンダーを出す", () => {
     let mounted: Component[];
-    let sync: TimelineSync<Leaf, Component, Note>;
+    let sync: NavigationSync<Leaf, Component, Note>;
     let leaves: Map<string, Leaf>;
     // tabs are objects like Obsidian's leaves, one per name; a tab shows a note in a container, named after the tab
     // unless a test says otherwise
@@ -34,7 +34,7 @@ describe("TimelineSync: タブごとに、そのタブのノートのタイム�
     beforeEach(() => {
         mounted = [];
         leaves = new Map();
-        sync = new TimelineSync<Leaf, Component, Note>({
+        sync = new NavigationSync<Leaf, Component, Note>({
             mount: (leaf, props) => {
                 const component = { leaf: leaf.name, props, unmounted: false };
                 mounted.push(component);
@@ -49,11 +49,11 @@ describe("TimelineSync: タブごとに、そのタブのノートのタイム�
         sync.sync([tab("A", note("日記/2026-10-30.md"))], settings);
         expect(live()).toHaveLength(1);
         expect(live()[0].props.granularity).toBe("day");
-        expect(live()[0].props.initialDate.format("YYYY-MM-DD")).toBe("2026-10-30");
+        expect(live()[0].props.date!.format("YYYY-MM-DD")).toBe("2026-10-30");
         expect(live()[0].props.isPeriodic).toBe(true);
     });
 
-    it("同じタブで同じノートのままなら、作り直さない（週の移動や開閉が残る）", () => {
+    it("同じタブで同じノートのままなら、作り直さない（ミニカレンダーを動かした位置が残る）", () => {
         sync.sync([tab("A", note("日記/2026-10-30.md"))], settings);
         sync.sync([tab("A", note("日記/2026-10-30.md"))], settings);
         expect(mounted).toHaveLength(1);
@@ -82,7 +82,7 @@ describe("TimelineSync: タブごとに、そのタブのノートのタイム�
         expect(live().map((c) => c.leaf)).toEqual(["A", "B"]);
         sync.sync([tab("A", note("日記/2026-10-30.md")), tab("B", note("月/2026-11.md"))], settings);
         expect(mounted[0].unmounted).toBe(false);
-        expect(live().map((c) => c.props.initialDate.format("YYYY-MM"))).toEqual(["2026-10", "2026-11"]);
+        expect(live().map((c) => c.props.date!.format("YYYY-MM"))).toEqual(["2026-10", "2026-11"]);
     });
 
     it("同じノートを 2 つのタブで開けば、それぞれに出す", () => {
@@ -112,7 +112,7 @@ describe("TimelineSync: タブごとに、そのタブのノートのタイム�
     it("ノートの名前が変わったら、新しい名前で付け直す", () => {
         sync.sync([tab("A", note("日記/2026-10-30.md"))], settings);
         sync.sync([tab("A", note("日記/2026-10-31.md"))], settings);
-        expect(live()[0].props.initialDate.format("YYYY-MM-DD")).toBe("2026-10-31");
+        expect(live()[0].props.date!.format("YYYY-MM-DD")).toBe("2026-10-31");
     });
 
     describe("ふつうのノート", () => {
@@ -121,15 +121,13 @@ describe("TimelineSync: タブごとに、そのタブのノートのタイム�
             expect(live()).toHaveLength(0);
         });
 
-        it("オンなら、今日の日次のタイムラインを出す", () => {
-            sync.sync([tab("A", note("メモ.md"))], { ...settings, displayOnRestNotes: true });
-            expect(live()[0].props.granularity).toBe("day");
-            expect(live()[0].props.initialDate.isSame(moment(), "day")).toBe(true);
-            expect(live()[0].props.isPeriodic).toBe(false);
+        it("オンなら、周期ノートでないノートとして出す（今の位置は付けた先で求める）", () => {
+            sync.sync([tab("A", note("メモ.md"))], { ...settings, other: true });
+            expect(live()[0].props).toEqual({ isPeriodic: false, granularity: null, date: null });
         });
 
         it("ふつうのノートどうしで開き直したら、そのノートのものに付け替える", () => {
-            const on = { ...settings, displayOnRestNotes: true };
+            const on = { ...settings, other: true };
             sync.sync([tab("A", note("メモ.md"))], on);
             sync.sync([tab("A", note("別のメモ.md"))], on);
             expect(mounted).toHaveLength(2);
@@ -137,35 +135,13 @@ describe("TimelineSync: タブごとに、そのタブのノートのタイム�
         });
     });
 
-    describe("開閉の初期値（幅では決めない）", () => {
-        it("周期ノートは設定の viewMode、ふつうのノートは restViewMode で始める", () => {
-            sync.sync([tab("A", note("日記/2026-10-30.md")), tab("B", note("メモ.md"))], {
-                ...settings,
-                displayOnRestNotes: true,
-            });
-            expect(live().map((c) => c.props.viewModeOverride)).toEqual(["expanded", "collapsed"]);
-        });
-
-        it("そのタブで開閉を切り替えていれば、次に付けるときはそれで始める", () => {
-            sync.sync([tab("A", note("日記/2026-10-30.md"))], settings);
-            live()[0].props.onViewModeChange("collapsed");
-            sync.sync([tab("A", note("日記/2026-10-31.md"))], settings);
-            expect(live()[0].props.viewModeOverride).toBe("collapsed");
-        });
-
-        it("覚えるのはタブごと、周期ノートとふつうのノートで別々", () => {
-            const on = { ...settings, displayOnRestNotes: true };
-            sync.sync([tab("A", note("日記/2026-10-30.md")), tab("B", note("日記/2026-10-30.md"))], on);
-            live()[0].props.onViewModeChange("collapsed");
-            sync.sync([tab("A", note("メモ.md")), tab("B", note("日記/2026-10-31.md"))], on);
-            expect(live().map((c) => c.props.viewModeOverride)).toEqual(["collapsed", "expanded"]);
-            live()[0].props.onViewModeChange("expanded");
-            sync.sync([tab("A", note("日記/2026-11-01.md")), tab("B", note("日記/2026-10-31.md"))], on);
-            expect(live().find((c) => c.leaf === "A")!.props.viewModeOverride).toBe("collapsed");
-        });
+    it("周期ノートに出さない設定なら、周期ノートからも外す（出す場所を変えたとき）", () => {
+        sync.sync([tab("A", note("日記/2026-10-30.md"))], settings);
+        sync.sync([tab("A", note("日記/2026-10-30.md"))], { periodic: false, other: false });
+        expect(live()).toHaveLength(0);
     });
 
-    it("clear: 全部外す。次の sync で付け直す（設定を変えたとき）", () => {
+    it("clear: 全部外す。次の sync で付け直す", () => {
         sync.sync([tab("A", note("日記/2026-10-30.md")), tab("B", note("月/2026-10.md"))], settings);
         sync.clear();
         expect(live()).toHaveLength(0);

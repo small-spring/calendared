@@ -33,15 +33,6 @@
                 date.clone().subtract(1, "year"),
             );
         },
-        reset: () => {
-            yearsRanges.update((values) => ({
-                ...values,
-                crrRangeIndex: values.ranges.findIndex(
-                    (range) => range === values.todayRange,
-                ),
-            }));
-            displayedDateStore.set($todayStore);
-        },
         increment: () => {
             displayedDateStore.update((date) =>
                 date.clone().add(1, "year"),

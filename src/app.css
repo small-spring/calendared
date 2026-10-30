@@ -1,4 +1,6 @@
-#pnc-container {
+/* Calendared: the breadcrumbs and mini calendar use the calendar's colors too (today's date, the buttons) */
+#pnc-container,
+.calendared-nav {
   --color-background-table-header: transparent;
   --color-background-day-bttn: transparent;
   --color-background-week-bttn: transparent;
@@ -55,6 +57,11 @@
   @apply cursor-[var(--cursor)];
 }
 
+/* Calendared: Open now in a note's header, dimmed while now's note is open (docs/adr/0030) */
+.calendared-open-now-is-now {
+  opacity: 0.3;
+}
+
 /* Calendared: the sticker shown in a periodic note's header, sized like the neighboring icons */
 .pnc-sticker-action-emoji {
   font-size: var(--icon-size);
@@ -63,20 +70,33 @@
 
 /*
   Calendared: on phones Obsidian's note header starts below the status bar (the Dynamic Island) and floats over the note,
-  which starts below it. The timeline goes right under the header, and the note starts below the timeline
-  (--pnc-timeline-height, set by Timeline.svelte). It hides along with the header when you scroll down
+  which starts below it. The breadcrumbs and mini calendar go right under the header, and the note starts below them
+  (--calendared-nav-height, set by Navigation.svelte). They hide along with the header when you scroll down
 */
-.is-phone #timeline-container.pnc-timeline-phone {
-  top: calc(var(--view-header-top-offset) + var(--view-header-height) + var(--size-4-1));
+.is-phone .calendared-nav.is-phone-bar {
+  top: calc(var(--view-header-top-offset) + var(--view-header-height));
   transition: opacity 0.2s ease-in-out;
 }
-.is-phone.is-hidden-nav #timeline-container.pnc-timeline-phone {
+/* the bar's background also fills the space above it, behind the header's buttons, so the note doesn't show through
+   there while scrolling. The header stays above it */
+.is-phone .calendared-nav.is-phone-bar::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 100%;
+  height: calc(var(--view-header-top-offset) + var(--view-header-height));
+  background-color: var(--background-primary);
+}
+.is-phone .workspace-leaf-content:has(> [data-type="calendared-navigation"]) > .view-header {
+  z-index: 20;
+}
+.is-phone.is-hidden-nav .calendared-nav.is-phone-bar {
   opacity: 0;
   pointer-events: none;
 }
-.is-phone .mod-root .workspace-leaf-content:has(> [data-type="periodic-notes-calendar-timeline"]) .view-content .markdown-reading-view > .markdown-preview-view,
-.is-phone .mod-root .workspace-leaf-content:has(> [data-type="periodic-notes-calendar-timeline"]) .view-content .markdown-source-view > .cm-editor > .cm-scroller {
-  padding-top: calc(var(--view-top-spacing-markdown) + var(--pnc-timeline-height, 0px) + var(--size-4-2));
+.is-phone .mod-root .workspace-leaf-content:has(> [data-type="calendared-navigation"]) .view-content .markdown-reading-view > .markdown-preview-view,
+.is-phone .mod-root .workspace-leaf-content:has(> [data-type="calendared-navigation"]) .view-content .markdown-source-view > .cm-editor > .cm-scroller {
+  padding-top: calc(var(--view-top-spacing-markdown) + var(--calendared-nav-height, 0px));
 }
 
 /* Calendared: the "Add emoji search languages" dialog (AddEmojiLanguages.svelte) */

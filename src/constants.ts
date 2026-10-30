@@ -2,7 +2,8 @@ import { type IGranularity } from "./io";
 
 export const CALENDAR_LUCIDE_ICON = 'calendar-days';
 export const LEAF_TYPE = 'periodic-notes-calendar-view';
-export const TIMELINE_TYPE = 'periodic-notes-calendar-timeline';
+/** Calendared: marks a tab's breadcrumbs and mini calendar (app.css places them on phones) */
+export const NAVIGATION_TYPE = 'calendared-navigation';
 export const granularities = ['day', 'week', 'month', 'quarter', 'year'] as const;
 export const granularitiesCapitalize = ['Day', 'Week', 'Month', 'Quarter', 'Year'] as const;
 

@@ -11,13 +11,15 @@ import type { IGranularity } from './io/types';
 import { isValidPeriodicNote } from './io/validation';
 import { overlapsMonth, rangeOfPeriod, shiftPeriod } from './periods';
 import { toSupportedWeekStart, weekSchemeFor } from './weeks';
+import { migrateTimelineSettings } from './navigation';
 import {
   displayedDateStore,
   setupLocale,
   themeStore,
 } from './stores';
-import TimelineManager from './ui/components/timeline/manager';
+import NavigationManager from './ui/components/navigation/manager';
 import { closeNoteMenu } from './ui/note-menu';
+import { OpenNowActions } from './ui/open-now';
 import { destroyStickerPicker } from './ui/sticker-picker';
 import { getDailyNotesPlugin } from './utils';
 import { CalendarView } from './view';
@@ -27,6 +29,8 @@ import { getNoteSticker, isPeriodicNote, openStickerPicker, removeSticker, Stick
 export default class PeriodicNotesCalendarPlugin extends Plugin {
   /** Calendared: sticker button in the header of periodic notes */
   stickerActions = new StickerActions();
+  /** Calendared: Open now button in the header of every note (docs/adr/0030) */
+  openNowActions = new OpenNowActions();
 
   /**
    * Calendared: upstream left this empty, so popovers mounted on document.body (calendar, sticker picker, ...)
@@ -36,8 +40,9 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
   onunload() {
     destroyStickerPicker();
     closeNoteMenu();
-    TimelineManager.destroy();
+    NavigationManager.destroy();
     this.stickerActions.removeAll();
+    this.openNowActions.removeAll();
   }
 
   async onload() {
@@ -59,6 +64,9 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     this.register(unsubSettingsStore);
     // Calendared: show/hide the header sticker buttons when the sticker settings change
     this.register(settingsStore.subscribe(() => this.stickerActions.refresh()));
+    this.register(settingsStore.subscribe(() => this.openNowActions.refresh()));
+    // Calendared: add or remove the breadcrumbs and mini calendar when the settings change which notes show them
+    this.register(settingsStore.subscribe(() => NavigationManager.instance?.syncAll()));
 
     this.addSettingTab(new SettingsTab());
 
@@ -165,12 +173,13 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
 
     this.app.workspace.onLayoutReady(async () => {
       ViewManager.initView({ active: false });
-      TimelineManager.create()?.syncAll();
+      NavigationManager.create().syncAll();
 
       // Calendared: when the plugin is enabled while a note is already open, no `file-open` fires,
       // so pick up the current note once here (on app startup this just repeats what `file-open` does)
       this.onFileOpen(this.app.workspace.getActiveFile());
       this.stickerActions.refresh();
+      this.openNowActions.refresh();
 
       // open note at startup
       const startupNoteGranularity = getStartupNoteGranularity();
@@ -192,10 +201,11 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     }
 
     settingsStore.update((old) => {
-      const newSettings = { ...old, ...(loadedSettings || {}) };
+      // Calendared: upstream's timeline settings become the breadcrumbs' and mini calendar's (docs/adr/0031)
+      const newSettings = { ...old, ...migrateTimelineSettings((loadedSettings || {}) as unknown as Record<string, unknown>) } as ISettings;
       // Calendared: drop the saved settings of removed features
       for (const key of REMOVED_SETTINGS) {
-        delete (newSettings as Record<string, unknown>)[key];
+        delete (newSettings as unknown as Record<string, unknown>)[key];
       }
       // Calendared: weeks start on Saturday, Sunday or Monday only (docs/spec/periods.md)
       newSettings.localeSettings = {
@@ -313,14 +323,17 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     // Calendared: keep the header sticker buttons in step with the notes shown and their stickers
     this.registerEvent(this.app.workspace.on('file-open', () => this.stickerActions.refresh()))
     this.registerEvent(this.app.workspace.on('layout-change', () => this.stickerActions.refresh()))
+    this.registerEvent(this.app.workspace.on('file-open', () => this.openNowActions.refresh()))
+    this.registerEvent(this.app.workspace.on('layout-change', () => this.openNowActions.refresh()))
+    this.registerEvent(this.app.vault.on('rename', () => this.openNowActions.refresh()))
     this.registerEvent(this.app.metadataCache.on('changed', () => this.stickerActions.refresh()))
     // Calendared: upstream re-mounted the timeline only on workspace `resize`, so opening another note in the same tab
     // kept the previous note's timeline (e.g. a monthly note's Q1 view on a daily note).
-    // Each tab keeps its timeline while it shows the same note (docs/adr/0017); tabs opened, closed or moved
-    // and renamed notes are picked up too
-    this.registerEvent(this.app.workspace.on('file-open', () => TimelineManager.instance?.syncAll()))
-    this.registerEvent(this.app.workspace.on('layout-change', () => TimelineManager.instance?.syncAll()))
-    this.registerEvent(this.app.vault.on('rename', () => TimelineManager.instance?.syncAll()))
+    // Each tab keeps its breadcrumbs and mini calendar while it shows the same note (docs/adr/0017); tabs opened,
+    // closed or moved and renamed notes are picked up too
+    this.registerEvent(this.app.workspace.on('file-open', () => NavigationManager.instance?.syncAll()))
+    this.registerEvent(this.app.workspace.on('layout-change', () => NavigationManager.instance?.syncAll()))
+    this.registerEvent(this.app.vault.on('rename', () => NavigationManager.instance?.syncAll()))
   }
 
   /**

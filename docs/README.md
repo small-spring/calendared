@@ -24,7 +24,6 @@ Calendared の開発向けの文書（日本語）。使う人向けの説明は
 - [plans/](plans/): これから作るものの設計（目指す姿と、決めることの一覧）
   - [plans/settings.md](plans/settings.md): 設定画面の整理
   - [plans/navigation.md](plans/navigation.md): ノートの間の移動（タイムライン・Open now・カレンダー）の要求と案
-  - [plans/timeline-handoff.md](plans/timeline-handoff.md): パンくずとミニカレンダーを作るための引き継ぎ（作り終えたら消す）
 
 ## やり方・参考
 

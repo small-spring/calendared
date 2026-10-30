@@ -107,7 +107,7 @@
    （2026-10-30 に済んだ。カレンダーのマスと月・年の表記は `vaultSource().activeFile()` と比べる。`activeFileStore` は消した。
    `main.ts` の `onFileOpen` は、表示中の月を開いたノートに合わせる役目（[ADR-0018](../adr/0018-when-displayed-month-changes.md)）だけになった）
 7. ~~[ADR-0017](../adr/0017-timeline-per-tab.md) タイムラインをタブごとに作り直す（不具合 (4)、「ふつうのノートにも出す」の作り直し）~~
-   （2026-10-30 に済んだ。どのタブに何を出すかは `src/ui/components/timeline/sync.ts` の `TimelineSync` が決め、`manager.ts` は Obsidian との
+   （2026-10-30 に済んだ。どのタブに何を出すかは `TimelineSync`（今は `src/ui/components/navigation/sync.ts` の `NavigationSync`）が決め、`manager.ts` は Obsidian との
    つなぎだけ。タブごとに部品・ノートのパス・付けた先の要素を覚え、同じノートなら作り直さない。外すときは Svelte の `unmount`。
    開閉の初期値は設定か、そのタブで前に切り替えた状態（周期ノートとふつうのノートで別々）。幅で開閉を決める仕組みは消した。
    ノートを開いたとき・タブの配置が変わったとき・名前が変わったときに同期する）

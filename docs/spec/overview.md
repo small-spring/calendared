@@ -4,13 +4,14 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 設定画面の整理で変わる予定のことは [plans/settings.md](../plans/settings.md)（作り終えたら、ここを書き換える）。
 元の版との違いは [customizations.md](../customizations.md)、各機能の細かい仕様は [stickers.md](stickers.md)・[periods.md](periods.md) にある。
 
-中心は **周期ノート**（日・週・月・四半期・年のノート）を作って行き来すること。カレンダー・タイムライン・ステッカーは、その入口や飾りにあたる。
+中心は **周期ノート**（日・週・月・四半期・年のノート）を作って行き来すること。カレンダー・パンくずとミニカレンダー・ステッカーは、その入口や飾りにあたる。
 
 ```
 周期ノート（土台）
 ├── コマンド        … キーボードから開く
 ├── カレンダー      … サイドのペインから開く
-├── タイムライン    … ノートの上の帯から前後へ移る
+├── パンくずとミニカレンダー … ノートの上の帯から上の周期や前後へ移る
+├── Open now        … 見出しバーとカレンダーのボタンで今のノートへ
 └── ステッカー      … ノートに絵文字を 1 つ付けて、カレンダーなどに出す
 ```
 
@@ -32,7 +33,7 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 - テンプレート: `{{title}}`・`{{date}}`（ノートの日付）、`{{time}}`・`{{currentDate}}`（今）、`{{monday}}` などの曜日を置き換える。
   `{{date+1d}}` のようにずらす、`{{date:YYYY-MM-DD}}` のように書式を付けることもできる
 - 週の決め方: Google カレンダーと同じ。週の始まりは土・日・月から選び、週番号は ISO 8601（[periods.md](periods.md)）。
-  ファイル名、週番号の列、タイムライン、テンプレートの曜日のすべてに効く
+  ファイル名、週番号の列、パンくずとミニカレンダー、テンプレートの曜日のすべてに効く
 - 起動時に周期ノートを 1 つ開ける（どれかをオンにするとほかはオフになる）
 - ノートを作る前に確認を出せる
 - 隠れたつながり: 周期「日」をオフにしていて、コアプラグイン「デイリーノート」がオンのときは、日のノートの書式・フォルダ・テンプレート・
@@ -84,7 +85,9 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 
 ## 3. カレンダー（サイドのペイン）
 
-- 常に日のビュー。ヘッダーは `[月] ‹ › [年] ⌄ …… ⌖`。⌄ で月を選ぶ吹き出し、⌖ で今月に戻る
+- 常に日のビュー。ヘッダーは `[月] ‹ › [年] ⌄ …… Open now`。⌄ で月を選ぶ吹き出し
+- **Open now**（[ADR-0030](../adr/0030-open-now.md)）: 使っている周期のうち一番細かいものの今のノートを開き（なければ作る）、カレンダーを今日の月にする。
+  カレンダーのヘッダー（元の版の ⌖ の代わり）と、すべてのノートの見出しバーに出す。今のノートを開いているときは薄くする
   - 日（や月）の周期を無効にしたときだけ、月・年のビューが出る
 - 日付・週番号・月と年の表記を押すと、そのノートを開く（なければ作る）。Ctrl/Cmd を押しながらだと横に開く
 - ノートがあるかはドット、ステッカーがあれば絵文字で示す
@@ -101,37 +104,56 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 
 | 表示名 | 今の場所 | キー | 既定 | 内容 |
 | --- | --- | --- | --- | --- |
+| Open now button | Calendar › Interaction behavior | `openNowHeaderButton` | オン | ノートの見出しバーに Open now を出す |
 | Hover preview | Calendar › Interaction behavior | `autoHoverPreview` | オフ | Ctrl/Cmd を押さなくても、ホバーでプレビューを出す |
 | Calendar language | Calendar › Localization | `localeSettings.localeOverride` | Obsidian の言語 | カレンダーの中の言語 |
 | ― | ― | `yearsRangesStart` | `2020` | 年のビューの 12 年の区切りの起点 |
 
 週の始まり（`Week starts on`）もカレンダーの並びに効くが、周期ノート全体の設定として 1. に置いた。
 
-## 4. タイムライン（ノートの右上の帯）
+## 4. パンくずとミニカレンダー（ノートの上の帯）
 
-- 周期ノートの上に、前後の期間を並べた帯を出す。`‹ ›` で動かし、⌖ でノートの日付に戻る
-  - 並ぶもの: デイリーノートはその週の 7 日、週次ノートはその月の週、月次ノートはその四半期の 3 か月、四半期ノートはその年の四半期、
-    年次ノートは前後 2 年を含む 5 年
-  - 周期ノートでないノートでは、今日の週の 7 日（デイリーノートと同じ帯）
-- 見出し（W43、Q3、10月 など）と帯の左の年月を押すと、そのノートを開く。ドットとステッカーも出す
-- 開閉（⌃ / ›）はタブごとに覚える
-- スマホでは見出しバーのすぐ下に出て、スクロールで一緒に隠れる
+[ADR-0031](../adr/0031-breadcrumbs-and-mini-calendar.md)・[ADR-0032](../adr/0032-compact-on-desktop.md)。元の版の「タイムライン」を 2 つの機能に分けた。
+
+```
+            2026 › Q4 › 10月 › W44 › 30日              … パンくず
+‹   月 27   火 28   水 29  [木 30]  金 31   土 1   日 2   ›   … ミニカレンダー
+```
+
+- **パンくず**: 開いているノートの位置を上の周期から並べる。上の周期を押すとそのノートを開く（なければ作る）。
+  一番右を押すと、‹ › で動かしたミニカレンダーがノートに戻る
+  - 使っていない周期のうち、週と四半期は出さない。月と年は出すが押せない（薄くはしない）
+  - 週のノートの年・四半期・月は、その週の木曜日のもの
+  - ミニカレンダーがオフのときは、両端の ‹ › で前後のノートを直接開く
+- **ミニカレンダー**: 開いているノートと同じ周期を並べ、ドットとステッカーを出す。今日（今週、今月…）は色を付けて太字にする
+  - 日: カレンダーと同じ週の 7 日（設定で、ノートを真ん中に前後 3 日ずつにもできる）。週・月・四半期・年: ノートを真ん中に前後 2 つずつ
+  - ‹ › は帯の幅ぶん動く。動かした位置はタブごとに、同じノートを開いている間は残す
+  - パンくずがオフでノートが帯から外れたときだけ、帯の下の線にまたがって「30日に戻る」のボタン（↺）を真ん中に出す
+- 周期ノートでないノート（設定でオンのとき）: 使っている周期のうち一番細かいものの「今」を基準にする
+- 置き場所: 見出しバーのすぐ下。パンくずが上、ミニカレンダーが下
+  - スマホ: 横いっぱいの帯。本文はその下から始まり、下へスクロールすると見出しバーと一緒に隠れる。帯の上（見出しバーの後ろ）も塗りつぶす
+  - PC（タブレットを含む）: 幅 26rem までの帯を真ん中に置き、本文は帯の下から。「Compact on desktop」がオンなら、右上に浮かせた小さな箱にする
+    （本文は下げない）。タブが狭い（左右に分けたときなど）と箱がタイトルに被るので、帯で出す
+- たたむボタンはない
 
 ### 設定
 
 | 表示名 | 今の場所 | キー | 既定 | 内容 |
 | --- | --- | --- | --- | --- |
-| Timeline | Calendar › Timeline | `timeline.enabled` | オン | タイムラインを出すか |
-| Unique timelines for periodic notes | Calendar › Timeline | `timeline.granularityBased` | オン | 周期ごとの帯にするか（オフなら、どのノートでも日の帯） |
-| Periodic notes timeline view mode | Calendar › Timeline | `timeline.viewMode` | 開いた状態 | 周期ノートで、開いた・閉じた状態のどちらで始めるか |
-| Show timeline everywhere | Calendar › Timeline | `timeline.displayOnRestNotes` | オフ | 周期ノート以外のノートにも出すか |
-| Non-periodic notes timeline view mode | Calendar › Timeline | `timeline.restViewMode` | 閉じた状態 | 周期ノート以外で、どちらの状態で始めるか |
-| Show timeline stickers | Calendar › Timeline | `timeline.displayStickers` | オン | 帯にステッカーを出すか |
+| Show on | Calendar › Breadcrumbs | `breadcrumbs.placement` | Always | パンくずを出す場所（Always / Phone only / Never） |
+| Show on other notes | Calendar › Breadcrumbs | `breadcrumbs.onOtherNotes` | オン | 周期ノートでないノートにも出すか |
+| Show on | Calendar › Mini calendar | `miniCalendar.placement` | Always | ミニカレンダーを出す場所 |
+| Show on other notes | Calendar › Mini calendar | `miniCalendar.onOtherNotes` | オン | 周期ノートでないノートにも出すか |
+| Days | Calendar › Mini calendar | `miniCalendar.dayLayout` | Calendar week | 日の並べ方（Calendar week / Centered on the note） |
+| Show stickers | Calendar › Mini calendar | `miniCalendar.displayStickers` | オン | ステッカーを出すか |
+| Compact on desktop | Calendar › Mini calendar | `compactOnDesktop` | オフ | PC で右上の小さな箱にする（パンくずにも効く） |
+
+前の `timeline.*` の設定は、起動したときに読み替えて消す（オフにしていれば両方 Never、ほかの人のノートにも出すか・ステッカーは引き継ぐ）。
 
 ## 5. ステッカー（[stickers.md](stickers.md)）
 
 - ノートのプロパティ 1 つに絵文字を 1 つ保存する
-- 出る場所: カレンダーのマス、月・年の表記、タイムライン
+- 出る場所: カレンダーのマス、月・年の表記、ミニカレンダー
 - 付ける入口: 周期ノートの見出しバーのボタン、コマンド、カレンダーの右クリック
 - 絵文字ピッカー: 今のステッカーと外すボタンが一番上。選んで追加した言語でも検索できる（追加したときに言葉をダウンロードする）。
   検索欄で Esc を押すとピッカーを閉じる
@@ -145,7 +167,7 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 | Sticker property | Calendar › Stickers | `stickerProperty` | `sticker` | 絵文字を入れるプロパティの名前 |
 | Emoji search languages | Calendar › Stickers | （プラグインのフォルダにあるファイル） | 英語だけ | 絵文字を検索する言語 |
 
-タイムラインにステッカーを出すか（`timeline.displayStickers`）は 4. にある。
+ミニカレンダーにステッカーを出すか（`miniCalendar.displayStickers`）は 4. にある。
 
 ## 6. 確認
 
@@ -153,7 +175,7 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 
 | 表示名 | 今の場所 | キー | 既定 | 内容 |
 | --- | --- | --- | --- | --- |
-| Creation confirmation | Calendar › Interaction behavior | `shouldConfirmBeforeCreate` | オン | ノートを作る前に確認する（カレンダー・タイムラインから作るとき。コマンドと起動時には出ない） |
+| Creation confirmation | Calendar › Interaction behavior | `shouldConfirmBeforeCreate` | オン | ノートを作る前に確認する（カレンダー・パンくず・ミニカレンダー・Open now から作るとき。コマンドと起動時には出ない） |
 | ― | ― | `shouldConfirmBeforeDeleteFormat` | オン | 書式を消す前に確認する（その書式でしか読めないノートがあるときだけ） |
 | ― | ― | `shouldConfirmBeforeReplaceAllFormats` | オン | 書式の一括の付け替えの前に確認する |
 | ― | ― | `shouldConfirmBeforeMoveFile`、`shouldConfirmBeforeMoveAllFiles` | オン | ファイルの一覧で、移動・一括の移動の前に確認する |
@@ -175,8 +197,9 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 | 今の場所 | 中身 | 本来の機能 |
 | --- | --- | --- |
 | Calendar › Stickers | オン・オフ、見出しバーのボタン、プロパティ、検索の言語 | 5. ステッカー |
-| Calendar › Timeline | オン・オフ、周期ごとの帯、開閉の初期値、周期ノート以外、ステッカー | 4. タイムライン |
-| Calendar › Interaction behavior | 作成の確認、ホバーのプレビュー | 6. 確認、3. カレンダー |
+| Calendar › Breadcrumbs | 出す場所、周期ノート以外 | 4. パンくずとミニカレンダー |
+| Calendar › Mini calendar | 出す場所、周期ノート以外、日の並べ方、ステッカー、Compact on desktop | 4. パンくずとミニカレンダー |
+| Calendar › Interaction behavior | 作成の確認、Open now のボタン、ホバーのプレビュー | 6. 確認、3. カレンダー |
 | Calendar › Localization | カレンダーの言語、週の始まり | 3. カレンダー、1. 周期ノート（週の決め方） |
 | Periods › 各周期 | オン・オフ、書式、フォルダ、テンプレート、起動時に開く | 1. 周期ノート |
 | （画面になし） | 確認 6 つ、`yearsRangesStart` | 6. 確認、3. カレンダー |

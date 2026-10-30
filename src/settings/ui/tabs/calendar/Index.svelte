@@ -1,13 +1,12 @@
 <script lang="ts">
   import locales from "@/locales";
   import { defaultWeekdays, sysLocaleKey } from "@/localization";
-  import type { TimelineViewMode } from "@/settings/constants";
+  import type { ISettings } from "@/settings/constants";
   import { settingsStore } from "@/settings/store";
   import { Dropdown, SettingItem, Toggle } from "@/settings/ui";
   import { switchLocale, updateWeekStartSetting } from "@/stores";
   import { toSupportedWeekStart } from "@/weeks";
   import { localeWeekStart, weekdayNames } from "@/calendar-locale";
-  import TimelineManager from "@/ui/components/timeline/manager";
   import { derived as derivedStore } from "svelte/store";
   import { Notice, Platform } from "obsidian";
   import { isReservedStickerProperty, RESERVED_STICKER_PROPERTIES } from "@/ui/utils/emoji-picker";
@@ -50,54 +49,16 @@
     }));
   };
 
-  // Timeline
-  const handleToggleTimeline = (enabled: boolean) => {
-    settingsStore.update((s) => {
-      s.timeline.enabled = enabled;
-      return s;
-    });
-    if (enabled) {
-      TimelineManager.create()?.syncAll();
-    } else {
-      TimelineManager.destroy();
-    }
-  };
-
-  const handleToggleGranularityBased = (granularityBased: boolean) => {
-    settingsStore.update((s) => {
-      s.timeline.granularityBased = granularityBased;
-      return s;
-    });
-    TimelineManager.instance?.restartAll();
-  };
-  const handleSetViewMode = (viewMode: TimelineViewMode) => {
-    settingsStore.update((s) => {
-      s.timeline.viewMode = viewMode;
-      return s;
-    });
-    TimelineManager.instance?.restartAll();
-  };
-  const handleToggleDisplayOnRestNotes = (displayOnRestNotes: boolean) => {
-    settingsStore.update((s) => {
-      s.timeline.displayOnRestNotes = displayOnRestNotes;
-      return s;
-    });
-    TimelineManager.instance?.restartAll();
-  };
-  const handleToggleDisplayStickers = (displayStickers: boolean) => {
-    settingsStore.update((s) => {
-      s.timeline.displayStickers = displayStickers;
-      return s;
-    });
-    TimelineManager.instance?.restartAll();
-  };
-  const handleSetRestViewMode = (restViewMode: TimelineViewMode) => {
-    settingsStore.update((s) => {
-      s.timeline.restViewMode = restViewMode;
-      return s;
-    });
-    TimelineManager.instance?.restartAll();
-  };
+  // Calendared: the breadcrumbs and the mini calendar (docs/adr/0031, 0032). NavigationManager follows the settings
+  const placementOptions = [
+    { label: "Always", value: "always" },
+    { label: "Phone only", value: "phone" },
+    { label: "Never", value: "never" },
+  ];
+  const updateBreadcrumbs = (change: Partial<ISettings["breadcrumbs"]>) =>
+    settingsStore.update((s) => ({ ...s, breadcrumbs: { ...s.breadcrumbs, ...change } }));
+  const updateMiniCalendar = (change: Partial<ISettings["miniCalendar"]>) =>
+    settingsStore.update((s) => ({ ...s, miniCalendar: { ...s.miniCalendar, ...change } }));
 
   // Localization
   const handleSetLanguage = (localeKey: string) => {
@@ -214,95 +175,99 @@
   {/if}
 </div>
 
-<!-- --- Timeline section ---- -->
-<!-- ------------------------- -->
+<!-- --- Breadcrumbs section ---- -->
+<!-- ---------------------------- -->
 <div class="setting-group">
   <SettingItem
     isHeading={true}
-    name="Timeline"
-    type="toggle"
-    description="Quickly jump between time periods from the top of your periodic notes."
-  >
-    {#snippet control()}
-      <Toggle
-        onChange={handleToggleTimeline}
-        isEnabled={$settingsStore.timeline.enabled}
-      />
-    {/snippet}
-  </SettingItem>
-
-  {#if $settingsStore.timeline.enabled}
-    <div class="setting-items">
-      <SettingItem
-        name="Unique timelines for periodic notes"
-        description="Toggle to show a specific timeline for each type of periodic note. When off, all periodic notes share the same week-based timeline."
-      >
+    name="Breadcrumbs"
+    description="Where the note sits, such as 2026 › Q4 › Oct › W44 › 30, above the note. Click a period to open its note."
+  />
+  <div class="setting-items">
+    <SettingItem name="Show on" description="Phone only keeps desktop and tablets to the side calendar.">
+      {#snippet control()}
+        <Dropdown
+          options={placementOptions}
+          onChange={(placement) => updateBreadcrumbs({ placement: placement as ISettings["breadcrumbs"]["placement"] })}
+          value={$settingsStore.breadcrumbs.placement}
+        />
+      {/snippet}
+    </SettingItem>
+    {#if $settingsStore.breadcrumbs.placement !== "never"}
+      <SettingItem name="Show on other notes" description="Also show where today is on notes that aren't periodic notes.">
         {#snippet control()}
           <Toggle
-            onChange={handleToggleGranularityBased}
-            isEnabled={$settingsStore.timeline.granularityBased}
+            onChange={(onOtherNotes) => updateBreadcrumbs({ onOtherNotes })}
+            isEnabled={$settingsStore.breadcrumbs.onOtherNotes}
           />
         {/snippet}
       </SettingItem>
-      <SettingItem
-        name="Periodic notes timeline view mode"
-        description="Set the default display mode for the timeline, either expanded or collapsed."
-      >
+    {/if}
+  </div>
+</div>
+
+<!-- --- Mini calendar section ---- -->
+<!-- ------------------------------ -->
+<div class="setting-group">
+  <SettingItem
+    isHeading={true}
+    name="Mini calendar"
+    description="The notes before and after the open one, above the note, with their stickers."
+  />
+  <div class="setting-items">
+    <SettingItem name="Show on" description="Phone only keeps desktop and tablets to the side calendar.">
+      {#snippet control()}
+        <Dropdown
+          options={placementOptions}
+          onChange={(placement) => updateMiniCalendar({ placement: placement as ISettings["miniCalendar"]["placement"] })}
+          value={$settingsStore.miniCalendar.placement}
+        />
+      {/snippet}
+    </SettingItem>
+    {#if $settingsStore.miniCalendar.placement !== "never"}
+      <SettingItem name="Show on other notes" description="Also show the days around today on notes that aren't periodic notes.">
+        {#snippet control()}
+          <Toggle
+            onChange={(onOtherNotes) => updateMiniCalendar({ onOtherNotes })}
+            isEnabled={$settingsStore.miniCalendar.onOtherNotes}
+          />
+        {/snippet}
+      </SettingItem>
+      <SettingItem name="Days" description="Show the calendar's week, or the note in the middle with 3 days on each side.">
         {#snippet control()}
           <Dropdown
             options={[
-              { label: "Expanded", value: "expanded" },
-              { label: "Collapsed", value: "collapsed" },
+              { label: "Calendar week", value: "week" },
+              { label: "Centered on the note", value: "centered" },
             ]}
-            onChange={handleSetViewMode}
-            value={$settingsStore.timeline.viewMode}
+            onChange={(dayLayout) => updateMiniCalendar({ dayLayout: dayLayout as ISettings["miniCalendar"]["dayLayout"] })}
+            value={$settingsStore.miniCalendar.dayLayout}
           />
         {/snippet}
       </SettingItem>
-
+      <SettingItem name="Show stickers">
+        {#snippet control()}
+          <Toggle
+            onChange={(displayStickers) => updateMiniCalendar({ displayStickers })}
+            isEnabled={$settingsStore.miniCalendar.displayStickers}
+          />
+        {/snippet}
+      </SettingItem>
+    {/if}
+    {#if $settingsStore.breadcrumbs.placement === "always" || $settingsStore.miniCalendar.placement === "always"}
       <SettingItem
-        name="Show timeline everywhere"
-        description="Enable the timeline for all notes, not just periodic ones."
+        name="Compact on desktop"
+        description="Applies to both. Show them in a small box at the top right of the note instead of a bar under its header. Phones always use the bar."
       >
         {#snippet control()}
           <Toggle
-            onChange={handleToggleDisplayOnRestNotes}
-            isEnabled={$settingsStore.timeline.displayOnRestNotes}
+            onChange={(compactOnDesktop) => settingsStore.update((s) => ({ ...s, compactOnDesktop }))}
+            isEnabled={$settingsStore.compactOnDesktop}
           />
         {/snippet}
       </SettingItem>
-
-      <SettingItem
-        name="Show timeline stickers"
-        description="Show emoji stickers in the timeline view."
-      >
-        {#snippet control()}
-          <Toggle
-            onChange={handleToggleDisplayStickers}
-            isEnabled={$settingsStore.timeline.displayStickers}
-          />
-        {/snippet}
-      </SettingItem>
-
-      {#if $settingsStore.timeline.displayOnRestNotes}
-        <SettingItem
-          name="Non-periodic notes timeline view mode"
-          description="Set the default display mode for the timeline on non-periodic notes."
-        >
-          {#snippet control()}
-            <Dropdown
-              options={[
-                { label: "Expanded", value: "expanded" },
-                { label: "Collapsed", value: "collapsed" },
-              ]}
-              onChange={handleSetRestViewMode}
-              value={$settingsStore.timeline.restViewMode}
-            />
-          {/snippet}
-        </SettingItem>
-      {/if}
-    </div>
-  {/if}
+    {/if}
+  </div>
 </div>
 
 <!-- ------------------------------------- -->
@@ -320,6 +285,18 @@
         <Toggle
           onChange={handleShouldConfirmBeforeCreate}
           isEnabled={$settingsStore.shouldConfirmBeforeCreate}
+        />
+      {/snippet}
+    </SettingItem>
+
+    <SettingItem
+      name="Open now button"
+      description="Show a button in every note's header that opens now's note: today's, or this week's if daily notes are off, and so on."
+    >
+      {#snippet control()}
+        <Toggle
+          onChange={(openNowHeaderButton) => settingsStore.update((s) => ({ ...s, openNowHeaderButton }))}
+          isEnabled={$settingsStore.openNowHeaderButton}
         />
       {/snippet}
     </SettingItem>

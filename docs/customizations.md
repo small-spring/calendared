@@ -167,3 +167,9 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
   やり方・参考は `docs/guides/`、調べたことは `docs/research/`、使い終わったものは `docs/archive/` に置いた。機能と設定の一覧は `docs/spec/overview.md`〔2026-10-30〕
 - `manifest.json` の `authorUrl` を small-spring の GitHub にし、元の作者の Ko-fi を指していた `fundingUrl` を消した〔2026-10-30〕
 - `manifest.json`・`package.json` の説明（`description`）を自分の版の文にした（仮。機能を詰め終えたら書き直す）〔2026-10-30〕
+- タイムラインを「パンくず」（`2026 › Q4 › 10月 › W44 › 30日`。上の周期を押すと開く）と「ミニカレンダー」（同じ周期の前後。‹ › で動かす）に分けて作り直した。
+  それぞれ出す場所（Always / Phone only / Never）と周期ノートでないノートにも出すかを選べ、たたむボタンはなくした。PC では見出しバーの下に幅を絞った帯で出し、
+  「Compact on desktop」で右上の小さな箱にできる（タブが狭いと帯に戻る）。前の `timeline.*` の設定は読み替える（ADR-0031・0032）〔2026-10-31〕
+- 「Open now」ボタンを作った。使っている周期のうち一番細かいものの今のノートを開き、カレンダーを今日の月にする。カレンダーの ⌖ を置き換え、
+  すべてのノートの見出しバーにも出す（設定でオフにできる。ADR-0030）〔2026-10-31〕
+- カレンダーとミニカレンダーで、今日（今週・今月…）の日付を太字にした（アクセント色だけでは細く薄く見えた）〔2026-10-31〕

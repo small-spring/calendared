@@ -2,7 +2,7 @@
     import { noteAt } from "@/io";
     import { inLocale } from "@/calendar-locale";
     import { settingsStore } from "@/settings";
-    import { displayedDateStore, yearsRanges } from "@/stores";
+    import { displayedDateStore } from "@/stores";
     import { todayStore } from "@/stores/dates";
     import { Header } from "./core";
     import MonthPicker from "./MonthPicker.svelte";
@@ -36,15 +36,6 @@
             displayedDateStore.update((date) =>
                 date.clone().subtract(1, "month"),
             );
-        },
-        reset: () => {
-            yearsRanges.update((values) => ({
-                ...values,
-                crrRangeIndex: values.ranges.findIndex(
-                    (range) => range === values.todayRange,
-                ),
-            }));
-            displayedDateStore.set($todayStore);
         },
         increment: () => {
             displayedDateStore.update((date) =>

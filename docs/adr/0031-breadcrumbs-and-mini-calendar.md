@@ -4,7 +4,7 @@ title: "タイムラインを「パンくず」と「ミニカレンダー」の
 status: 採用
 date: 2026-10-30
 area: タイムライン
-implemented: false
+implemented: true
 supersedes: 0029
 aliases:
   - ADR-0031

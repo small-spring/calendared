@@ -86,6 +86,8 @@
           ? "opacity-25"
           : "",
     isActive && isToday && "!text-[--text-on-accent]",
+    // Calendared: today's (this week's, this month's...) button is bold, since its accent color alone looks dim and thin
+    isToday && "!font-bold",
     className,
   )}
   style={`

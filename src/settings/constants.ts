@@ -2,6 +2,12 @@ import { DEFAULT_FORMATS_PER_GRANULARITY, granularities } from "@/constants";
 import { type IGranularity } from "@/io";
 import { sysLocaleKey, sysWeekStartId } from "../localization";
 import { toSupportedWeekStart } from "../weeks";
+import {
+  DEFAULT_BREADCRUMBS,
+  DEFAULT_MINI_CALENDAR,
+  type BreadcrumbsSettings,
+  type MiniCalendarSettings,
+} from "../navigation";
 import { v4 as uuidv4 } from "uuid";
 
 export type TFormat = {
@@ -10,7 +16,6 @@ export type TFormat = {
   error: string;
   loading: boolean;
 }
-export type TimelineViewMode = 'expanded' | 'collapsed';
 export interface PeriodSettings {
   enabled: boolean;
   openAtStartup: boolean;
@@ -23,15 +28,12 @@ export interface PeriodSettings {
 
 export interface ISettings {
   periods: Record<IGranularity, PeriodSettings>;
-  timeline: {
-    enabled: boolean;
-    /** Whether the adjacent dates will be based in the crr file granularity or if they'll always be adjacent days. */
-    granularityBased: boolean;
-    displayOnRestNotes: boolean;
-    displayStickers: boolean;
-    viewMode: TimelineViewMode;
-    restViewMode: TimelineViewMode;
-  };
+  /** Calendared: the breadcrumbs above a note (docs/adr/0031). With the mini calendar, replaces upstream's timeline */
+  breadcrumbs: BreadcrumbsSettings;
+  /** Calendared: the mini calendar above a note (docs/adr/0031) */
+  miniCalendar: MiniCalendarSettings;
+  /** Calendared: on desktop, show both in a small box at the top right of the note instead of a bar under its header (docs/adr/0032) */
+  compactOnDesktop: boolean;
 
 
   /** Calendared: property that holds a note's sticker emoji (see docs/spec/stickers.md) */
@@ -40,6 +42,8 @@ export interface ISettings {
   stickersEnabled: boolean;
   /** Calendared: show the sticker button in the header of periodic notes */
   stickerHeaderButton: boolean;
+  /** Calendared: show the Open now button in the header of every note (docs/adr/0030) */
+  openNowHeaderButton: boolean;
 
   /** Whether to show a confirmation dialog before creating a new note */
   shouldConfirmBeforeCreate: boolean;
@@ -121,17 +125,13 @@ export const DEFAULT_SETTINGS: ISettings = Object.freeze({
   periods: Object.fromEntries(granularities.map(
     g => [g, getDefaultPeriodicNotesConfig(g)],
   )) as Record<IGranularity, PeriodSettings>,
-  timeline: {
-    enabled: true,
-    granularityBased: true,
-    displayOnRestNotes: false,
-    displayStickers: true,
-    viewMode: 'expanded' as const,
-    restViewMode: 'collapsed' as const,
-  },
+  breadcrumbs: DEFAULT_BREADCRUMBS,
+  miniCalendar: DEFAULT_MINI_CALENDAR,
+  compactOnDesktop: false,
   stickerProperty: "sticker",
   stickersEnabled: true,
   stickerHeaderButton: true,
+  openNowHeaderButton: true,
   shouldConfirmBeforeCreate: true,
   shouldConfirmBeforeDeleteFormat: true,
   shouldConfirmBeforeReplaceAllFormats: true,

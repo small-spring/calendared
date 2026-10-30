@@ -29,15 +29,6 @@
                 displayedDateModifier: -YEARS_RANGE_SIZE,
             });
         },
-        reset: () => {
-            yearsRanges.update((values) => ({
-                ...values,
-                crrRangeIndex: values.ranges.findIndex(
-                    (range) => range === values.todayRange,
-                ),
-            }));
-            displayedDateStore.set($todayStore);
-        },
         increment: () => {
             yearsRanges.updateRanges({ action: "increment" });
         },

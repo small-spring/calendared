@@ -5,6 +5,10 @@
   import PeriodTitle, { type TTitle } from "./PeriodTitle.svelte";
   import { type Snippet } from "svelte";
   import { setIcon } from "obsidian";
+  import { vaultSource } from "@/io";
+  import { settingsStore } from "@/settings";
+  import { todayStore } from "@/stores";
+  import { isNowNoteFile, openNow, openNowIcon } from "@/ui/open-now";
 
   interface Props {
     leftDate?: moment.Moment | null;
@@ -23,7 +27,6 @@
       showingCrrDate: boolean;
       decrement: () => void;
       increment: () => void;
-      reset: () => void;
     };
   }
   let {
@@ -84,14 +87,17 @@
   });
   $effect(() => {
     if (resetEl) {
-      setIcon(resetEl, "locate-fixed");
+      setIcon(resetEl, openNowIcon());
     }
   });
+  // Calendared: Open now replaces upstream's ⌖ (docs/adr/0030). Dimmed only when now's note is open and the calendar
+  // shows today, so you can still come back after looking around the calendar with now's note open
+  let isNowOpen = $derived(isNowNoteFile(vaultSource().activeFile(), $settingsStore, $todayStore));
 </script>
 
 <!--
   Calendared: upstream laid this out as a big left title, a right title, and ‹ • › below.
-  Now one row: [left title ‹ ›] [right title ⌄] ... [go to current]
+  Now one row: [left title ‹ ›] [right title ⌄] ... [Open now]
   Title sizes follow upstream's minimal mode.
 -->
 
@@ -151,11 +157,11 @@
     <button
       class={cn(
         "clickable-icon",
-        nav.showingCrrDate && "opacity-30 !cursor-default",
+        nav.showingCrrDate && isNowOpen && "opacity-30 !cursor-default",
       )}
       id="reset-button"
-      aria-label={`Go to current ${nav.type}`}
-      onclick={nav.reset}
+      aria-label="Open now"
+      onclick={openNow}
       bind:this={resetEl}
     ></button>
   </div>
