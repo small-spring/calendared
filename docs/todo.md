@@ -17,24 +17,6 @@
 
 ## 2. やりたいこと
 
-- ショートカットを Calendared のコマンドへ移す（2026-10-29 時点の Vault `private` の `.obsidian/hotkeys.json` を見たもの）
-  - 今の割り当てと、移し先の候補:
-    | 今のコマンド | キー | Calendared の移し先 |
-    | --- | --- | --- |
-    | `daily-notes`（コアのデイリーノート: 今日のノート） | Cmd+D | `create-current-daily-note`（Open today's note） |
-    | `daily-notes:goto-prev`（前のデイリーノート） | Cmd+← と Cmd+Shift+, | `open-previous-note`（Open previous periodic note） |
-    | `daily-notes:goto-next`（次のデイリーノート） | Cmd+→ | `open-next-note`（Open next periodic note） |
-    | `calendar:show-calendar-view`（Calendar プラグイン） | Cmd+Shift+C | `toggle-calendar-view`（Toggle calendar interface） |
-  - Calendar プラグインはもう入っていないので、Cmd+Shift+C は今は何もしていない。`periodic-notes` プラグインもフォルダだけ残っていて無効
-  - 前後を開くコマンドは 2026-10-29 に作った（「Open previous periodic note」「Open next periodic note」）。
-    ないときは作らず通知を出す。「ノートがある所まで飛ばす」形が欲しくなったら考える
-  - 残り: Obsidian の設定のホットキーで、コアの割り当てを外して Calendared のコマンドに付け直す（手作業）
-  - 移すときは、コア側の割り当てを外してから Calendared に付ける（同じキーが 2 つに付くと衝突する）
-  - **インストールしたら自動でショートカットが付くようにする** か検討
-    - `addCommand` の `hotkeys` で既定のキーを指定できる。ユーザーが設定画面で変えたらそちらが優先される
-    - Obsidian の公開プラグインのガイドラインでは、既定のホットキーは付けないよう勧められている（ほかのプラグインや OS と衝突するため）。
-      自分用なら付けてよいが、公開するなら設定で「既定のキーを使う」を選べる形にするなど
-    - Cmd+← / → は、編集中は行頭・行末へ移動するキーでもある（今もコアのコマンドがそれを上書きしている）
 - ステッカーを複数の種類に（例: 気分 `mood`、活動量 `activeness`）
   - 種類ごとにプロパティを 1 つ持ち、それぞれに絵文字を 1 つ付ける。カレンダーに出す種類を切り替える
   - 前に見送った「1 つのノートに複数のステッカーを並べる」とは別の考え（表示は常に 1 つなので、マスの表示を考え直さなくてよい）
