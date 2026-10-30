@@ -12,7 +12,7 @@ import { settingsStore } from "./store";
 import { DUP_ERROR_PREFIX } from "@/io/validation";
 
 export class SettingsTab extends PluginSettingTab {
-  private view: Record<string, unknown>;
+  private view: Record<string, unknown> | null = null;
 
   constructor() {
     const plugin = PluginService.getPlugin();
@@ -23,6 +23,8 @@ export class SettingsTab extends PluginSettingTab {
   }
 
   display() {
+    // Calendared: a tab shown again without being hidden first kept its previous component mounted
+    if (this.view) void unmount(this.view);
     this.containerEl.empty();
 
     this.view = mount(Settings, {
@@ -31,7 +33,10 @@ export class SettingsTab extends PluginSettingTab {
   }
   hide() {
     super.hide()
-    void unmount(this.view)
+    // Calendared: unmount once; Obsidian can hide a tab that is already hidden, which made Svelte warn
+    // lifecycle_double_unmount
+    if (this.view) void unmount(this.view)
+    this.view = null
 
     const errors = [];
 

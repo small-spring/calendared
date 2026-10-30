@@ -18,7 +18,7 @@ export type TBasePopoverId = typeof STICKER_POPOVER_ID | typeof BASE_POPOVER_ID
 
 export class BaseComponentBehavior {
   public componentHtmlEl: HTMLElement;
-  public component: Record<string, unknown>;
+  public component: Record<string, unknown> | null;
   public autoUpdateCleanup: (() => void) | null | undefined;
   public boundCallbacks = new Map<keyof WindowEventMap, WindowEventHandler<keyof WindowEventMap>>();
   public opened = false;

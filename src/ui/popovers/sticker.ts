@@ -37,7 +37,9 @@ export class StickerPopoverBehavior extends BaseComponentBehavior {
   }
   public cleanup() {
     this.close();
-    void unmount(this.component);
+    // Calendared: unmount once (a second cleanup made Svelte warn lifecycle_double_unmount)
+    if (this.component) void unmount(this.component);
+    this.component = null;
   }
 
   public getWindowEvents(): TWindowEvents {
