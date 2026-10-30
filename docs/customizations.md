@@ -174,3 +174,4 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
   すべてのノートの見出しバーにも出す（設定でオフにできる。ADR-0030）〔2026-10-31〕
 - カレンダーとミニカレンダーで、今日（今週・今月…）の日付を太字にした（アクセント色だけでは細く薄く見えた）〔2026-10-31〕
 - パンくずとミニカレンダーのオン・オフを、出す場所の 3 択の Never から、ステッカーと同じ見出しのトグルにした。出す場所は Always / Phone only の 2 択になり、オフにしても覚えておく（ADR-0033）〔2026-10-31〕
+- 設定画面の文言の誤りと書き方を直した。Periods タブの先頭の文（オフにした周期もコマンドから作れる、と書いていた）を今の動きに合わせ、書式の行の「Replace all formats with this one」は、ノートの名前を変えるボタンなので「Rename notes to this format」にした（確認の画面も）。文の途中の「Daily」などを小文字にし、件数を「N files」に、選択肢を「Same as system (English)」「Language default (Sunday)」にした〔2026-10-31〕

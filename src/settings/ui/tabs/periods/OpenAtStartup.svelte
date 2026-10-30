@@ -4,7 +4,6 @@
 
     import { type PeriodSettings, settingsStore } from "@/settings";
     import { SettingItem, Toggle } from "@/settings/ui";
-    import { capitalize } from "@/utils";
     import { granularities } from "@/constants";
 
     interface Props {
@@ -15,10 +14,11 @@
     let { settings, granularity }: Props = $props();
 </script>
 
+<!-- Calendared: lowercase in the middle of the sentence (sentence case) -->
 <SettingItem
     name="Open on startup"
-    description={`Automatically open or create a new ${capitalize(
-        getPeriodicityFromGranularity(granularity),
+    description={`Automatically open or create a new ${getPeriodicityFromGranularity(
+        granularity,
     )} note whenever you open this vault.`}
     type="toggle"
     isHeading={false}

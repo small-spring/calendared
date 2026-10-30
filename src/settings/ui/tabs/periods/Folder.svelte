@@ -4,7 +4,6 @@
         type IGranularity,
     } from "@/io";
     import { validateFolder } from "@/io/validation";
-    import { capitalize } from "@/utils";
     import { onDestroy, onMount } from "svelte";
     import { type PeriodSettings, FolderSuggest } from "@/settings";
     import { cn } from "@/ui/utils";
@@ -43,9 +42,9 @@
 <div class="setting-item">
     <div class="setting-item-info">
         <div class="setting-item-name">Folder</div>
+        <!-- Calendared: lowercase in the middle of the sentence (sentence case) -->
         <div class="setting-item-description">
-            New {capitalize(getPeriodicityFromGranularity(granularity))} notes will
-            be placed here
+            Where new {getPeriodicityFromGranularity(granularity)} notes are created.
         </div>
         <div
             class={cn(

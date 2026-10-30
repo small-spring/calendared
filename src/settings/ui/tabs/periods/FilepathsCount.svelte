@@ -42,8 +42,9 @@
     }
 </script>
 
-<!-- Calendared: "0 Files" is shown too (as text, nothing to list), so a format that reads no note says so;
-     upstream showed nothing. Only an empty format (e.g. the row for adding one) shows no count -->
+<!-- Calendared: "0 files" is shown too (as text, nothing to list), so a format that reads no note says so;
+     upstream showed nothing. Only an empty format (e.g. the row for adding one) shows no count.
+     Lowercase "file(s)" (sentence case; upstream wrote "Files") -->
 {#if format.value.trim() || format.loading}
     <div class="relative inline-flex">
         <LoadingCircle loading={format.loading} />
@@ -62,7 +63,7 @@
                 onclick={handleClick}
             >
                 {filesCount}
-                {filesCount === 1 ? "File" : "Files"}
+                {filesCount === 1 ? "file" : "files"}
             </a>
         {:else}
             <span
@@ -70,7 +71,7 @@
                     "[font-size:calc(var(--font-ui-small)+1px)]",
                     error && "!text-[var(--text-error)]",
                     format.loading && "opacity-60",
-                )}>0 Files</span
+                )}>0 files</span
             >
         {/if}
     </div>

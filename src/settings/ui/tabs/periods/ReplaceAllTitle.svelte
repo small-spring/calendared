@@ -6,4 +6,5 @@
     let { replacingFormat }: Props = $props();
 </script>
 
-Replace all formats with <span class="u-pop">{replacingFormat}</span>?
+<!-- Calendared: the action renames notes (upstream: "Replace all formats with …") -->
+Rename notes to <span class="u-pop">{replacingFormat}</span>?

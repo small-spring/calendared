@@ -68,7 +68,8 @@
   const getLanguageOptions = () => {
     let options = [
       {
-        label: `Same as system - ${locales.get(sysLocaleKey) || sysLocaleKey}`,
+        // Calendared: the language in parentheses (upstream: "Same as system - English")
+        label: `Same as system (${locales.get(sysLocaleKey) || sysLocaleKey})`,
         value: sysLocaleKey,
       },
     ];
@@ -99,7 +100,8 @@
     const localeDefault = toSupportedWeekStart(localeWeekStart(locale));
     return [
       {
-        label: `Locale default - ${names[localeDefault]}`,
+        // Calendared: "Language default (Sunday)"; upstream-style "Locale default - Sunday" read as developer jargon
+        label: `Language default (${names[localeDefault]})`,
         value: defaultWeekdays[localeDefault],
       },
       ...[6, 0, 1].map((i) => ({

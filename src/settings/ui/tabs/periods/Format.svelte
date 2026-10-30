@@ -265,7 +265,7 @@
         note: {
           Component: ReplaceAllNote,
         },
-        cta: "Replace",
+        cta: "Rename",
         onAccept: (dontAskAgain) => {
           replaceAll();
 
@@ -511,6 +511,7 @@
       </div>
       <div class="flex">
         <!-- replace -->
+        <!-- Calendared: named after what it does (renames the notes), not "Replace all formats with this one" -->
         <button
           class={cn(
             "clickable-icon extra-setting-button hover:!bg-[var(--background-modifier-hover)]",
@@ -523,7 +524,7 @@
                 : "",
             type === "skeleton" && "!opacity-0 -z-50",
           )}
-          aria-label="Replace all formats with this one"
+          aria-label="Rename notes to this format"
           bind:this={replaceBttnEl}
           onclick={handleReplaceAll}
           disabled={!!error || value.trim() === "" || type === "skeleton"}
