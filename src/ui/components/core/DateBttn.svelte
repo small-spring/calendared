@@ -1,10 +1,9 @@
 <script lang="ts">
   import { IGranularity } from "@/io";
 
-  import { noteAt } from "@/io";
+  import { noteAt, vaultSource } from "@/io";
   import { settingsStore } from "@/settings";
   import {
-    activeFileStore,
     displayedDateStore,
     todayStore,
   } from "@/stores/";
@@ -51,12 +50,15 @@
   // Calendared: read through the vault source, with the settings read reactively (docs/state.md, ADR-S2);
   // upstream re-read everything on a store emitting a random number
   let { file, sticker } = $derived(noteAt(granularity, date, $settingsStore));
+  // Calendared: selected when its note is the open one, read from Obsidian (docs/state.md, ADR-S1); upstream kept the
+  // selection in a store that several places wrote, which could drift from the open note
   let isActive = $derived.by(() => {
-    if (!$activeFileStore?.file?.path || !file?.path) {
+    const openFile = vaultSource().activeFile();
+    if (!openFile || !file) {
       return false;
     }
 
-    return isActiveOverride ?? $activeFileStore.file.path === file.path;
+    return isActiveOverride ?? openFile.path === file.path;
   });
 
   let isToday = $derived(date.isSame($todayStore, granularity));

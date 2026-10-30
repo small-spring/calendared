@@ -31,18 +31,20 @@ function fakeApp() {
     const files = new Map<string, unknown>();
     const caches = new Map<string, unknown>();
     let dailyNotes: unknown = null;
+    let activeFile: unknown = null;
     const vault = Object.assign(fakeEvents(), {
         getAbstractFileByPath: (path: string) => files.get(path) ?? null,
         getMarkdownFiles: () => [...files.values()].filter((f) => f instanceof TFile && f.path.endsWith(".md")),
     });
     const metadataCache = Object.assign(fakeEvents(), { getFileCache: (file: TFile) => caches.get(file.path) ?? null });
-    const workspace = fakeEvents();
+    const workspace = Object.assign(fakeEvents(), { getActiveFile: () => activeFile });
     const internalPlugins = { getPluginById: (id: string) => (id === "daily-notes" ? dailyNotes : null) };
     return {
         app: { vault, metadataCache, workspace, internalPlugins },
         files,
         caches,
         setDailyNotes: (value: unknown) => (dailyNotes = value),
+        setActiveFile: (value: unknown) => (activeFile = value),
         listenerCount: () => vault.count() + metadataCache.count() + workspace.count(),
     };
 }
@@ -187,6 +189,13 @@ describe("createVaultSource: Obsidian にそのまま聞く", () => {
         expect(source.markdownFiles()).toEqual([a, b]);
         fake.files.delete(a.path);
         expect(source.markdownFiles()).toEqual([b]);
+    });
+
+    it("activeFile: Obsidian が開いているノートとするものを返す（なければ null）", () => {
+        expect(source.activeFile()).toBeNull();
+        const file = fileAt("日記/2026-10-30.md");
+        fake.setActiveFile(file);
+        expect(source.activeFile()).toBe(file);
     });
 
     it("dailyNotes: Obsidian のコアプラグイン「デイリーノート」を返す（なければ null）", () => {

@@ -12,7 +12,6 @@ import { isValidPeriodicNote } from './io/validation';
 import { overlapsMonth, rangeOfPeriod, shiftPeriod } from './periods';
 import { toSupportedWeekStart, weekSchemeFor } from './weeks';
 import {
-  activeFileStore,
   displayedDateStore,
   setupLocale,
   themeStore,
@@ -323,24 +322,15 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
   }
 
   /**
-   * Calendared: keep the calendar in step with whichever note is open, however it was opened
-   * (file explorer, a hotkey, links, switching tabs...). Upstream only updated the selection when a note was
-   * opened from the calendar, and followed other opens (`syncCalendar`) inside TimelineManager, so nothing
-   * happened while the timeline was disabled.
+   * Calendared: keep the displayed month in step with whichever note is open, however it was opened
+   * (file explorer, a hotkey, links, switching tabs...). Upstream followed other opens (`syncCalendar`) inside
+   * TimelineManager, so nothing happened while the timeline was disabled. The selection needs nothing here: the
+   * calendar reads the open note itself (docs/state.md, ADR-S1)
    */
   private onFileOpen(file: TFile | null) {
-    // nothing open (e.g. the last tab was closed) or a non-periodic note: nothing on the calendar is "open" anymore
-    if (!file) {
-      activeFileStore.set({ file: null, date: null, granularity: null });
-      return;
-    }
-    const { isValid, granularity, date, period } = isValidPeriodicNote(file.basename);
-    if (typeof isValid !== "boolean" || !date || !granularity || !period) {
-      activeFileStore.set({ file: null, date: null, granularity: null });
-      return;
-    }
-
-    activeFileStore.set({ file, date, granularity });
+    if (!file) return;
+    const { isValid, date, period } = isValidPeriodicNote(file.basename);
+    if (typeof isValid !== "boolean" || !date || !period) return;
 
     // Calendared: always follow the open note, but only when no day of it is on the displayed month already.
     // Otherwise clicking a year title would jump to January, or a week number to the month the week starts in.

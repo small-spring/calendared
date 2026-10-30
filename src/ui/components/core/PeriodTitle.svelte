@@ -16,7 +16,7 @@
   // Used by the header and the month picker so every title follows the same rules.
   import { getPeriodicityFromGranularity } from "@/io";
   import { settingsStore } from "@/settings";
-  import { activeFileStore } from "@/stores";
+  import { vaultSource } from "@/io";
   import { cn, eventHandlers, isControlPressed } from "@/ui/utils";
   import { capitalize } from "@/utils";
   import Button from "./Button.svelte";
@@ -57,9 +57,10 @@
   );
   // the open note looks selected wherever it shows up on the calendar, like the date buttons.
   // The background is drawn with a shadow so the selected title keeps its size and nothing shifts
+  // Calendared: the open note as Obsidian knows it (docs/state.md, ADR-S1)
   let isActive = $derived(
     !!title.fileData.file &&
-      $activeFileStore?.file?.path === title.fileData.file.path,
+      vaultSource().activeFile()?.path === title.fileData.file.path,
   );
 </script>
 

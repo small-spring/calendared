@@ -1,5 +1,4 @@
 import { settingsStore } from "@/settings";
-import { activeFileStore } from "@/stores/notes";
 import { createConfirmationDialog } from "@/ui/modals/confirmation";
 import { Notice, TFile, WorkspaceLeaf } from "obsidian";
 import { get } from "svelte/store";
@@ -42,13 +41,8 @@ export async function createOrOpenNote({
 
   async function openFile(file: TFile | undefined | null) {
     if (file) {
+      // Calendared: the calendar's selection follows from opening the note (docs/state.md, ADR-S1)
       await leaf?.openFile(file, openState);
-      activeFileStore.update(d => {
-        if (d) {
-          d.file = file;
-        }
-        return d
-      })
     }
   }
 

@@ -15,6 +15,11 @@ export type VaultSource = {
     /** The folder at the path, or null (nothing there, or a file) */
     folderAt(path: string): TFolder | null;
     metadataOf(file: TFile): CachedMetadata | null;
+    /**
+     * The note Obsidian counts as open: the current tab's, or the last one used while another kind of view (such as the
+     * calendar) has the focus. The calendar's selection is this note (docs/state.md, ADR-S1)
+     */
+    activeFile(): TFile | null;
     /** Every Markdown file in the vault (for counting notes in the settings; the calendar looks notes up by path) */
     markdownFiles(): TFile[];
     /** Obsidian's core Daily notes plugin, whose settings the day notes follow while the plugin's own are off */
@@ -75,6 +80,10 @@ export function createVaultSource(app: App, schedule: Schedule = nextFrame): Vau
         metadataOf(file) {
             subscribe();
             return app.metadataCache.getFileCache(file);
+        },
+        activeFile() {
+            subscribe();
+            return app.workspace.getActiveFile();
         },
         markdownFiles() {
             subscribe();
