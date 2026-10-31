@@ -1,6 +1,7 @@
 import { PluginService } from "@/app-service";
 import { weekdayNames } from "@/calendar-locale";
 import { DAILY_NOTES_PLUGIN_ID, DEFAULT_FORMATS_PER_GRANULARITY, granularities } from "@/constants";
+import { formatTokenGuide, type TokenGuideItem } from "@/format-tokens";
 import { getPeriodicityFromGranularity, IGranularity } from "@/io";
 import type { DnPluginSettings } from "@/io/settings";
 import { validateFolder, validateFormat, validateTemplate } from "@/io/validation";
@@ -764,26 +765,27 @@ function periodNeedsAttention(granularity: IGranularity): boolean {
   return !!(check.unreadable || check.mismatched);
 }
 
+// Calendared: list the period's tokens instead of linking to Moment.js's documentation, whose tokens mean calendar
+// years and quarters and include ones a period's name can't use (docs/adr/0042)
 function formatDescription(granularity: IGranularity): DocumentFragment {
-  const required: Record<IGranularity, string> = {
-    day: "Y or y (year), M (month) and D (day)",
-    week: "GG (week year) and W (week)",
-    month: "Y or y (year) and M (month)",
-    quarter: "Y or y (year) and Q (quarter)",
-    year: "Y or y (year)",
-  };
+  const { required, optional } = formatTokenGuide(granularity);
   const fragment = createFragment();
-  const first = fragment.createDiv();
-  first.appendText("Must include: ");
-  first.createSpan({ cls: "u-pop", text: required[granularity] });
-  const second = fragment.createDiv();
-  // say where the link goes (site and address), not just "Syntax Reference"
-  second.appendText("Format tokens: ");
-  second.createEl("a", {
-    text: "Moment.js documentation",
-    href: "https://momentjs.com/docs/#/displaying/format/",
-  });
-  second.createSpan({ cls: "calendared-faint", text: " (momentjs.com)" });
+  const tokenLine = (label: string, items: TokenGuideItem[]) => {
+    const line = fragment.createDiv();
+    line.appendText(label);
+    items.forEach(({ token, meaning }, i) => {
+      line.createEl("code", { text: token });
+      line.appendText(` ${meaning}${i < items.length - 1 ? ", " : ""}`);
+    });
+  };
+  tokenLine("Needs: ", required);
+  tokenLine("Also: ", optional);
+  const text = fragment.createDiv();
+  text.appendText("Text in brackets is kept as is: ");
+  text.createEl("code", { text: granularity === "week" ? "[W]" : "[Notes]" });
+  if (granularity === "quarter" || granularity === "year") {
+    text.appendText(granularity === "quarter" ? ". YYYY and Q count from Starts in." : ". YYYY counts from Starts in.");
+  }
   return fragment;
 }
 

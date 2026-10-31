@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { disallowedTokens, tokenize } from "./format-tokens";
+import { disallowedTokens, formatTokenGuide, tokenize } from "./format-tokens";
 
 // ---- 書式を記号に分ける（docs/adr/0041） ----
 
@@ -73,5 +73,34 @@ describe("disallowedTokens: その周期の書式に使えない記号", () => {
 
     it("同じ記号は 1 回だけ挙げる", () => {
         expect(disallowedTokens("YYYY-DD-DD", "month")).toEqual(["DD"]);
+    });
+});
+
+// ---- 書式の欄の下に出す記号の一覧（docs/adr/0042） ----
+
+describe("formatTokenGuide: 周期ごとの、書式に使う記号と意味の一覧", () => {
+    const tokensOf = (items: { token: string }[]) => items.map((i) => i.token);
+
+    it("必ず入れる記号は、日なら年・月・日、週なら週の年と週、月なら年と月、四半期なら年と四半期、年なら年", () => {
+        expect(tokensOf(formatTokenGuide("day").required)).toEqual(["YYYY", "MM", "DD"]);
+        expect(tokensOf(formatTokenGuide("week").required)).toEqual(["GGGG", "WW"]);
+        expect(tokensOf(formatTokenGuide("month").required)).toEqual(["YYYY", "MM"]);
+        expect(tokensOf(formatTokenGuide("quarter").required)).toEqual(["YYYY", "Q"]);
+        expect(tokensOf(formatTokenGuide("year").required)).toEqual(["YYYY"]);
+    });
+
+    it("一覧の記号は、どれもその周期の書式に使える（使える記号の決まりとずれない）", () => {
+        for (const g of ["day", "week", "month", "quarter", "year"] as const) {
+            const { required, optional } = formatTokenGuide(g);
+            const format = tokensOf([...required, ...optional]).join("-");
+            expect(disallowedTokens(format, g), g).toEqual([]);
+        }
+    });
+
+    it("どの記号にも意味が付いている", () => {
+        for (const g of ["day", "week", "month", "quarter", "year"] as const) {
+            const { required, optional } = formatTokenGuide(g);
+            for (const item of [...required, ...optional]) expect(item.meaning, `${g} ${item.token}`).not.toBe("");
+        }
     });
 });

@@ -57,3 +57,62 @@ export function disallowedTokens(format: string, granularity: IGranularity): str
     };
     return [...new Set(tokens.filter((t) => !allowed(kindOf(t))))];
 }
+
+export type TokenGuideItem = { token: string; meaning: string };
+
+const YEAR_SHORT: TokenGuideItem = { token: "YY", meaning: "two-digit year" };
+const MONTH_NAMES: TokenGuideItem[] = [
+    { token: "M", meaning: "month without a leading zero" },
+    { token: "MMM", meaning: "short month name (Oct)" },
+    { token: "MMMM", meaning: "month name (October)" },
+];
+
+/**
+ * The tokens shown under a period's format field, in place of a link to Moment.js's documentation: the ones a name
+ * needs, then other common ones. Each is one the period may use (docs/adr/0042)
+ */
+export function formatTokenGuide(granularity: IGranularity): { required: TokenGuideItem[]; optional: TokenGuideItem[] } {
+    switch (granularity) {
+        case "day":
+            return {
+                required: [
+                    { token: "YYYY", meaning: "year" },
+                    { token: "MM", meaning: "month" },
+                    { token: "DD", meaning: "day" },
+                ],
+                optional: [
+                    YEAR_SHORT,
+                    ...MONTH_NAMES,
+                    { token: "D", meaning: "day without a leading zero" },
+                    { token: "ddd", meaning: "short weekday name (Mon)" },
+                    { token: "dddd", meaning: "weekday name (Monday)" },
+                ],
+            };
+        case "week":
+            return {
+                required: [
+                    { token: "GGGG", meaning: "ISO week-numbering year" },
+                    { token: "WW", meaning: "ISO week number" },
+                ],
+                optional: [{ token: "W", meaning: "week number without a leading zero" }],
+            };
+        case "month":
+            return {
+                required: [
+                    { token: "YYYY", meaning: "year" },
+                    { token: "MM", meaning: "month" },
+                ],
+                optional: [YEAR_SHORT, ...MONTH_NAMES],
+            };
+        case "quarter":
+            return {
+                required: [
+                    { token: "YYYY", meaning: "year" },
+                    { token: "Q", meaning: "quarter (1–4)" },
+                ],
+                optional: [YEAR_SHORT],
+            };
+        case "year":
+            return { required: [{ token: "YYYY", meaning: "year" }], optional: [YEAR_SHORT] };
+    }
+}

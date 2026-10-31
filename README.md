@@ -107,8 +107,20 @@ note instead, even in the editor. Pick other keys if you use those for editing.
 
 ## Formats and weeks
 
-- Each period has one format, written with [Moment.js tokens](https://momentjs.com/docs/#/displaying/format/). The defaults are
-  `YYYY-MM-DD`, `GGGG-[W]WW`, `YYYY-MM`, `YYYY-[Q]Q`, and `YYYY`.
+- Each period has one format. The defaults are `YYYY-MM-DD`, `GGGG-[W]WW`, `YYYY-MM`, `YYYY-[Q]Q`, and `YYYY`.
+  These tokens can be used (the settings list them under each format field):
+
+  | Period | Needed | Also |
+  | --- | --- | --- |
+  | Daily | `YYYY` year, `MM` month, `DD` day | `YY` two-digit year, `M` and `D` without a leading zero, `MMM` (Oct), `MMMM` (October), `ddd` (Mon), `dddd` (Monday) |
+  | Weekly | `GGGG` ISO week-numbering year, `WW` ISO week | `W` without a leading zero |
+  | Monthly | `YYYY` year, `MM` month | `YY`, `M`, `MMM`, `MMMM` |
+  | Quarterly | `YYYY` year, `Q` quarter (1–4) | `YY` |
+  | Yearly | `YYYY` year | `YY` |
+
+  Text in brackets is kept as is: `[W]`, `[Notes]`. Month and weekday names follow Obsidian's language.
+  For quarters and years, `YYYY` and `Q` count from **Starts in** (see below).
+  The tokens are written the same way as in core Daily notes, Periodic Notes, and Templater, so their formats work here.
 - New notes are named with the format, and existing notes are found by it. Notes named in another format don't show up.
   After changing a format, a warning under it tells you how many notes still have the old names and offers to rename them.
 - For weekly notes, use `GGGG` (ISO week-numbering year) and `WW` (ISO week), as in the default. The settings warn about
@@ -142,7 +154,7 @@ Pick a template file for each period. These placeholders are replaced when a not
 | `{{time}}`, `{{currentDate}}` | The time and date now |
 | `{{monday}}` … `{{sunday}}` | That day in the note's week |
 | `{{date+1d}}`, `{{date-1w}}` | Shifted dates |
-| `{{date:YYYY-MM-DD}}`, `{{title:dddd, MMMM Do YYYY}}` | With a format |
+| `{{date:YYYY-MM-DD}}`, `{{title:dddd, MMMM Do YYYY}}` | With a format. Any [Moment.js format](https://momentjs.com/docs/#/displaying/format/) works here; years and quarters are calendar ones |
 
 ## Settings
 
