@@ -58,7 +58,33 @@ export function disallowedTokens(format: string, granularity: IGranularity): str
     return [...new Set(tokens.filter((t) => !allowed(kindOf(t))))];
 }
 
-export type TokenGuideItem = { token: string; meaning: string };
+/**
+ * What the period's format lacks to name one period, for the settings' error, or null. Checked after disallowedTokens,
+ * so it only looks at tokens the period may use
+ */
+export function missingTokens(format: string, granularity: IGranularity): string | null {
+    const tokens = tokenize(format).flatMap((p) => (p.kind === "token" ? [p.token] : []));
+    const has = (kind: TokenKind) => tokens.some((t) => kindOf(t) === kind);
+    if (granularity === "day" && tokens.some((t) => /^(LL?|ll?)$/.test(t))) return null;
+    if (!has("year") && !has("weekYear")) return "year (Y, y, gg or GG)";
+    switch (granularity) {
+        case "quarter":
+            return has("quarter") ? null : "quarter (Q)";
+        case "month":
+            return has("month") ? null : "month (M)";
+        case "week":
+            return has("week") ? null : "week (w or W)";
+        case "day":
+            // an ISO week date (GGGG-[W]WW-E) names the day by its weekday
+            if (has("week")) return tokens.some((t) => /^(d+|do|e|E)$/.test(t)) ? null : "weekday (E)";
+            if (!has("month")) return "month (M)";
+            return tokens.some((t) => /^D+$|^D+o$/.test(t)) ? null : "day (D)";
+        case "year":
+            return null;
+    }
+}
+
+export type TokenGuideItem ={ token: string; meaning: string };
 
 const YEAR_SHORT: TokenGuideItem = { token: "YY", meaning: "two-digit year" };
 const MONTH_NAMES: TokenGuideItem[] = [

@@ -19,8 +19,6 @@
 2026-11-01 に ADR と仕様に照らして元の版から残った古いコードを洗い出したうち、動きを確かめながら直すもの。
 「たぶん」は、Obsidian で起きるかをまだ確かめていない — どれも Claude
 
-- 整理: 書式に必要な記号の確かめ方（`src/io/validation/format.ts` の `isTokenEffective` など）が元の版の手作りのまま。
-  `src/format-tokens.ts` の分け方で確かめる（[ADR-0040](adr/0040-format-tokens-per-period.md)・[ADR-0041](adr/0041-own-format-tokenizer.md)）
 - 整理: 設定の `yearsRangesStart` は保存されても読まれず、既定値の 2020 だけが使われている。設定から外して定数にする
   （[spec/overview.md](spec/overview.md) の表からも外す）
 

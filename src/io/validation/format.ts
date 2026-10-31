@@ -5,7 +5,7 @@ import { getPeriodicityFromGranularity } from "../parse";
 import { type IGranularity } from "../types";
 import { DUP_ERROR_PREFIX } from "./constants";
 import { weekSchemeFor } from "@/weeks";
-import { disallowedTokens } from "@/format-tokens";
+import { disallowedTokens, missingTokens } from "@/format-tokens";
 
 // https://github.com/liamcain/obsidian-periodic-notes/blob/a8aa7e4e368ac344282b17e381b9101af12af0d1/src/settings/validation.ts#L20
 function validateFilename(filename: string): boolean {
@@ -26,60 +26,6 @@ function validateFilename(filename: string): boolean {
   );
 }
 
-export const isTokenEffective = (value: string, token: string) => {
-  const isEffective = (startIndex: number, foundOpeningBracket: boolean) => {
-    let _foundOpeningBracket = foundOpeningBracket;
-    let tokenFound = false;
-    let tokenFoundIndex = -1;
-
-    for (let i = startIndex; i < value.length; i++) {
-      if (value[i] === "[") {
-        if (!_foundOpeningBracket && !tokenFound) {
-          _foundOpeningBracket = true;
-          continue;
-        }
-        if (_foundOpeningBracket && tokenFound) {
-          return {
-            isEffective: true,
-            effectiveTokenIndex: tokenFoundIndex,
-          };
-        }
-      }
-
-      if (value[i] === token) {
-        tokenFound = true;
-        tokenFoundIndex = i
-
-        if (
-          !value.slice(i + 1).includes("]") &&
-          !value.slice(i + 1).includes("[")
-        ) {
-          return {
-            isEffective: true,
-            effectiveTokenIndex: tokenFoundIndex
-          };
-        }
-
-
-        if (!_foundOpeningBracket) {
-          return {
-            isEffective: true,
-            effectiveTokenIndex: tokenFoundIndex
-          };
-        } else {
-          continue;
-        }
-      }
-
-      if (value[i] === "]" && _foundOpeningBracket && tokenFound) {
-        return isEffective(i + 1, true);
-      }
-    }
-  };
-
-  return isEffective(0, false);
-}
-
 function isAmbiguousFormat(
   value: string,
   currentDate: moment.Moment,
@@ -88,35 +34,8 @@ function isAmbiguousFormat(
 ): string | null {
   const errorMessage = "Ambiguous format.";
 
-  const containsValidToken = (tokens: string[]) => {
-    return tokens.some((token) => isTokenEffective(value, token)?.isEffective);
-  }
-
-  // Check for missing essential information based on granularity
-  const missingInfo = (() => {
-    if (containsValidToken(["x", "X"])) return null;
-    if (containsValidToken(["l", "L"]) && value !== "LT" && value !== "LTS") return null;
-    // Calendared: G (ISO week-based year) is allowed again. Upstream dropped it as "ambiguous for some dates": its week
-    // check compared moment's language weeks and calendar years, which don't match ISO weeks around New Year
-    if (!containsValidToken(["Y", "y", "g", "G"])) return "year (Y, y, gg or GG)";
-
-    switch (granularity) {
-      case "quarter":
-        if (!containsValidToken(["Q"])) return "quarter (Q)";
-        break;
-      case "month":
-        if (!containsValidToken(["M"])) return "month (M)";
-        break;
-      case "week":
-        if (!containsValidToken(["w", "W"])) return "week (w or W)";
-        break;
-      case "day":
-        if (!containsValidToken(["M"])) return "month (M)";
-        if (!containsValidToken(["D"])) return "day (D)";
-        break;
-    }
-    return null;
-  })();
+  // Calendared: read with the format's tokens, so text in [brackets] doesn't count (docs/adr/0041)
+  const missingInfo = missingTokens(value, granularity);
 
   if (missingInfo) {
     return `${errorMessage} Missing ${missingInfo} info. Can't uniquely identify ${granularity}.`;
