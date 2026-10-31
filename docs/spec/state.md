@@ -31,7 +31,6 @@
 | `notesChangedStore` | 「ノートの情報を描き直す」合図 | （`settingsStore` と `internalFileModStore` の変化から作る） | 設定のどこが変わっても発火する（ノートの一覧が設定に入っているため）。カレンダーの全マスが計算し直す。2026-10-30 に消した（窓口から読む） |
 | `todayStore` | 今日 | `View.svelte` の 1 分ごとの確認 | 問題なし |
 | `localeDataStore` / `localeSwitched` | 曜日の名前、言語を変えた合図 | 言語・週の始まりの変更 | 合図に乱数（`Math.random()`）。2026-10-30 に `localeSwitched` を消した（タイムラインは設定の言語を読む）。`localeDataStore` は言語の扱いの作り直しで見直す |
-| `crrTabStore` | 日・月・年のどのビューか | カレンダー | 問題なし |
 | `yearsRanges` | 年のビューの範囲 | 年のビュー | 複雑だが、年のビューは日・月を無効にしたときだけ出る |
 | `stickerPickerNoteStore` | ステッカーのピッカーの対象 | ステッカーの操作 | 問題なし |
 | `themeStore` | ライト・ダーク | 起動時、テーマの変化 | 問題なし |

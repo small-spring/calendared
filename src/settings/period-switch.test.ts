@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { granularities } from "@/constants";
 import type { IGranularity } from "@/io";
-import { calendarViews, openAtStartupOf, setOpenAtStartup, setPeriodEnabled } from "./period-switch";
+import { calendarView, openAtStartupOf, setOpenAtStartup, setPeriodEnabled } from "./period-switch";
 
 type Periods = Record<IGranularity, { enabled: boolean; openAtStartup: boolean }>;
 const periods = (on: IGranularity[], startup?: IGranularity): Periods =>
@@ -50,19 +50,22 @@ describe("起動時に開く周期: 設定は周期ごとの openAtStartup の�
     });
 });
 
-describe("calendarViews: カレンダーの表示（日・月・年）のうち、出すもの", () => {
+describe("calendarView: カレンダーに出すビュー", () => {
     const on = (gs: IGranularity[]) => Object.fromEntries(granularities.map((g) => [g, gs.includes(g)])) as Record<IGranularity, boolean>;
 
-    it("日・月・年は、それぞれオンなら出す", () => {
-        expect(calendarViews(on(["day", "month", "year"]))).toEqual(["day", "month", "year"]);
-        expect(calendarViews(on(["year"]))).toEqual(["year"]);
+    it("日か週がオンなら日のビュー", () => {
+        expect(calendarView(on(["day", "week", "month", "quarter", "year"]))).toBe("day");
+        expect(calendarView(on(["week", "year"]))).toBe("day");
     });
 
-    it("週は日の表の左の列にあるので、週だけでも日の表を出す", () => {
-        expect(calendarViews(on(["week"]))).toEqual(["day"]);
+    it("日と週がオフなら月のビュー、月と四半期もオフなら年のビュー", () => {
+        expect(calendarView(on(["month", "year"]))).toBe("month");
+        expect(calendarView(on(["quarter"]))).toBe("month");
+        expect(calendarView(on(["year"]))).toBe("year");
     });
 
-    it("四半期は月の表の左の列にあるので、四半期だけでも月の表を出す", () => {
-        expect(calendarViews(on(["quarter", "year"]))).toEqual(["month", "year"]);
+    it("オンの周期だけで決まり、前のビューを引きずらない（日をオンに戻せば日のビューに戻る）", () => {
+        expect(calendarView(on(["month", "year"]))).toBe("month");
+        expect(calendarView(on(["day", "month", "year"]))).toBe("day");
     });
 });

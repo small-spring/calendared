@@ -1,11 +1,6 @@
 <script lang="ts">
     import { type IGranularity } from "@/io";
     import { displayedDateStore, localeDataStore, yearsRanges } from "@/stores";
-    import {
-        crrTabStore,
-        getEnabledPeriods,
-        periodTabs,
-    } from "@/stores/calendar";
     import { onMount } from "svelte";
     import {
         cn,
@@ -18,6 +13,7 @@
     import YearsHeader from "./YearsHeader.svelte";
     import DateBttn from "./core/DateBttn.svelte";
     import { settingsStore } from "@/settings";
+    import { calendarView } from "@/settings/period-switch";
     import { weekSchemeFor } from "@/weeks";
     import { periodRulesFor, rangeOfPeriod } from "@/periods";
     import { crumbText, periodStart } from "@/navigation";
@@ -38,11 +34,11 @@
         return [0, 1, 2, 3].map((row) => [0, 1, 2].map((i) => start.clone().add(row * 3 + i, "months")));
     });
 
-    let crrTab = $derived($crrTabStore);
-    let tabs: typeof periodTabs = $state(periodTabs);
-    let enabledPeriods: Record<IGranularity, boolean> = $state(
-        {} as Record<IGranularity, boolean>,
+    let enabledPeriods = $derived(
+        Object.fromEntries(Object.entries($settingsStore.periods).map(([g, s]) => [g, s.enabled])) as Record<IGranularity, boolean>,
     );
+    // Calendared: the view follows the periods on (calendarView); upstream kept the Day/Month/Year tab picked
+    let view = $derived(calendarView(enabledPeriods));
     let containerEl: HTMLDivElement | null = $state(null);
 
     // Calendared: the row whose weekly note is the open note, read from Obsidian like the date buttons
@@ -50,21 +46,6 @@
         const file = noteAt("week", getStartOfWeek(days), $settingsStore).file;
         return !!file && vaultSource().activeFile()?.path === file.path;
     };
-
-    $effect.pre(() => {
-        const enabledPeriodsRes = getEnabledPeriods($settingsStore.periods);
-        enabledPeriods = enabledPeriodsRes.enabledPeriods;
-        tabs = enabledPeriodsRes.tabs;
-    });
-
-    $effect.pre(() => {
-        if (!tabs.includes(crrTab)) {
-            const newTab = tabs[0];
-            if (newTab !== crrTab) {
-                crrTabStore.set(newTab);
-            }
-        }
-    });
 
     onMount(() => {
         if (containerEl?.parentElement) {
@@ -76,11 +57,11 @@
 <div id="pnc-container" class="px-4 !pt-2" bind:this={containerEl}>
     <!--
         Calendared: the calendar stays on the day view, and months are picked from the header popover
-        (MonthPicker). The month/year views below are only
-        reached when the day view (or the month view) isn't shown: days and weeks (or months and quarters) are both off.
+        (MonthPicker). The month/year views below show only when days and weeks (and then months and quarters) are
+        all off, so a click on a month or year opens its note.
     -->
 
-    {#if crrTab === "day" && tabs.includes("day")}
+    {#if view === "day"}
         <MonthHeader />
         <table class="pnc-calendar">
             <colgroup>
@@ -154,7 +135,7 @@
             </tbody>
         </table>
     {/if}
-    {#if crrTab === "month" && tabs.includes("month")}
+    {#if view === "month"}
         <YearHeader />
         <table class="pnc-calendar">
             <tbody>
@@ -188,12 +169,6 @@
                                     compactDot
                                     date={monthStart}
                                     granularity="month"
-                                    onSelect={tabs.includes("day")
-                                        ? () => {
-                                              displayedDateStore.set(monthStart.clone());
-                                              crrTabStore.set("day");
-                                          }
-                                        : null}
                                     className={cn(
                                         "px-1 mb-3 items-center justify-center",
                                         "text-sm !pt-2.5 !pb-4",
@@ -212,7 +187,7 @@
             </tbody>
         </table>
     {/if}
-    {#if crrTab === "year" && tabs.includes("year")}
+    {#if view === "year"}
         <YearsHeader />
         <table class="pnc-calendar">
             <tbody>
@@ -226,12 +201,6 @@
                                     compactDot
                                     date={yearStart}
                                     granularity="year"
-                                    onSelect={tabs.includes("month")
-                                        ? () => {
-                                              displayedDateStore.set(yearStart.clone());
-                                              crrTabStore.set("month");
-                                          }
-                                        : null}
                                     className={cn(
                                         "tracking-wide px-1 !pt-2.5 !pb-4",
                                         "text-base",
