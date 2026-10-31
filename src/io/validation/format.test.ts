@@ -49,6 +49,35 @@ describe("validateFormat: 書式の誤り（設定画面に出す文）", () => 
         expect(validateFormat("YYYY[年度]", "year")).toBe("");
     });
 
+    it("[ ] の中の文字は、要る記号に数えない", () => {
+        expect(validateFormat("YYYY-[MM]-DD", "day")).toMatch(/^Ambiguous format\. Missing month \(M\) info/);
+        expect(validateFormat("YYYY-MM-[DD]", "day")).toMatch(/^Ambiguous format\. Missing day \(D\) info/);
+        expect(validateFormat("[YYYY]-MM", "month")).toMatch(/^Ambiguous format\. Missing year/);
+        expect(validateFormat("YYYY-[Q]", "quarter")).toMatch(/^Ambiguous format\. Missing quarter \(Q\) info/);
+        expect(validateFormat("[Q]YYYY", "quarter")).toMatch(/^Ambiguous format\. Missing quarter \(Q\) info/);
+        expect(validateFormat("[W]WW", "week")).toMatch(/^Ambiguous format\. Missing year/);
+        expect(validateFormat("GGGG-[W]", "week")).toMatch(/^Ambiguous format\. Missing week \(w or W\) info/);
+        expect(validateFormat("[Y]", "year")).toMatch(/^Ambiguous format\. Missing year/);
+        expect(validateFormat("[Year] YYYY [Month] MM", "month")).toBe("");
+    });
+
+    it("同じ種類の別の記号でもよい（短い年、月の名前、序数、言語の週、まとめた日付）", () => {
+        expect(validateFormat("YY-MM", "month")).toBe("");
+        expect(validateFormat("MMMM YYYY", "month")).toBe("");
+        expect(validateFormat("YYYY-MM-Do", "day")).toBe("");
+        expect(validateFormat("gggg-[W]ww", "week")).toBe("");
+        expect(validateFormat("LL", "day")).toBe("");
+        expect(validateFormat("y", "year")).toBe("");
+    });
+
+    it("年の何日目（DDDD）だけでは、日に月が足りない", () => {
+        expect(validateFormat("YYYY-DDDD", "day")).toMatch(/^Ambiguous format\. Missing month \(M\) info/);
+    });
+
+    it("日の書式を ISO の週の日付（週の年・週・曜日）で書くと、月が足りないとされる", () => {
+        expect(validateFormat("GGGG-[W]WW-E", "day")).toMatch(/^Ambiguous format\. Missing month \(M\) info/);
+    });
+
     it("その周期の今の書式と同じ値は誤りにしない（周期の書式は 1 つ）", () => {
         expect(validateFormat("YYYY-MM", "month")).toBe("");
     });
