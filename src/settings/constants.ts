@@ -8,20 +8,13 @@ import {
   type BreadcrumbsSettings,
   type MiniCalendarSettings,
 } from "../navigation";
-import { v4 as uuidv4 } from "uuid";
 
-export type TFormat = {
-  id: string;
-  value: string;
-  error: string;
-  loading: boolean;
-}
 export interface PeriodSettings {
   enabled: boolean;
   openAtStartup: boolean;
 
-  selectedFormat: TFormat;
-  formats: Record<string, TFormat>;
+  /** Calendared: the one format of the period's notes, used to name new notes and to read existing ones (docs/adr/0019) */
+  format: string;
   folder: string;
   templatePath: string;
 }
@@ -48,17 +41,6 @@ export interface ISettings {
   /** Whether to show a confirmation dialog before creating a new note */
   shouldConfirmBeforeCreate: boolean;
 
-  /** Whether to show a confirmation dialog before deleting a format on "Notes" settings tab */
-  shouldConfirmBeforeDeleteFormat: boolean;
-
-  /** Whether to show a confirmation dialog before replacing all formats with selected one on "Notes" settings tab */
-  shouldConfirmBeforeReplaceAllFormats: boolean;
-
-  shouldConfirmBeforeMoveFile: boolean;
-  shouldConfirmBeforeMoveAllFiles: boolean;
-  shouldConfirmBeforeDeleteFile: boolean;
-  shouldConfirmBeforeDeleteAllFiles: boolean;
-
   /** Starting year for the year range selector */
   yearsRangesStart: 2020;
 
@@ -75,20 +57,11 @@ export interface ISettings {
 export function getDefaultPeriodicNotesConfig(
   granularity: IGranularity,
 ): PeriodSettings {
-  const id = uuidv4();
-  const selectedFormat = {
-    id,
-    value: DEFAULT_FORMATS_PER_GRANULARITY[granularity],
-    error: "",
-    loading: false,
-  }
-
   return {
     enabled: granularity === "day" || granularity === 'week',
     openAtStartup: false,
 
-    selectedFormat,
-    formats: { [id]: selectedFormat },
+    format: DEFAULT_FORMATS_PER_GRANULARITY[granularity],
     templatePath: "",
     folder: "/",
   } satisfies PeriodSettings
@@ -115,6 +88,14 @@ export const REMOVED_SETTINGS = [
   "emojiSearchInLanguage",
   "popoversClosing",
   "autoHoverPreview",
+  // Calendared: confirmations for deleting a format and renaming notes to it (docs/adr/0019), and for moving and deleting
+  // notes from the list of a format's notes, which is now read-only (docs/adr/0022)
+  "shouldConfirmBeforeDeleteFormat",
+  "shouldConfirmBeforeReplaceAllFormats",
+  "shouldConfirmBeforeMoveFile",
+  "shouldConfirmBeforeMoveAllFiles",
+  "shouldConfirmBeforeDeleteFile",
+  "shouldConfirmBeforeDeleteAllFiles",
 ] as const;
 /** Calendared: per-period settings of removed features (`periods.<granularity>.preview`: TODO / preview sections) */
 export const REMOVED_PERIOD_SETTINGS = ["preview"] as const;
@@ -131,12 +112,6 @@ export const DEFAULT_SETTINGS: ISettings = Object.freeze({
   stickerHeaderButton: true,
   openNowHeaderButton: true,
   shouldConfirmBeforeCreate: true,
-  shouldConfirmBeforeDeleteFormat: true,
-  shouldConfirmBeforeReplaceAllFormats: true,
-  shouldConfirmBeforeMoveFile: true,
-  shouldConfirmBeforeMoveAllFiles: true,
-  shouldConfirmBeforeDeleteFile: true,
-  shouldConfirmBeforeDeleteAllFiles: true,
   yearsRangesStart: 2020,
 
   localeSettings: {

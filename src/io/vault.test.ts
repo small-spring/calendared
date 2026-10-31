@@ -30,8 +30,7 @@ vi.mock("@/app-service", () => ({
 
 const settings = vi.hoisted(() => {
     const period = (enabled: boolean, format: string, folder: string) => {
-        const selectedFormat = { id: "s", value: format, error: "", loading: false };
-        return { enabled, openAtStartup: false, selectedFormat, formats: { s: selectedFormat }, folder, templatePath: "" };
+        return { enabled, openAtStartup: false, format, folder, templatePath: "" };
     };
     const initial = () => ({
         periods: {
@@ -58,7 +57,7 @@ vi.mock("@/settings", async () => {
 });
 
 const { settingsStore } = await import("@/settings");
-const { getNotePath, getFileData, noteAt, notesOnlyWithFormatIn, notesWithFormatIn } = await import("./vault");
+const { getNotePath, getFileData, noteAt, notesWithFormatIn } = await import("./vault");
 const { initVaultSource } = await import("./vault-source");
 const { PluginService } = await import("@/app-service");
 
@@ -97,7 +96,7 @@ describe("getNotePath: 周期と日付から、そのノートのパスを決め
 
     it("書式に .md が含まれていれば、もう一度は足さない", () => {
         settingsStore.update((s) => {
-            s.periods.day.selectedFormat.value = "YYYY-MM-DD[.md]";
+            s.periods.day.format = "YYYY-MM-DD[.md]";
             return s;
         });
         expect(getNotePath("day", date("2026-10-30"))).toBe("日記/2026-10-30.md");
@@ -105,7 +104,7 @@ describe("getNotePath: 周期と日付から、そのノートのパスを決め
 
     it("書式に / があれば、フォルダの下のフォルダになる", () => {
         settingsStore.update((s) => {
-            s.periods.day.selectedFormat.value = "YYYY/MM/YYYY-MM-DD";
+            s.periods.day.format = "YYYY/MM/YYYY-MM-DD";
             return s;
         });
         expect(getNotePath("day", date("2026-10-30"))).toBe("日記/2026/10/2026-10-30.md");
@@ -219,16 +218,5 @@ describe("notesWithFormatIn: 設定画面の「書式ごとのファイル数」
         const passed = settings.initial();
         passed.periods.day.enabled = false;
         expect(notesWithFormatIn("day", "YYYY-MM-DD", passed)).toEqual(["Daily/2026-10-30.md"]);
-    });
-});
-
-describe("notesOnlyWithFormatIn: 書式を消すときの確認の数。その周期のフォルダで、ほかの書式では読めないノート", () => {
-    const note = (path: string) =>
-        Object.assign(new TFile(), { path, basename: path.slice(path.lastIndexOf("/") + 1, -3), extension: "md" });
-
-    it("同じ名前を書くほかの書式があれば、そのノートは数えない", () => {
-        fake.files.set("週/2026-W44.md", note("週/2026-W44.md"));
-        expect(notesOnlyWithFormatIn("week", "YYYY-[W]ww", ["GGGG-[W]WW"], settings.initial())).toEqual([]);
-        expect(notesOnlyWithFormatIn("week", "YYYY-[W]ww", [], settings.initial())).toEqual(["週/2026-W44.md"]);
     });
 });

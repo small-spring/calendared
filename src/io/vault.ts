@@ -4,7 +4,7 @@ import { type DnPluginSettings, normalizePeriodSettings } from "./settings";
 import { DAILY_NOTES_PLUGIN_ID } from "@/constants";
 import { stickerFrom, type TSticker } from "@/stickers";
 import { vaultSource } from "./vault-source";
-import { notesOnlyWithFormat, notesWithFormat } from "./notes-by-format";
+import { notesWithFormat } from "./notes-by-format";
 import { type ISettings, settingsStore } from "@/settings";
 import { get } from "svelte/store";
 import { PluginService } from "@/app-service";
@@ -62,8 +62,8 @@ export function periodNotePath(
   { periods, localeSettings }: Pick<ISettings, "periods" | "localeSettings">,
   dailyNotesPlugin: DnPluginSettings | null | undefined,
 ): string {
-  const { settings: { selectedFormat, folder } } = normalizePeriodSettings(granularity, periods, dailyNotesPlugin);
-  return notePath(granularity, date, { folder, format: selectedFormat.value }, weekSchemeFor(localeSettings));
+  const { settings: { format, folder } } = normalizePeriodSettings(granularity, periods, dailyNotesPlugin);
+  return notePath(granularity, date, { folder, format }, weekSchemeFor(localeSettings));
 }
 
 export function getFileData(
@@ -102,23 +102,6 @@ export function notesWithFormatIn(
   const vault = vaultSource();
   const { settings: { folder } } = normalizePeriodSettings(granularity, settings.periods, vault.dailyNotes());
   return notesWithFormat(vault.markdownFiles(), granularity, { folder, format }, weekSchemeFor(settings.localeSettings));
-}
-
-/** Calendared: the notes only this format of a period reads (`others` are its other formats), for deleting it */
-export function notesOnlyWithFormatIn(
-  granularity: IGranularity,
-  format: string,
-  others: string[],
-  settings: Pick<ISettings, "periods" | "localeSettings">,
-): string[] {
-  const vault = vaultSource();
-  const { settings: { folder } } = normalizePeriodSettings(granularity, settings.periods, vault.dailyNotes());
-  return notesOnlyWithFormat(
-    vault.markdownFiles(),
-    granularity,
-    { folder, format, others },
-    weekSchemeFor(settings.localeSettings),
-  );
 }
 
 export async function getTemplateInfo(

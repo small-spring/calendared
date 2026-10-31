@@ -4,7 +4,7 @@ title: "書式の件数から開く一覧は見るだけにする"
 status: 採用
 date: 2026-10-30
 area: 設定
-implemented: false
+implemented: true
 aliases:
   - ADR-0022
   - settings ADR-C3

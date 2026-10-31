@@ -25,14 +25,14 @@
 
 {#if periodSettingsType === "period"}
     Note: Using {periodicity} format
-    <span class="u-pop">{periodSettings.selectedFormat.value}</span>
+    <span class="u-pop">{periodSettings.format}</span>
 {:else if periodSettingsType === "daily"}
     Note: Using Daily notes plugin format <span class="u-pop"
-        >{periodSettings.selectedFormat.value}</span
+        >{periodSettings.format}</span
     >
 {:else if periodSettingsType === "default"}
     Note: Using default format <span class="u-pop"
-        >{periodSettings.selectedFormat.value}</span
+        >{periodSettings.format}</span
     >
     {#if granularity === "day" && dnPluginLoaded && !dnPlugin?.enabled}
         (Daily notes plugin disabled)

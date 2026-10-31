@@ -49,10 +49,7 @@ export function normalizePeriodSettings(
         ...pluginSettings.day,
         enabled: true,
         openAtStartup: dailyNotesPluginSettings?.autorun || false,
-        selectedFormat: {
-          ...pluginSettings.day.selectedFormat,
-          value: dailyNotesPluginSettings?.format || DEFAULT_FORMATS_PER_GRANULARITY.day
-        },
+        format: dailyNotesPluginSettings?.format || DEFAULT_FORMATS_PER_GRANULARITY.day,
         folder: dailyNotesPluginSettings?.folder || '/',
         templatePath: dailyNotesPluginSettings?.template || '',
       }

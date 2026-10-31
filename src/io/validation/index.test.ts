@@ -1,26 +1,24 @@
 import { describe, expect, it, vi } from "vitest";
-import { writable } from "svelte/store";
+import { get, writable } from "svelte/store";
 
 // The parser reads the formats from the settings store; give it a stand-in with the formats used in the vault
 // (and for the plugin service it imports, which needs a running Obsidian)
 vi.mock("@/app-service", () => ({ PluginService: { getPlugin: () => null } }));
-vi.mock("@/settings", () => {
-    const format = (id: string, value: string, error = "") => ({ [id]: { id, value, error, loading: false } });
-    return {
-        settingsStore: writable({
-            periods: {
-                day: { formats: { ...format("d", "YYYY-MM-DD"), ...format("d2", "YYYYMMDD") } },
-                week: { formats: format("w", "YYYY-[W]ww") },
-                month: { formats: format("m", "YYYY-MM") },
-                quarter: { formats: format("q", "YYYY-[Q]Q") },
-                year: { formats: { ...format("y", "YYYY"), ...format("y2", "[Year] YYYY", "Ambiguous format.") } },
-            },
-            localeSettings: { weekStartId: 1 },
-        }),
-    };
-});
+vi.mock("@/settings", () => ({
+    settingsStore: writable({
+        periods: {
+            day: { format: "YYYY-MM-DD" },
+            week: { format: "YYYY-[W]ww" },
+            month: { format: "YYYY-MM" },
+            quarter: { format: "YYYY-[Q]Q" },
+            year: { format: "YYYY" },
+        },
+        localeSettings: { weekStartId: 1 },
+    }),
+}));
 
 const { isValidPeriodicNote } = await import("./index");
+const { settingsStore } = await import("@/settings");
 
 const parse = (fileName: string) => {
     const { isValid, granularity, date } = isValidPeriodicNote(fileName);
@@ -66,13 +64,19 @@ describe("isValidPeriodicNote: ファイル名から周期と日付を読む", (
     });
 });
 
-describe("isValidPeriodicNote: 周期の書式が複数あるとき（作り直す前の振る舞い）", () => {
-    it("周期のどの書式に合っても、その周期のノートとして読む", () => {
-        expect(parse("20261029")).toEqual({ isValid: true, granularity: "day", date: "2026-10-29" });
+describe("isValidPeriodicNote: 周期の書式は 1 つ（ADR-0019）", () => {
+    it("周期の書式に合う名前だけを読む。前の書式の名前は読まない", () => {
+        expect(parse("20261029")).toEqual({ isValid: null, granularity: null, date: null });
+        expect(isValidPeriodicNote("2026-10-29").format).toBe("YYYY-MM-DD");
     });
 
-    it("誤りのある書式に合う名前は、isValid が false", () => {
-        expect(parse("Year 2026")).toEqual({ isValid: false, granularity: "year", date: "2026-01-01" });
-        expect(isValidPeriodicNote("Year 2026").format?.value).toBe("[Year] YYYY");
+    it("書式に誤りがあれば（ほかの周期と同じ書式など）、名前は読めても isValid が false", () => {
+        const saved = get(settingsStore);
+        settingsStore.set({ ...saved, periods: { ...saved.periods, year: { ...saved.periods.year, format: "YYYY-MM" } } });
+        try {
+            expect(parse("2026-10")).toEqual({ isValid: false, granularity: "month", date: "2026-10-01" });
+        } finally {
+            settingsStore.set(saved);
+        }
     });
 });

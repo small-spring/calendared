@@ -7,9 +7,8 @@ import { capitalize } from "@/utils";
 import { App, Notice, PluginSettingTab } from 'obsidian';
 import { mount, unmount } from "svelte";
 import { get } from "svelte/store";
-import { v4 as uuidv4 } from "uuid";
 import { settingsStore } from "./store";
-import { DUP_ERROR_PREFIX } from "@/io/validation";
+import { validateFormat } from "@/io/validation";
 
 export class SettingsTab extends PluginSettingTab {
   private view: Record<string, unknown> | null = null;
@@ -38,16 +37,13 @@ export class SettingsTab extends PluginSettingTab {
     if (this.view) void unmount(this.view)
     this.view = null
 
+    // Calendared: a period has one format (docs/adr/0019). An empty or invalid one is replaced with the default, so
+    // creating a note always has a valid format
     const errors = [];
-
-    const periods = get(settingsStore).periods
-    for (const [g, periodSettings] of Object.entries(periods)) {
-      this.replaceSelectedFormatIfNeeded(g as IGranularity);
-      for (const format of Object.values(periodSettings.formats)) {
-        if (format.error) {
-          errors.push(capitalize(getPeriodicityFromGranularity(g as IGranularity)))
-          break;
-        }
+    for (const g of Object.keys(get(settingsStore).periods) as IGranularity[]) {
+      this.replaceFormatIfNeeded(g);
+      if (validateFormat(get(settingsStore).periods[g].format, g)) {
+        errors.push(capitalize(getPeriodicityFromGranularity(g)))
       }
     }
 
@@ -60,62 +56,18 @@ export class SettingsTab extends PluginSettingTab {
     }
   }
 
-  /**
-      * Check if the selected format is invalid, if so replace it with a valid format from the formats list or a default format.
-      * This ensures that creating a note will always have a valid format.
-      */
-  private replaceSelectedFormatIfNeeded(granularity: IGranularity) {
-    const periodSettings = get(settingsStore).periods[granularity]
-    const selectedFormat = periodSettings.selectedFormat;
-    let correctedValue: string | null = null;
+  private replaceFormatIfNeeded(granularity: IGranularity) {
+    const invalidValue = get(settingsStore).periods[granularity].format;
+    if (invalidValue.trim() && !validateFormat(invalidValue, granularity)) return;
 
-    if (!selectedFormat.error.trim()) return;
-
-    const foundValidFormat = Object.values(periodSettings.formats).find(format => !format.error.trim());
-    if (foundValidFormat) {
-      settingsStore.update((s) => {
-        s.periods[granularity].selectedFormat = foundValidFormat;
-
-        return s;
-      })
-      correctedValue = foundValidFormat.value
-    } else {
-      const isSelectedFormatDup = selectedFormat.error.includes(DUP_ERROR_PREFIX)
-      // remove extra duplicated formats
-      if (isSelectedFormatDup) {
-        settingsStore.update(s => {
-          Object.values(s.periods[granularity].formats).forEach(format => {
-            if (selectedFormat.id !== format.id && selectedFormat.value === format.value) {
-              delete s.periods[granularity].formats[format.id]
-            }
-          });
-          s.periods[granularity].selectedFormat.error = '';
-
-          return s
-        })
-      } else {
-        // add a default format
-        const id = uuidv4();
-        const defaultFormat = {
-          id,
-          value: DEFAULT_FORMATS_PER_GRANULARITY[granularity],
-          error: '',
-          loading: false,
-        }
-        settingsStore.update(s => {
-          s.periods[granularity].selectedFormat = defaultFormat;
-          s.periods[granularity].formats[id] = defaultFormat;
-
-          return s
-        })
-        correctedValue = defaultFormat.value
-      }
-    }
-
-    if (!correctedValue) return;
+    const correctedValue = DEFAULT_FORMATS_PER_GRANULARITY[granularity];
+    settingsStore.update((s) => {
+      s.periods[granularity].format = correctedValue;
+      return s
+    })
+    if (!invalidValue.trim()) return;
 
     const periodicity = capitalize(getPeriodicityFromGranularity(granularity));
-    const invalidValue = selectedFormat.value;
     new Notice(genNoticeFragment([
       [periodicity, 'u-pop'],
       [' format '],

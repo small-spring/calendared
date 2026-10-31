@@ -1,4 +1,4 @@
-import { DEFAULT_SETTINGS, REMOVED_PERIOD_SETTINGS, REMOVED_SETTINGS, settingsStore, SettingsTab, type ISettings } from '@/settings';
+import { DEFAULT_SETTINGS, REMOVED_PERIOD_SETTINGS, REMOVED_SETTINGS, migrateFormatSettings, settingsStore, SettingsTab, type ISettings } from '@/settings';
 import { InvalidFormat, ViewManager } from '@/ui';
 import { MarkdownView, Notice, Plugin, TAbstractFile, TFile, WorkspaceLeaf, WorkspaceRoot } from 'obsidian';
 import { mount } from 'svelte';
@@ -8,7 +8,7 @@ import { CALENDAR_LUCIDE_ICON, granularities, LEAF_TYPE } from './constants';
 import { createOrOpenNote, getFileData, getStartupNoteGranularity, initVaultSource, isBackupPath } from './io';
 import { getPeriodicityFromGranularity } from './io/parse';
 import type { IGranularity } from './io/types';
-import { isValidPeriodicNote } from './io/validation';
+import { isValidPeriodicNote, validateFormat } from './io/validation';
 import { overlapsMonth, rangeOfPeriod, shiftPeriod } from './periods';
 import { toSupportedWeekStart, weekSchemeFor } from './weeks';
 import { migratePlacementSettings, migrateTimelineSettings } from './navigation';
@@ -206,9 +206,10 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     settingsStore.update((old) => {
       // Calendared: upstream's timeline settings become the breadcrumbs' and mini calendar's (docs/adr/0031), and their
       // "Never" a toggle (docs/adr/0033)
-      const saved = migratePlacementSettings(
+      // Calendared: and a period's list of formats becomes its one format (docs/adr/0019)
+      const saved = migrateFormatSettings(migratePlacementSettings(
         migrateTimelineSettings((loadedSettings || {}) as unknown as Record<string, unknown>),
-      );
+      ));
       const newSettings = { ...old, ...saved } as ISettings;
       // Calendared: drop the saved settings of removed features
       for (const key of REMOVED_SETTINGS) {
@@ -227,14 +228,8 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
           delete (periodSettings as unknown as Record<string, unknown>)[key];
         }
       })
-      Object.entries(periods).forEach(([granularity, periodSettings]) => {
-        Object.values(periodSettings.formats).forEach((format) => {
-          periods[granularity as IGranularity].formats[format.id].loading = false
-        })
-      })
       return {
         ...newSettings,
-        // reset formats loading state
         periods
       }
     });
@@ -392,8 +387,8 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
       props: {
         granularity,
         filepath: file.path,
-        formatValue: format.value,
-        error: format.error
+        formatValue: format,
+        error: validateFormat(format, granularity)
       }
     })
     new Notice(fragment, 10000)

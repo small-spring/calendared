@@ -4,7 +4,6 @@
     import { settingsStore, type PeriodSettings } from "@/settings";
     import { checkWeekFormat, isoWeekFormatFor, weekSchemeFor, type WeekName } from "@/weeks";
     import { type Writable } from "svelte/store";
-    import { v4 as uuidv4 } from "uuid";
     import Format from "./Format.svelte";
     interface Props {
         granularity: IGranularity;
@@ -12,13 +11,6 @@
     }
 
     let { granularity, settings }: Props = $props();
-
-    // Calendared: the format used for new notes is listed first (display order only)
-    let orderedFormats = $derived(
-        Object.values($settings.formats).sort(
-            (a, b) => Number(b.id === $settings.selectedFormat.id) - Number(a.id === $settings.selectedFormat.id),
-        ),
-    );
 
     function getExpectedTokens(granularity: IGranularity): string {
         const baseTokens = "Y or y (year)";
@@ -39,7 +31,11 @@
     // Calendared: weekly formats are checked against the week scheme (docs/spec/periods.md). Formats whose names break around
     // New Year, or don't match the calendar's week numbers, get a warning and a one-click switch to the ISO version
     let weeks = $derived(weekSchemeFor($settingsStore.localeSettings));
-    let weekFormat = $derived(granularity === "week" && !$settings.selectedFormat.error ? $settings.selectedFormat.value.trim() : "");
+    // read again when any period's format changes (another period's format can't be the same)
+    let weekFormat = $derived.by(() => {
+        void $settingsStore;
+        return granularity === "week" && !validateFormat($settings.format, granularity) ? $settings.format.trim() : "";
+    });
     let weekCheck = $derived(weekFormat ? checkWeekFormat(weekFormat, weeks) : null);
     let suggestedWeekFormat = $derived(isoWeekFormatFor(weekFormat));
     let newYearWeek = $derived(weeks.weekOf(window.moment().endOf("year")));
@@ -49,16 +45,12 @@
     };
 
     /**
-     * Use the ISO version for new weekly notes: add it to the formats (or pick it if it's there) and select it.
-     * The old format stays, so notes named with it are still recognized. Renaming them (migration) is a separate step
+     * Use the ISO version for new weekly notes. Notes named with the old format are read again once renamed to the new
+     * one (migration, a separate step)
      */
     function useSuggestedWeekFormat() {
-        const existing = Object.values($settings.formats).find((f) => f.value === suggestedWeekFormat);
-        const id = existing?.id ?? uuidv4();
-        const format = { id, value: suggestedWeekFormat, error: validateFormat(suggestedWeekFormat, granularity, id), loading: false };
         settings.update((s) => {
-            s.formats[id] = format;
-            s.selectedFormat = format;
+            s.format = suggestedWeekFormat;
             return s;
         });
     }
@@ -70,7 +62,6 @@
             <div
                 class="setting-item-name mb-2 flex items-center justify-between"
             >
-                <!-- Calendared: the format used for new notes is marked in the list below instead of repeated here -->
                 <span>Format</span>
             </div>
             <div class="setting-item-description">
@@ -84,14 +75,6 @@
                         Preview: <span class="u-pop">{weeks.format(weeks.weekOf(window.moment()), weekFormat)}</span>
                         · New Year: <span class="u-pop">{weeks.format(newYearWeek, weekFormat)}</span>
                         ({describeWeek(newYearWeek)})
-                    </p>
-                {:else if $settings.selectedFormat.value.trim()}
-                    <p class="mt-0 mb-1">
-                        Preview: <span class="u-pop"
-                            >{window
-                                .moment()
-                                .format($settings.selectedFormat.value)}</span
-                        >
                     </p>
                 {/if}
                 {#if weekCheck && (weekCheck.unreadable || weekCheck.mismatched)}
@@ -108,7 +91,8 @@
                             </p>
                         {/if}
                         <p class="mt-0 mb-1">
-                            GG is the week's year and W its number (ISO 8601, like Google Calendar). Existing notes keep working.
+                            GG is the week's year and W its number (ISO 8601, like Google Calendar). After switching, notes named
+                            with the current format aren't found until they are renamed to the new one.
                         </p>
                         <button class="mod-cta" onclick={useSuggestedWeekFormat}>Use {suggestedWeekFormat}</button>
                     </div>
@@ -127,18 +111,5 @@
             </div>
         </div>
     </div>
-    <form
-        class="w-full"
-        onsubmit={(e) => {
-            e.preventDefault();
-        }}
-    >
-        <fieldset role="radiogroup" class="border-none p-0 m-0">
-            <legend class="sr-only">Choose a date format</legend>
-            {#each orderedFormats as format (format.id)}
-                <Format {settings} {format} {granularity} />
-            {/each}
-            <Format {settings} type="skeleton" />
-        </fieldset>
-    </form>
+    <Format {settings} {granularity} />
 </div>

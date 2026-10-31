@@ -173,24 +173,18 @@ function isAmbiguousFormat(
   return null;
 }
 
+// Calendared: a period has one format (docs/adr/0019), so a duplicate is another period's format
 function checkIfDuplicateFormat(
   value: string,
   granularity: IGranularity,
-  id: string,
 ) {
   const periods = get(settingsStore).periods
   for (const [g, periodSettings] of Object.entries(periods)) {
-    for (const format of Object.values(periodSettings.formats)) {
-      if (format.id !== id && format.value === value) {
-        return {
-          duplicate: true,
-          errorMsg: `${DUP_ERROR_PREFIX} ${granularity === g
-            ? ""
-            : `from ${capitalize(getPeriodicityFromGranularity(g as IGranularity))
-            } Notes settings`
-            }`,
-        };
-      }
+    if (g !== granularity && periodSettings.format === value) {
+      return {
+        duplicate: true,
+        errorMsg: `${DUP_ERROR_PREFIX} from ${capitalize(getPeriodicityFromGranularity(g as IGranularity))} Notes settings`,
+      };
     }
   }
 
@@ -200,7 +194,6 @@ function checkIfDuplicateFormat(
 export function validateFormat(
   value: string,
   granularity: IGranularity,
-  id: string,
 ): string {
   let error = "";
 
@@ -242,11 +235,7 @@ export function validateFormat(
   }
 
   // check for duplicated valid formats
-  const { duplicate, errorMsg } = checkIfDuplicateFormat(
-    value,
-    granularity,
-    id,
-  );
+  const { duplicate, errorMsg } = checkIfDuplicateFormat(value, granularity);
   if (duplicate) {
     error = errorMsg;
     return error;

@@ -24,15 +24,15 @@ export async function createOrOpenNote({
   granularity: IGranularity;
   confirmBeforeCreateOverride?: boolean;
 }) {
-  const { settings: { selectedFormat } } = getNormalizedPeriodSettings(granularity);
+  const { settings: { format } } = getNormalizedPeriodSettings(granularity);
 
-  const filename = date.format(selectedFormat.value);
+  const filename = date.format(format);
   const normalizedPath = getNotePath(granularity, date);
 
   // console.log("🎉🎉🎉 [createOrOpenNote()] 🎉🎉🎉");
   // console.table({
   //     granularity,
-  //     selectedFormat,
+  //     format,
   //     filename,
   //     normalizedPath,
   //     date,
@@ -91,7 +91,7 @@ export async function createOrOpenNote({
 }
 
 export async function createNote(granularity: IGranularity, date: moment.Moment) {
-  const { settings: { templatePath, selectedFormat } } = getNormalizedPeriodSettings(granularity);
+  const { settings: { templatePath, format } } = getNormalizedPeriodSettings(granularity);
 
   const normalizedPath = getNotePath(granularity, date);
   await ensureFolderExists(normalizedPath);
@@ -100,7 +100,7 @@ export async function createNote(granularity: IGranularity, date: moment.Moment)
   try {
     const file = await PluginService.getPlugin()?.app.vault.create(
       normalizedPath,
-      replaceTemplateContents(date, selectedFormat.value, templateContents, weekSchemeFor(get(settingsStore).localeSettings))
+      replaceTemplateContents(date, format, templateContents, weekSchemeFor(get(settingsStore).localeSettings))
     );
     if (!file || !(file instanceof TFile)) return;
 

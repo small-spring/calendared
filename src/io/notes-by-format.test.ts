@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { weekSchemeFor } from "@/weeks";
-import { isBackupPath, notesOnlyWithFormat, notesWithFormat } from "./notes-by-format";
+import { isBackupPath, notesWithFormat } from "./notes-by-format";
 
 const weeks = weekSchemeFor({ weekStartId: 1 });
 const md = (path: string) => {
@@ -64,32 +64,6 @@ describe("notesWithFormat: その周期のフォルダで、書式に名前が�
 
     it("ほかの周期の名前は選ばない", () => {
         expect(notesWithFormat([md("日記/2026-10.md")], "day", daily, weeks)).toEqual([]);
-    });
-});
-
-describe("notesOnlyWithFormat: 書式を消すときの確認の数。その書式でしか読めないノート", () => {
-    it("ほかの書式でも読めるノートは数えない（同じ名前を書く書式が 2 つあるとき）", () => {
-        const weekly = { folder: "週", format: "YYYY-[W]ww", others: ["GGGG-[W]WW"] };
-        expect(notesOnlyWithFormat([md("週/2026-W44.md")], "week", weekly, weeks)).toEqual([]);
-    });
-
-    it("ほかの書式では読めないノートだけを数える", () => {
-        const files = [md("日記/2026-10-30.md"), md("日記/20261031.md")];
-        expect(notesOnlyWithFormat(files, "day", { ...daily, others: ["YYYYMMDD"] }, weeks)).toEqual([
-            "日記/2026-10-30.md",
-        ]);
-    });
-
-    it("ほかの書式がなければ、その書式で読めるノートすべて", () => {
-        expect(notesOnlyWithFormat([md("日記/2026-10-30.md")], "day", { ...daily, others: [] }, weeks)).toEqual([
-            "日記/2026-10-30.md",
-        ]);
-    });
-
-    it("空のほかの書式は数に入れない", () => {
-        expect(notesOnlyWithFormat([md("日記/2026-10-30.md")], "day", { ...daily, others: [" "] }, weeks)).toEqual([
-            "日記/2026-10-30.md",
-        ]);
     });
 });
 
