@@ -4,7 +4,6 @@ import { Notice, TFile, WorkspaceLeaf } from "obsidian";
 import { get } from "svelte/store";
 import CreateNote from "./CreateNote.svelte";
 import { getPeriodicityFromGranularity, replaceTemplateContents } from "./parse";
-import { getNormalizedPeriodSettings } from "./settings";
 import { type IGranularity } from "./types";
 import { ensureFolderExists, getNotePath, getTemplateInfo } from "./vault";
 import { PluginService } from "@/app-service";
@@ -80,7 +79,7 @@ export async function createOrOpenNote({
 }
 
 export async function createNote(granularity: IGranularity, date: moment.Moment) {
-  const { settings: { templatePath, format } } = getNormalizedPeriodSettings(granularity);
+  const { templatePath, format } = get(settingsStore).periods[granularity];
 
   const normalizedPath = getNotePath(granularity, date);
   await ensureFolderExists(normalizedPath);

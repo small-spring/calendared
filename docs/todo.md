@@ -19,9 +19,6 @@
 2026-11-01 に ADR と仕様に照らして元の版から残った古いコードを洗い出したうち、動きを確かめながら直すもの。
 「たぶん」は、Obsidian で起きるかをまだ確かめていない — どれも Claude
 
-- 不具合（たぶん）: オフにした周期は、既定の書式とフォルダ / でノートを探す（`src/io/settings.ts` の `normalizePeriodSettings`）。
-  書式を変えてから周期をオフにすると、今あるノートがパンくずやカレンダーから見つからない。
-  仕様の「無効にした周期の、すでにあるノートは開く」と合わない（[spec/overview.md](spec/overview.md)、[ADR-0019](adr/0019-one-format-per-period.md)）
 - 不具合（たぶん）: 元の版の Day/Month/Year のタブの仕組み（`src/stores/calendar.ts` の `crrTabStore`、`Calendar.svelte`）が残っている。
   日と週をオフにして月のビューになったあと日をオンに戻すと、月のビューのままになる。ビューは使っている周期だけから決める
 - 不具合（たぶん）: 「今日」（`todayStore`）を、カレンダーのペインの 1 分ごとのタイマーだけが更新している（`View.svelte`）。

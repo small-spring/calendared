@@ -1,6 +1,6 @@
 <script lang="ts">
+    import { settingsStore } from "@/settings";
     import { getPeriodicityFromGranularity } from "./parse";
-    import { getNormalizedPeriodSettings } from "./settings";
     import { type IGranularity } from "./types";
 
     interface Props {
@@ -9,16 +9,9 @@
     const { granularity }: Props = $props();
 
     const periodicity = $derived(getPeriodicityFromGranularity(granularity));
-    const { settings: periodSettings, type: periodSettingsType } = $derived(
-        getNormalizedPeriodSettings(granularity),
-    );
+    // Calendared: always the period's own format (the dialog only opens for enabled periods)
+    const format = $derived($settingsStore.periods[granularity].format);
 </script>
 
-{#if periodSettingsType === "period"}
-    Note: Using {periodicity} format
-    <span class="u-pop">{periodSettings.format}</span>
-{:else if periodSettingsType === "default"}
-    Note: Using default format <span class="u-pop"
-        >{periodSettings.format}</span
-    >
-{/if}
+Note: Using {periodicity} format
+<span class="u-pop">{format}</span>

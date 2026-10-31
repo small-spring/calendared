@@ -47,14 +47,7 @@ const settings = vi.hoisted(() => {
     return { period, initial };
 });
 
-vi.mock("@/settings", async () => {
-    const { DEFAULT_FORMATS_PER_GRANULARITY } = await import("@/constants");
-    return {
-        settingsStore: writable(settings.initial()),
-        getDefaultPeriodicNotesConfig: (g: keyof typeof DEFAULT_FORMATS_PER_GRANULARITY) =>
-            settings.period(g === "day" || g === "week", DEFAULT_FORMATS_PER_GRANULARITY[g], "/"),
-    };
-});
+vi.mock("@/settings", () => ({ settingsStore: writable(settings.initial()) }));
 
 const { settingsStore } = await import("@/settings");
 const { getNotePath, getFileData, noteAt, notesWithFormatIn } = await import("./vault");
@@ -110,8 +103,13 @@ describe("getNotePath: 周期と日付から、そのノートのパスを決め
         expect(getNotePath("day", date("2026-10-30"))).toBe("日記/2026/10/2026-10-30.md");
     });
 
-    it("無効にした周期は、その周期の既定の書式とフォルダ / で作る（自分の設定は使わない）", () => {
-        expect(getNotePath("quarter", date("2026-10-30"))).toBe("2026-Q4.md");
+    it("無効にした周期も、その周期の設定の書式とフォルダで探す（既定の書式には戻さない）", () => {
+        expect(getNotePath("quarter", date("2026-10-30"))).toBe("四半期/2026-Q4.md");
+        settingsStore.update((s) => {
+            s.periods.quarter.format = "YYYY年Q四半期";
+            return s;
+        });
+        expect(getNotePath("quarter", date("2026-10-30"))).toBe("四半期/2026年4四半期.md");
     });
 
     describe("日次ノートを無効にしているとき", () => {
@@ -122,14 +120,14 @@ describe("getNotePath: 周期と日付から、そのノートのパスを決め
             });
         });
 
-        it("Obsidian のコアプラグイン「デイリーノート」がオンでも、その設定は使わず、既定の書式とフォルダ / で作る", () => {
+        it("Obsidian のコアプラグイン「デイリーノート」がオンでも、その設定は使わず、日の設定の書式とフォルダで探す", () => {
             fake.dailyNotes = { enabled: true, instance: { options: { format: "YYYYMMDD", folder: "Daily" } } };
-            expect(getNotePath("day", date("2026-10-30"))).toBe("2026-10-30.md");
+            expect(getNotePath("day", date("2026-10-30"))).toBe("日記/2026-10-30.md");
         });
 
-        it("デイリーノートもオフなら、既定の書式とフォルダ / で作る", () => {
+        it("デイリーノートもオフでも、日の設定の書式とフォルダで探す", () => {
             fake.dailyNotes = { enabled: false };
-            expect(getNotePath("day", date("2026-10-30"))).toBe("2026-10-30.md");
+            expect(getNotePath("day", date("2026-10-30"))).toBe("日記/2026-10-30.md");
         });
     });
 });
@@ -182,6 +180,15 @@ describe("noteAt: 渡した設定で、その日付の周期ノートとステ�
         });
     });
 
+    it("日次ノートを無効にしていても、日の設定のフォルダと書式で探す（書式を変えてからオフにしても見つかる）", () => {
+        const file = fileAt("日記/20261030.md");
+        fake.files.set(file.path, file);
+        const passed = settings.initial();
+        passed.periods.day.format = "YYYYMMDD";
+        passed.periods.day.enabled = false;
+        expect(noteAt("day", date("2026-10-30"), passed)).toEqual({ file, sticker: null });
+    });
+
     it("日次ノートを無効にしていても、コアプラグイン「デイリーノート」の設定では探さない", () => {
         const file = fileAt("Daily/20261030.md");
         fake.files.set(file.path, file);
@@ -206,12 +213,11 @@ describe("notesWithFormatIn: 設定画面の「書式ごとのファイル数」
         expect(notesWithFormatIn("day", "YYYYMMDD", settings.initial())).toEqual(["日記/20261030.md"]);
     });
 
-    it("日次ノートを無効にしていれば、コアプラグイン「デイリーノート」がオンでも、既定のフォルダ /（Vault 全体）で数える", () => {
-        fake.files.set("Daily/2026-10-30.md", note("Daily/2026-10-30.md"));
-        fake.files.set("ほか/2026-10-31.md", note("ほか/2026-10-31.md"));
+    it("日次ノートを無効にしていても、コアプラグイン「デイリーノート」のフォルダではなく、日の設定のフォルダで数える", () => {
+        for (const path of ["日記/2026-10-30.md", "Daily/2026-10-31.md", "2026-11-01.md"]) fake.files.set(path, note(path));
         fake.dailyNotes = { enabled: true, instance: { options: { format: "YYYY-MM-DD", folder: "Daily" } } };
         const passed = settings.initial();
         passed.periods.day.enabled = false;
-        expect(notesWithFormatIn("day", "YYYY-MM-DD", passed)).toEqual(["Daily/2026-10-30.md", "ほか/2026-10-31.md"]);
+        expect(notesWithFormatIn("day", "YYYY-MM-DD", passed)).toEqual(["日記/2026-10-30.md"]);
     });
 });
