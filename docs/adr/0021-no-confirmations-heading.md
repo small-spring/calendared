@@ -4,7 +4,7 @@ title: "「確認」の見出しは作らず、残る 1 つの確認は全体の
 status: 採用
 date: 2026-10-30
 area: 設定
-implemented: false
+implemented: true
 aliases:
   - ADR-0021
   - settings ADR-C2

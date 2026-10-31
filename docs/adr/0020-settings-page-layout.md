@@ -4,7 +4,7 @@ title: "見出しで区切った 1 ページに、周期と移行だけサブペ
 status: 採用
 date: 2026-10-30
 area: 設定
-implemented: false
+implemented: true
 aliases:
   - ADR-0020
   - settings ADR-C1

@@ -183,3 +183,5 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 - 書式を周期ごとに 1 つにした（ADR-0019）。設定画面の書式は 1 つの入力欄になり、空にして離れると既定の書式に戻る。保存済みの書式の一覧は、新しいノートに使っていた書式だけを残して読み替える。前の書式の名前のノートは、移行（これから作る）で変換するまで読めない〔2026-10-31〕
 - 書式の件数から開く一覧を見るだけにした（検索と、ノートを開くことだけ。ADR-0022）。移す・消す・全部移す・全部消すと、書式を消す・ノートの名前を付け替えるボタン、それぞれの確認をなくした〔2026-10-31〕
 - 週の書式の注意を短くし、入力欄のすぐ下（件数の行の上）に移した。枠をなくし、切り替えのボタンと、その右に何がおかしいかの例だけを出し、理由は「Why?」で開く。年明けの週のプレビューは件数の行につなげた〔2026-10-31〕
+- 設定画面を、Obsidian 1.13 の宣言で書く設定で組み直した（ADR-0020）。タブをなくし、見出しなしの全体の設定（週の始まり・起動時に開く・カレンダーの言語・作成の確認・Open now のボタン）、Periodic notes（周期ごとの行にオン・オフと要約、押すとサブページ）、Period breadcrumbs・Mini calendar・Stickers（見出しのトグル）、一番下に Migrate notes（入口だけ）の 1 ページにした。起動時に開く周期は 1 つのドロップダウンに、テンプレートは横のボタンで開けるようにし、コアのデイリーノートがオンなら見出しの下に弱い警告を出す。`minAppVersion` を 1.13.1 にし、古い Obsidian では更新の案内だけを出す（ADR-0036・0037）〔2026-10-31〕
+- 設定画面の文言を直した。書式の説明「Must include: …」、テンプレートの説明「New daily notes start with this file's contents.」、出す場所の選択肢「All devices / Phones only」と説明「Tablets don't count as phones.」、Open now のボタンの説明を「In the tab title bar of every note. …」にし、見出し「Interaction behavior」「Localization」をなくした〔2026-10-31〕

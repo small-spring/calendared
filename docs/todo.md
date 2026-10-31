@@ -23,14 +23,13 @@
     - 書式を変えたあと前の名前のノートが見えなくなることは、週の書式の注意には書かず、この案内で伝える（2026-10-31 に決めた）。
       「ノートは消えない」と添えるかもここで決める（あってもなくてもよい程度）
   - 作るもの: ①書式を 1 つにする → ②設定画面の組み直し（Obsidian 1.13 の宣言で書く設定）→ ③移行 2 つ（書式の変換、ステッカーのプロパティの付け替え）・移行の案内。
-    ① は 2026-10-31 に済んだ（書式の欄は 1 つの入力欄、件数の一覧は見るだけ。見た目は ② で組み直す）
+    ① と ② は 2026-10-31 に済んだ。③ は、設定画面の一番下の「Migrate notes」（今は入口だけ。`src/settings/plugin-tab.ts` の `migrationPage`）に作る
   - ③ の書式の変換は作り直す: ① で「Rename notes to this format」（ほかの書式のノートを今の書式の名前に変える）は、ほかの書式がなくなって
     使えないので消した。名前を変える処理 `renameForFormat`（`src/periods.ts`、テストあり）と、ファイルマネージャーで名前を変えてリンクも
     直すやり方（`app.fileManager.renameFile`）は使える。前の書式は変換するときに入力する（ADR-0019）— Claude
-  - 絵文字の検索の言語の一覧（`EmojiLanguages.svelte`）は自前の見た目にした。公開の部品 `SettingGroup`（1.11 から）で公式の一覧の配置を
-    まねた版と見比べて、自前の版を選んだ（2026-10-30）。組み直すときに、Obsidian の一覧の見た目とずれていないかも見る
-- 〔仕上げ〕設定画面の文言を、ガイドラインの決まり（見出しは `setHeading()`、文は sentence case、見出しに「settings」と書かない）に合わせる。
-  公開しなくても読みやすくなるので、設定画面の組み直しと一緒にやる — Claude
+- 〔機能〕周期のオン・オフで、ほかの周期も動く理由を設定画面に出すか決める（[plans/settings-wording.md](plans/settings-wording.md) の H2）— 自分と Claude
+- 〔確かめる〕設定画面の周期の行のトグルと見出しのトグルは、Obsidian の設定画面の作りに頼って足している（[ADR-0036](adr/0036-additions-to-setting-definitions.md)）。
+  Obsidian を更新したら、出ているかを見る — 自分
 
 ### 確かめる
 
@@ -45,7 +44,6 @@
 - manifest.json と package.json
   - `description` を書き直す。今は 2026-10-30 に入れた仮の文（「Keep your days, weeks, months, and years calendared. …」）。
     機能を詰め終えたら、README と一緒に見直す — Claude、決めるのは自分
-  - `minAppVersion` を 1.13.1 にする（今は 1.7.7。2026-10-30 に決めた）。設定画面を宣言で書く形に作り直すときに一緒に上げる — Claude
 - README を英語で、今の仕様に合わせて書き直す（書くことは [guides/publishing.md](guides/publishing.md) の「README に書くこと」）。
   機能を詰め終えてから書く。スクリーンショットは自分 — Claude
   - おすすめのキーの割り当てを載せる（既定のホットキーは付けない。公開のガイドラインに従う）。例: 今日のノート Cmd+D、前後のノート Cmd+← / →、

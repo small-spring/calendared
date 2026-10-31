@@ -43,24 +43,69 @@
   @apply overflow-x-hidden
 }
 
-#pnc-settings-container {
-  scrollbar-gutter: stable;
-  padding-right: calc(var(--size-4-12) - 16px)
-}
-
 /* Calendared: a heading with a toggle (Stickers, Period breadcrumbs, Mini calendar) keeps the toggle at the right of
    the heading. Obsidian lets the heading wrap and sizes its text to the description, so a two-line description pushed
    the toggle below it, and a one-line one left the toggle touching the text. The toggle's box only takes the toggle's
-   width; otherwise it grows as much as the text and leaves a wide gap on phones */
-#pnc-settings-container .setting-group > .setting-item-heading.mod-toggle {
+   width; otherwise it grows as much as the text and leaves a wide gap on phones. The heading and its description are
+   added in src/settings/ui/rows.ts */
+.calendared-settings .setting-group > .setting-item-heading.mod-toggle {
   flex-wrap: nowrap;
 }
-#pnc-settings-container .setting-group > .setting-item-heading.mod-toggle .setting-item-info {
+.calendared-settings .setting-group > .setting-item-heading .setting-item-info {
   flex: 1 1 0;
   margin-inline-end: var(--size-4-4);
 }
-#pnc-settings-container .setting-group > .setting-item-heading.mod-toggle .setting-item-control {
+.calendared-settings .setting-group > .setting-item-heading .setting-item-info .setting-item-name {
+  color: var(--setting-group-heading-color);
+  font-size: var(--setting-group-heading-size);
+  font-weight: var(--setting-group-heading-weight);
+}
+.calendared-settings .setting-group > .setting-item-heading .setting-item-description {
+  font-weight: var(--font-normal);
+  padding-top: var(--size-2-1);
+}
+.calendared-settings .setting-group > .setting-item-heading.mod-toggle .setting-item-control {
   flex: 0 0 auto;
+}
+/* a heading with a toggle is a group of its own, with its settings in the group right after (so turning it off can
+   hide them); the two read as one */
+.calendared-settings .setting-group.calendared-heading-group + .setting-group {
+  margin-top: 0;
+}
+
+/* a setting with a box under its name and description (the format field, the emoji search languages) */
+.setting-item.calendared-setting-stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--size-4-3);
+}
+.setting-item.calendared-setting-stacked > .setting-item-control:empty {
+  display: none;
+}
+/* as wide as the setting, also on phones, where Obsidian lines a setting's parts up at the left */
+.setting-item.calendared-setting-stacked > .calendared-setting-below {
+  width: 100%;
+}
+
+/* the icon of the tab title bar's button, next to the setting's name */
+.calendared-setting-name-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--size-4-1);
+}
+.calendared-setting-name-icon > span {
+  display: inline-flex;
+  --icon-size: var(--icon-s);
+}
+
+/* the toggle on each period's row, before the "›" */
+.calendared-period-toggle {
+  display: flex;
+  align-items: center;
+}
+
+.calendared-faint {
+  color: var(--text-faint);
 }
 
 /* settings suggestions are appended to body; keep them above the settings modal */
@@ -158,10 +203,6 @@
 
 /* Calendared: the installed emoji search languages, a small boxed list under "Emoji search languages"
    (EmojiLanguages.svelte). The side margins match Obsidian's setting items, so the box lines up with the settings */
-/* the space around the box is padding on a wrapper: a margin at the bottom would slip out of the settings card */
-.calendared-language-list-box {
-  padding: 0 var(--setting-items-padding-x, 0px) var(--setting-items-padding-x, var(--size-4-4));
-}
 .calendared-language-items {
   border: var(--border-width) solid var(--background-modifier-border);
   border-radius: var(--radius-m);

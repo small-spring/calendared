@@ -2,22 +2,14 @@
   // Calendared: the languages the sticker picker searches in besides English (src/emoji-search.ts). Their search words
   // are downloaded only from the "Add languages" dialog, and kept in the plugin's folder until removed here
   import { EMOJI_DATA_SIZES_KB } from "@/emoji-search";
-  import { SettingItem } from "@/settings/ui";
   import { emojiSearchState, removeEmojiLanguage } from "@/ui/utils/emoji-locale";
   import { useIcon } from "@/ui/utils";
   import { AddEmojiLanguagesModal } from "./add-emoji-languages-modal";
   import { languageNames } from "./language-names";
 </script>
 
-<SettingItem name="Emoji search languages">
-  {#snippet description()}
-    <p class="m-0">
-      Search stickers in these languages too. Each one is downloaded once when added (from <code>cdn.jsdelivr.net</code>).
-    </p>
-  {/snippet}
-</SettingItem>
-<!-- the languages sit in a box under the heading above, one compact line each, with "Add languages…" as the box's last
-     line (like a settings list's "Add item"), so the list and how to grow it read as one thing -->
+<!-- the languages sit in a box under the setting's name and description, one compact line each, with "Add languages…"
+     as the box's last line (like a settings list's "Add item"), so the list and how to grow it read as one thing -->
 <div class="calendared-language-list-box">
   <div class="calendared-language-items">
     {#each $emojiSearchState.installed as language (language)}

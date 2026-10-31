@@ -1,17 +1,66 @@
 import { PluginService } from "@/app-service";
-import { DEFAULT_FORMATS_PER_GRANULARITY } from "@/constants";
+import { weekdayNames } from "@/calendar-locale";
+import { DAILY_NOTES_PLUGIN_ID, DEFAULT_FORMATS_PER_GRANULARITY, granularities } from "@/constants";
 import { getPeriodicityFromGranularity, IGranularity } from "@/io";
-import Settings from "@/settings/ui/Index.svelte";
+import type { DnPluginSettings } from "@/io/settings";
+import { validateFolder, validateFormat, validateTemplate } from "@/io/validation";
+import locales from "@/locales";
+import { defaultWeekdays, sysLocaleKey } from "@/localization";
+import { showsOn } from "@/navigation";
+import { switchLocale, updateWeekStartSetting } from "@/stores";
+import { openNowIcon } from "@/ui/open-now";
+import { STICKER_BUTTON_ICON } from "@/ui/sticker-actions";
 import { genNoticeFragment } from "@/ui/utils";
+import { isReservedStickerProperty, RESERVED_STICKER_PROPERTIES } from "@/ui/utils/emoji-picker";
 import { capitalize } from "@/utils";
-import { App, Notice, PluginSettingTab } from 'obsidian';
-import { mount, unmount } from "svelte";
-import { get } from "svelte/store";
+import { checkWeekFormat, weekSchemeFor } from "@/weeks";
+import {
+  App,
+  normalizePath,
+  Notice,
+  PluginSettingTab,
+  type Setting,
+  type SettingDefinitionItem,
+  type SettingGroupItem,
+  ToggleComponent,
+} from "obsidian";
+import { get, type Writable } from "svelte/store";
+import writableDerived from "svelte-writable-derived";
+import type { ISettings, PeriodSettings } from "./constants";
+import { openAtStartupOf, setOpenAtStartup, setPeriodEnabled } from "./period-switch";
 import { settingsStore } from "./store";
-import { validateFormat } from "@/io/validation";
+import Format from "./ui/periods/Format.svelte";
+import { headingExtras, mountBelow, nameWithIcon } from "./ui/rows";
+import EmojiLanguages from "./ui/stickers/EmojiLanguages.svelte";
+import { FileSuggest } from "./ui/suggest";
 
+const settings = () => get(settingsStore);
+const periodName = (g: IGranularity) => `${capitalize(getPeriodicityFromGranularity(g))} notes`;
+
+/** Calendared: a period's settings as a store of their own, for the format field (Format.svelte) */
+function periodStore(granularity: IGranularity): Writable<PeriodSettings> {
+  return writableDerived(
+    settingsStore,
+    (s) => s.periods[granularity],
+    (period, s) => ({ ...s, periods: { ...s.periods, [granularity]: period } }),
+  );
+}
+
+/** Calendared: a copy of the settings with the value at a key such as `breadcrumbs.placement` replaced */
+function withValueAt(value: unknown, path: string[], newValue: unknown): unknown {
+  if (path.length === 0) return newValue;
+  const [head, ...rest] = path;
+  const object = (value ?? {}) as Record<string, unknown>;
+  return { ...object, [head]: withValueAt(object[head], rest, newValue) };
+}
+
+/**
+ * Calendared: the settings are written as definitions (Obsidian 1.13): one page divided by headings, with a page of its
+ * own for each period and for migrations (docs/adr/0020, docs/plans/settings.md). Upstream drew two tabs with Svelte
+ */
 export class SettingsTab extends PluginSettingTab {
-  private view: Record<string, unknown> | null = null;
+  private periodRowsQueued = false;
+  private periodRowToggles = new WeakMap<HTMLElement, ToggleComponent>();
 
   constructor() {
     const plugin = PluginService.getPlugin();
@@ -19,31 +68,450 @@ export class SettingsTab extends PluginSettingTab {
     if (plugin && app) {
       super(app, plugin);
     }
+    this.containerEl?.addClass("calendared-settings");
   }
 
+  /** Only Obsidian before 1.13 calls this; the settings need the definitions */
   display() {
-    // Calendared: a tab shown again without being hidden first kept its previous component mounted
-    if (this.view) void unmount(this.view);
     this.containerEl.empty();
-
-    this.view = mount(Settings, {
-      target: this.containerEl
-    })
+    this.containerEl.createEl("p", {
+      text: "Calendared's settings need Obsidian 1.13.1 or later. Update Obsidian to change them.",
+    });
   }
+
+  getControlValue(key: string): unknown {
+    const s = settings();
+    switch (key) {
+      case "weekStart":
+        return defaultWeekdays[s.localeSettings.weekStartId];
+      case "openAtStartup":
+        return openAtStartupOf(s.periods);
+      case "calendarLanguage":
+        return s.localeSettings.localeOverride;
+    }
+    return key.split(".").reduce<unknown>((value, k) => (value as Record<string, unknown> | undefined)?.[k], s);
+  }
+
+  setControlValue(key: string, value: unknown) {
+    const period = /^periods\.(\w+)\.enabled$/.exec(key)?.[1] as IGranularity | undefined;
+    if (key === "weekStart") {
+      updateWeekStartSetting(defaultWeekdays.indexOf(value as string));
+    } else if (key === "calendarLanguage") {
+      // also resets the week start to the language's, so its choices and value are read again
+      switchLocale(value as string);
+      this.update();
+    } else if (key === "openAtStartup") {
+      settingsStore.update((s) => ({ ...s, periods: setOpenAtStartup(s.periods, value as IGranularity | "none") }));
+      this.update();
+    } else if (period) {
+      this.setPeriodEnabled(period, value as boolean);
+    } else {
+      settingsStore.update((s) => withValueAt(s, key.split("."), value) as ISettings);
+    }
+    this.refreshDomState();
+  }
+
+  getSettingDefinitions(): SettingDefinitionItem[] {
+    return [
+      ...this.generalSettings(),
+      this.periodsGroup(),
+      ...this.navigationGroups(),
+      ...this.stickerGroups(),
+      this.migrationPage(),
+    ];
+  }
+
+  // Calendared: settings for everything, without a heading at the top (the plugin guidelines)
+  private generalSettings(): SettingDefinitionItem[] {
+    const s = settings();
+    const locale = s.localeSettings.localeOverride;
+    const names = weekdayNames(locale, 0).weekdays;
+    const weekStartOptions: Record<string, string> = {};
+    // Calendared: Saturday, Sunday or Monday only, like Google Calendar (docs/adr/0011), named in the calendar's language
+    for (const i of [6, 0, 1]) weekStartOptions[defaultWeekdays[i]] = names[i];
+
+    const languageOptions: Record<string, string> = {
+      [sysLocaleKey]: `Same as system (${locales.get(sysLocaleKey) || sysLocaleKey})`,
+    };
+    for (const key of window.moment.locales()) {
+      if (key !== sysLocaleKey) languageOptions[key] = locales.get(key) || key;
+    }
+
+    const startupOptions: Record<string, string> = { none: "Nothing" };
+    const startupNames: Record<IGranularity, string> = {
+      day: "Today's note",
+      week: "This week's note",
+      month: "This month's note",
+      quarter: "This quarter's note",
+      year: "This year's note",
+    };
+    for (const g of granularities) if (s.periods[g].enabled) startupOptions[g] = startupNames[g];
+
+    return [
+      {
+        name: "Week starts on",
+        // the week start also decides a weekly note's days (docs/adr/0011), which the name doesn't tell
+        desc: "Also sets which 7 days a weekly note covers.",
+        control: { type: "dropdown", key: "weekStart", options: weekStartOptions },
+      },
+      {
+        name: "Open on startup",
+        aliases: ["startup", "daily note"],
+        control: { type: "dropdown", key: "openAtStartup", options: startupOptions },
+      },
+      {
+        name: "Calendar language",
+        desc: "Month and weekday names in the calendar, period breadcrumbs and mini calendar. File names use Obsidian's language.",
+        control: { type: "dropdown", key: "calendarLanguage", options: languageOptions },
+      },
+      {
+        name: "Confirm before creating notes",
+        desc: "From the calendar, period breadcrumbs, mini calendar or Open now. Commands never ask.",
+        control: { type: "toggle", key: "shouldConfirmBeforeCreate" },
+      },
+      {
+        name: "Open now button",
+        desc: "In the tab title bar of every note. Opens today's note, or this week's if daily notes are off.",
+        render: (setting) => {
+          setting.setName(nameWithIcon(openNowIcon(), "Open now button"));
+          setting.addToggle((toggle) =>
+            toggle.setValue(settings().openNowHeaderButton).onChange((on) => this.setControlValue("openNowHeaderButton", on)),
+          );
+        },
+      },
+    ];
+  }
+
+  private periodsGroup(): SettingDefinitionItem {
+    return {
+      type: "group",
+      heading: "Periodic notes",
+      // ADR-0034: core Daily notes isn't read; when it is on too, say so faintly, without asking to turn it off
+      extraButtons: coreDailyNotesOn()
+        ? [
+            headingExtras({
+              description:
+                "Core Daily notes is also on. Its \"Open today's daily note\" may create a second note for the same day.",
+            }),
+          ]
+        : [],
+      items: granularities.map((g) => this.periodPage(g)),
+    };
+  }
+
+  private periodPage(granularity: IGranularity): SettingGroupItem {
+    const periodicity = getPeriodicityFromGranularity(granularity);
+    const isOn = () => settings().periods[granularity].enabled;
+    return {
+      type: "page",
+      name: periodName(granularity),
+      desc: periodSummary(granularity),
+      status: () => (periodNeedsAttention(granularity) ? "warning" : null),
+      // a page's row has no toggle, so one is added once the rows are drawn. This runs each time they are drawn
+      visible: () => {
+        this.queuePeriodRows();
+        return true;
+      },
+      items: [
+        {
+          type: "group",
+          items: [
+            {
+              name: `Use ${periodicity} notes`,
+              desc: `Turning it off hides ${periodicity} notes from the calendar and the commands, and stops creating them. Notes you already have are kept.`,
+              control: { type: "toggle", key: `periods.${granularity}.enabled` },
+            },
+          ],
+        },
+        {
+          type: "group",
+          visible: isOn,
+          items: [
+            {
+              name: "Format",
+              render: (setting) => {
+                setting.setDesc(formatDescription(granularity));
+                return mountBelow(setting, Format, { settings: periodStore(granularity), granularity });
+              },
+            },
+            {
+              name: "Folder",
+              desc: `Where new ${periodicity} notes are created.`,
+              control: {
+                type: "folder",
+                key: `periods.${granularity}.folder`,
+                includeRoot: true,
+                placeholder: "/",
+                validate: (folder) => validateFolder(folder.trim()),
+              },
+            },
+            {
+              name: "Template",
+              desc: `New ${periodicity} notes start with this file's contents.`,
+              render: (setting) => this.renderTemplate(setting, granularity),
+            },
+          ],
+        },
+      ],
+    };
+  }
+
+  private setPeriodEnabled(granularity: IGranularity, enabled: boolean) {
+    settingsStore.update((s) => ({ ...s, periods: setPeriodEnabled(s.periods, granularity, enabled) }));
+    // other periods can change with it, and the period rows say whether each is on
+    this.update();
+  }
+
+  /**
+   * The toggle at the right of each period's row, before the "›", and the row's summary under its name. A page's row
+   * can't have a toggle of its own, so they are added to the drawn rows; if Obsidian draws them differently, the toggle
+   * at the top of the period's page is still there
+   */
+  private queuePeriodRows() {
+    if (this.periodRowsQueued) return;
+    this.periodRowsQueued = true;
+    queueMicrotask(() => {
+      this.periodRowsQueued = false;
+      const rows = Array.from(this.containerEl.querySelectorAll<HTMLElement>(".setting-item.mod-navigable"));
+      for (const granularity of granularities) {
+        const row = rows.find((el) => el.querySelector(".setting-item-name")?.textContent === periodName(granularity));
+        const controlEl = row?.querySelector<HTMLElement>(".setting-item-control");
+        if (!row || !controlEl) continue;
+
+        // the summary is read when the row is drawn: going back from a period's page draws the rows again, but from
+        // the definitions read before the page was opened
+        row.querySelector(".setting-item-description")?.setText(periodSummary(granularity));
+        let wrapper = controlEl.querySelector<HTMLElement>(".calendared-period-toggle");
+        if (!wrapper) {
+          wrapper = createDiv("calendared-period-toggle");
+          controlEl.prepend(wrapper);
+          // the row opens the page when clicked; a click on the toggle stops here. (Not preventDefault: the toggle is a
+          // label, and that would keep its checkbox from changing)
+          wrapper.addEventListener("click", (e) => e.stopPropagation());
+          const toggle = new ToggleComponent(wrapper).onChange((on) => {
+            if (on !== settings().periods[granularity].enabled) this.setPeriodEnabled(granularity, on);
+          });
+          toggle.toggleEl.setAttribute("aria-label", `Use ${getPeriodicityFromGranularity(granularity)} notes`);
+          this.periodRowToggles.set(wrapper, toggle);
+        }
+        this.periodRowToggles.get(wrapper)?.setValue(settings().periods[granularity].enabled);
+      }
+    });
+  }
+
+  private renderTemplate(setting: Setting, granularity: IGranularity) {
+    const templateFile = () => {
+      const path = settings().periods[granularity].templatePath;
+      return path ? this.app.vault.getFileByPath(path) : null;
+    };
+    let suggest: FileSuggest | undefined;
+    setting.addText((text) => {
+      text
+        .setPlaceholder(`templates/${getPeriodicityFromGranularity(granularity)}`)
+        .setValue(settings().periods[granularity].templatePath)
+        .onChange((value) => {
+          const path = value.trim() ? normalizePath(value.trim().endsWith(".md") ? value.trim() : `${value.trim()}.md`) : "";
+          const error = path ? validateTemplate(path) : "";
+          setting.setErrorMessage(error || null);
+          if (error) return;
+          settingsStore.update((s) => withValueAt(s, ["periods", granularity, "templatePath"], path) as ISettings);
+          openButton?.setDisabled(!templateFile());
+        });
+      suggest = new FileSuggest(text.inputEl);
+      const error = text.getValue() ? validateTemplate(text.getValue()) : "";
+      if (error) setting.setErrorMessage(error);
+    });
+    // Calendared: the template can be opened from here to edit it (docs/plans/settings.md)
+    let openButton: { setDisabled(disabled: boolean): unknown } | undefined;
+    setting.addExtraButton((button) => {
+      openButton = button;
+      button
+        .setIcon("pencil")
+        .setTooltip("Open template")
+        .setDisabled(!templateFile())
+        .onClick(() => {
+          const file = templateFile();
+          if (!file) return;
+          this.app.setting?.close?.();
+          void this.app.workspace.getLeaf("tab").openFile(file);
+        });
+    });
+    return () => suggest?.destroy();
+  }
+
+  // Calendared: the breadcrumbs and the mini calendar (docs/adr/0031, 0032), each turned on and off by its heading's
+  // toggle (docs/adr/0033). "Period breadcrumbs" on screen, so it isn't taken for the community plugin "Breadcrumbs"
+  private navigationGroups(): SettingDefinitionItem[] {
+    const showOn = {
+      options: { always: "All devices", phone: "Phones only" },
+      desc: "Tablets don't count as phones.",
+    };
+    const featureToggle = (feature: "breadcrumbs" | "miniCalendar") => ({
+      isOn: () => settings()[feature].enabled,
+      onChange: (on: boolean) => this.setControlValue(`${feature}.enabled`, on),
+    });
+    return [
+      {
+        type: "group",
+        heading: "Period breadcrumbs",
+        cls: "calendared-heading-group",
+        extraButtons: [
+          headingExtras({
+            description: "Shows where the note sits, such as 2026 › Q4 › Oct › W44 › 30, above the note. Click a period to open its note.",
+            toggle: featureToggle("breadcrumbs"),
+          }),
+        ],
+      },
+      {
+        type: "group",
+        visible: () => settings().breadcrumbs.enabled,
+        items: [
+          { name: "Show on", desc: showOn.desc, control: { type: "dropdown", key: "breadcrumbs.placement", options: showOn.options } },
+          { name: "Show on non-periodic notes", control: { type: "toggle", key: "breadcrumbs.onOtherNotes" } },
+        ],
+      },
+      {
+        type: "group",
+        heading: "Mini calendar",
+        cls: "calendared-heading-group",
+        extraButtons: [
+          headingExtras({
+            description: "Shows the days (or weeks, months…) around the note, above it. Click one to open it.",
+            toggle: featureToggle("miniCalendar"),
+          }),
+        ],
+      },
+      {
+        type: "group",
+        visible: () => settings().miniCalendar.enabled,
+        items: [
+          { name: "Show on", desc: showOn.desc, control: { type: "dropdown", key: "miniCalendar.placement", options: showOn.options } },
+          { name: "Show on non-periodic notes", control: { type: "toggle", key: "miniCalendar.onOtherNotes" } },
+          {
+            name: "Days shown",
+            desc: "For daily notes. Other notes show 2 on each side.",
+            control: {
+              type: "dropdown",
+              key: "miniCalendar.dayLayout",
+              options: { week: "Calendar week", centered: "3 days each side" },
+            },
+          },
+          {
+            name: "Show stickers",
+            // has no effect while stickers are off
+            visible: () => settings().stickersEnabled,
+            control: { type: "toggle", key: "miniCalendar.displayStickers" },
+          },
+        ],
+      },
+      // applies to both, so it sits apart from both headings, and shows while either of them shows on desktop
+      {
+        type: "group",
+        visible: () => showsOn(settings().breadcrumbs, false) || showsOn(settings().miniCalendar, false),
+        items: [
+          {
+            name: "Compact on desktop",
+            desc: "Show the period breadcrumbs and mini calendar in a small box at the top right of the note, instead of a bar under the tab title bar. Phones always use the bar.",
+            control: { type: "toggle", key: "compactOnDesktop" },
+          },
+        ],
+      },
+    ];
+  }
+
+  // Calendared: turning stickers off hides everything about them (display, header button, menu item, commands).
+  // Upstream's prefix / migrate / backup settings were removed
+  private stickerGroups(): SettingDefinitionItem[] {
+    return [
+      {
+        type: "group",
+        heading: "Stickers",
+        cls: "calendared-heading-group",
+        extraButtons: [
+          headingExtras({
+            description: "An emoji for each periodic note, shown in the calendar.",
+            toggle: { isOn: () => settings().stickersEnabled, onChange: (on) => this.setControlValue("stickersEnabled", on) },
+          }),
+        ],
+      },
+      {
+        type: "group",
+        visible: () => settings().stickersEnabled,
+        items: [
+          {
+            name: "Sticker button",
+            desc: "In the tab title bar of periodic notes. Shows the note's sticker; click it to pick one.",
+            render: (setting) => {
+              setting.setName(nameWithIcon(STICKER_BUTTON_ICON, "Sticker button"));
+              setting.addToggle((toggle) =>
+                toggle.setValue(settings().stickerHeaderButton).onChange((on) => this.setControlValue("stickerHeaderButton", on)),
+              );
+            },
+          },
+          {
+            name: "Sticker property",
+            render: (setting) => {
+              setting.setDesc(stickerPropertyDescription());
+              setting.addText((text) => {
+                // eslint-disable-next-line obsidianmd/ui/sentence-case -- the default property name, written as it is
+                text.setPlaceholder("sticker").setValue(settings().stickerProperty);
+                // saved when leaving the field, so the property doesn't change with each letter typed
+                text.inputEl.addEventListener("blur", () => {
+                  const property = text.getValue().trim();
+                  const error =
+                    property === ""
+                      ? "Enter a property name for stickers."
+                      : isReservedStickerProperty(property)
+                        ? `'${property}' is one of Obsidian's built-in properties. Choose another name, such as 'sticker' or 'mood'.`
+                        : "";
+                  setting.setErrorMessage(error || null);
+                  if (!error && property !== settings().stickerProperty) this.setControlValue("stickerProperty", property);
+                });
+              });
+            },
+          },
+          // the box of languages (EmojiLanguages.svelte) stays inside the Stickers group with its description; a
+          // definitions list would be a group of its own, with a heading as large as "Stickers" and no description
+          {
+            name: "Emoji search languages",
+            desc: "Search stickers in these languages too. Each one is downloaded once when added (from cdn.jsdelivr.net).",
+            render: (setting) => mountBelow(setting, EmojiLanguages, {}),
+          },
+        ],
+      },
+    ];
+  }
+
+  // Calendared: what migrations will do lives on a page of its own at the bottom (docs/plans/settings.md, "移行")
+  private migrationPage(): SettingDefinitionItem {
+    return {
+      type: "page",
+      name: "Migrate notes",
+      desc: "Rename notes after changing a format, or move stickers after changing the sticker property.",
+      items: [
+        {
+          type: "group",
+          items: [
+            {
+              name: "Not available yet",
+              desc: "Renaming notes to a new format and moving stickers to a new property will be here.",
+            },
+          ],
+        },
+      ],
+    };
+  }
+
   hide() {
-    super.hide()
-    // Calendared: unmount once; Obsidian can hide a tab that is already hidden, which made Svelte warn
-    // lifecycle_double_unmount
-    if (this.view) void unmount(this.view)
-    this.view = null
+    super.hide();
 
     // Calendared: a period has one format (docs/adr/0019). An empty or invalid one is replaced with the default, so
     // creating a note always has a valid format
     const errors = [];
-    for (const g of Object.keys(get(settingsStore).periods) as IGranularity[]) {
+    for (const g of granularities) {
       this.replaceFormatIfNeeded(g);
-      if (validateFormat(get(settingsStore).periods[g].format, g)) {
-        errors.push(capitalize(getPeriodicityFromGranularity(g)))
+      if (validateFormat(settings().periods[g].format, g)) {
+        errors.push(capitalize(getPeriodicityFromGranularity(g)));
       }
     }
 
@@ -57,14 +525,14 @@ export class SettingsTab extends PluginSettingTab {
   }
 
   private replaceFormatIfNeeded(granularity: IGranularity) {
-    const invalidValue = get(settingsStore).periods[granularity].format;
+    const invalidValue = settings().periods[granularity].format;
     if (invalidValue.trim() && !validateFormat(invalidValue, granularity)) return;
 
     const correctedValue = DEFAULT_FORMATS_PER_GRANULARITY[granularity];
     settingsStore.update((s) => {
       s.periods[granularity].format = correctedValue;
-      return s
-    })
+      return s;
+    });
     if (!invalidValue.trim()) return;
 
     const periodicity = capitalize(getPeriodicityFromGranularity(granularity));
@@ -76,6 +544,66 @@ export class SettingsTab extends PluginSettingTab {
       ['Using '],
       [correctedValue, 'u-pop'],
       [' to prevent errors.'],
-    ]), 8000)
+    ]), 8000);
   }
+}
+
+function coreDailyNotesOn(): boolean {
+  const app = PluginService.getPlugin()?.app;
+  return !!app?.internalPlugins?.getPluginById<DnPluginSettings>(DAILY_NOTES_PLUGIN_ID)?.enabled;
+}
+
+/** The second line of a period's row: its format and folder, or that it is off */
+function periodSummary(granularity: IGranularity): string {
+  const period = settings().periods[granularity];
+  if (!period.enabled) return "Off";
+  const parts = [period.format, period.folder.trim() || "/"];
+  if (period.openAtStartup) parts.push("Opens at startup");
+  return parts.join(" · ");
+}
+
+/** An invalid format, or a weekly format that breaks around New Year or differs from the calendar's week numbers */
+function periodNeedsAttention(granularity: IGranularity): boolean {
+  const period = settings().periods[granularity];
+  if (!period.enabled) return false;
+  if (validateFormat(period.format, granularity)) return true;
+  if (granularity !== "week") return false;
+  const check = checkWeekFormat(period.format.trim(), weekSchemeFor(settings().localeSettings));
+  return !!(check.unreadable || check.mismatched);
+}
+
+function formatDescription(granularity: IGranularity): DocumentFragment {
+  const required: Record<IGranularity, string> = {
+    day: "Y or y (year), M (month) and D (day)",
+    week: "GG (week year) and W (week)",
+    month: "Y or y (year) and M (month)",
+    quarter: "Y or y (year) and Q (quarter)",
+    year: "Y or y (year)",
+  };
+  const fragment = createFragment();
+  const first = fragment.createDiv();
+  first.appendText("Must include: ");
+  first.createSpan({ cls: "u-pop", text: required[granularity] });
+  const second = fragment.createDiv();
+  // say where the link goes (site and address), not just "Syntax Reference"
+  second.appendText("Format tokens: ");
+  second.createEl("a", {
+    text: "Moment.js documentation",
+    href: "https://momentjs.com/docs/#/displaying/format/",
+  });
+  second.createSpan({ cls: "calendared-faint", text: " (momentjs.com)" });
+  return fragment;
+}
+
+function stickerPropertyDescription(): DocumentFragment {
+  const fragment = createFragment();
+  fragment.createDiv({ text: "Property that holds the sticker. Adding a sticker replaces its value." });
+  // always show which names are refused, from the same list the check uses
+  const reserved = fragment.createDiv();
+  reserved.appendText("Can't be one of Obsidian's built-in properties: ");
+  RESERVED_STICKER_PROPERTIES.forEach((name, i) => {
+    reserved.createEl("code", { text: name });
+    if (i < RESERVED_STICKER_PROPERTIES.length - 1) reserved.appendText(", ");
+  });
+  return fragment;
 }

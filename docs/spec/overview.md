@@ -1,7 +1,7 @@
 # 機能の一覧
 
 Calendared に **今ある機能** と、それぞれの **設定項目** をまとめる。今どうなっているかだけを書く。
-設定画面の整理で変わる予定のことは [plans/settings.md](../plans/settings.md)（作り終えたら、ここを書き換える）。
+設定画面の整理で、まだ作っていないこと（移行）は [plans/settings.md](../plans/settings.md)。
 元の版との違いは [customizations.md](../customizations.md)、各機能の細かい仕様は [stickers.md](stickers.md)・[periods.md](periods.md) にある。
 
 中心は **周期ノート**（日・週・月・四半期・年のノート）を作って行き来すること。カレンダー・パンくずとミニカレンダー・ステッカーは、その入口や飾りにあたる。
@@ -18,7 +18,7 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 設定の表の見方
 
 - 「表示名」は設定画面での名前。画面に出ていないものは「―」
-- 「今の場所」は、`Calendar` タブ・`Periods` タブと、その中の見出し
+- 「場所」は設定画面の見出し。「（一番上）」は見出しのない全体の設定、「周期 ›」は周期の行から開くサブページ（下の「設定画面の形」）
 - 「キー」は `data.json` での名前（`src/settings/constants.ts` の `ISettings`）。`periods.<周期>.` は周期ごとに持つ
 
 ## 1. 周期ノート（土台）
@@ -34,23 +34,23 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
   `{{date+1d}}` のようにずらす、`{{date:YYYY-MM-DD}}` のように書式を付けることもできる
 - 週の決め方: Google カレンダーと同じ。週の始まりは土・日・月から選び、週番号は ISO 8601（[periods.md](periods.md)）。
   ファイル名、週番号の列、パンくずとミニカレンダー、テンプレートの曜日のすべてに効く
-- 起動時に周期ノートを 1 つ開ける（どれかをオンにするとほかはオフになる）
+- 起動時に周期ノートを 1 つ開ける（全体の設定「Open on startup」で、オンの周期から 1 つ選ぶ）
 - ノートを作る前に確認を出せる
 - 隠れたつながり: 周期「日」をオフにしていて、コアプラグイン「デイリーノート」がオンのときは、日のノートの書式・フォルダ・テンプレート・
   起動時に開くかを、コアのデイリーノートの設定から読む（`src/io/settings.ts` の `normalizePeriodSettings`）。設定画面には何も出ていない
 
 ### 周期ごとに繰り返す設定
 
-日・週・月・四半期・年の 5 つが、それぞれ同じ形の設定を持つ（`periods.<周期>.…`）。今の設定画面では「Periods」タブに周期ごとの見出しが並び、
-開くと下の 5 つが出る。
+日・週・月・四半期・年の 5 つが、それぞれ同じ形の設定を持つ（`periods.<周期>.…`）。設定画面の「Periodic notes」に周期ごとの行が並ぶ。
+行の右でオン・オフでき、2 行目に書式とフォルダ（オフなら「Off」）、書式に注意があれば警告の印を出す。行を押すとサブページが開き、下の項目が出る。
 
 | 表示名 | キー | 日 | 週 | 月 | 四半期 | 年 | 内容 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| （周期の見出しのトグル） | `enabled` | オン | オン | オフ | オフ | オフ | その周期を使うか |
+| （周期の行のトグル）・Use daily notes など | `enabled` | オン | オン | オフ | オフ | オフ | その周期を使うか |
 | Format | `format` | `YYYY-MM-DD` | `GGGG-[W]WW` | `YYYY-MM` | `YYYY-[Q]Q` | `YYYY` | ノートの名前の書式（1 つ） |
 | Folder | `folder` | `/` | `/` | `/` | `/` | `/` | ノートを置くフォルダ |
-| Template | `templatePath` | 空 | 空 | 空 | 空 | 空 | テンプレートのファイル |
-| Open on startup | `openAtStartup` | オフ | オフ | オフ | オフ | オフ | 起動時にこの周期の今のノートを開く（5 つのうち 1 つだけオンにできる） |
+| Template | `templatePath` | 空 | 空 | 空 | 空 | 空 | テンプレートのファイル。横の鉛筆のボタンで開ける |
+| ―（全体の Open on startup） | `openAtStartup` | オフ | オフ | オフ | オフ | オフ | 起動時にこの周期の今のノートを開く（5 つのうち 1 つだけ） |
 
 周期によって違うところ
 
@@ -60,13 +60,14 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 
 ### 周期ノート全体の設定
 
-| 表示名 | 今の場所 | キー | 既定 | 内容 |
+| 表示名 | 場所 | キー | 既定 | 内容 |
 | --- | --- | --- | --- | --- |
-| Week starts on | Calendar › Localization | `localeSettings.weekStartId` | Obsidian の言語の既定（土・日・月に寄せる） | 週の始まり |
+| Week starts on | （一番上） | `localeSettings.weekStartId` | Obsidian の言語の既定（土・日・月に寄せる） | 週の始まり |
+| Open on startup | （一番上） | `periods.<周期>.openAtStartup` | Nothing | 起動時に開くノート（Nothing / Today's note / This week's note …。オンの周期だけ出る） |
 | ― | ― | （コアのデイリーノートの設定） | ― | 周期「日」がオフのとき、日のノートに使う |
 
-起動時に開く周期（上の表の「Open on startup」をまとめたもの）も、整理のあとはここに入る。
-確認を出すかどうかの設定は「6. 確認」にまとめた。
+確認を出すかどうかの設定は「6. 確認」にまとめた。コアのデイリーノートがオンのときは、「Periodic notes」の見出しの下に、
+同じ日のノートが 2 つできうることを説明の文で知らせる（[ADR-0034](../adr/0034-no-settings-import.md)）。
 
 ## 2. コマンド
 
@@ -102,10 +103,10 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 
 ### 設定
 
-| 表示名 | 今の場所 | キー | 既定 | 内容 |
+| 表示名 | 場所 | キー | 既定 | 内容 |
 | --- | --- | --- | --- | --- |
-| Open now button | Calendar › Interaction behavior | `openNowHeaderButton` | オン | ノートの見出しバーに Open now を出す |
-| Calendar language | Calendar › Localization | `localeSettings.localeOverride` | Obsidian の言語 | カレンダーの中の言語 |
+| Open now button | （一番上） | `openNowHeaderButton` | オン | ノートの見出しバーに Open now を出す |
+| Calendar language | （一番上） | `localeSettings.localeOverride` | Obsidian の言語 | カレンダーの中の言語 |
 | ― | ― | `yearsRangesStart` | `2020` | 年のビューの 12 年の区切りの起点 |
 
 週の始まり（`Week starts on`）もカレンダーの並びに効くが、周期ノート全体の設定として 1. に置いた。
@@ -137,17 +138,17 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 
 ### 設定
 
-| 表示名 | 今の場所 | キー | 既定 | 内容 |
+| 表示名 | 場所 | キー | 既定 | 内容 |
 | --- | --- | --- | --- | --- |
-| Period breadcrumbs | Calendar › Period breadcrumbs（見出しのトグル） | `breadcrumbs.enabled` | オン | パンくずを出すか |
-| Show on | Calendar › Period breadcrumbs | `breadcrumbs.placement` | Always | パンくずを出す場所（Always / Phone only） |
-| Show on non-periodic notes | Calendar › Period breadcrumbs | `breadcrumbs.onOtherNotes` | オン | 周期ノートでないノートにも出すか |
-| Mini calendar | Calendar › Mini calendar（見出しのトグル） | `miniCalendar.enabled` | オン | ミニカレンダーを出すか |
-| Show on | Calendar › Mini calendar | `miniCalendar.placement` | Always | ミニカレンダーを出す場所 |
-| Show on non-periodic notes | Calendar › Mini calendar | `miniCalendar.onOtherNotes` | オン | 周期ノートでないノートにも出すか |
-| Days shown | Calendar › Mini calendar | `miniCalendar.dayLayout` | Calendar week | 日のノートでの日の並べ方（Calendar week / 3 days each side） |
-| Show stickers | Calendar › Mini calendar | `miniCalendar.displayStickers` | オン | ステッカーを出すか（ステッカーがオフのときは隠す） |
-| Compact on desktop | Calendar（Mini calendar の下の、見出しのない段） | `compactOnDesktop` | オフ | PC で右上の小さな箱にする（パンくずにも効く） |
+| Period breadcrumbs | Period breadcrumbs（見出しのトグル） | `breadcrumbs.enabled` | オン | パンくずを出すか |
+| Show on | Period breadcrumbs | `breadcrumbs.placement` | All devices | パンくずを出す場所（All devices / Phones only。タブレットはスマホに含めない） |
+| Show on non-periodic notes | Period breadcrumbs | `breadcrumbs.onOtherNotes` | オン | 周期ノートでないノートにも出すか |
+| Mini calendar | Mini calendar（見出しのトグル） | `miniCalendar.enabled` | オン | ミニカレンダーを出すか |
+| Show on | Mini calendar | `miniCalendar.placement` | All devices | ミニカレンダーを出す場所 |
+| Show on non-periodic notes | Mini calendar | `miniCalendar.onOtherNotes` | オン | 周期ノートでないノートにも出すか |
+| Days shown | Mini calendar | `miniCalendar.dayLayout` | Calendar week | 日のノートでの日の並べ方（Calendar week / 3 days each side） |
+| Show stickers | Mini calendar | `miniCalendar.displayStickers` | オン | ステッカーを出すか（ステッカーがオフのときは隠す） |
+| Compact on desktop | Mini calendar の下の、見出しのない段（どちらかが PC に出るときだけ） | `compactOnDesktop` | オフ | PC で右上の小さな箱にする（パンくずにも効く） |
 
 前の `timeline.*` の設定は、起動したときに読み替えて消す（オフにしていれば両方オフ。ほかのノートにも出すか・ステッカーは引き継ぐ）。出す場所を 3 択で持っていたときの Never はオフに読み替える（[ADR-0033](../adr/0033-heading-toggles.md)）。
 
@@ -161,12 +162,12 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 
 ### 設定
 
-| 表示名 | 今の場所 | キー | 既定 | 内容 |
+| 表示名 | 場所 | キー | 既定 | 内容 |
 | --- | --- | --- | --- | --- |
-| Stickers | Calendar › Stickers | `stickersEnabled` | オン | ステッカー機能のすべて（表示、ボタン、メニュー、コマンド） |
-| Sticker button | Calendar › Stickers | `stickerHeaderButton` | オン | 周期ノートの見出しバーにボタンを出す |
-| Sticker property | Calendar › Stickers | `stickerProperty` | `sticker` | 絵文字を入れるプロパティの名前 |
-| Emoji search languages | Calendar › Stickers | （プラグインのフォルダにあるファイル） | 英語だけ | 絵文字を検索する言語 |
+| Stickers | Stickers（見出しのトグル） | `stickersEnabled` | オン | ステッカー機能のすべて（表示、ボタン、メニュー、コマンド） |
+| Sticker button | Stickers | `stickerHeaderButton` | オン | 周期ノートの見出しバーにボタンを出す |
+| Sticker property | Stickers | `stickerProperty` | `sticker` | 絵文字を入れるプロパティの名前 |
+| Emoji search languages | Stickers | （プラグインのフォルダにあるファイル） | 英語だけ | 絵文字を検索する言語 |
 
 ミニカレンダーにステッカーを出すか（`miniCalendar.displayStickers`）は 4. にある。
 
@@ -174,29 +175,34 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 
 操作の前に確認の画面を出すかどうか。
 
-| 表示名 | 今の場所 | キー | 既定 | 内容 |
+| 表示名 | 場所 | キー | 既定 | 内容 |
 | --- | --- | --- | --- | --- |
-| Confirm before creating notes | Calendar › Interaction behavior | `shouldConfirmBeforeCreate` | オン | ノートを作る前に確認する（カレンダー・パンくず・ミニカレンダー・Open now から作るとき。コマンドと起動時には出ない） |
+| Confirm before creating notes | （一番上） | `shouldConfirmBeforeCreate` | オン | ノートを作る前に確認する（カレンダー・パンくず・ミニカレンダー・Open now から作るとき。コマンドと起動時には出ない） |
 
 書式を消す・付け替える・ノートを移す・消すときの確認は、その操作と一緒になくした（2026-10-31。[ADR-0021](../adr/0021-no-confirmations-heading.md)）。
 
 ## 7. 移行
 
-すでにあるノートを今の設定に合わせて書き換える操作。今はない。元の版の「書式の付け替え」（ほかの書式のノートを今の書式の名前にする）は、
+すでにあるノートを今の設定に合わせて書き換える操作。今はない（設定画面の一番下の「Migrate notes」は、まだ入口だけ）。元の版の「書式の付け替え」（ほかの書式のノートを今の書式の名前にする）は、
 書式が 1 つになって使えなくなったので消した。前の書式のノートの変換は、移行として作り直す（[plans/settings.md](../plans/settings.md) の「移行」）。
 名前を変える処理（`src/periods.ts` の `renameForFormat`）は残してある
 
 今は、ステッカーのプロパティの名前を変えると、それまでのステッカーが見えなくなる（前のプロパティを読まない。[ADR-0002](../adr/0002-read-only-configured-property.md)）。
 
-## 今の設定画面との対応
+## 設定画面の形
 
-| 今の場所 | 中身 | 本来の機能 |
+Obsidian 1.13 の宣言で書く設定で描く（[ADR-0020](../adr/0020-settings-page-layout.md)）。`minAppVersion` は 1.13.1 で、それより前の Obsidian では更新の案内だけが出る。
+タブはなく、見出しで区切った 1 ページに、周期と移行だけサブページがある。
+
+| 見出し | 中身 | 本来の機能 |
 | --- | --- | --- |
-| Calendar › Stickers | オン・オフ、見出しバーのボタン、プロパティ、検索の言語 | 5. ステッカー |
-| Calendar › Period breadcrumbs | オン・オフ、出す場所、周期ノート以外 | 4. パンくずとミニカレンダー |
-| Calendar › Mini calendar | オン・オフ、出す場所、周期ノート以外、日の並べ方、ステッカー | 4. パンくずとミニカレンダー |
-| Calendar（見出しのない段） | Compact on desktop | 4. パンくずとミニカレンダー |
-| Calendar › Interaction behavior | 作成の確認、Open now のボタン | 6. 確認、3. カレンダー |
-| Calendar › Localization | カレンダーの言語、週の始まり | 3. カレンダー、1. 周期ノート（週の決め方） |
-| Periods › 各周期 | オン・オフ、書式、フォルダ、テンプレート、起動時に開く | 1. 周期ノート |
-| （画面になし） | 確認 6 つ、`yearsRangesStart` | 6. 確認、3. カレンダー |
+| （一番上、見出しなし） | 週の始まり、起動時に開く、カレンダーの言語、作成の確認、Open now のボタン | 1. 周期ノート、3. カレンダー、6. 確認 |
+| Periodic notes | 周期ごとの行（オン・オフ、要約、›）。サブページにオン・オフ、書式、フォルダ、テンプレート | 1. 周期ノート |
+| Period breadcrumbs（見出しのトグル） | 出す場所、周期ノート以外 | 4. パンくずとミニカレンダー |
+| Mini calendar（見出しのトグル） | 出す場所、周期ノート以外、日の並べ方、ステッカー | 4. パンくずとミニカレンダー |
+| （見出しのない段） | Compact on desktop | 4. パンくずとミニカレンダー |
+| Stickers（見出しのトグル） | 見出しバーのボタン、プロパティ、検索の言語 | 5. ステッカー |
+| （一番下） | Migrate notes ›（入口だけ） | 7. 移行 |
+| （画面になし） | `yearsRangesStart` | 3. カレンダー |
+
+周期の行のトグルと見出しのトグルは、宣言では出せないので、描かれた行に足している（[ADR-0036](../adr/0036-additions-to-setting-definitions.md)）。
