@@ -16,6 +16,7 @@ import {
   displayedDateStore,
   setupLocale,
   themeStore,
+  todayStore,
 } from './stores';
 import NavigationManager from './ui/components/navigation/manager';
 import { closeNoteMenu } from './ui/note-menu';
@@ -25,6 +26,7 @@ import { CalendarView } from './view';
 import { initEmojiSearch } from './ui/utils/emoji-locale';
 import { HOVER_LINK_SOURCE } from './ui/utils/event-handlers';
 import { trackSettingChanges } from './settings/migration-notice';
+import { nextToday } from './today';
 import { getNoteSticker, isPeriodicNote, openStickerPicker, removeSticker, StickerActions } from './ui/sticker-actions';
 
 export default class PeriodicNotesCalendarPlugin extends Plugin {
@@ -66,6 +68,10 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     // Calendared: show/hide the header sticker buttons when the sticker settings change
     this.register(settingsStore.subscribe(() => this.stickerActions.refresh()));
     this.register(settingsStore.subscribe(() => this.openNowActions.refresh()));
+    // Calendared: upstream's calendar view kept today current with its own timer, so with the pane closed
+    // the date went stale. The plugin does it now; the header's Open now button is re-dimmed on a new day
+    this.registerInterval(window.setInterval(updateToday, 1000 * 60));
+    this.register(todayStore.subscribe(() => this.openNowActions.refresh()));
     // Calendared: add or remove the breadcrumbs and mini calendar when the settings change which notes show them
     this.register(settingsStore.subscribe(() => NavigationManager.instance?.syncAll()));
 
@@ -400,6 +406,13 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
  * Calendared: keeps `migrationNotices` up to date as the format or sticker property changes. Compares copies of the
  * values: some settings are changed in place (e.g. a period's format), so the previous settings object has the new value
  */
+/** Calendared: set today, and the calendar's month when it showed today's (src/today.ts) */
+function updateToday() {
+  const next = nextToday(get(todayStore), get(displayedDateStore), window.moment());
+  if (next.today) todayStore.set(next.today);
+  if (next.displayed) displayedDateStore.set(next.displayed);
+}
+
 function trackMigrationNotices(): () => void {
   const tracked = (s: ISettings) => ({
     periods: Object.fromEntries(granularities.map((g) => [g, { format: s.periods[g].format }])) as Record<IGranularity, { format: string }>,
