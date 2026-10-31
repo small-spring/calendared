@@ -28,13 +28,13 @@ export function setOpenAtStartup<T>(periods: PeriodSwitches<T>, choice: IGranula
 }
 
 /**
- * Calendared: the calendar's views (day, month, year) to show. Weeks are the column beside the days and quarters the
- * column beside the months, so either one alone still shows its view; upstream showed a view only when its own period was on
+ * Calendared: the calendar's view (day, month or year), decided only by the periods on. Weeks are the column beside the
+ * days and quarters the column beside the months, so either one alone still shows its view. The month and year views
+ * show only when the views before them have nothing on. Upstream kept the view picked on tabs, so turning days back on
+ * left the month view showing
  */
-export function calendarViews(enabled: Record<IGranularity, boolean>): ("day" | "month" | "year")[] {
-    const views: ("day" | "month" | "year")[] = [];
-    if (enabled.day || enabled.week) views.push("day");
-    if (enabled.month || enabled.quarter) views.push("month");
-    if (enabled.year) views.push("year");
-    return views;
+export function calendarView(enabled: Record<IGranularity, boolean>): "day" | "month" | "year" {
+    if (enabled.day || enabled.week) return "day";
+    if (enabled.month || enabled.quarter) return "month";
+    return "year";
 }
