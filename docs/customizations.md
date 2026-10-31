@@ -187,3 +187,4 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 - 設定画面の文言を直した。書式の説明「Must include: …」、テンプレートの説明「New daily notes start with this file's contents.」、出す場所の選択肢「All devices / Phones only」と説明「Tablets don't count as phones.」、Open now のボタンの説明を「In the tab title bar of every note. …」にし、見出し「Interaction behavior」「Localization」をなくした〔2026-10-31〕
 - 移行を作った（ADR-0023・0024）。設定画面の一番下の Migrate notes に、書式の変換（前の書式を入れると、その名前のノートを今の書式の名前に変え、リンクも更新する）と、ステッカーのプロパティの付け替え（周期ノートだけ、前のプロパティの値を今のプロパティへ移す）を置いた。どちらも先に一覧を見せて 1 件ずつ外せ、ぶつかるノートは飛ばし、絵文字でない値には印を付ける。書式や Sticker property を変えたあと、前のもののノートが残っている間は、その欄のすぐ下に消えない警告（Rename… / Keep as is）を出す（ADR-0035）〔2026-10-31〕
 - 移行を実際の Vault でテスト用のノートで走らせて確かめた（名前とリンクの変更、ぶつかったノートを飛ばす、ステッカーの付け替え、周期ノートでないノートを巻き込まない、実行中は押せない）。終わったときの通知に、一覧で分けておいたぶつかりの件数も入れた〔2026-10-31〕
+- 周期のオン・オフの連動（日をオフにすると週も、四半期をオンにすると月も、など。元の版の決まり）をなくした。週だけ・四半期だけでも使え、そのときもカレンダーはふつうの日（月）の表を出す。最後の 1 つはオフにできず、通知で知らせる（ADR-0038）〔2026-10-31〕

@@ -16,7 +16,6 @@
 
 ### 機能・不具合
 
-- 〔機能〕周期のオン・オフで、ほかの周期も動く理由を設定画面に出すか決める（[plans/settings-wording.md](plans/settings-wording.md) の H2）— 自分と Claude
 - 〔確かめる〕設定画面の周期の行のトグルと見出しのトグルは、Obsidian の設定画面の作りに頼って足している（[ADR-0036](adr/0036-additions-to-setting-definitions.md)）。
   Obsidian を更新したら、出ているかを見る — 自分
 

@@ -70,10 +70,10 @@
     <!--
         Calendared: upstream showed Day/Month/Year tabs here. The calendar now stays on the day view and
         months are picked from the header popover (MonthPicker). The month/year views below are only
-        reached when the day (or month) period is disabled in settings.
+        reached when the day view (or the month view) isn't shown: days and weeks (or months and quarters) are both off.
     -->
 
-    {#if crrTab === "day" && enabledPeriods.day}
+    {#if crrTab === "day" && tabs.includes("day")}
         <MonthHeader />
         <table class="pnc-calendar">
             <colgroup>
@@ -147,7 +147,7 @@
             </tbody>
         </table>
     {/if}
-    {#if crrTab === "month" && enabledPeriods.month}
+    {#if crrTab === "month" && tabs.includes("month")}
         <YearHeader />
         <table class="pnc-calendar">
             <tbody>
@@ -185,7 +185,7 @@
                                         .month(monthIndex)
                                         .startOf("month")}
                                     granularity="month"
-                                    onSelect={enabledPeriods.day
+                                    onSelect={tabs.includes("day")
                                         ? () => {
                                               displayedDateStore.set(
                                                   $displayedDateStore
@@ -216,7 +216,7 @@
             </tbody>
         </table>
     {/if}
-    {#if crrTab === "year" && enabledPeriods.year}
+    {#if crrTab === "year" && tabs.includes("year")}
         <YearsHeader />
         <table class="pnc-calendar">
             <tbody>
@@ -231,7 +231,7 @@
                                         .year(year)
                                         .startOf("year")}
                                     granularity="year"
-                                    onSelect={enabledPeriods.month
+                                    onSelect={tabs.includes("month")
                                         ? () => {
                                               displayedDateStore.set(
                                                   $displayedDateStore

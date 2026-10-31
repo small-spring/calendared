@@ -270,7 +270,9 @@ export class SettingsTab extends PluginSettingTab {
 
   private setPeriodEnabled(granularity: IGranularity, enabled: boolean) {
     settingsStore.update((s) => ({ ...s, periods: setPeriodEnabled(s.periods, granularity, enabled) }));
-    // other periods can change with it, and the period rows say whether each is on
+    // the last period on stays on: say why its toggle went back
+    if (!enabled && settings().periods[granularity].enabled) new Notice("At least one period needs to stay on.");
+    // the period rows say whether each is on
     this.update();
   }
 

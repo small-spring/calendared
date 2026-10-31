@@ -92,6 +92,13 @@ Vitest 3 には critical が 2 件あった（テスト用サーバー経由の�
   `upstream` の remote は元のコードを見比べる参照用
 - 機能を削ったときは、コードにコメントを残さない（customizations.md に何を削ったかを書く）
 
+### 画面の文（英語）
+
+- Obsidian のガイドラインに従う。見出しは `setHeading()`（宣言で書く設定では `heading`）、文は sentence case、見出しに「settings」と書かない
+- 周期ノートの総称は「periodic note」、周期ごとは小文字の「daily note」など（見出しの「Daily notes」は除く）
+- 説明は「何に効くか」か「気をつけること」だけにする。名前で足りるものは説明をなくす
+- 見出しバーは Obsidian 本体の言葉で「tab title bar」と書く
+
 ## 変更の入ったコミットを探す
 
 文書にはコミット ID を書かない（2026-10-29 に決めた）。元の版を取り込むときの rebase などで ID が変わるのと、
