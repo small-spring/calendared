@@ -16,9 +16,7 @@
 
 ### 機能・不具合
 
-- 機能: コアのデイリーノートの設定を読まないようにする（[ADR-0027](adr/0027-no-core-daily-notes-settings.md)。まだ作っていない）。
-  今は、周期「日」をオフにしていてコアのデイリーノートがオンのとき、その設定を代わりに使う（[spec/overview.md](spec/overview.md) の「隠れたつながり」）。
-  あわせて、起動のたびにコアのデイリーノートをオンにしている所（`src/utils.ts` の `getDailyNotesPlugin`）も見直す — Claude
+（今はなし）
 
 ### 確かめる
 

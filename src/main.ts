@@ -21,7 +21,6 @@ import NavigationManager from './ui/components/navigation/manager';
 import { closeNoteMenu } from './ui/note-menu';
 import { OpenNowActions } from './ui/open-now';
 import { destroyStickerPicker } from './ui/sticker-picker';
-import { getDailyNotesPlugin } from './utils';
 import { CalendarView } from './view';
 import { initEmojiSearch } from './ui/utils/emoji-locale';
 import { HOVER_LINK_SOURCE } from './ui/utils/event-handlers';
@@ -57,9 +56,6 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
 
     // theme
     themeStore.set(this.getTheme());
-
-    // plugins
-    await getDailyNotesPlugin()
 
     // Calendared: remember the format or sticker property a change leaves behind, for the settings' notice (docs/adr/0035)
     this.register(trackMigrationNotices());

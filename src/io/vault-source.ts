@@ -1,8 +1,6 @@
-import { DAILY_NOTES_PLUGIN_ID } from "@/constants";
 import { type App, type CachedMetadata, type EventRef, TFile, TFolder } from "obsidian";
 import { tick } from "svelte";
 import { createSubscriber } from "svelte/reactivity";
-import type { DnPluginSettings } from "./settings";
 
 /**
  * Calendared: the one place the UI reads what Obsidian knows (docs/adr/0016). It keeps no copies: every read
@@ -22,8 +20,6 @@ export type VaultSource = {
     activeFile(): TFile | null;
     /** Every Markdown file in the vault (for counting notes in the settings; the calendar looks notes up by path) */
     markdownFiles(): TFile[];
-    /** Obsidian's core Daily notes plugin, whose settings the day notes follow while the plugin's own are off */
-    dailyNotes(): DnPluginSettings | null;
 };
 
 type Schedule = (run: () => void) => void;
@@ -88,10 +84,6 @@ export function createVaultSource(app: App, schedule: Schedule = nextFrame): Vau
         markdownFiles() {
             subscribe();
             return app.vault.getMarkdownFiles();
-        },
-        dailyNotes() {
-            subscribe();
-            return app.internalPlugins?.getPluginById<DnPluginSettings>(DAILY_NOTES_PLUGIN_ID) ?? null;
         },
     };
 }

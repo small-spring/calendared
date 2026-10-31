@@ -30,7 +30,6 @@ function fakeEvents() {
 function fakeApp() {
     const files = new Map<string, unknown>();
     const caches = new Map<string, unknown>();
-    let dailyNotes: unknown = null;
     let activeFile: unknown = null;
     const vault = Object.assign(fakeEvents(), {
         getAbstractFileByPath: (path: string) => files.get(path) ?? null,
@@ -38,12 +37,10 @@ function fakeApp() {
     });
     const metadataCache = Object.assign(fakeEvents(), { getFileCache: (file: TFile) => caches.get(file.path) ?? null });
     const workspace = Object.assign(fakeEvents(), { getActiveFile: () => activeFile });
-    const internalPlugins = { getPluginById: (id: string) => (id === "daily-notes" ? dailyNotes : null) };
     return {
-        app: { vault, metadataCache, workspace, internalPlugins },
+        app: { vault, metadataCache, workspace },
         files,
         caches,
-        setDailyNotes: (value: unknown) => (dailyNotes = value),
         setActiveFile: (value: unknown) => (activeFile = value),
         listenerCount: () => vault.count() + metadataCache.count() + workspace.count(),
     };
@@ -196,12 +193,5 @@ describe("createVaultSource: Obsidian にそのまま聞く", () => {
         const file = fileAt("日記/2026-10-30.md");
         fake.setActiveFile(file);
         expect(source.activeFile()).toBe(file);
-    });
-
-    it("dailyNotes: Obsidian のコアプラグイン「デイリーノート」を返す（なければ null）", () => {
-        expect(source.dailyNotes()).toBeNull();
-        const dailyNotes = { enabled: true, instance: { options: { format: "YYYY-MM-DD" } } };
-        fake.setDailyNotes(dailyNotes);
-        expect(source.dailyNotes()).toBe(dailyNotes);
     });
 });

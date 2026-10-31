@@ -1,7 +1,4 @@
 // import { Notice, requestUrl } from 'obsidian';
-import { PluginService } from './app-service';
-import { DAILY_NOTES_PLUGIN_ID } from './constants';
-import { DnPluginSettings } from './io/settings';
 
 // export async function fetchWithRetry<T>(url: string, retries = 0): Promise<T | null> {
 //   try {
@@ -38,16 +35,6 @@ export function capitalize(string: string) {
 //
 //   return plugins?.getPlugin(pluginId)
 // }
-
-export async function getDailyNotesPlugin() {
-  const dailyNotesPlugin = PluginService.getPlugin()?.app.internalPlugins?.getPluginById<DnPluginSettings>(DAILY_NOTES_PLUGIN_ID);
-
-  if (!dailyNotesPlugin?.enabled) {
-    (dailyNotesPlugin as { enable?: (e?: unknown) => void }).enable?.()
-  }
-
-  return dailyNotesPlugin;
-}
 
 export function escapeRegex(string: string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

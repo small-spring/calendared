@@ -122,13 +122,8 @@ describe("getNotePath: 周期と日付から、そのノートのパスを決め
             });
         });
 
-        it("Obsidian のコアプラグイン「デイリーノート」がオンなら、その書式とフォルダを使う", () => {
+        it("Obsidian のコアプラグイン「デイリーノート」がオンでも、その設定は使わず、既定の書式とフォルダ / で作る", () => {
             fake.dailyNotes = { enabled: true, instance: { options: { format: "YYYYMMDD", folder: "Daily" } } };
-            expect(getNotePath("day", date("2026-10-30"))).toBe("Daily/20261030.md");
-        });
-
-        it("デイリーノートの書式やフォルダが空なら、既定の書式と / を使う", () => {
-            fake.dailyNotes = { enabled: true, instance: { options: { format: "", folder: "" } } };
             expect(getNotePath("day", date("2026-10-30"))).toBe("2026-10-30.md");
         });
 
@@ -187,13 +182,13 @@ describe("noteAt: 渡した設定で、その日付の周期ノートとステ�
         });
     });
 
-    it("日次ノートを無効にしていれば、窓口から読んだコアプラグイン「デイリーノート」の設定で探す", () => {
+    it("日次ノートを無効にしていても、コアプラグイン「デイリーノート」の設定では探さない", () => {
         const file = fileAt("Daily/20261030.md");
         fake.files.set(file.path, file);
         fake.dailyNotes = { enabled: true, instance: { options: { format: "YYYYMMDD", folder: "Daily" } } };
         const passed = settings.initial();
         passed.periods.day.enabled = false;
-        expect(noteAt("day", date("2026-10-30"), passed)).toEqual({ file, sticker: null });
+        expect(noteAt("day", date("2026-10-30"), passed)).toEqual({ file: null, sticker: null });
     });
 });
 
@@ -211,12 +206,12 @@ describe("notesWithFormatIn: 設定画面の「書式ごとのファイル数」
         expect(notesWithFormatIn("day", "YYYYMMDD", settings.initial())).toEqual(["日記/20261030.md"]);
     });
 
-    it("日次ノートを無効にしていれば、コアプラグイン「デイリーノート」のフォルダで数える", () => {
+    it("日次ノートを無効にしていれば、コアプラグイン「デイリーノート」がオンでも、既定のフォルダ /（Vault 全体）で数える", () => {
         fake.files.set("Daily/2026-10-30.md", note("Daily/2026-10-30.md"));
         fake.files.set("ほか/2026-10-31.md", note("ほか/2026-10-31.md"));
         fake.dailyNotes = { enabled: true, instance: { options: { format: "YYYY-MM-DD", folder: "Daily" } } };
         const passed = settings.initial();
         passed.periods.day.enabled = false;
-        expect(notesWithFormatIn("day", "YYYY-MM-DD", passed)).toEqual(["Daily/2026-10-30.md"]);
+        expect(notesWithFormatIn("day", "YYYY-MM-DD", passed)).toEqual(["Daily/2026-10-30.md", "ほか/2026-10-31.md"]);
     });
 });

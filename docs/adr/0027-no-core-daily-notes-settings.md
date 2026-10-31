@@ -4,7 +4,7 @@ title: "コアプラグイン「デイリーノート」の設定は使わない
 status: 採用
 date: 2026-10-30
 area: 設定
-implemented: false
+implemented: true
 aliases:
   - ADR-0027
   - settings ADR-C8

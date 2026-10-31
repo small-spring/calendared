@@ -1,7 +1,6 @@
 import { normalizePath, Notice, TFile } from "obsidian";
 import { IGranularity } from "./types";
-import { type DnPluginSettings, normalizePeriodSettings } from "./settings";
-import { DAILY_NOTES_PLUGIN_ID } from "@/constants";
+import { normalizePeriodSettings } from "./settings";
 import { stickerFrom, type TSticker } from "@/stickers";
 import { vaultSource } from "./vault-source";
 import { notesWithFormat } from "./notes-by-format";
@@ -48,21 +47,19 @@ async function ensureTemplateExists(path: string) {
 }
 
 export function getNotePath(granularity: IGranularity, date: moment.Moment) {
-  const dailyNotesPlugin = PluginService.getPlugin()?.app.internalPlugins?.getPluginById<DnPluginSettings>(DAILY_NOTES_PLUGIN_ID);
-  return periodNotePath(granularity, date, get(settingsStore), dailyNotesPlugin);
+  return periodNotePath(granularity, date, get(settingsStore));
 }
 
 /**
- * Calendared: getNotePath with what it reads as arguments, for the UI to pass the settings it reads reactively and the
- * Daily notes plugin from the vault source (docs/adr/0016)
+ * Calendared: getNotePath with the settings as an argument, for the UI to pass the settings it reads reactively
+ * (docs/adr/0016)
  */
 export function periodNotePath(
   granularity: IGranularity,
   date: moment.Moment,
   { periods, localeSettings }: Pick<ISettings, "periods" | "localeSettings">,
-  dailyNotesPlugin: DnPluginSettings | null | undefined,
 ): string {
-  const { settings: { format, folder } } = normalizePeriodSettings(granularity, periods, dailyNotesPlugin);
+  const { settings: { format, folder } } = normalizePeriodSettings(granularity, periods);
   return notePath(granularity, date, { folder, format }, periodRulesFor({ periods, localeSettings }));
 }
 
@@ -85,7 +82,7 @@ export function noteAt(
   settings: Pick<ISettings, "periods" | "localeSettings" | "stickersEnabled" | "stickerProperty">,
 ): TFileData {
   const vault = vaultSource();
-  const file = vault.fileAt(periodNotePath(granularity, date, settings, vault.dailyNotes()));
+  const file = vault.fileAt(periodNotePath(granularity, date, settings));
   return { file, sticker: file && stickerFrom(vault.metadataOf(file), settings) };
 }
 
@@ -100,7 +97,7 @@ export function notesWithFormatIn(
   settings: Pick<ISettings, "periods" | "localeSettings">,
 ): string[] {
   const vault = vaultSource();
-  const { settings: { folder } } = normalizePeriodSettings(granularity, settings.periods, vault.dailyNotes());
+  const { settings: { folder } } = normalizePeriodSettings(granularity, settings.periods);
   return notesWithFormat(vault.markdownFiles(), granularity, { folder, format }, periodRulesFor(settings));
 }
 
