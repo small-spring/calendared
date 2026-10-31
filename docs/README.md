@@ -25,7 +25,6 @@ Calendared の開発向けの文書（日本語）。使う人向けの説明は
 - [todo.md](todo.md): 作業の一覧（機能・不具合・公開の手続き・いつか・見送ったこと）。やることはここだけに書く
 - [plans/](plans/): これから作るものの設計（目指す姿と、決めることの一覧）
   - [plans/sticker-kinds.md](plans/sticker-kinds.md): ステッカーを複数の種類にする（いつか）の設計
-  - [plans/navigation.md](plans/navigation.md): ノートの間の移動（タイムライン・Open now・カレンダー）の要求と案
 
 ## やり方・参考
 
@@ -42,6 +41,7 @@ Calendared の開発向けの文書（日本語）。使う人向けの説明は
 
 - [archive/](archive/): 済んだ手続きや、役目を終えた文書
   - [archive/device-testing-setup.md](archive/device-testing-setup.md): 実機で試すための一度だけの準備
+  - [archive/navigation.md](archive/navigation.md): ノートの間の移動の計画（要求の表。決めたことは ADR-0031）
 
 ## 置き場所の決まり
 

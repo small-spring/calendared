@@ -4,7 +4,7 @@ title: "ほかのプラグインの設定は読み取らず、いつも Calendar
 status: 採用
 date: 2026-10-31
 area: 設定
-implemented: false
+implemented: true
 aliases:
   - ADR-0034
 ---
