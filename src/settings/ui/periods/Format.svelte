@@ -6,6 +6,7 @@
   import { settingsStore, type PeriodSettings } from "@/settings";
   import { cn } from "@/ui/utils";
   import { debounce } from "obsidian";
+  import { formatPeriod, periodOf, periodRulesFor } from "@/periods";
   import { weekSchemeFor } from "@/weeks";
   import { type Writable } from "svelte/store";
   import FilepathsCount from "./FilepathsCount.svelte";
@@ -38,11 +39,10 @@
     return validateFormat(value, granularity);
   });
 
-  // Calendared: weekly names come from the week scheme (the row's Monday), not from today's date
+  // Calendared: today's period named as its note would be (weeks by the row's Monday, fiscal quarters and years)
   const previewName = (formatValue: string) => {
-    if (granularity !== "week") return window.moment().format(formatValue);
-    const weeks = weekSchemeFor($settingsStore.localeSettings);
-    return weeks.format(weeks.weekOf(window.moment()), formatValue);
+    const rules = periodRulesFor($settingsStore);
+    return formatPeriod(periodOf(granularity, window.moment(), rules), formatValue, rules);
   };
   // Calendared: a weekly format also shows the week at New Year, where names break most often
   const newYearPreview = (formatValue: string) => {

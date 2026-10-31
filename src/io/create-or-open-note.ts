@@ -9,7 +9,7 @@ import { type IGranularity } from "./types";
 import { ensureFolderExists, getNotePath, getTemplateInfo } from "./vault";
 import { PluginService } from "@/app-service";
 import { capitalize } from "@/utils";
-import { weekSchemeFor } from "@/weeks";
+import { periodRulesFor } from "@/periods";
 
 export async function createOrOpenNote({
   leaf,
@@ -24,20 +24,9 @@ export async function createOrOpenNote({
   granularity: IGranularity;
   confirmBeforeCreateOverride?: boolean;
 }) {
-  const { settings: { format } } = getNormalizedPeriodSettings(granularity);
-
-  const filename = date.format(format);
   const normalizedPath = getNotePath(granularity, date);
-
-  // console.log("🎉🎉🎉 [createOrOpenNote()] 🎉🎉🎉");
-  // console.table({
-  //     granularity,
-  //     format,
-  //     filename,
-  //     normalizedPath,
-  //     date,
-  //     formattedDate: date.format("YYYY-MM-DD, [W]W, [w]w")
-  // })
+  // Calendared: the name the note gets, not moment's (moment writes calendar quarters and years; docs/adr/0039)
+  const filename = normalizedPath.slice(normalizedPath.lastIndexOf("/") + 1).replace(/\.md$/, "");
 
   async function openFile(file: TFile | undefined | null) {
     if (file) {
@@ -100,7 +89,7 @@ export async function createNote(granularity: IGranularity, date: moment.Moment)
   try {
     const file = await PluginService.getPlugin()?.app.vault.create(
       normalizedPath,
-      replaceTemplateContents(date, format, templateContents, weekSchemeFor(get(settingsStore).localeSettings))
+      replaceTemplateContents(granularity, date, format, templateContents, periodRulesFor(get(settingsStore)))
     );
     if (!file || !(file instanceof TFile)) return;
 

@@ -1,4 +1,4 @@
-import type { WeekScheme } from '@/weeks';
+import { formatPeriod, periodOf, type PeriodRules } from '@/periods';
 import type { IGranularity, IPeriodicity } from './types';
 
 
@@ -44,19 +44,21 @@ const REGEX = (function generateRegex(): RegExp {
  * @param date The main date to use for replacements
  * @param defaultFormat The default format to use when no custom format is specified
  * @param template The template string containing placeholders to be replaced
+ * @param rules Calendared: how periods are cut (the week start, the quarters' and years' cycles)
  * @returns The template string with all placeholders replaced by formatted date strings
  */
 export function replaceTemplateContents(
+  granularity: IGranularity,
   date: moment.Moment,
   defaultFormat: string,
   template: string,
-  weeks: WeekScheme,
+  rules: PeriodRules,
 ): string {
   const now = window.moment();
   // Calendared: weekdays are taken from the note's week as the calendar shows it (the week scheme's row,
   // docs/spec/periods.md). Upstream used moment's language week start (Sunday in Japanese)
   const weekdays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-  const rowStart = weeks.rangeOf(weeks.weekOf(date))!.start;
+  const rowStart = rules.weeks.rangeOf(rules.weeks.weekOf(date))!.start;
 
   return template.replace(REGEX,
     (match, type: string | undefined | null) => {
@@ -68,7 +70,7 @@ export function replaceTemplateContents(
       let modifiedDefaultFormat = defaultFormat;
 
       const minusIndex = match.indexOf('-');
-      const plusIndex = match.indexOf('-');
+      const plusIndex = match.indexOf('+');
       const colonIndex = match.indexOf(':');
       let delta = "";
       let unit = "";
@@ -117,9 +119,10 @@ export function replaceTemplateContents(
         momentDate.add(parseInt(delta, 10), unit as moment.DurationInputArg2);
       }
 
-      return momentDate.format(
-        format || modifiedDefaultFormat
-      );
+      if (format || type.toLowerCase() === 'time') return momentDate.format(format || modifiedDefaultFormat);
+      // Calendared: with the period's format, write the name of the period containing the date, as the note's own name
+      // is written (fiscal quarters and years, weeks by the row's Monday; docs/adr/0039)
+      return formatPeriod(periodOf(granularity, momentDate, rules), defaultFormat, rules);
     }
   );
 }

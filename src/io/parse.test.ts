@@ -1,6 +1,7 @@
 import moment from "moment";
 import { describe, expect, it, vi } from "vitest";
 import { createIsoWeekScheme, type WeekScheme } from "@/weeks";
+import { periodRules } from "@/periods";
 import { replaceTemplateContents } from "./parse";
 
 // Characterization tests: they pin down how template placeholders behave today, so the code can be reworked safely.
@@ -12,7 +13,7 @@ const noteDate = () => moment("2026-10-29", DEFAULT_FORMAT);
 const sundayWeeks = createIsoWeekScheme(0);
 const mondayWeeks = createIsoWeekScheme(1);
 const replace = (template: string, date = noteDate(), weeks: WeekScheme = sundayWeeks) =>
-    replaceTemplateContents(date, DEFAULT_FORMAT, template, weeks);
+    replaceTemplateContents("day", date, DEFAULT_FORMAT, template, periodRules(weeks));
 
 describe("replaceTemplateContents: ノートの日付", () => {
     it("{{date}} と {{title}} はノートの日付を既定の書式で書く", () => {
@@ -36,6 +37,10 @@ describe("replaceTemplateContents: ノートの日付", () => {
         expect(replace("{{date+1d}}")).toBe("2026-10-30");
         expect(replace("{{date-1M:YYYY-MM}}")).toBe("2026-09");
         expect(replace("{{date+1w}}")).toBe("2026-11-05");
+    });
+
+    it("+ でずらし、: のあとの書式に - があっても、ずらす", () => {
+        expect(replace("{{date+1d:YYYY-MM-DD}}")).toBe("2026-10-30");
     });
 
     it("1 行に複数あっても、それぞれ置き換える", () => {
@@ -103,5 +108,31 @@ describe("replaceTemplateContents: 置き換えないもの", () => {
 
     it("空のテンプレートは空のまま", () => {
         expect(replace("")).toBe("");
+    });
+});
+
+describe("replaceTemplateContents: 書式を書かないときは、ノートの名前と同じ決まりで書く（docs/adr/0039）", () => {
+    const fiscal = periodRules(sundayWeeks, {
+        quarter: { startMonth: 5, yearInName: "start" },
+        year: { startMonth: 5, yearInName: "end" },
+    });
+    const march = moment("2027-03-10", DEFAULT_FORMAT);
+
+    it("四半期・年を 1 月以外から始めると、{{title}}・{{date}} は年度の数字で書く", () => {
+        expect(replaceTemplateContents("quarter", march, "YYYY-[Q]Q", "{{title}} {{date}}", fiscal)).toBe("2026-Q4 2026-Q4");
+        expect(replaceTemplateContents("year", march, "[FY]YYYY", "{{title}}", fiscal)).toBe("FY2027");
+    });
+
+    it("ずらしたときも、ずらした先の期間の名前", () => {
+        expect(replaceTemplateContents("quarter", march, "YYYY-[Q]Q", "{{date+3M}}", fiscal)).toBe("2027-Q1");
+    });
+
+    it(": のあとに書式を書けば、暦の日付として moment で書く", () => {
+        expect(replaceTemplateContents("quarter", march, "YYYY-[Q]Q", "{{date:YYYY-[Q]Q}}", fiscal)).toBe("2027-Q1");
+    });
+
+    it("週のノートの {{title}} は、行の月曜日の ISO の週（日曜はじまりの行の日曜日でも）", () => {
+        const sunday = moment("2026-11-01", DEFAULT_FORMAT);
+        expect(replaceTemplateContents("week", sunday, "GGGG-[W]WW", "{{title}}", fiscal)).toBe("2026-W45");
     });
 });

@@ -150,7 +150,7 @@ Pick a template file for each period. These placeholders are replaced when a not
 
 | Placeholder | Becomes |
 | --- | --- |
-| `{{title}}`, `{{date}}` | The note's date, in the period's format |
+| `{{title}}`, `{{date}}` | The note's name (the period's format, with fiscal quarters and years) |
 | `{{time}}`, `{{currentDate}}` | The time and date now |
 | `{{monday}}` … `{{sunday}}` | That day in the note's week |
 | `{{date+1d}}`, `{{date-1w}}` | Shifted dates |
