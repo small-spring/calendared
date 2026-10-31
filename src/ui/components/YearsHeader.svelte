@@ -35,7 +35,6 @@
     }}
 >
     {#snippet leftTitleSnippet()}
-        <!-- Calendared: always uses upstream's minimal-mode size -->
         <div
             id="years-range"
             class="!text-[--color-text-header-title] text-xl font-semibold mb-2"

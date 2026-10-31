@@ -35,10 +35,6 @@
     textClassName?: string;
     /** called after the title is clicked */
     onOpen?: () => void;
-    /** show the "note exists" dot under the label (off where there's no room, e.g. the timeline heading) */
-    showDot?: boolean;
-    /** text to show instead of `date.format(title.formatValue)` (e.g. a month name formatted with Intl) */
-    text?: string;
     /** show the note's sticker at the top-right of the label, like on the date buttons (see docs/adr/0008) */
     showSticker?: boolean;
   }
@@ -48,8 +44,6 @@
     className = "",
     textClassName = "",
     onOpen,
-    showDot = true,
-    text,
     showSticker = false,
   }: Props = $props();
 
@@ -112,21 +106,19 @@
       }}
     >
       <span class="relative">
-        {text ?? title.text ?? inLocale(date, $settingsStore.localeSettings.localeOverride).format(title.formatValue)}
+        {title.text ?? inLocale(date, $settingsStore.localeSettings.localeOverride).format(title.formatValue)}
         {#if showSticker && title.fileData.sticker}
           <!-- the emoji keeps the date buttons' small size, whatever the title's size -->
           <span class="text-xs font-normal"><Sticker sticker={title.fileData.sticker.emoji} /></span>
         {/if}
       </span>
     </Button>
-    {#if showDot}
-      <div class="h-[8px] leading-[0]">
-        <Dot
-          className="w-1"
-          isVisible={!!title.fileData.file}
-          isFilled={!!title.fileData.file}
-        />
-      </div>
-    {/if}
+    <div class="h-[8px] leading-[0]">
+      <Dot
+        className="w-1"
+        isVisible={!!title.fileData.file}
+        isFilled={!!title.fileData.file}
+      />
+    </div>
   </div>
 </div>

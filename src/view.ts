@@ -36,7 +36,6 @@ export class CalendarView extends ItemView {
     return Promise.resolve();
   }
 
-  // TODO: might use user defined icon, like day planner plugin does
   getIcon() {
     return CALENDAR_LUCIDE_ICON;
   }

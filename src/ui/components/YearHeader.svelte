@@ -1,7 +1,7 @@
 <script lang="ts">
     import { noteAt } from "@/io";
     import { settingsStore } from "@/settings";
-    import { displayedDateStore, yearsRanges } from "@/stores";
+    import { displayedDateStore } from "@/stores";
     import { todayStore } from "@/stores/dates";
     import { Header } from "./core";
     import { crumbText, samePeriod } from "@/navigation";
@@ -12,13 +12,6 @@
     // Calendared: the year by its own start month, written "2026–27" if it isn't January (docs/adr/0039)
     let rules = $derived(periodRulesFor($settingsStore));
     let isToday = $derived(samePeriod("year", $displayedDateStore, $todayStore, rules));
-
-    $effect.pre(() => {
-        if ($displayedDateStore) {
-            // add new ranges or update existing ones every time displayed date changes
-            yearsRanges.selectOrCreateRanges();
-        }
-    });
 </script>
 
 <Header
@@ -44,6 +37,4 @@
             );
         },
     }}
->
-    <!-- Calendared: upstream also showed the current 12-year range (e.g. "2020-2031") on the right; removed -->
-</Header>
+/>

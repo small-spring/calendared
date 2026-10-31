@@ -1,7 +1,7 @@
 import { PluginService } from "@/app-service";
 import { type TWindowEvents, type WindowEventHandler } from "@/ui/types";
 import { autoUpdate, computePosition, flip } from "@floating-ui/dom";
-import { debounce, PopoverSuggest, Scope, TAbstractFile, TFile, TFolder } from "obsidian";
+import { debounce, PopoverSuggest, Scope, TAbstractFile, TFile } from "obsidian";
 
 interface Suggestion<T> {
   value: T,
@@ -197,40 +197,6 @@ abstract class BaseSuggest<T> extends PopoverSuggest<T> {
   }
 
   abstract getSuggestions(inputVal: string, ...props: unknown[]): T[];
-}
-
-export class FolderSuggest extends BaseSuggest<TFolder> {
-  getSuggestions(inputVal: string): TFolder[] {
-    const allVaultFiles = PluginService.getPlugin()?.app.vault.getAllLoadedFiles();
-    const folders: TFolder[] = [];
-
-    allVaultFiles?.forEach((file: TAbstractFile) => {
-      if (
-        file instanceof TFolder &&
-        file.path.toLowerCase().contains(inputVal.toLowerCase())
-      ) {
-        folders.push(file);
-      }
-    });
-
-    return folders;
-  }
-
-  /**
-      * Set content of each individual suggestion div element
-      *
-      * called for each suggestion item from getSuggestions() in renderSuggestions()
-  */
-  renderSuggestion(file: TFolder, el: HTMLElement): void {
-    el.setText(file.path);
-  }
-
-  selectSuggestion(value: TFolder, _: KeyboardEvent | MouseEvent): void {
-    this.inputEl.value = value.path;
-    this.inputEl.trigger("input");
-    this.suggestionSelected = true;
-    this.close();
-  }
 }
 
 export class FileSuggest extends BaseSuggest<TFile> {

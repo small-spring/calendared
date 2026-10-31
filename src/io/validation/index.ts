@@ -8,17 +8,6 @@ import { PluginService } from '@/app-service';
 import { vaultSource } from '../vault-source';
 import { validateFormat } from './format';
 
-export function removeEscapedCharacters(format: string): string {
-    const withoutBrackets = format.replace(/\[[^\]]*\]/g, ''); // remove everything within brackets
-
-    return withoutBrackets.replace(/\\./g, '');
-}
-
-export function getBasename(format: string): string {
-    const isTemplateNested = format.indexOf('/') !== -1;
-    return isTemplateNested ? format.split('/').pop() ?? '' : format;
-}
-
 export function isValidPeriodicNote(fileName: string, customGranularities = granularities as unknown as IGranularity[])
     : { isValid: boolean, granularity: IGranularity, date: moment.Moment, period: PeriodName, format: string } | { isValid: null, granularity: null, date: null, period: null, format: null } {
     // Calendared: every granularity is read as a period name through the period rules (docs/spec/periods.md, docs/adr/0039).
@@ -67,13 +56,5 @@ export function validateTemplate(template: string): string {
 
     return "";
 }
-export function isTemplateValid(template: string): boolean {
-    if (!template) {
-        return false;
-    }
-
-    return PluginService.getPlugin()?.app.vault.getAbstractFileByPath(template) !== null;
-}
-
 export * from "./format"
 export * from './constants'

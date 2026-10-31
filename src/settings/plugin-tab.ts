@@ -197,7 +197,7 @@ export class SettingsTab extends PluginSettingTab {
       },
       {
         name: "Open now button",
-        desc: "In the tab title bar of every note. Opens today's note, or this week's if daily notes are off.",
+        desc: "In the tab title bar of every note. Opens the current note of the shortest period you use (today's note if daily notes are on).",
         render: (setting) => {
           setting.setName(nameWithIcon(openNowIcon(), "Open now button"));
           setting.addToggle((toggle) =>
@@ -449,7 +449,6 @@ export class SettingsTab extends PluginSettingTab {
   }
 
   // Calendared: turning stickers off hides everything about them (display, header button, menu item, commands).
-  // Upstream's prefix / migrate / backup settings were removed
   private stickerGroups(): SettingDefinitionItem[] {
     return [
       {

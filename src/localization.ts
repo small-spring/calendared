@@ -18,4 +18,3 @@ export const sysLocaleKey =
 
 const sysLocaleMoment = window.moment().clone().locale(sysLocaleKey);
 export const sysWeekStartId = sysLocaleMoment.localeData().firstDayOfWeek();
-export const sysWeekStartName = defaultWeekdays[sysWeekStartId];

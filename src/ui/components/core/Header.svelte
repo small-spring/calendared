@@ -98,7 +98,6 @@
 <!--
   Calendared: upstream laid this out as a big left title, a right title, and ‹ • › below.
   Now one row: [left title ‹ ›] [right title ⌄] ... [Open now]
-  Title sizes follow upstream's minimal mode.
 -->
 
 <!-- items-end: arrows and icons sit on the titles' bottom line (titles reserve 8px below for the dot) -->

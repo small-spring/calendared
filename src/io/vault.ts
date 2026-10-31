@@ -7,7 +7,6 @@ import { notesWithFormat } from "./notes-by-format";
 import { type ISettings, settingsStore } from "@/settings";
 import { get } from "svelte/store";
 import { PluginService } from "@/app-service";
-import type { IFoldInfo } from "./types";
 import { join, notePath } from './note-path';
 import { periodRulesFor } from '@/periods';
 
@@ -103,12 +102,12 @@ export function notesWithFormatIn(
 
 export async function getTemplateInfo(
   template: string
-): Promise<[string, IFoldInfo | null]> {
+): Promise<string> {
   const app = PluginService.getPlugin()?.app;
 
   const normalizedPath = normalizePath(template);
   if (normalizedPath === "/") {
-    return Promise.resolve(["", null]);
+    return "";
   }
   await ensureTemplateExists(normalizedPath);
 
@@ -116,32 +115,16 @@ export async function getTemplateInfo(
     // get First file matching given normalizedPath
     const abstractFile = app?.vault.getAbstractFileByPath(normalizedPath);
 
-    let templateFile = null;
-    let contents = "";
     if (abstractFile instanceof TFile) {
-      templateFile = abstractFile
-      contents = await app?.vault.cachedRead(templateFile) || "";
+      return await app?.vault.cachedRead(abstractFile) || "";
     }
-
-    const foldInfo = PluginService.getPlugin()?.app.foldManager.load(templateFile) ?? null;
-    return [contents, foldInfo];
+    return "";
   } catch (err) {
     console.error(
       `Failed to read the daily note template '${normalizedPath}'`,
       err
     );
     new Notice("Failed to read the daily note template");
-    return ["", null];
-  }
-}
-
-export async function modifyFile(file: TFile, updatedContent: string) {
-  const app = PluginService.getPlugin()?.app
-  const activeEditor = app?.workspace.activeEditor
-  const editor = activeEditor?.editor
-  if (editor && activeEditor.file === file) {
-    editor.setValue(updatedContent)
-  } else {
-    await app?.vault.process(file, (crrContent) => updatedContent)
+    return "";
   }
 }

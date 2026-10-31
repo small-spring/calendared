@@ -75,8 +75,8 @@
 
 <div id="pnc-container" class="px-4 !pt-2" bind:this={containerEl}>
     <!--
-        Calendared: upstream showed Day/Month/Year tabs here. The calendar now stays on the day view and
-        months are picked from the header popover (MonthPicker). The month/year views below are only
+        Calendared: the calendar stays on the day view, and months are picked from the header popover
+        (MonthPicker). The month/year views below are only
         reached when the day view (or the month view) isn't shown: days and weeks (or months and quarters) are both off.
     -->
 

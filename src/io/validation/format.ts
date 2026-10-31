@@ -167,8 +167,6 @@ function isAmbiguousFormat(
           } `;
       }
       break;
-    // default:
-    //   return errorMessage + `Unknown granularity: ${granularity} `;
   }
 
   return null;

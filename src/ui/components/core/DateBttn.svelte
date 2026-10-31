@@ -20,17 +20,14 @@
     // Properties
     date: moment.Moment;
     granularity: IGranularity;
-    isActiveOverride?: boolean | null;
     displaySticker?: boolean;
-    displayDot?: boolean;
     className?: string;
     dotContainerClassName?: string;
     children?: Snippet;
-    text?: Snippet;
     ignoreAdjacentMonth?: boolean;
     /** Calendared: when set, a click calls this instead of opening the note */
     onSelect?: (() => void) | null;
-    /** Calendared: the calendar's smaller dot (upstream's minimal mode, now the only calendar layout) */
+    /** Calendared: the calendar's smaller dot */
     compactDot?: boolean;
   }
 
@@ -38,13 +35,10 @@
     date,
     granularity,
     displaySticker = true,
-    displayDot = true,
     className = "",
     dotContainerClassName = "",
     children,
-    text,
     ignoreAdjacentMonth = false,
-    isActiveOverride = null,
     onSelect = null,
     compactDot = false,
   }: Props = $props();
@@ -60,7 +54,7 @@
       return false;
     }
 
-    return isActiveOverride ?? openFile.path === file.path;
+    return openFile.path === file.path;
   });
 
   // Calendared: a quarter or year by its own start month (docs/adr/0039)
@@ -125,21 +119,18 @@
     });
   }}
 >
-  {@render text?.()}
   <span id="date-text" class="relative">
     {#if displaySticker}
       <Sticker sticker={sticker?.emoji} />
     {/if}
     {@render children?.()}
   </span>
-  {#if displayDot}
-    <div class={cn("absolute leading-[0]", dotContainerClassName)}>
-      <Dot
-        className={cn((compactDot || Platform.isPhone) && "w-1")}
-        isVisible={!!file}
-        isFilled={!!file}
-        {isActive}
-      />
-    </div>
-  {/if}
+  <div class={cn("absolute leading-[0]", dotContainerClassName)}>
+    <Dot
+      className={cn((compactDot || Platform.isPhone) && "w-1")}
+      isVisible={!!file}
+      isFilled={!!file}
+      {isActive}
+    />
+  </div>
 </Button>

@@ -1,5 +1,5 @@
 import { LEAF_TYPE } from '@/constants';
-import { TFile, WorkspaceLeaf, Platform } from 'obsidian';
+import { WorkspaceLeaf, Platform } from 'obsidian';
 import { PluginService } from '@/app-service';
 
 export class ViewManager {
@@ -55,24 +55,7 @@ export class ViewManager {
     return 'root';
   }
 
-  static getLeafFilePath(workspaceLeaf: WorkspaceLeaf | null) {
-    return workspaceLeaf?.view.getState().file as string | undefined || (workspaceLeaf?.view as unknown as { file?: { path?: string } })?.file?.path
-  }
-
   static getMainLeaf() {
     return PluginService.getPlugin()?.app.workspace.getLeavesOfType(LEAF_TYPE)[0] as WorkspaceLeaf | null
-  }
-
-  static getFileFromLeaf(leaf?: WorkspaceLeaf | null, _file?: TFile) {
-    if (!leaf) return;
-
-    const leafFilepath = _file?.path || this.getLeafFilePath(leaf);
-    if (!leafFilepath) return;
-
-    const file = PluginService.getPlugin()?.app.vault.getAbstractFileByPath(leafFilepath);
-    if (file && !(file instanceof TFile)) return;
-    if (!file) return;
-
-    return file
   }
 }

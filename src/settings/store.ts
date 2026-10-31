@@ -8,11 +8,6 @@ function createEnhancedStore(initialValue: ISettings) {
     update,
     set,
     subscribe,
-
-    // Bulk operations
-    reset() {
-      set(DEFAULT_SETTINGS);
-    },
   };
 }
 

@@ -2,32 +2,11 @@ import 'obsidian';
 
 export type IGranularity = 'day' | 'week' | 'month' | 'quarter' | 'year';
 export type IPeriodicity = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
-export interface IPeriodicNoteSettings {
-  folder: string;
-  format: string;
-  template: string;
-}
-
-interface IFold {
-  from: number;
-  to: number;
-}
-export interface IFoldInfo {
-  folds: IFold[];
-}
 
 declare module 'obsidian' {
   interface App {
     internalPlugins: {
       getPluginById<T = unknown>(id: string): T | undefined;
-    }
-    foldManager: {
-      load(file: TFile | null): IFoldInfo | null
-    }
-    plugins: {
-      enabledPlugins: Set<string>;
-      enablePluginAndSave(id: string): Promise<void>;
-      getPlugin(id: string): Plugin | undefined;
     }
     setting?: {
       activeTab?: Record<string, unknown>;
@@ -45,10 +24,5 @@ declare module 'obsidian' {
     id: string;
     height?: number;
     containerEl?: HTMLElement;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- must match Obsidian's own declaration to merge
-  interface FuzzySuggestModal<T> {
-    updateSuggestions: () => void
   }
 }

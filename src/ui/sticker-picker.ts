@@ -1,5 +1,4 @@
-// Calendared: the sticker picker (StickerPicker.svelte) as one box mounted on document.body. Upstream split it into
-// a generic popover behavior shared with the floating calendar and a sticker subclass; only the picker is left
+// Calendared: the sticker picker (StickerPicker.svelte) as one box mounted on document.body
 import { MODAL_CLASS, STICKER_PICKER_ID } from "@/constants";
 import { stickerPickerNoteStore } from "@/stores/sticker-picker";
 import StickerPickerComponent from "@/ui/components/StickerPicker.svelte";
