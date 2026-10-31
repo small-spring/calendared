@@ -21,25 +21,15 @@
 
 ### 確かめる
 
-- **iPhone での確認**（必須）: 見え方、タップ、右クリックの代わり（長押し）、ホバーを前提にした機能。入れ方は
-  [guides/device-testing.md](guides/device-testing.md)。2026-10-31 に、パンくず・ミニカレンダー・Open now の見え方は確かめた — 自分
 - Windows での確認（任意）— 自分
 
 ## 2. パートナーに使ってもらう
 
-見せる前に、manifest と README を自分の版として整える（2026-10-30 に決めた）。
+パートナーはリポジトリのコントリビューターなので、自分でビルドして入れてもらう（2026-10-31 に決めた）。
+入れ方と使い方は [guides/usage-ja.md](guides/usage-ja.md)。
 
-- manifest.json と package.json
-  - `description` を書き直す。今は 2026-10-30 に入れた仮の文（「Keep your days, weeks, months, and years calendared. …」）。
-    機能を詰め終えたら、README と一緒に見直す — Claude、決めるのは自分
-- README を英語で、今の仕様に合わせて書き直す（書くことは [guides/publishing.md](guides/publishing.md) の「README に書くこと」）。
-  機能を詰め終えてから書く。スクリーンショットは自分 — Claude
-  - おすすめのキーの割り当てを載せる（既定のホットキーは付けない。公開のガイドラインに従う）。例: 今日のノート Cmd+D、前後のノート Cmd+← / →、
-    今月のノート Cmd+M、カレンダーの表示 Cmd+Shift+C（自分の Vault の割り当て）。Cmd+← / → は編集中の行頭・行末への移動と重なることも書き添える
-- 渡し方を決める。リポジトリは公開していないので、BRAT で入れるには GitHub のトークンが要る。
-  手軽なのは、`main.js`・`manifest.json`・`styles.css` を Vault の `.obsidian/plugins/calendared/` に置く形（[guides/device-testing.md](guides/device-testing.md)）。
-  リポジトリが非公開の間は、絵文字の検索の言語を追加できない（jsDelivr から取れない）ので、要るなら言語のファイルも一緒に渡す — 自分と Claude
-- 使い方の短い説明を用意する（日本語。README の要約でよい）— Claude
+- README のスクリーンショットを撮って `docs/screenshots/` に置き、README のコメントを外す（撮るものは [screenshots/README.md](screenshots/README.md)）— 自分
+- パートナーに [guides/usage-ja.md](guides/usage-ja.md) を渡して、入れてもらう — 自分
 - しばらく使ってもらい、感想を聞く。聞きたいこと: 何に使ったか、わかりにくかった所、要らない機能、欲しい機能 — 自分
 - もらった感想をこの一覧に振り分ける（直す・作る・見送る）— 自分と Claude
 
@@ -64,9 +54,8 @@
 - `versions.json`（どの版がどの `minAppVersion` から動くかの対応表）を作るか決める。任意 — Claude
 - リポジトリの整理
   - `CHANGELOG.md`: 今は元の版の履歴。消して、自分の版の最初のバージョンから英語で書き始める案 — 決めるのは自分
-  - release-please（`release-please-config.json`、`.release-please-manifest.json`）を使い続けるか決める。使わないなら消す — 自分
-  - `.github/workflows/main.yml` を作り直す。今は元の版向け（id が `periodic-notes-calendar`、`main` ブランチ、`secrets.PAT` が前提）。
-    例: タグを push したら、テストとビルドをして、Release に `main.js`・`manifest.json`・`styles.css` を載せる — Claude
+  - release-please の設定（`release-please-config.json`、`.release-please-manifest.json`）を消すか決める。2026-10-31 にワークフローを
+    作り直して、もう使っていない — 自分
   - 既定のブランチを決める（`custom` のままか、`main` にするか）。審査は既定のブランチの先頭の `manifest.json` を読む — 自分
   - `upstream` の remote を、元のコードを見比べる参照用に残すか決める — 自分
   - GitHub のリポジトリ（small-spring/calendared）を公開にする。2026-10-30 の時点では外から見えない。README とライセンス表示が済んでから — 自分
@@ -75,7 +64,7 @@
   - Release から入れて動くか。BRAT でこのリポジトリを指定して入れるのが手軽 — 自分
   - 絵文字の検索の言語を、本番の版で jsDelivr から追加できるか（リポジトリを公開にしてから。取れないときに GitHub の raw から取れるかも）— 自分
 - 申請（手順は guides/publishing.md の「申請の手順」）
-  - Release を作る — 自分（ワークフローを作り直したら Claude）
+  - Release を作る。`manifest.json` の `version` と同じタグを push すると、ワークフローが下書きを作る（[guides/development.md](guides/development.md) の「Release」）— 自分
   - community.obsidian.md でプラグインを登録する — 自分
   - 自動の審査で指摘されたら直す — Claude と自分
 - 公開が済んだら、文書を切り替える — Claude

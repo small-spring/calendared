@@ -1,361 +1,195 @@
 > [!NOTE]
-> **Calendared** — a personal fork of [luiisca/obsidian-periodic-notes-calendar](https://github.com/luiisca/obsidian-periodic-notes-calendar) v1.2.1,
-> modified since 2026-10-28 (GPL-3.0, same as the original).
-> What changed: [docs/customizations.md](docs/customizations.md) (Japanese). The rest of this README is the original's.
+> **Calendared** is a modified version of [luiisca/obsidian-periodic-notes-calendar](https://github.com/luiisca/obsidian-periodic-notes-calendar) v1.2.1
+> by Luis Cadillo, changed since 2026-10-28 (GPL-3.0, same as the original). It is not maintained by the original author.
+> What changed: [docs/customizations.md](docs/customizations.md) (Japanese).
 >
-> 元の Periodic Notes Calendar を改造した個人用の版です。元の版との違いは [docs/customizations.md](docs/customizations.md)、
-> 開発向けの文書の目次は [docs/README.md](docs/README.md)。
+> 日本語の使い方: [docs/guides/usage-ja.md](docs/guides/usage-ja.md)。開発向けの文書の目次: [docs/README.md](docs/README.md)。
 
-# 📅 Periodic Notes Calendar Plugin for Obsidian
+# Calendared
 
-Obsidian calendar plugin for writing and organizing periodic notes (daily to
-yearly). Navigate via command palette or calendar UI. Summarize entries with
-stickers in calendar view. Streamline planning, reviewing, and reflection.
+Keep your days, weeks, months, quarters, and years calendared. Calendared creates and opens periodic notes
+(daily, weekly, monthly, quarterly, and yearly notes) from a calendar, from breadcrumbs and a mini calendar above
+each note, and from commands. Mark any periodic note with an emoji sticker and see it on the calendar.
 
-https://github.com/user-attachments/assets/25b380df-3f15-4492-8119-3d95a7604c9e
+Works on desktop and mobile. Needs Obsidian 1.13.1 or later.
+
+<!-- Screenshots: put the images in docs/screenshots/ (see docs/screenshots/README.md), then uncomment.
+![The calendar with stickers](docs/screenshots/calendar.png)
+![Breadcrumbs and the mini calendar above a daily note](docs/screenshots/breadcrumbs.png)
+-->
 
 ## Features
 
-- [**Dual Access Methods**](#dual-access-methods): Use the command palette for quick actions or a visual
-  calendar UI.
-- [**Floating Mode**](#floating-mode): Toggle between a floating overlay view or a standard fixed panel.
-- [**Emoji Summaries**](#emoji-summaries): Quickly visualize your day, week, month, or year with
-  customizable emoji indicators.
-- **Multiple Periodicities**: Support for daily, weekly, monthly, quarterly, and
-  yearly notes.
-- [**Natural Language Commands**](#create-notes-with-natural-language-dates): Create notes for specific dates using intuitive
-  language.
-- [**Template Support**](#template-support): Create dynamic notes using `{{}}` placeholders for dates and times with support for natural language inputs (e.g., "next friday"), time adjustments, and custom formatting.
-- [**Bulk Management by Format**](#bulk-management-by-format): Perform bulk actions (move, delete, switch formats) for notes organized by user-defined formats.
-- **Timeline Quickview**: A mini-calendar displayed at the top of periodic notes, with the option to enable it for all notes.
-  It supports unique timelines for each type of periodic note.
-- [**Note Preview Panel**](#note-preview-panel): Offers a configurable preview leaf for your notes, periodic and non periodic, supporting vertical or horizontal splits, zen mode for minimal distractions, optional tab headers and more.
-  Easily integrates with the calendar view or works in a separate tab.
-- **Open notes at startup**: Automatically open or create a periodic note (daily, weekly, monthly, quarterly, or yearly) when launching your vault..
-- **Switch Language**: Pick your preferred calendar language in the plugin settings.
-- [**Customizable Appearance**](#customization): Modify the plugin's UI to match your style using CSS snippets, with full control over colors, layouts, and elements.
+- **Periodic notes**: Turn each period (day, week, month, quarter, year) on or off on its own. Each period has
+  one file name format, a folder, and a template.
+- **Calendar**: A month calendar in the sidebar. Click a date, a week number, the month, or the year to open its note
+  (or create it). Dots show which notes exist, and stickers show on top.
+- **Breadcrumbs and mini calendar**: A strip above every note. The breadcrumbs (`2026 › Q4 › Oct › W44 › 30`) open the
+  note of the larger periods. The mini calendar shows the notes just before and after in the same period.
+- **Open now**: One button that opens the current note of your finest period (today's note, if you use daily notes).
+- **Stickers**: Give a periodic note one emoji. It is saved in a note property (`sticker: 👍`), so it stays with the
+  note even without the plugin.
+- **Weeks like Google Calendar**: Weeks start on Saturday, Sunday, or Monday, and week numbers follow ISO 8601. The
+  same weeks are used everywhere: file names, the calendar, the breadcrumbs, and templates.
+- **Migrations**: After changing a format or the sticker property, rename the old notes or move their stickers in one go,
+  with a list to check first.
 
-## Usage
+## Getting started
 
-### Dual Access Methods 
+1. Open **Settings → Calendared**. Under **Periodic notes**, turn on the periods you use (daily and weekly are on at first).
+   Click a period to set its format, folder, and template.
+2. Click the calendar icon in the ribbon, or run **Calendared: Toggle calendar interface**, to open the calendar.
+3. Click a date to open or create that day's note.
+4. Click the sticker button (😊+) in the tab title bar of a periodic note to give it an emoji.
 
-**Command Palette**
+## Calendar
 
-Access the Command Palette (Cmd/Ctrl + P) and type `Periodic notes calendar:`
+- Click a date, a week number, the month name, or the year to open its note. If there is none, it is created
+  (you are asked first, unless you turn off **Confirm before creating notes**). Hold Ctrl/Cmd to open it in a new split.
+- Right-click a date for more: open in a new tab or to the right, duplicate, sticker, delete, or create.
+- Hover a date with Ctrl/Cmd held to preview the note. Whether Ctrl/Cmd is needed is set in the settings of the core plugin
+  **Page preview** (source "Calendared").
+- The open note is highlighted, and the calendar follows it to its month. With weekly notes on, the open week's row is shaded.
+- **Open now** at the top right goes back to now. It is also in the tab title bar of every note (turn it off in settings).
+- If you turn off both days and weeks, the calendar shows months or years instead.
 
-**Calendar UI**
-
-1. Click the calendar icon in the ribbon or use the command
-   `Periodic notes calendar: Toggle calendar interface`
-2. Select a date to create or open a note for that day
-
-### Floating Mode
-
-https://github.com/user-attachments/assets/240df1bf-776e-45e5-a247-6bf5ae0bba9c
-
-
-### Emoji Summaries
-
-Add emoji stickers to your calendar entries to quickly visualize note content or mood. There are two ways to add stickers:
-
-**From the editor**:
-
-Type "#emoji" anywhere in your note (e.g., #🎉). The emoji will automatically appear as a sticker in the calendar view.
-
-**From the calendar**:
-
-1. Right-click on a date
-2. Select "Add sticker"
-3. Choose an emoji from the picker
-
-Stickers appear above note icons in the calendar, providing a quick visual overview without opening the notes.
-
-### Create notes with Natural Language Dates
-
-Create notes for specific dates using natural language expressions:
-
-1. Open the Command Palette (Cmd/Ctrl + P)
-2. Type `Periodic notes calendar: Open periodic note from natural language date`
-3. Enter expressions like `next tuesday` or `two months from now`
-4. Optionally customize the format (default: YYYY-MM-DD) and periodicity (default: daily)
-5. Press Enter to create or open the note
-
-Examples of natural language inputs:
-
-- tomorrow
-- in 3 weeks
-- last friday
-
-### Template Support
-
-https://github.com/user-attachments/assets/f6072da9-71ba-4a60-a74f-b88ad3316e2f
-
-Templates use `{{}}` placeholders to dynamically insert dates and times. Each placeholder can include an identifier, optional adjustment, and optional format: `{{identifier[±adjustment][:format]}}`.
-
-#### Core Placeholders
-
-- `{{title}}` or `{{date}}`: Note's date
-- `{{time}}`: Current time
-- `{{currentdate}}`: Current date and time
-- `{{monday}}` through `{{sunday}}`: Days of week
-
-#### Natural Language Dates
-
-Supports any date expression [Chrono](https://github.com/wanasit/chrono) can parse:
+## Breadcrumbs and mini calendar
 
 ```
-{{tomorrow}}
-{{next friday}}
-{{2 weeks from now}}
-{{end of this month}}
-{{5 days ago}}
-{{last monday}}
-etc
+            2026 › Q4 › Oct › W44 › 30              ← breadcrumbs
+‹   Mon 27   Tue 28   Wed 29  [Thu 30]  Fri 31   Sat 1   Sun 2   ›   ← mini calendar
 ```
 
-#### Date Adjustments
+- **Breadcrumbs**: Where the open note sits, from the year down. Click a larger period to open its note.
+  A weekly note belongs to the year, quarter, and month of its Thursday.
+- **Mini calendar**: The notes of the same period around the open one, with dots and stickers. Use ‹ › to look further.
+  For daily notes it shows the calendar week (or three days on each side).
+- Both can be turned off, shown on phones only, or hidden on notes that aren't periodic notes. On notes that aren't
+  periodic notes, they show "now".
+- On desktop, **Compact on desktop** turns the strip into a small box at the top right of the note.
 
-Add/subtract time using `±n[unit]`:
+## Stickers
 
-```
-{{date+1d}}    // Add one day
-{{monday-1w}}  // Subtract one week
-```
+- A note has at most one sticker, saved in a property (`sticker` by default; change it under **Sticker property**).
+  Writing `sticker: 🎉` in the properties yourself works the same.
+- Add one from the sticker button in the tab title bar, the command **Manage sticker**, or right-clicking a date in the
+  calendar. Remove it from the trash button at the top of the picker, or with **Remove sticker**.
+- Stickers show on the calendar, the month and year titles, and the mini calendar.
+- The picker searches in English. Under **Emoji search languages** you can add up to 20 other languages
+  (for example, Japanese: いいね → 👍). Each language is downloaded once when you add it (see [Network use](#network-use)).
+- Properties that Obsidian treats specially (`tags`, `aliases`, `cssclasses`) can't be used, because a sticker replaces
+  the whole value.
 
-Units: y(ears), Q(uarters), M(onths), w(eeks), W(eeks ISO), d(ays), h(ours), m(inutes), s(econds)
+## Commands
 
-#### Custom Formatting
+| Command | What it does |
+| --- | --- |
+| Open today's note / this week's / this month's / this quarter's / this year's note | Open the current note of that period (create it if needed). Only periods that are on are listed |
+| Open previous periodic note / Open next periodic note | Open the note before or after the open periodic note in the same period. Doesn't create notes |
+| Toggle calendar interface | Open or close the calendar |
+| Manage sticker / Remove sticker | Add, change, or remove the sticker of the open periodic note |
 
-Add Moment.js format after colon:
+### Recommended hotkeys
 
-```
-{{date:YYYY-MM-DD}}
-{{time:HH:mm}}
-{{next friday:dddd, MMMM Do}}
-```
+Calendared sets no hotkeys by default. Set them in **Settings → Hotkeys** (search for "Calendared"). For example:
 
-#### Example Template
+| Command | Hotkey |
+| --- | --- |
+| Open today's note | Cmd+D (Ctrl+D) |
+| Open previous periodic note / Open next periodic note | Cmd+← / Cmd+→ (Ctrl+← / Ctrl+→) |
+| Open this month's note | Cmd+M (Ctrl+M) |
+| Toggle calendar interface | Cmd+Shift+C (Ctrl+Shift+C) |
 
-```markdown
-# {{title:dddd, MMMM Do YYYY}}
+Cmd+← / → also move to the start and end of the line while editing. Once a hotkey is set, it opens the previous or next
+note instead, even in the editor. Pick other keys if you use those for editing.
 
-Created: {{currentdate:HH:mm}}
-Week: {{date:w}}
+## Formats and weeks
 
-## Planning
+- Each period has one format, written with [Moment.js tokens](https://momentjs.com/docs/#/displaying/format/). The defaults are
+  `YYYY-MM-DD`, `GGGG-[W]WW`, `YYYY-MM`, `YYYY-[Q]Q`, and `YYYY`.
+- New notes are named with the format, and existing notes are found by it. Notes named in another format don't show up.
+  After changing a format, a warning under it tells you how many notes still have the old names and offers to rename them.
+- For weekly notes, use `GGGG` (ISO week-numbering year) and `WW` (ISO week), as in the default. The settings warn about
+  formats that would number weeks differently around New Year, with a button to switch.
+- **Week starts on**: Saturday, Sunday, or Monday. Week numbers are always ISO 8601.
 
-Previous: [[{{5 days ago}}]]
-Next: [[{{in 2 weeks}}]]
-```
+## Templates
 
-Invalid placeholders remain unchanged for easy debugging. All date expressions respect your locale settings and default formats.
+Pick a template file for each period. These placeholders are replaced when a note is created:
 
+| Placeholder | Becomes |
+| --- | --- |
+| `{{title}}`, `{{date}}` | The note's date, in the period's format |
+| `{{time}}`, `{{currentDate}}` | The time and date now |
+| `{{monday}}` … `{{sunday}}` | That day in the note's week |
+| `{{date+1d}}`, `{{date-1w}}` | Shifted dates |
+| `{{date:YYYY-MM-DD}}`, `{{title:dddd, MMMM Do YYYY}}` | With a format |
 
-### Bulk Management by Format
+## Settings
 
-https://github.com/user-attachments/assets/cd209f3c-6b54-4ecd-86fb-a9026081d055
+| Section | Settings |
+| --- | --- |
+| (top) | Week starts on, Open on startup, Calendar language, Confirm before creating notes, Open now button |
+| Periodic notes | Each period: on or off, format, folder, template |
+| Period breadcrumbs | Show on (all devices / phones only), show on non-periodic notes |
+| Mini calendar | Show on, show on non-periodic notes, days shown, show stickers. Compact on desktop |
+| Stickers | Sticker button, sticker property, emoji search languages |
+| Migrate notes | Rename notes from a previous format, move stickers from a previous property |
 
-1. Go to Settings → Periodic notes calendar → Periods and add your desired formats to the list of recognized formats.
-2. Bulk operations are immediately available for all formats in the list. Select a format to access its tools:
-   - Left Button: Opens a file management menu that lets you:
-        - View and open a list of all files
-        - Move, or delete files individually
-        - Move or delete all files at once
-   - First Right Button: Rename all files from other formats to match this format
-   - Last Right Button: Remove this format from the list (existing files remain unchanged).
+The migrations list the notes first so you can uncheck any. They skip notes whose new name or property is already taken.
+Renaming uses Obsidian's rename, so links are updated. Make a backup before large changes.
 
-These features ensure effortless organization and allow you to experiment with new formats without losing control, making it simple to manage and update your periodic notes.
-> _**Note**: Bulk operations are limited to files detected under your provided valid formats._
+If the core plugin **Daily notes** is also on, both can create a note for the same day. Use one of them for daily notes.
 
-### Note Preview Panel
+## Customization
 
-1. Go to Settings → Periodic notes calendar → Calendar and enable the Preview feature.
-2. Configure default settings like split mode, zen mode, and tab header visibility.
-3. Navigate to the calendar view, where you'll find an `Open Preview` button. Click it to open a preview panel displaying notes for the currently enabled periods (e.g., day, week, month, quarter, year, or multiple).
-
-### Customization
-
-The plugin's appearance can be extensively customized through CSS variables and selectors. Here's how to get started:
-
-#### Setting Up [CSS Snippets](https://help.obsidian.md/Extending+Obsidian/CSS+snippets)
-
-1. Open Settings.
-2. Under Appearance → CSS snippets, select Open snippets folder (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-plus"><path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>).
-3. In the snippets folder, create a CSS file that contains your snippet.
-4. In Obsidian, under Appearance → CSS snippets, select Reload snippets (<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-cw"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>) to see the snippet in the list.
-
-> **Tip**: Use a code editor like Visual Studio Code or Sublime Text to ensure your CSS is valid and properly formatted.
-
-#### Available Variables
-
-The plugin uses CSS variables to control colors and styling. All customizations should be wrapped in the #pnc-container selector:
+The colors can be changed with a [CSS snippet](https://help.obsidian.md/Extending+Obsidian/CSS+snippets). The calendar
+is `#pnc-container`, and the breadcrumbs and mini calendar are `.calendared-nav`:
 
 ```css
-#pnc-container {
-    /* Background Colors */
-    --color-background-table-header: transparent;
-
-    /* Period Button Background Colors */
-    --color-background-day-bttn: transparent;
-    --color-background-week-bttn: transparent;
-    --color-background-month-bttn: transparent;
-    --color-background-quarter-bttn: transparent;
-    --color-background-year-bttn: transparent;
-    --color-background-weekend: transparent; /* weekend column */
-
-    /* UI Element Colors */
-    --color-dot: var(--text-muted);
-    --color-arrow: var(--text-muted);
-
-    /* Text Colors */
-    --color-text-header-title: var(--text-normal);
-    --color-text-table-header: var(--text-muted);
-    --color-text-today: var(--interactive-accent);
-
-    /* Period Button Text Colors */
-    --color-text-day-bttn: var(--text-normal);
-    --color-text-week-bttn: var(--text-muted);
-    --color-text-month-bttn: var(--text-normal);
-    --color-text-quarter-bttn: var(--text-normal);
-    --color-text-year-bttn: var(--text-normal);
-}
-
-#pnc-container #timeline-container {
-    border: 1px solid green;
+#pnc-container,
+.calendared-nav {
+  --color-dot: var(--text-muted);
+  --color-arrow: var(--text-muted);
+  --color-text-today: var(--interactive-accent);
+  --color-text-header-title: var(--text-normal);
+  --color-text-table-header: var(--text-muted);
+  --color-background-weekend: transparent;
+  /* also --color-text-<period>-bttn and --color-background-<period>-bttn, for day, week, month, quarter, year */
 }
 ```
-#### Targeting Specific Elements
-
-You can also style specific components using nested selectors:
-
-```css
-#pnc-container #timeline-container {
-    border: 1px solid green;
-}
-```
-
-> **Important**: Always prefix your selectors with #pnc-container to prevent style conflicts with other plugins or Obsidian's core styles.
-
-The plugin automatically adapts to your chosen Obsidian theme, but these variables give you fine-grained control over its appearance.
-Changes are applied immediately when you save your CSS file—no need to restart Obsidian.
 
 ## Installation
 
-<!-- TODO: complete -->
-<!-- **From Community Plugins** -->
-<!---->
-<!-- 1. Open Obsidian and go to Settings → Community Plugins -->
-<!-- 2. Disable Safe Mode -->
-<!-- 3. Click "Browse" and search for "Periodic notes calendar" -->
-<!-- 4. Click "Install", then "Enable" to activate the plugin -->
+Calendared is not in the community plugins list. While the repository is private, build it from source:
 
-**BRAT**
+1. Install [Node.js](https://nodejs.org/) and clone this repository
+2. `npm install`
+3. `npm run deploy -- "/path/to/your/vault"` — runs the tests, builds, and copies `main.js`, `manifest.json`, and
+   `styles.css` to `.obsidian/plugins/calendared/` in the vault. On Windows, run `bash scripts/deploy.sh "/c/path/to/your/vault"`
+   in Git Bash instead
+4. In Obsidian, turn on **Calendared** in **Settings → Community plugins**
 
-1. Install BRAT from Obsidian Community Plugins
-2. Open Command Palette and run `BRAT: Add a beta plugin for testing`
-3. Enter repository URL: `https://github.com/luiisca/obsidian-periodic-notes-calendar`
-4. Wait for installation to complete
-5. Enable `Periodic notes calendar` in Settings → Community Plugins
+For a phone, install it in the vault on your computer and let your sync bring the `.obsidian/plugins/calendared/` folder
+over (with Obsidian Sync, turn on syncing of community plugins).
 
-For detailed setup instructions, see [BRAT's quick guide](https://tfthacker.com/brat-quick-guide).
+Releases (`main.js`, `manifest.json`, `styles.css`) can also be put in `.obsidian/plugins/calendared/` by hand.
 
-**Manually**
+## Network use
 
-1. Download the [latest release](https://github.com/luiisca/obsidian-periodic-notes-calendar/releases) from Github
-2. Extract to `path-to-your-vault/.obsidian/plugins`
-3. Enable `Periodic notes calendar` in Settings > community plugins
+Calendared connects to the internet only when you add a language under **Emoji search languages**. It then downloads
+that language's keywords from this repository, through jsDelivr (`cdn.jsdelivr.net`) or GitHub
+(`raw.githubusercontent.com`), and keeps them in the plugin's folder. Only the language is sent.
 
+While this repository is private, the download fails. Run `npm run emoji-language -- ja "/path/to/your/vault"`
+(with your language) instead, and restart Obsidian.
 
-## Tips and Tricks
+## Credits and license
 
-### Customizable Emoji Summaries
-
-You can use emojis to provide a quick visual summary of your notes. The plugin
-allows you to choose any emoji from the emoji picker dialog. Here are some
-examples of how you might use them:
-
-- 😊: A positive day 
-- 📝: Significant writing done 
-- 🏆: Achieved a goal 
-- 🌟: Important day 
-- 🎉: Celebration or special event
-
-Feel free to create your own emoji system that works best for your needs!
-
-### Natural Language Date Navigation
-
-In addition to creating notes, you can also use natural language to navigate to
-specific dates. Try commands like:
-
-- "Last Friday"
-- "Jump to three weeks ago"
-- "Next month"
-
-This feature makes it easy to quickly access notes without needing to know the
-exact date.
-
-### Rename All Periodic Notes in One Click
-
-If your notes use different formats, like `YYYY-MM-DD` and `YYYY/MM/DD`, and you want to standardize them, follow these steps:
-
-1. Open Settings → Periodic notes calendar → Periods.
-2. Add all the formats you’ve used to the list of recognized formats so the plugin can detect them.
-3. Click the first button on the right under the format you want to use.
-
-This process works for all periodicities, allowing you to quickly standardize your notes regardless of their original format.
-
-### Open notes in a new pane
-
-`Ctrl/Cmd + Click` on a date to open that note in a new pane.
-
-### Pin commands
-
-Pin frequently used plugin commands for quick access:
-
-1. Go to Settings → Command palette
-2. Click the "Select a command ..." input box
-3. Type `Periodic notes calendar`
-4. Select and pin desired command
-
-For more details, visit [obsidian help](https://help.obsidian.md/Plugins/Command+palette#Pinned+commands).
-
-### Auto-migrate TODO Items
-
-Have your uncompleted tasks automatically move to the next period:
-
-1. Enable preview mode in settings
-2. Create a template for your chosen period (daily, weekly, etc.)
-3. Define a "TODO" section in your template
-4. Add tasks to this section - incomplete items will auto-migrate when the next periodic note is created
-
-
-## FAQ
-
-### How do I customize the calendar's appearance?
-The calendar follows your Obsidian theme.
-For custom styling, create a [CSS Snippet](https://help.obsidian.md/Extending+Obsidian/CSS+snippets)
-using the variables in the [Customization](#customization) section.
-
-### How do I reopen the calendar if I close it?
-
-Use the Command Palette and search for `Periodic notes calendar: Toggle calendar interface`.
-
-### How do I change the calendar's start day?
-
-Go to Settings → Periodic notes calendar → Calendar → Localization and choose your preferred start day.
-
-### Is this plugin compatible with mobile?
-
-Yes, it works fully on Obsidian Mobile.
-
-## Support
-
-If you encounter any issues or have feature requests, please file them in the
-[GitHub Issues](https://github.com/luiisca/obsidian-periodic-notes-calendar/issues)
-section.
-
-## Say Thanks 🙏
-
-If you find this plugin helpful, consider supporting its development:
-
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](ko-fi.com/luiscadillo)
+- Based on [Periodic Notes Calendar](https://github.com/luiisca/obsidian-periodic-notes-calendar) v1.2.1 by
+  Luis Cadillo ([luiisca](https://github.com/luiisca)). Thank you.
+- Modified by [small-spring](https://github.com/small-spring) since 2026-10-28. The changes and their dates are listed in
+  [docs/customizations.md](docs/customizations.md), and changed code is marked with `Calendared:` comments.
+- Licensed under the [GNU General Public License v3.0](LICENSE), same as the original.
+- Third-party components bundled in `main.js`: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The emoji search keywords
+  are made from [Unicode CLDR](https://cldr.unicode.org/) data ([data/emoji-keywords/](data/emoji-keywords/)).

@@ -1,6 +1,6 @@
 # 文書の目次
 
-Calendared の開発向けの文書（日本語）。使う人向けの説明は、ルートの [README.md](../README.md)（英語、元の版のまま）。
+Calendared の開発向けの文書（日本語）。使う人向けの説明は、ルートの [README.md](../README.md)（英語）と、その要約の [guides/usage-ja.md](guides/usage-ja.md)（日本語）。
 必要なものだけ読む。
 
 ## 今どうなっているか
@@ -30,7 +30,12 @@ Calendared の開発向けの文書（日本語）。使う人向けの説明は
 
 - [guides/development.md](guides/development.md): ビルド・deploy・依存の更新・書き方の決まり・テスト
 - [guides/device-testing.md](guides/device-testing.md): Windows・iPhone の実機で試す
+- [guides/usage-ja.md](guides/usage-ja.md): 使う人向けの日本語の使い方（入れ方を含む。パートナーに渡す）
 - [guides/publishing.md](guides/publishing.md): 公開の手続きの決まり・要件・issue の下書き（公開が済んだら archive/ へ）
+
+## 画像
+
+- [screenshots/](screenshots/): ルートの README に載せるスクリーンショット
 
 ## 使い終わったもの
 
