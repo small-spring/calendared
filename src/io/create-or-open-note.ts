@@ -84,7 +84,7 @@ export async function createNote(granularity: IGranularity, date: moment.Moment)
 
   const normalizedPath = getNotePath(granularity, date);
   await ensureFolderExists(normalizedPath);
-  const templateContents = await getTemplateInfo(templatePath);
+  const templateContents = await getTemplateInfo(templatePath, granularity);
 
   try {
     const file = await PluginService.getPlugin()?.app.vault.create(
