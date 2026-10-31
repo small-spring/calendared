@@ -113,7 +113,6 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 | --- | --- | --- | --- | --- |
 | Open now button | （一番上） | `openNowHeaderButton` | オン | ノートの見出しバーに Open now を出す |
 | Calendar language | （一番上） | `localeSettings.localeOverride` | Obsidian の言語 | カレンダーの中の言語 |
-| ― | ― | `yearsRangesStart` | `2020` | 年のビューの 12 年の区切りの起点 |
 
 週の始まり（`Week starts on`）もカレンダーの並びに効くが、周期ノート全体の設定として 1. に置いた。
 
@@ -216,7 +215,6 @@ Obsidian 1.13 の宣言で書く設定で描く（[ADR-0020](../adr/0020-setting
 | （見出しのない段） | Compact on desktop | 4. パンくずとミニカレンダー |
 | Stickers（見出しのトグル） | 見出しバーのボタン、プロパティ、検索の言語 | 5. ステッカー |
 | （一番下） | Migrate notes ›。サブページに書式の変換（周期ごと）とステッカーのプロパティの付け替え | 7. 移行 |
-| （画面になし） | `yearsRangesStart` | 3. カレンダー |
 
 サブページは周期と移行だけで、段はメインのページとサブページの 2 つまで。移行のボタンには何が起きるかを書く（「Rename 12 notes…」）。
 周期の行のトグルと見出しのトグルは、宣言では出せないので、描かれた行に足している（[ADR-0036](../adr/0036-additions-to-setting-definitions.md)）。

@@ -1,11 +1,10 @@
-import { YEARS_RANGE_SIZE } from '@/constants';
-import { DEFAULT_SETTINGS } from '@/settings';
+import { YEARS_RANGE_SIZE, YEARS_RANGES_START } from '@/constants';
 import { get, writable } from 'svelte/store';
 
 type IRange = `${string}-${string}`
 function createYearsRangesStore() {
   const defaultRange =
-    `${DEFAULT_SETTINGS.yearsRangesStart}-${DEFAULT_SETTINGS.yearsRangesStart + YEARS_RANGE_SIZE - 1}` as IRange;
+    `${YEARS_RANGES_START}-${YEARS_RANGES_START + YEARS_RANGE_SIZE - 1}` as IRange;
   const store = writable<{
     ranges: IRange[];
     todayRange: `${string}-${string}`;

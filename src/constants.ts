@@ -7,6 +7,8 @@ export const NAVIGATION_TYPE = 'calendared-navigation';
 export const granularities = ['day', 'week', 'month', 'quarter', 'year'] as const;
 
 export const YEARS_RANGE_SIZE = 12
+/** Calendared: the year the year view's 12-year ranges count from. Upstream kept it in the settings, where it was never read */
+export const YEARS_RANGES_START = 2020
 
 export const STICKER_PICKER_ID = 'sticker-picker';
 

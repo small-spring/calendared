@@ -2,8 +2,6 @@ import moment from "moment";
 import { get } from "svelte/store";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/settings", () => ({ DEFAULT_SETTINGS: { yearsRangesStart: 2020 } }));
-
 describe("年のビューの 12 年の区切り（yearsRanges）", () => {
   beforeEach(() => {
     vi.resetModules();
