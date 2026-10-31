@@ -9,6 +9,7 @@
   import { weekSchemeFor } from "@/weeks";
   import { type Writable } from "svelte/store";
   import FilepathsCount from "./FilepathsCount.svelte";
+  import WeekFormatCheck from "./WeekFormatCheck.svelte";
 
   interface Props {
     settings: Writable<PeriodSettings>;
@@ -41,6 +42,13 @@
     if (granularity !== "week") return window.moment().format(formatValue);
     const weeks = weekSchemeFor($settingsStore.localeSettings);
     return weeks.format(weeks.weekOf(window.moment()), formatValue);
+  };
+  // Calendared: a weekly format also shows the week at New Year, where names break most often
+  const newYearPreview = (formatValue: string) => {
+    const weeks = weekSchemeFor($settingsStore.localeSettings);
+    const week = weeks.weekOf(window.moment().endOf("year"));
+    const range = weeks.rangeOf(week);
+    return { name: weeks.format(week, formatValue), range: range ? `${range.start.format("M/D")} – ${range.end.format("M/D")}` : "" };
   };
 
   // an empty format can't name new notes (it would write a timestamp as the file name), so it isn't saved
@@ -81,6 +89,9 @@
       )}
     />
   </div>
+  {#if granularity === "week"}
+    <WeekFormatCheck {settings} />
+  {/if}
   <div class="pl-[1px] [font-size:calc(var(--font-ui-small)+1px)]">
     <FilepathsCount {granularity} format={$settings.format} {error} />
     {#if error}
@@ -88,6 +99,11 @@
       <span class="text-[var(--text-error)]" id={`format-error-${granularity}`}>{error}</span>
     {:else}
       <span class="u-pop">{previewName(value.trim() ? value : defaultFormat)}</span>
+      {#if granularity === "week"}
+        {@const newYear = newYearPreview(value.trim() ? value : defaultFormat)}
+        · New Year: <span class="u-pop">{newYear.name}</span>
+        {#if newYear.range}<span class="text-[var(--text-muted)]">({newYear.range})</span>{/if}
+      {/if}
     {/if}
   </div>
 </div>
