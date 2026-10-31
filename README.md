@@ -120,6 +120,7 @@ note instead, even in the editor. Pick other keys if you use those for editing.
 
   Text in brackets is kept as is: `[W]`, `[Notes]`. Month and weekday names follow Obsidian's language.
   For quarters and years, `YYYY` and `Q` count from **Starts in** (see below).
+  Daily notes can also be named by their ISO week date: `GGGG-[W]WW-E` (the week-numbering year, week, and weekday 1–7, all together).
   The tokens are written the same way as in core Daily notes, Periodic Notes, and Templater, so their formats work here.
 - New notes are named with the format, and existing notes are found by it. Notes named in another format don't show up.
   After changing a format, a warning under it tells you how many notes still have the old names and offers to rename them.

@@ -74,8 +74,9 @@ describe("validateFormat: 書式の誤り（設定画面に出す文）", () => 
         expect(validateFormat("YYYY-DDDD", "day")).toMatch(/^Ambiguous format\. Missing month \(M\) info/);
     });
 
-    it("日の書式を ISO の週の日付（週の年・週・曜日）で書くと、月が足りないとされる", () => {
-        expect(validateFormat("GGGG-[W]WW-E", "day")).toMatch(/^Ambiguous format\. Missing month \(M\) info/);
+    it("日の書式は ISO の週の日付（週の年・週・曜日）でも書ける（docs/adr/0040）", () => {
+        expect(validateFormat("GGGG-[W]WW-E", "day")).toBe("");
+        expect(validateFormat("GGGG-[W]WW", "day")).toMatch(/^Ambiguous format\. Missing weekday \(E\) info/);
     });
 
     it("その周期の今の書式と同じ値は誤りにしない（周期の書式は 1 つ）", () => {

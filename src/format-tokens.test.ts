@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { disallowedTokens, formatTokenGuide, tokenize } from "./format-tokens";
+import { disallowedTokens, formatTokenGuide, missingTokens, tokenize } from "./format-tokens";
 
 // ---- 書式を記号に分ける（docs/adr/0041） ----
 
@@ -73,6 +73,53 @@ describe("disallowedTokens: その周期の書式に使えない記号", () => {
 
     it("同じ記号は 1 回だけ挙げる", () => {
         expect(disallowedTokens("YYYY-DD-DD", "month")).toEqual(["DD"]);
+    });
+});
+
+describe("missingTokens: その周期の名前を 1 つに決めるのに足りない記号", () => {
+    it("既定の書式には足りないものがない", () => {
+        expect(missingTokens("YYYY-MM-DD", "day")).toBeNull();
+        expect(missingTokens("GGGG-[W]WW", "week")).toBeNull();
+        expect(missingTokens("YYYY-MM", "month")).toBeNull();
+        expect(missingTokens("YYYY-[Q]Q", "quarter")).toBeNull();
+        expect(missingTokens("YYYY", "year")).toBeNull();
+    });
+
+    it("年がなければ、まず年を挙げる", () => {
+        expect(missingTokens("MM", "month")).toBe("year (Y, y, gg or GG)");
+        expect(missingTokens("[W]WW", "week")).toBe("year (Y, y, gg or GG)");
+    });
+
+    it("周期ごとに要る記号", () => {
+        expect(missingTokens("YYYY", "quarter")).toBe("quarter (Q)");
+        expect(missingTokens("YYYY", "month")).toBe("month (M)");
+        expect(missingTokens("GGGG", "week")).toBe("week (w or W)");
+        expect(missingTokens("YYYY-DD", "day")).toBe("month (M)");
+        expect(missingTokens("YYYY-MM", "day")).toBe("day (D)");
+    });
+
+    it("[ ] の中の文字は数えない", () => {
+        expect(missingTokens("YYYY-[Q]", "quarter")).toBe("quarter (Q)");
+        expect(missingTokens("[YYYY]-MM", "month")).toBe("year (Y, y, gg or GG)");
+        expect(missingTokens("YYYY-MM-[DD]", "day")).toBe("day (D)");
+    });
+
+    it("同じ種類の別の記号でもよい", () => {
+        expect(missingTokens("YY-MMMM", "month")).toBeNull();
+        expect(missingTokens("YYYY-MM-Do", "day")).toBeNull();
+        expect(missingTokens("gggg-[W]ww", "week")).toBeNull();
+        expect(missingTokens("YYYY-Qo", "quarter")).toBeNull();
+    });
+
+    it("時刻を含まないまとめた日付（LL など）は、それだけで日を決める", () => {
+        expect(missingTokens("LL", "day")).toBeNull();
+        expect(missingTokens("l", "day")).toBeNull();
+    });
+
+    it("日は ISO の週の日付（週の年・週・曜日）でも決まる（docs/adr/0040）", () => {
+        expect(missingTokens("GGGG-[W]WW-E", "day")).toBeNull();
+        expect(missingTokens("GGGG-[W]WW-ddd", "day")).toBeNull();
+        expect(missingTokens("GGGG-[W]WW", "day")).toBe("weekday (E)");
     });
 });
 
