@@ -24,6 +24,7 @@ import { destroyStickerPicker } from './ui/sticker-picker';
 import { getDailyNotesPlugin } from './utils';
 import { CalendarView } from './view';
 import { initEmojiSearch } from './ui/utils/emoji-locale';
+import { HOVER_LINK_SOURCE } from './ui/utils/event-handlers';
 import { getNoteSticker, isPeriodicNote, openStickerPicker, removeSticker, StickerActions } from './ui/sticker-actions';
 
 export default class PeriodicNotesCalendarPlugin extends Plugin {
@@ -69,6 +70,8 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     this.register(settingsStore.subscribe(() => NavigationManager.instance?.syncAll()));
 
     this.addSettingTab(new SettingsTab());
+    // Calendared: a row in the Page preview settings, where Ctrl/Cmd on hover is switched (docs/adr/0026)
+    this.registerHoverLinkSource(HOVER_LINK_SOURCE, { display: "Calendared", defaultMod: true });
 
     setupLocale()
     // Calendared: the picker's search in Obsidian's language, from keywords downloaded on request (emoji-search.ts)

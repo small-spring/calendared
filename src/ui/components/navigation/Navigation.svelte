@@ -191,7 +191,7 @@
                       granularity: crumb.granularity,
                     })}
                   onpointerenter={(event) =>
-                    eventHandlers.onHover({ event, isControlPressed: isControlPressed(event), file: fileData.file })}
+                    eventHandlers.onHover({ event, file: fileData.file })}
                   >{text}</button
                 >
               {:else}

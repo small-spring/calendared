@@ -105,7 +105,6 @@
       onpointerenter={(event) => {
         eventHandlers.onHover({
           event,
-          isControlPressed: isControlPressed(event),
           file: title.fileData.file,
         });
       }}

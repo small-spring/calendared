@@ -4,7 +4,7 @@ title: "ホバーのプレビューは、コアプラグイン「ページプレ
 status: 採用
 date: 2026-10-30
 area: 設定
-implemented: false
+implemented: true
 aliases:
   - ADR-0026
   - settings ADR-C7
