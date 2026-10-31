@@ -36,6 +36,42 @@ git push origin 0.1.0
   - emoji-mart の型定義ファイルの中のエラー 2 件（部品の側の問題。ビルドには影響しない）
   - `Format.svelte` の `tabindex` の型のエラー 1 件（元の版から）
 
+## Obsidian で確かめる（Obsidian CLI）
+
+動いている Obsidian を、コマンドで操作して確かめられる（Obsidian CLI。`/usr/local/bin/obsidian`、1.12.7 以降。説明は `obsidian help` と
+[公式の文書](https://obsidian.md/help/cli)）。Claude もこれで画面を見られる。2026-10-31 に、Obsidian 1.14.5 で試した。
+
+```bash
+obsidian plugin:reload id=calendared
+```
+
+| 目的 | コマンド |
+| --- | --- |
+| deploy した版を読み直す | `obsidian plugin:reload id=calendared` |
+| ノートを開く | `obsidian open path=04-daily/2026-10-31.md` |
+| Obsidian のコマンドを実行する | `obsidian command id=<ID>`（一覧は `obsidian commands filter=calendared`） |
+| 画面の文字や属性を読む | `obsidian dev:dom selector=<CSS> text`（`all`、`attr=`、`css=` も使える） |
+| JavaScript を実行する | `obsidian eval code="..."`（`app` に触れる） |
+| 画面を撮る | `obsidian dev:screenshot path=<ファイル>` |
+| スマホの見た目にする | `obsidian dev:mobile on` / `off` |
+| エラーとログを読む | `obsidian dev:errors`、`obsidian dev:console` |
+
+気をつけること（文書には書かれていない）
+
+- ふだんの Vault（private）をそのまま触る。設定のトグルを動かしたりノートを作ったりすると、本物のデータが変わる。
+  確かめるだけなら、読む・撮る・開くにとどめる
+- 文字で確かめられるものは、`dev:dom` か `eval` で読む。Obsidian が裏にあっても読める
+- `dev:screenshot` は、Obsidian が前にないと描き直しが止まっていて、古い画面が写る。撮る直前に `open -a Obsidian` で前に出す
+- `dev:screenshot` と `dev:dom` は、メインのウィンドウしか見ない。設定画面は別のウィンドウ（題が「設定 - …」）で開くので、
+  `eval` から Electron のウィンドウを探して読む。例（設定の文字を読む）:
+
+  ```bash
+  obsidian eval code="(async()=>{const w=require('electron').remote.BrowserWindow.getAllWindows().find(w=>w.getTitle().startsWith('設定')); return await w.webContents.executeJavaScript(\"document.querySelector('.vertical-tab-content')?.innerText\")})()"
+  ```
+
+  撮るときは、同じウィンドウで `w.focus()` のあと `w.webContents.capturePage()` の結果を `toPNG()` でファイルに書く。
+  設定画面を開くのは `obsidian command id=app:open-settings`、Calendared のページへは `app.setting.openTabById('calendared')`
+
 ## テスト
 
 `npm test`（1 回動かす）/ `npm run test:watch`（ファイルを保存するたびに動かす）。道具は Vitest。設定は `vitest.config.ts`。
