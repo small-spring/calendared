@@ -47,8 +47,11 @@ export function openFormatRename(granularity: IGranularity, fromFormat: string, 
     actionLabel: (n) => `Rename ${notes(n)}`,
     runningLabel: (done, total) => `Renaming… ${done}/${total}`,
     run: (keys, onProgress) => renameNotes(plan.filter((row) => keys.includes(row.from)), onProgress),
-    resultMessage: ({ changed, skipped }) =>
-      `Renamed ${notes(changed)}.` + (skipped ? ` Skipped ${skipped}: a note with the new name already exists.` : ""),
+    // the conflicts listed apart were never run, but were skipped all the same
+    resultMessage: ({ changed, skipped }) => {
+      const all = skipped + plan.filter((row) => row.conflict).length;
+      return `Renamed ${notes(changed)}.` + (all ? ` Skipped ${all}: a note with the new name already exists.` : "");
+    },
     onDone: () => {
       forgetFinishedNotices();
       onDone();
@@ -84,8 +87,10 @@ export function openStickerMove(fromProperty: string, onDone: () => void = () =>
     actionLabel: (n) => `Move ${n === 1 ? "1 sticker" : `${n} stickers`}`,
     runningLabel: (done, total) => `Moving… ${done}/${total}`,
     run: (keys, onProgress) => moveStickers(plan.filter((row) => keys.includes(row.path)), fromProperty, onProgress),
-    resultMessage: ({ changed, skipped }) =>
-      `Moved ${changed === 1 ? "1 sticker" : `${changed} stickers`}.` + (skipped ? ` Skipped ${skipped}: already has "${toProperty}".` : ""),
+    resultMessage: ({ changed, skipped }) => {
+      const all = skipped + plan.filter((row) => row.conflict).length;
+      return `Moved ${changed === 1 ? "1 sticker" : `${changed} stickers`}.` + (all ? ` Skipped ${all}: already has "${toProperty}".` : "");
+    },
     onDone: () => {
       forgetFinishedNotices();
       onDone();
