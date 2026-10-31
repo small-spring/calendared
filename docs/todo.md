@@ -19,8 +19,6 @@
 2026-11-01 に ADR と仕様に照らして元の版から残った古いコードを洗い出したうち、動きを確かめながら直すもの。
 「たぶん」は、Obsidian で起きるかをまだ確かめていない — どれも Claude
 
-- 不具合（たぶん）: 「今日」（`todayStore`）を、カレンダーのペインの 1 分ごとのタイマーだけが更新している（`View.svelte`）。
-  ペインを閉じたまま日付が変わると、Open now・パンくず・ミニカレンダーの今日が古いまま（[ADR-0030](adr/0030-open-now.md)）。タイマーを main.ts に移す
 - 不具合: テンプレートのファイルがないと、ノートを作るときに空のテンプレートを黙って作る（`src/io/vault.ts` の `ensureTemplateExists`）。
   設定画面は「Template file not found」と出すので食い違う。作らずに空として扱う。読めなかったときの文言が、どの周期でも「daily note template」
 - 整理: 書式に必要な記号の確かめ方（`src/io/validation/format.ts` の `isTokenEffective` など）が元の版の手作りのまま。
