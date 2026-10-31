@@ -17,6 +17,20 @@
     読み込み順の不具合（例: `Cannot access 'X' before initialization`）は型チェックや ESLint では見つからないため
   - 動作や見た目は確かめないので、Obsidian での確認は別に必要
 - Windows・iPhone で試すときは [device-testing.md](device-testing.md)（Remotely Save で Calendared のフォルダだけを同期する）
+- `npm run emoji-language -- <言語> [Vault のパス]`（`scripts/add-emoji-language.mjs`）: 絵文字の検索の言葉を、ダウンロードせずに
+  Vault のプラグインのフォルダに置く（下の「絵文字の検索の言葉」）。リポジトリが非公開の間は、設定からの追加はダウンロードに失敗するので、こちらを使う
+
+### Release
+
+`manifest.json` の `version` と同じタグ（`v` を付けない。例: `0.1.0`）を push すると、ワークフロー（`.github/workflows/main.yml`）が
+テストとビルドをして、`main.js`・`manifest.json`・`styles.css` を載せた Release の下書きを作る。GitHub で下書きを確かめ、説明を書いて公開する。
+
+```bash
+git tag 0.1.0
+git push origin 0.1.0
+```
+
+- タグと `version` が違うと止まる。先に `manifest.json` と `package.json` の `version` を上げてコミットする
 - `npm run check`: svelte-check。残っている既知の警告・エラー:
   - 設定画面のトグル（`Toggle.svelte`）のアクセシビリティの警告 2 件
   - emoji-mart の型定義ファイルの中のエラー 2 件（部品の側の問題。ビルドには影響しない）

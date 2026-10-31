@@ -1,49 +1,44 @@
-name: Release Please
+# Calendared: rewritten (upstream used release-please on `main` with a personal token).
+# Push a tag that matches manifest.json's version (e.g. `git tag 0.1.0 && git push origin 0.1.0`, no leading `v`).
+# This tests and builds the plugin and makes a draft release with main.js, manifest.json and styles.css;
+# check the draft on GitHub, write the notes and publish it.
+name: Release
 
 on:
   push:
-    branches:
-      - main
-
-env:
-  PLUGIN_ID: periodic-notes-calendar
+    tags:
+      - "*.*.*"
 
 permissions:
   contents: write
-  pull-requests: write
 
 jobs:
-  release-please:
-    runs-on: ubuntu-latest
-    outputs:
-      release_created: ${{ steps.release.outputs.release_created }}
-      tag_name: ${{ steps.release.outputs.tag_name }}
-    steps:
-      - uses: googleapis/release-please-action@v4
-        id: release
-        with:
-          token: ${{ secrets.PAT }}
-          target-branch: main
-          config-file: release-please-config.json
-          manifest-file: .release-please-manifest.json
-  build:
-    needs: release-please
-    if: ${{ needs.release-please.outputs.release_created }}
+  release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Node.js environment
+      - name: Setup Node.js
         uses: actions/setup-node@v4
-      - name: Build
-        id: build
+        with:
+          node-version: 24
+          cache: npm
+      - name: Check the tag matches manifest.json
         run: |
-          npm install
-          npx vite build --mode production
-          mkdir ${{ env.PLUGIN_ID}}
-          cp manifest.json main.js styles.css ${{ env.PLUGIN_ID }}
-          zip -r ${{ env.PLUGIN_ID }}.zip ${{ env.PLUGIN_ID }}
-      - name: Upload release artifacts
+          version="$(node -p "require('./manifest.json').version")"
+          if [ "$version" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME doesn't match manifest.json's version $version" >&2
+            exit 1
+          fi
+      - name: Test and build
+        run: |
+          npm ci
+          npm test
+          npm run build
+          node scripts/check-load.cjs main.js
+      - name: Draft the release
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
-        run: gh release upload ${{ needs.release-please.outputs.tag_name }} manifest.json main.js styles.css ${{ env.PLUGIN_ID }}.zip
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" main.js manifest.json styles.css \
+            --draft --title "$GITHUB_REF_NAME" --notes "Calendared $GITHUB_REF_NAME"

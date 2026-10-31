@@ -1,7 +1,7 @@
 {
   "name": "calendared",
   "version": "0.1.0",
-  "description": "Keep your days, weeks, months, and years calendared. Every span of time gets its own note, a place on the calendar, and an emoji to remember it by.",
+  "description": "Keep your days, weeks, months, quarters, and years calendared. Open periodic notes from a calendar, breadcrumbs, and a mini calendar, and mark each one with an emoji sticker.",
   "author": "small-spring",
   "main": "main.js",
   "type": "module",
@@ -18,7 +18,8 @@
     "lint": "eslint ./src",
     "lint-fix": "npm run check && eslint --fix ./src",
     "deploy": "scripts/deploy.sh",
-    "adr": "node scripts/adr-index.mjs"
+    "adr": "node scripts/adr-index.mjs",
+    "emoji-language": "node scripts/add-emoji-language.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
