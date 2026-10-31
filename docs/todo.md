@@ -32,9 +32,6 @@
   `src/format-tokens.ts` の分け方で確かめる（[ADR-0040](adr/0040-format-tokens-per-period.md)・[ADR-0041](adr/0041-own-format-tokenizer.md)）
 - 整理: 設定の `yearsRangesStart` は保存されても読まれず、既定値の 2020 だけが使われている。設定から外して定数にする
   （[spec/overview.md](spec/overview.md) の表からも外す）
-- 決める: `src/io/notes-by-format.ts` の `isBackupPath`（元の版が作った `periodic-notes-BACKUP-…` のフォルダを数に入れない）。
-  今はバックアップを作らない（[ADR-0024](adr/0024-migration-safety.md)）。数える所と起動時の通知では除くが、ノートの名前を読む所では除かず、
-  扱いがばらばら。残すなら仕様に一言書き、要らなければ消す
 
 ### 確かめる
 

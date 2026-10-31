@@ -5,7 +5,7 @@ import { mount } from 'svelte';
 import { get } from 'svelte/store';
 import { PluginService } from './app-service';
 import { CALENDAR_LUCIDE_ICON, granularities, LEAF_TYPE } from './constants';
-import { createOrOpenNote, getFileData, getStartupNoteGranularity, initVaultSource, isBackupPath } from './io';
+import { createOrOpenNote, getFileData, getStartupNoteGranularity, initVaultSource } from './io';
 import { getPeriodicityFromGranularity } from './io/parse';
 import type { IGranularity } from './io/types';
 import { isValidPeriodicNote, validateFormat } from './io/validation';
@@ -366,7 +366,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
   private onFileCreated(file: TAbstractFile) {
     if (!(file instanceof TFile)) return;
     if (!this.app.workspace.layoutReady) return;
-    if (file.extension !== 'md' || isBackupPath(file.path)) return;
+    if (file.extension !== 'md') return;
 
     this.noticeIfInvalidFormat(file);
   }

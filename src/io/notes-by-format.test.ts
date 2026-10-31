@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { periodRules } from "@/periods";
 import { weekSchemeFor } from "@/weeks";
-import { isBackupPath, notesWithFormat } from "./notes-by-format";
+import { notesWithFormat } from "./notes-by-format";
 
 const weeks = periodRules(weekSchemeFor({ weekStartId: 1 }));
 const md = (path: string) => {
@@ -44,11 +44,6 @@ describe("notesWithFormat: その周期のフォルダで、書式に名前が�
         expect(notesWithFormat([md("日記/2026-10-30.pdf")], "day", daily, weeks)).toEqual([]);
     });
 
-    it("バックアップのフォルダの中は選ばない", () => {
-        const files = [md("日記/periodic-notes-BACKUP-20250101120000/2026-10-30.md")];
-        expect(notesWithFormat(files, "day", daily, weeks)).toEqual([]);
-    });
-
     it("週次ノートは週の決め方で読む", () => {
         const weekly = { folder: "週", format: "GGGG-[W]WW" };
         expect(notesWithFormat([md("週/2026-W44.md"), md("週/2026-W4.md")], "week", weekly, weeks)).toEqual([
@@ -65,17 +60,5 @@ describe("notesWithFormat: その周期のフォルダで、書式に名前が�
 
     it("ほかの周期の名前は選ばない", () => {
         expect(notesWithFormat([md("日記/2026-10.md")], "day", daily, weeks)).toEqual([]);
-    });
-});
-
-describe("isBackupPath: 元の版が作ったバックアップのフォルダ（periodic-notes-BACKUP-日時）の中か", () => {
-    it("どこかの階層がバックアップのフォルダなら true", () => {
-        expect(isBackupPath("periodic-notes-BACKUP-20250101120000/2026-10-30.md")).toBe(true);
-        expect(isBackupPath("日記/periodic-notes-BACKUP-20250101120000/a/2026-10-30.md")).toBe(true);
-    });
-
-    it("日時が正しくなければ、ただのフォルダ", () => {
-        expect(isBackupPath("periodic-notes-BACKUP-old/2026-10-30.md")).toBe(false);
-        expect(isBackupPath("日記/2026-10-30.md")).toBe(false);
     });
 });
