@@ -344,28 +344,27 @@ export class SettingsTab extends PluginSettingTab {
           setting.setErrorMessage(error || null);
           if (error) return;
           settingsStore.update((s) => withValueAt(s, ["periods", granularity, "templatePath"], path) as ISettings);
-          showOpenButton?.(!!templateFile());
+          showOpenLink();
         });
       suggest = new FileSuggest(text.inputEl);
       const error = text.getValue() ? validateTemplate(text.getValue()) : "";
       if (error) setting.setErrorMessage(error);
     });
-    // Calendared: the template can be opened from here to edit it (docs/spec/overview.md). Shown only while the file
-    // exists: a disabled button looks the same as an enabled one, so it seemed broken
-    let showOpenButton: ((visible: boolean) => void) | undefined;
-    setting.addExtraButton((button) => {
-      showOpenButton = (visible) => button.extraSettingsEl.toggle(visible);
-      showOpenButton(!!templateFile());
-      button
-        .setIcon("pencil")
-        .setTooltip("Open template")
-        .onClick(() => {
-          const file = templateFile();
-          if (!file) return;
-          this.app.setting?.close?.();
-          void this.app.workspace.getLeaf("tab").openFile(file);
-        });
-    });
+    // Calendared: the template can be opened from here to edit it, by a link in the description naming the file
+    // (docs/spec/overview.md). Not a button beside the field: it shifted the field and looked like editing the path
+    const description = (setting as unknown as { descEl: HTMLElement }).descEl;
+    const openLine = description.createDiv();
+    const showOpenLink = () => {
+      openLine.empty();
+      const file = templateFile();
+      if (!file) return;
+      openLine.createEl("a", { text: `Open ${file.name}`, href: "#" }).addEventListener("click", (event) => {
+        event.preventDefault();
+        this.app.setting?.close?.();
+        void this.app.workspace.getLeaf("tab").openFile(file);
+      });
+    };
+    showOpenLink();
     return () => suggest?.destroy();
   }
 
