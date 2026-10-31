@@ -9,11 +9,11 @@ vi.mock("@/settings", () => {
     return {
         settingsStore: writable({
             periods: {
-                day: { formats: format("d", "YYYY-MM-DD") },
+                day: { formats: { ...format("d", "YYYY-MM-DD"), ...format("d2", "YYYYMMDD") } },
                 week: { formats: format("w", "YYYY-[W]ww") },
                 month: { formats: format("m", "YYYY-MM") },
                 quarter: { formats: format("q", "YYYY-[Q]Q") },
-                year: { formats: format("y", "YYYY") },
+                year: { formats: { ...format("y", "YYYY"), ...format("y2", "[Year] YYYY", "Ambiguous format.") } },
             },
             localeSettings: { weekStartId: 1 },
         }),
@@ -63,5 +63,16 @@ describe("isValidPeriodicNote: ファイル名から周期と日付を読む", (
         expect(isValidPeriodicNote("2026-W44").period).toEqual({ granularity: "week", weekYear: 2026, week: 44 });
         expect(isValidPeriodicNote("2026-10").period).toEqual({ granularity: "month", year: 2026, month: 10 });
         expect(isValidPeriodicNote("メモ").period).toBeNull();
+    });
+});
+
+describe("isValidPeriodicNote: 周期の書式が複数あるとき（作り直す前の振る舞い）", () => {
+    it("周期のどの書式に合っても、その周期のノートとして読む", () => {
+        expect(parse("20261029")).toEqual({ isValid: true, granularity: "day", date: "2026-10-29" });
+    });
+
+    it("誤りのある書式に合う名前は、isValid が false", () => {
+        expect(parse("Year 2026")).toEqual({ isValid: false, granularity: "year", date: "2026-01-01" });
+        expect(isValidPeriodicNote("Year 2026").format?.value).toBe("[Year] YYYY");
     });
 });
