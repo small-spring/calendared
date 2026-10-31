@@ -8,6 +8,7 @@ import { get } from "svelte/store";
 import { PluginService } from "@/app-service";
 import { join, notePath } from './note-path';
 import { periodRulesFor } from '@/periods';
+import { getPeriodicityFromGranularity } from "./parse";
 
 
 export type TFileData = {
@@ -31,16 +32,6 @@ export async function ensureFolderExists(path: string): Promise<void> {
     if (!PluginService.getPlugin()?.app.vault.getAbstractFileByPath(dir)) {
       await PluginService.getPlugin()?.app.vault.createFolder(dir);
     }
-  }
-}
-
-async function ensureTemplateExists(path: string) {
-  // create directory if it doesn't exist
-  await ensureFolderExists(path);
-
-  // create file if it doesnt exist
-  if (!PluginService.getPlugin()?.app.vault.getAbstractFileByPath(path)) {
-    await PluginService.getPlugin()?.app.vault.create(path, "");
   }
 }
 
@@ -101,8 +92,13 @@ export function notesWithFormatIn(
   return notesWithFormat(vault.markdownFiles(), granularity, { folder, format }, periodRulesFor(settings));
 }
 
+/**
+ * Calendared: a missing template is read as empty and not created, matching the settings' "Template file not found"
+ * (upstream created an empty file there). The message names the note's period, not always "daily"
+ */
 export async function getTemplateInfo(
-  template: string
+  template: string,
+  granularity: IGranularity,
 ): Promise<string> {
   const app = PluginService.getPlugin()?.app;
 
@@ -110,22 +106,18 @@ export async function getTemplateInfo(
   if (normalizedPath === "/") {
     return "";
   }
-  await ensureTemplateExists(normalizedPath);
+
+  const abstractFile = app?.vault.getAbstractFileByPath(normalizedPath);
+  if (!(abstractFile instanceof TFile)) {
+    return "";
+  }
 
   try {
-    // get First file matching given normalizedPath
-    const abstractFile = app?.vault.getAbstractFileByPath(normalizedPath);
-
-    if (abstractFile instanceof TFile) {
-      return await app?.vault.cachedRead(abstractFile) || "";
-    }
-    return "";
+    return await app?.vault.cachedRead(abstractFile) || "";
   } catch (err) {
-    console.error(
-      `Failed to read the daily note template '${normalizedPath}'`,
-      err
-    );
-    new Notice("Failed to read the daily note template");
+    const what = `${getPeriodicityFromGranularity(granularity)} note template`;
+    console.error(`Failed to read the ${what} '${normalizedPath}'`, err);
+    new Notice(`Failed to read the ${what}`);
     return "";
   }
 }

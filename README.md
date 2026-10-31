@@ -146,7 +146,8 @@ Quarters and years are set separately; set the same month for both to keep them 
 
 ## Templates
 
-Pick a template file for each period. These placeholders are replaced when a note is created:
+Pick a template file for each period. If the file isn't there (the settings say "Template file not found"), new notes
+start empty; no template file is made. These placeholders are replaced when a note is created:
 
 | Placeholder | Becomes |
 | --- | --- |

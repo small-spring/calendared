@@ -1,5 +1,6 @@
 import moment from "moment";
 import { TFile, TFolder } from "obsidian";
+import { Notice } from "@/test-obsidian"; // the stand-in that "obsidian" points to in tests, with the messages shown
 import { writable } from "svelte/store";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -9,6 +10,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const fake = vi.hoisted(() => ({
     files: new Map<string, unknown>(),
+    contents: new Map<string, string>(),
+    created: [] as string[],
     caches: new Map<string, unknown>(),
     dailyNotes: null as null | { enabled: boolean; instance?: { options?: Record<string, unknown> } },
 }));
@@ -20,6 +23,13 @@ vi.mock("@/app-service", () => ({
                 vault: {
                     getAbstractFileByPath: (path: string) => fake.files.get(path) ?? null,
                     getMarkdownFiles: () => [...fake.files.values()].filter((f) => f instanceof TFile),
+                    cachedRead: async (file: TFile) => {
+                        const text = fake.contents.get(file.path);
+                        if (text === undefined) throw new Error("unreadable");
+                        return text;
+                    },
+                    create: async (path: string) => void fake.created.push(path),
+                    createFolder: async (path: string) => void fake.created.push(path),
                 },
                 metadataCache: { getFileCache: (file: TFile) => fake.caches.get(file.path) ?? null },
                 internalPlugins: { getPluginById: () => fake.dailyNotes },
@@ -50,7 +60,7 @@ const settings = vi.hoisted(() => {
 vi.mock("@/settings", () => ({ settingsStore: writable(settings.initial()) }));
 
 const { settingsStore } = await import("@/settings");
-const { getNotePath, getFileData, noteAt, notesWithFormatIn } = await import("./vault");
+const { getNotePath, getFileData, noteAt, notesWithFormatIn, getTemplateInfo } = await import("./vault");
 const { initVaultSource } = await import("./vault-source");
 const { PluginService } = await import("@/app-service");
 
@@ -63,6 +73,8 @@ const fileAt = (path: string) => Object.assign(new TFile(), { path });
 
 beforeEach(() => {
     fake.files.clear();
+    fake.contents.clear();
+    fake.created = [];
     fake.caches.clear();
     fake.dailyNotes = null;
     (settingsStore as ReturnType<typeof writable>).set(settings.initial());
@@ -219,5 +231,39 @@ describe("notesWithFormatIn: 設定画面の「書式ごとのファイル数」
         const passed = settings.initial();
         passed.periods.day.enabled = false;
         expect(notesWithFormatIn("day", "YYYY-MM-DD", passed)).toEqual(["日記/2026-10-30.md"]);
+    });
+});
+
+describe("getTemplateInfo: ノートを作るときのテンプレートの中身", () => {
+    it("テンプレートのファイルがあれば、その中身を返す", async () => {
+        fake.files.set("テンプレート/日.md", fileAt("テンプレート/日.md"));
+        fake.contents.set("テンプレート/日.md", "# {{title}}");
+        expect(await getTemplateInfo("テンプレート/日.md", "day")).toBe("# {{title}}");
+    });
+
+    it("テンプレートを選んでいなければ、空", async () => {
+        expect(await getTemplateInfo("", "day")).toBe("");
+        expect(fake.created).toEqual([]);
+    });
+
+    it("テンプレートのファイルがなければ、空として扱い、ファイルもフォルダも作らない", async () => {
+        expect(await getTemplateInfo("テンプレート/日.md", "day")).toBe("");
+        expect(fake.created).toEqual([]);
+    });
+
+    it("パスにあるのがフォルダなら、ないのと同じ", async () => {
+        fake.files.set("テンプレート/日.md", Object.assign(new TFolder(), { path: "テンプレート/日.md" }));
+        expect(await getTemplateInfo("テンプレート/日.md", "day")).toBe("");
+        expect(fake.created).toEqual([]);
+    });
+
+    it("読めなければ空にし、その周期の言葉で知らせる", async () => {
+        const error = vi.spyOn(console, "error").mockImplementation(() => {});
+        Notice.shown.length = 0;
+        fake.files.set("テンプレート/週.md", fileAt("テンプレート/週.md"));
+        expect(await getTemplateInfo("テンプレート/週.md", "week")).toBe("");
+        expect(Notice.shown).toEqual(["Failed to read the weekly note template"]);
+        expect(error.mock.calls[0][0]).toBe("Failed to read the weekly note template 'テンプレート/週.md'");
+        error.mockRestore();
     });
 });

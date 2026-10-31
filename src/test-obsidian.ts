@@ -11,5 +11,9 @@ export class TAbstractFile {
 export class TFile extends TAbstractFile {}
 export class TFolder extends TAbstractFile {}
 export class Notice {
-    constructor(public message: unknown) {}
+    /** the messages shown so far, for tests to read */
+    static shown: unknown[] = [];
+    constructor(public message: unknown) {
+        Notice.shown.push(message);
+    }
 }
