@@ -50,6 +50,7 @@ function createYearsRangesStore() {
       const prevRange = ranges[crrRangeIndex - 1];
 
       displayedDateStore.set(
+        // the displayed month, not a yearly note: calendar on purpose
         get(todayStore).clone().year(+crrRangeStartYear + (displayedDateModifier || -1)).startOf('year')
       );
 
@@ -68,6 +69,7 @@ function createYearsRangesStore() {
     if (action === 'increment') {
       const nextRange = ranges[crrRangeIndex + 1];
 
+      // the displayed month, not a yearly note: calendar on purpose
       displayedDateStore.set(get(todayStore).clone().year(+crrRangeEndYear + 1).startOf('year'));
 
       if (!nextRange) {

@@ -6,6 +6,8 @@
     granularity: IGranularity;
     fileData: TFileData;
     formatValue: string;
+    /** Calendared: text to show instead of the formatted date (e.g. "2026–27" for a year that doesn't start in January) */
+    text?: string;
     /** every label this title can show (e.g. all month names); the title is sized to the widest so nothing next to it shifts */
     widthSamples?: string[];
   };
@@ -110,7 +112,7 @@
       }}
     >
       <span class="relative">
-        {text ?? inLocale(date, $settingsStore.localeSettings.localeOverride).format(title.formatValue)}
+        {text ?? title.text ?? inLocale(date, $settingsStore.localeSettings.localeOverride).format(title.formatValue)}
         {#if showSticker && title.fileData.sticker}
           <!-- the emoji keeps the date buttons' small size, whatever the title's size -->
           <span class="text-xs font-normal"><Sticker sticker={title.fileData.sticker.emoji} /></span>

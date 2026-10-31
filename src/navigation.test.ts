@@ -11,12 +11,13 @@ import {
     stripDates,
     type Placement,
 } from "./navigation";
+import { periodRules } from "./periods";
 import { createIsoWeekScheme } from "./weeks";
 
 const d = (s: string) => moment(s, "YYYY-MM-DD");
 const ymd = (dates: moment.Moment[]) => dates.map((x) => x.format("YYYY-MM-DD"));
-const mondayWeeks = createIsoWeekScheme(1);
-const sundayWeeks = createIsoWeekScheme(0);
+const mondayWeeks = periodRules(createIsoWeekScheme(1));
+const sundayWeeks = periodRules(createIsoWeekScheme(0));
 const ALL = { day: true, week: true, month: true, quarter: true, year: true };
 
 // ---- 設定の読み替え（docs/adr/0031） ----
@@ -258,6 +259,37 @@ describe("crumbText: パンくずの文字（カレンダーの言語）", () =>
         expect(crumbText("week", d("2026-01-05"), "ja", mondayWeeks)).toBe("W02");
         // 日曜始まりの 2026-10-25 の行は、月曜日 10/26 の W44
         expect(crumbText("week", d("2026-10-25"), "ja", sundayWeeks)).toBe("W44");
+    });
+});
+
+describe("四半期・年が 1 月以外から始まるとき（docs/adr/0039）", () => {
+    const may = { startMonth: 5, yearInName: "start" } as const;
+    const mayRules = periodRules(createIsoWeekScheme(1), { quarter: may, year: may });
+
+    it("日: 上の周期は、その日を含む年・四半期", () => {
+        expect(crumbs("day", d("2027-03-10"), ALL, mayRules).slice(0, 3)).toEqual([
+            "year:2026-05-01", "quarter:2027-02-01", "month:2027-03-01",
+        ]);
+    });
+
+    it("年をまたぐ四半期は、2 か月目を含む年（年は暦どおり、四半期は 5 月始まり）", () => {
+        const rules = periodRules(createIsoWeekScheme(1), { quarter: may });
+        // 5 月始まりの四半期 2026-Q3 は 2026-11〜2027-01。2 か月目の 12 月は 2026 年
+        expect(crumbs("quarter", d("2026-11-01"), ALL, rules)).toEqual(["year:2026-01-01", "quarter:2026-11-01"]);
+        // 3 月始まりなら 2026-12〜2027-02 が 1 つの四半期で、2 か月目は 2027 年
+        const feb = periodRules(createIsoWeekScheme(1), { quarter: { startMonth: 3, yearInName: "start" } });
+        expect(crumbs("quarter", d("2026-12-01"), ALL, feb)).toEqual(["year:2027-01-01", "quarter:2026-12-01"]);
+    });
+
+    it("文字: 年は「2026–27」、四半期はその周期の番号", () => {
+        expect(crumbText("year", d("2026-05-01"), "ja", mayRules)).toBe("2026–27");
+        expect(crumbText("quarter", d("2027-02-01"), "ja", mayRules)).toBe("Q4");
+    });
+
+    it("ミニカレンダー: 四半期・年は、その周期の始まりの日で並ぶ", () => {
+        expect(ymd(stripDates("quarter", d("2027-03-10"), 0, "centered", mayRules))).toEqual([
+            "2026-08-01", "2026-11-01", "2027-02-01", "2027-05-01", "2027-08-01",
+        ]);
     });
 });
 

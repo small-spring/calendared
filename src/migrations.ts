@@ -1,7 +1,7 @@
 import { notesWithFormat } from "./io/notes-by-format";
 import type { IGranularity } from "./io/types";
 import { renameForFormat } from "./periods";
-import type { WeekScheme } from "./weeks";
+import type { PeriodRules } from "./periods";
 
 const has = (object: object, key: string) => Object.prototype.hasOwnProperty.call(object, key);
 
@@ -20,14 +20,14 @@ export function planFormatRenames(
   files: { path: string; basename: string; extension: string }[],
   granularity: IGranularity,
   { folder, fromFormat, toFormat }: { folder: string; fromFormat: string; toFormat: string },
-  weeks: WeekScheme,
+  rules: PeriodRules,
 ): PlannedRename[] {
   if (fromFormat.trim() === toFormat.trim()) return [];
   const taken = new Set(files.map((file) => file.path.toLowerCase()));
   const basenames = new Map(files.map((file) => [file.path, file.basename]));
 
-  return notesWithFormat(files, granularity, { folder, format: fromFormat }, weeks).flatMap((from) => {
-    const name = renameForFormat(basenames.get(from)!, granularity, fromFormat, toFormat, weeks);
+  return notesWithFormat(files, granularity, { folder, format: fromFormat }, rules).flatMap((from) => {
+    const name = renameForFormat(basenames.get(from)!, granularity, fromFormat, toFormat, rules);
     if (!name || name === basenames.get(from)) return [];
     const to = `${from.slice(0, from.lastIndexOf("/") + 1)}${name}.md`;
     return [{ from, to, conflict: taken.has(to.toLowerCase()) }];

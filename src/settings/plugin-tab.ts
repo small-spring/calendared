@@ -7,6 +7,7 @@ import { validateFolder, validateFormat, validateTemplate } from "@/io/validatio
 import locales from "@/locales";
 import { defaultWeekdays, sysLocaleKey } from "@/localization";
 import { showsOn } from "@/navigation";
+import { formatPeriod, periodRules, rangeOfPeriod, yearCycleOf, type PeriodName } from "@/periods";
 import { switchLocale, updateWeekStartSetting } from "@/stores";
 import { openNowIcon } from "@/ui/open-now";
 import { STICKER_BUTTON_ICON } from "@/ui/sticker-actions";
@@ -100,6 +101,13 @@ export class SettingsTab extends PluginSettingTab {
         return openAtStartupOf(s.periods);
       case "calendarLanguage":
         return s.localeSettings.localeOverride;
+      // Calendared: a quarter's or year's cycle; missing is the calendar year (docs/adr/0039)
+      case "periods.quarter.startMonth":
+      case "periods.year.startMonth":
+        return String(yearCycleOf(s.periods[key.split(".")[1] as "quarter" | "year"]).startMonth);
+      case "periods.quarter.yearInName":
+      case "periods.year.yearInName":
+        return yearCycleOf(s.periods[key.split(".")[1] as "quarter" | "year"]).yearInName;
     }
     return key.split(".").reduce<unknown>((value, k) => (value as Record<string, unknown> | undefined)?.[k], s);
   }
@@ -117,6 +125,11 @@ export class SettingsTab extends PluginSettingTab {
       this.update();
     } else if (period) {
       this.setPeriodEnabled(period, value as boolean);
+    } else if (/^periods\.(quarter|year)\.(startMonth|yearInName)$/.test(key)) {
+      const v = key.endsWith("startMonth") ? Number(value) : value;
+      settingsStore.update((s) => withValueAt(s, key.split("."), v) as ISettings);
+      // Year in names shows only for a cycle that doesn't start in January, and the examples change
+      this.update();
     } else {
       settingsStore.update((s) => withValueAt(s, key.split("."), value) as ISettings);
     }
@@ -246,6 +259,7 @@ export class SettingsTab extends PluginSettingTab {
                 return mountBelow(setting, Format, { settings: periodStore(granularity), granularity });
               },
             },
+            ...(granularity === "quarter" || granularity === "year" ? cycleSettings(granularity) : []),
             {
               name: "Folder",
               desc: `Where new ${periodicity} notes are created.`,
@@ -681,11 +695,60 @@ function coreDailyNotesOn(): boolean {
   return !!app?.internalPlugins?.getPluginById<DnPluginSettings>(DAILY_NOTES_PLUGIN_ID)?.enabled;
 }
 
+const monthName = (month: number) => new Intl.DateTimeFormat("en", { month: "long" }).format(new Date(2000, month - 1, 1));
+
+/**
+ * Calendared: the month a quarter's or year's 12-month cycle starts in, and which of its years names the notes
+ * (docs/adr/0039). The second one shows only when the cycle doesn't start in January, with an example from this year
+ */
+function cycleSettings(granularity: "quarter" | "year"): SettingGroupItem[] {
+  const noun = granularity === "quarter" ? "quarters' year" : "year";
+  const example = (yearInName: "start" | "end") => {
+    const s = settings();
+    const rules = periodRules(weekSchemeFor(s.localeSettings), {
+      [granularity]: { ...yearCycleOf(s.periods[granularity]), yearInName },
+    });
+    const thisYear = window.moment().year() + (yearInName === "end" ? 1 : 0);
+    const period: PeriodName = granularity === "quarter"
+      ? { granularity, year: thisYear, quarter: 4 }
+      : { granularity, year: thisYear };
+    const range = rangeOfPeriod(period, rules)!;
+    const format = s.periods[granularity].format.trim() || DEFAULT_FORMATS_PER_GRANULARITY[granularity];
+    return `${range.start.format("MMM YYYY")} – ${range.end.format("MMM YYYY")} is ${formatPeriod(period, format, rules)}`;
+  };
+  return [
+    {
+      name: "Starts in",
+      desc: `The month the ${noun} starts in. Changing it doesn't rename notes you already have: each keeps its name, which then stands for the new period.`,
+      control: {
+        type: "dropdown",
+        key: `periods.${granularity}.startMonth`,
+        options: Object.fromEntries(Array.from({ length: 12 }, (_, i) => [String(i + 1), monthName(i + 1)])),
+      },
+    },
+    {
+      name: "Year in names",
+      desc: `The year the notes are named after. Year it starts: ${example("start")}. Year it ends: ${example("end")}.`,
+      visible: () => yearCycleOf(settings().periods[granularity]).startMonth !== 1,
+      control: {
+        type: "dropdown",
+        key: `periods.${granularity}.yearInName`,
+        options: { start: "Year it starts", end: "Year it ends" },
+      },
+    },
+  ];
+}
+
 /** The second line of a period's row: its format and folder, or that it is off */
 function periodSummary(granularity: IGranularity): string {
   const period = settings().periods[granularity];
   if (!period.enabled) return "Off";
   const parts = [period.format, period.folder.trim() || "/"];
+  // Calendared: a quarter's or year's start month, if it isn't January (docs/adr/0039)
+  if (granularity === "quarter" || granularity === "year") {
+    const { startMonth } = yearCycleOf(period);
+    if (startMonth !== 1) parts.push(`from ${monthName(startMonth)}`);
+  }
   if (period.openAtStartup) parts.push("Opens at startup");
   return parts.join(" · ");
 }

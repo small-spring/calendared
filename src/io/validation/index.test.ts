@@ -43,11 +43,12 @@ describe("isValidPeriodicNote: ファイル名から周期と日付を読む", (
 
     it("週次ノートの日付は、その週（カレンダーの行）の最初の日。今日が何曜日でも同じ", () => {
         // fixed 2026-10-29: the parser used to take today and swap in the year and week number (docs/spec/periods.md)
+        // isValid is false: YYYY can't be used in a weekly note's format any more (docs/adr/0040), but the note is still read
         vi.useFakeTimers({ now: new Date(2026, 9, 29) }); // a Thursday
-        expect(parse("2026-W44")).toEqual({ isValid: true, granularity: "week", date: "2026-10-26" });
+        expect(parse("2026-W44")).toEqual({ isValid: false, granularity: "week", date: "2026-10-26" });
 
         vi.useFakeTimers({ now: new Date(2026, 10, 2) }); // a Monday
-        expect(parse("2026-W44")).toEqual({ isValid: true, granularity: "week", date: "2026-10-26" });
+        expect(parse("2026-W44")).toEqual({ isValid: false, granularity: "week", date: "2026-10-26" });
     });
 
     it("【気になる点】YYYY と ww を混ぜた週の書式は、年をまたぐ週の名前を読めない（書式を GGGG-[W]WW にすれば読める）", () => {

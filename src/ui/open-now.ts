@@ -10,7 +10,7 @@ import { isValidPeriodicNote } from "@/io/validation";
 import { finestEnabled, isNowNote, periodStart } from "@/navigation";
 import { settingsStore, type ISettings } from "@/settings";
 import { displayedDateStore, todayStore, yearsRanges } from "@/stores";
-import { weekSchemeFor } from "@/weeks";
+import { periodRulesFor } from "@/periods";
 
 /** calendar-clock ("now", not "today"); an older Obsidian without it in its Lucide set gets the plain clock */
 export function openNowIcon(): string {
@@ -33,7 +33,7 @@ export function isNowNoteFile(
   if (!file) return false;
   const { isValid, granularity, date } = isValidPeriodicNote(file.basename);
   const note = typeof isValid === "boolean" && granularity && date ? { granularity, date } : null;
-  return isNowNote(note, enabledPeriods(settings.periods), today, weekSchemeFor(settings.localeSettings));
+  return isNowNote(note, enabledPeriods(settings.periods), today, periodRulesFor(settings));
 }
 
 /** Open (or create, after the usual confirmation) now's note, and show today in the calendar */
@@ -43,7 +43,7 @@ export function openNow() {
 
   const today = get(todayStore);
   const granularity = finestEnabled(enabledPeriods());
-  const date = periodStart(granularity, today, weekSchemeFor(get(settingsStore).localeSettings));
+  const date = periodStart(granularity, today, periodRulesFor(get(settingsStore)));
   // the calendar moves to today's month itself: a week or quarter note would only bring it to the period's first month
   yearsRanges.update((values) => ({
     ...values,

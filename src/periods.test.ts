@@ -5,6 +5,8 @@ import {
     overlapsMonth,
     parsePeriod,
     periodOf,
+    periodRules,
+    cycleYearLabel,
     rangeOfPeriod,
     renameForFormat,
     shiftPeriod,
@@ -16,8 +18,8 @@ const d = (s: string) => moment(s, "YYYY-MM-DD");
 
 // ---- Period names and operations (docs/adr/0009, 0010) ----
 
-const mondayWeeks = createIsoWeekScheme(1);
-const sundayWeeks = createIsoWeekScheme(0);
+const mondayWeeks = periodRules(createIsoWeekScheme(1));
+const sundayWeeks = periodRules(createIsoWeekScheme(0));
 const FORMATS = { day: "YYYY-MM-DD", week: "GGGG-[W]WW", month: "YYYY-MM", quarter: "YYYY-[Q]Q", year: "YYYY" } as const;
 const range = (p: PeriodName, weeks = mondayWeeks) => {
     const r = rangeOfPeriod(p, weeks);
@@ -118,6 +120,76 @@ describe.each(["day", "week", "month", "quarter", "year"] as const)("どの周�
             expect(shiftPeriod(shiftPeriod(p, -1, sundayWeeks), 1, sundayWeeks)).toEqual(p);
             const next = periodOf(granularity, rangeOfPeriod(p, sundayWeeks)!.end.clone().add(1, "day"), sundayWeeks);
             expect(shiftPeriod(p, 1, sundayWeeks)).toEqual(next);
+        }
+    });
+});
+
+// ---- 四半期と年の始まりの月（docs/adr/0039） ----
+
+const may = { startMonth: 5, yearInName: "start" } as const;
+const mayEnd = { startMonth: 5, yearInName: "end" } as const;
+const mayRules = periodRules(createIsoWeekScheme(1), { quarter: may, year: may });
+const mayEndRules = periodRules(createIsoWeekScheme(1), { quarter: mayEnd, year: mayEnd });
+
+describe("5 月始まりの四半期と年", () => {
+    it("Q は始まりの月から数え、年の数字は 12 か月が始まる年", () => {
+        expect(periodOf("quarter", d("2026-05-01"), mayRules)).toEqual({ granularity: "quarter", year: 2026, quarter: 1 });
+        expect(periodOf("quarter", d("2026-10-29"), mayRules)).toEqual({ granularity: "quarter", year: 2026, quarter: 2 });
+        expect(periodOf("quarter", d("2027-03-15"), mayRules)).toEqual({ granularity: "quarter", year: 2026, quarter: 4 });
+        expect(periodOf("year", d("2027-04-30"), mayRules)).toEqual({ granularity: "year", year: 2026 });
+        expect(periodOf("year", d("2027-05-01"), mayRules)).toEqual({ granularity: "year", year: 2027 });
+    });
+
+    it("終わりの年で呼ぶと、同じ期間の数字が 1 つ大きい", () => {
+        expect(periodOf("quarter", d("2027-03-15"), mayEndRules)).toEqual({ granularity: "quarter", year: 2027, quarter: 4 });
+        expect(periodOf("year", d("2026-05-01"), mayEndRules)).toEqual({ granularity: "year", year: 2027 });
+        expect(range({ granularity: "year", year: 2027 }, mayEndRules)).toEqual(["2026-05-01", "2027-04-30"]);
+    });
+
+    it("期間は始まりの月から 3 か月・12 か月", () => {
+        expect(range({ granularity: "quarter", year: 2026, quarter: 4 }, mayRules)).toEqual(["2027-02-01", "2027-04-30"]);
+        expect(range({ granularity: "year", year: 2026 }, mayRules)).toEqual(["2026-05-01", "2027-04-30"]);
+        expect(shiftPeriod({ granularity: "quarter", year: 2026, quarter: 4 }, 1, mayRules)).toEqual({ granularity: "quarter", year: 2027, quarter: 1 });
+    });
+
+    it("名前の YYYY と Q は、その周期の数字で書いて読む", () => {
+        const q4 = { granularity: "quarter", year: 2026, quarter: 4 } as const;
+        expect(formatPeriod(q4, "YYYY-[Q]Q", mayRules)).toBe("2026-Q4");
+        expect(parsePeriod("2026-Q4", "quarter", "YYYY-[Q]Q", mayRules)).toEqual(q4);
+        expect(formatPeriod({ granularity: "year", year: 2026 }, "YYYY", mayRules)).toBe("2026");
+        expect(formatPeriod({ granularity: "year", year: 2027 }, "[FY]YY", mayEndRules)).toBe("FY27");
+        expect(parsePeriod("2026", "year", "YYYY", mayRules)).toEqual({ granularity: "year", year: 2026 });
+    });
+
+    it("四半期と年は、別々の月から始められる（年は暦どおり、四半期だけ 5 月始まり）", () => {
+        const rules = periodRules(createIsoWeekScheme(1), { quarter: may });
+        expect(periodOf("year", d("2027-03-15"), rules)).toEqual({ granularity: "year", year: 2027 });
+        expect(periodOf("quarter", d("2027-03-15"), rules)).toEqual({ granularity: "quarter", year: 2026, quarter: 4 });
+    });
+
+    it("見出しの年: 1 月始まりは「2026」、ほかは「2026–27」（名前の付け方によらない）", () => {
+        expect(cycleYearLabel({ granularity: "year", year: 2026 }, { startMonth: 1, yearInName: "start" })).toBe("2026");
+        expect(cycleYearLabel({ granularity: "year", year: 2026 }, may)).toBe("2026–27");
+        expect(cycleYearLabel({ granularity: "year", year: 2027 }, mayEnd)).toBe("2026–27");
+    });
+});
+
+describe.each([
+    ["5 月・始まりの年", mayRules],
+    ["5 月・終わりの年", mayEndRules],
+    ["2 月", periodRules(createIsoWeekScheme(1), { quarter: { startMonth: 2, yearInName: "start" }, year: { startMonth: 12, yearInName: "end" } })],
+] as const)("始まりの月を変えても守る約束（%s）", (_, rules) => {
+    const days = Array.from({ length: 800 }, (_, i) => d("2025-11-01").add(i, "days"));
+
+    it.each(["quarter", "year"] as const)("%s: 期間に元の日が入り、前の次は元に戻り、名前は読み戻せる", (granularity) => {
+        for (const day of days) {
+            const p = periodOf(granularity, day, rules);
+            const r = rangeOfPeriod(p, rules)!;
+            expect(day.isBetween(r.start, r.end, "day", "[]")).toBe(true);
+            expect(shiftPeriod(shiftPeriod(p, -1, rules), 1, rules)).toEqual(p);
+            expect(periodOf(granularity, r.end.clone().add(1, "day"), rules)).toEqual(shiftPeriod(p, 1, rules));
+            const format = FORMATS[granularity];
+            expect(parsePeriod(formatPeriod(p, format, rules), granularity, format, rules)).toEqual(p);
         }
     });
 });

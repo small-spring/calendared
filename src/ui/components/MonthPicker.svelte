@@ -1,7 +1,8 @@
 <script lang="ts">
     // Calendared: month picker shown as a popover from the header's year chevron.
     // Replaces upstream's "Month" tab (YearHeader + months table in Calendar.svelte).
-    import { monthsIndexesInQuarters } from "@/constants";
+    import { crumbText, periodStart } from "@/navigation";
+    import { periodRulesFor } from "@/periods";
     import { noteAt } from "@/io";
     import { settingsStore } from "@/settings";
     import { displayedDateStore, todayStore } from "@/stores";
@@ -17,7 +18,10 @@
     }
     let { onPick }: Props = $props();
 
-    let pickerYear = $state($displayedDateStore.clone().startOf("year"));
+    // Calendared: the year by its own start month, its 12 months from there (docs/adr/0039)
+    let rules = $derived(periodRulesFor($settingsStore));
+    let pickerYear = $state(periodStart("year", $displayedDateStore, periodRulesFor($settingsStore)));
+    let months = $derived(Array.from({ length: 12 }, (_, i) => pickerYear.clone().add(i, "months")));
     // Calendared: read through the vault source with the settings read reactively (docs/adr/0016)
     let yearFileData = $derived(noteAt("year", pickerYear, $settingsStore));
 </script>
@@ -36,6 +40,7 @@
             granularity: "year",
             fileData: yearFileData,
             formatValue: "YYYY",
+            text: crumbText("year", pickerYear, $settingsStore.localeSettings.localeOverride, rules),
         }}
         textClassName="text-sm"
         onOpen={onPick}
@@ -48,8 +53,7 @@
     />
 </div>
 <div class="grid grid-cols-3 gap-0.5">
-    {#each monthsIndexesInQuarters.flat() as monthIndex}
-        {@const month = pickerYear.clone().month(monthIndex)}
+    {#each months as month}
         <DateBttn
             compactDot
             date={month}

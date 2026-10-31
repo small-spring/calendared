@@ -1,13 +1,14 @@
 import moment from "moment";
 import { describe, expect, it } from "vitest";
+import { periodRules } from "@/periods";
 import { createIsoWeekScheme } from "@/weeks";
 import { notePath } from "./note-path";
 
 // notePath gets everything it depends on as arguments (no settings store, no Obsidian), so a caller that reads the
 // settings reactively recomputes the path whenever they change (docs/adr/0016)
 
-const mondayWeeks = createIsoWeekScheme(1);
-const sundayWeeks = createIsoWeekScheme(0);
+const mondayWeeks = periodRules(createIsoWeekScheme(1));
+const sundayWeeks = periodRules(createIsoWeekScheme(0));
 const date = (d: string) => moment(d, "YYYY-MM-DD");
 
 describe("notePath: 周期・日付・フォルダ・書式・週の決め方から、ノートのパスを作る", () => {

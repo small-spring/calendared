@@ -5,6 +5,7 @@ import { getPeriodicityFromGranularity } from "../parse";
 import { type IGranularity } from "../types";
 import { DUP_ERROR_PREFIX } from "./constants";
 import { weekSchemeFor } from "@/weeks";
+import { disallowedTokens } from "@/format-tokens";
 
 // https://github.com/liamcain/obsidian-periodic-notes/blob/a8aa7e4e368ac344282b17e381b9101af12af0d1/src/settings/validation.ts#L20
 function validateFilename(filename: string): boolean {
@@ -128,15 +129,15 @@ function isAmbiguousFormat(
                     Current year: ${currentDate.year()}, Parsed year: ${parsedDate.year()}`;
       }
       break;
-    case "quarter":
-      if (
-        parsedDate.quarter() !== currentDate.quarter() ||
-        parsedDate.year() !== currentDate.year()
-      ) {
+    case "quarter": {
+      // Calendared: checks the format can be read back, with moment's own quarters: calendar on purpose
+      const [parsedQ, currentQ] = [parsedDate.quarter(), currentDate.quarter()]; // calendar on purpose
+      if (parsedQ !== currentQ || parsedDate.year() !== currentDate.year()) {
         return `${errorMessage} It doesn't uniquely identify a quarter.
-                    Current: Q${currentDate.quarter()} ${currentDate.year()}, Parsed: Q${parsedDate.quarter()} ${parsedDate.year()}`;
+                    Current: Q${currentQ} ${currentDate.year()}, Parsed: Q${parsedQ} ${parsedDate.year()}`;
       }
       break;
+    }
     case "month":
       if (
         parsedDate.month() !== currentDate.month() ||
@@ -191,6 +192,15 @@ function checkIfDuplicateFormat(
   return { duplicte: false, errorMsg: "" };
 }
 
+/** What a period's names may contain, shown with the error (docs/adr/0040) */
+const ALLOWED_HINT: Record<IGranularity, string> = {
+  day: "Use the year, month and day (or the ISO week-based year, week and weekday together).",
+  week: "Use the week-based year (GGGG) and week (WW).",
+  month: "Use the year and month.",
+  quarter: "Use the year and quarter (Q).",
+  year: "Use the year.",
+};
+
 export function validateFormat(
   value: string,
   granularity: IGranularity,
@@ -205,6 +215,12 @@ export function validateFormat(
   if (!validateFilename(value)) {
     error = "Format contains illegal characters";
     return error;
+  }
+
+  // Calendared: only tokens of the periods that contain the whole period (docs/adr/0040)
+  const disallowed = disallowedTokens(value, granularity);
+  if (disallowed.length) {
+    return `${disallowed.join(", ")} can't be used in ${getPeriodicityFromGranularity(granularity)} note names. ${ALLOWED_HINT[granularity]}`;
   }
 
   const currentDate = window.moment();

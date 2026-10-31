@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { monthsIndexesInQuarters } from "@/constants";
     import { type IGranularity } from "@/io";
     import { displayedDateStore, localeDataStore, yearsRanges } from "@/stores";
     import {
@@ -20,6 +19,8 @@
     import DateBttn from "./core/DateBttn.svelte";
     import { settingsStore } from "@/settings";
     import { weekSchemeFor } from "@/weeks";
+    import { periodRulesFor, rangeOfPeriod } from "@/periods";
+    import { crumbText, periodStart } from "@/navigation";
     import { inLocale, monthGrid } from "@/calendar-locale";
     import { noteAt, vaultSource } from "@/io";
 
@@ -30,6 +31,12 @@
     // Calendared: names and numbers in the calendar's language, without switching Obsidian's moment (calendar-locale.ts)
     let locale = $derived($settingsStore.localeSettings.localeOverride);
     let weeks = $derived(weekSchemeFor($settingsStore.localeSettings));
+    let rules = $derived(periodRulesFor($settingsStore));
+    // Calendared: the month view's 12 months, from the start of the displayed month's year (docs/adr/0039)
+    let monthRows = $derived.by(() => {
+        const start = periodStart("year", $displayedDateStore, rules);
+        return [0, 1, 2, 3].map((row) => [0, 1, 2].map((i) => start.clone().add(row * 3 + i, "months")));
+    });
 
     let crrTab = $derived($crrTabStore);
     let tabs: typeof periodTabs = $state(periodTabs);
@@ -151,16 +158,19 @@
         <YearHeader />
         <table class="pnc-calendar">
             <tbody>
-                {#each monthsIndexesInQuarters as quarterMonthsIndexes, i}
+                <!--
+                    Calendared: the 12 months from the start of the year shown (its own start month), 3 to a row. A row's
+                    quarter is the one starting in that row, so it shows even when quarters and years start in other months
+                    (docs/adr/0039). Upstream showed January to December beside the calendar quarters
+                -->
+                {#each monthRows as row}
+                    {@const quarterStart = row.find((m) => periodStart("quarter", m, rules).isSame(m, "day"))!}
                     <tr>
                         {#if enabledPeriods.quarter}
                             <td>
                                 <DateBttn
                                     compactDot
-                                    date={$displayedDateStore
-                                        .clone()
-                                        .quarter(i + 1)
-                                        .startOf("quarter")}
+                                    date={quarterStart}
                                     granularity="quarter"
                                     className={cn(
                                         "px-1 !pt-2.5 !pb-4 opacity-85",
@@ -168,31 +178,19 @@
                                     )}
                                     dotContainerClassName={"bottom-[.3rem]"}
                                 >
-                                    Q{$displayedDateStore
-                                        .clone()
-                                        .quarter(i + 1)
-                                        .startOf("quarter")
-                                        .quarter()}
+                                    {crumbText("quarter", quarterStart, locale, rules)}
                                 </DateBttn>
                             </td>
                         {/if}
-                        {#each quarterMonthsIndexes as monthIndex}
+                        {#each row as monthStart}
                             <td>
                                 <DateBttn
                                     compactDot
-                                    date={$displayedDateStore
-                                        .clone()
-                                        .month(monthIndex)
-                                        .startOf("month")}
+                                    date={monthStart}
                                     granularity="month"
                                     onSelect={tabs.includes("day")
                                         ? () => {
-                                              displayedDateStore.set(
-                                                  $displayedDateStore
-                                                      .clone()
-                                                      .month(monthIndex)
-                                                      .startOf("month"),
-                                              );
+                                              displayedDateStore.set(monthStart.clone());
                                               crrTabStore.set("day");
                                           }
                                         : null}
@@ -205,9 +203,7 @@
                                         "bottom-[calc(1rem/2)]",
                                     )}
                                 >
-                                    {inLocale($displayedDateStore, locale)
-                                        .month(monthIndex)
-                                        .format("MMM")}
+                                    {inLocale(monthStart, locale).format("MMM")}
                                 </DateBttn>
                             </td>
                         {/each}
@@ -223,22 +219,16 @@
                 {#each getYears( { startRangeYear: +$yearsRanges.ranges[$yearsRanges.crrRangeIndex].split("-")[0] }, ) as rowYearsRange}
                     <tr>
                         {#each rowYearsRange as year}
+                            <!-- Calendared: the year named `year`, from its own start month (docs/adr/0039) -->
+                            {@const yearStart = rangeOfPeriod({ granularity: "year", year }, rules)!.start}
                             <td>
                                 <DateBttn
                                     compactDot
-                                    date={$displayedDateStore
-                                        .clone()
-                                        .year(year)
-                                        .startOf("year")}
+                                    date={yearStart}
                                     granularity="year"
                                     onSelect={tabs.includes("month")
                                         ? () => {
-                                              displayedDateStore.set(
-                                                  $displayedDateStore
-                                                      .clone()
-                                                      .year(year)
-                                                      .startOf("year"),
-                                              );
+                                              displayedDateStore.set(yearStart.clone());
                                               crrTabStore.set("month");
                                           }
                                         : null}
@@ -248,11 +238,7 @@
                                     )}
                                     dotContainerClassName={"bottom-[.3rem]"}
                                 >
-                                    {$displayedDateStore
-                                        .clone()
-                                        .year(year)
-                                        .startOf("year")
-                                        .year()}
+                                    {crumbText("year", yearStart, locale, rules)}
                                 </DateBttn>
                             </td>
                         {/each}

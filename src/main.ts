@@ -9,9 +9,9 @@ import { createOrOpenNote, getFileData, getStartupNoteGranularity, initVaultSour
 import { getPeriodicityFromGranularity } from './io/parse';
 import type { IGranularity } from './io/types';
 import { isValidPeriodicNote, validateFormat } from './io/validation';
-import { overlapsMonth, rangeOfPeriod, shiftPeriod } from './periods';
-import { toSupportedWeekStart, weekSchemeFor } from './weeks';
-import { migratePlacementSettings, migrateTimelineSettings } from './navigation';
+import { overlapsMonth, periodRulesFor, rangeOfPeriod, shiftPeriod } from './periods';
+import { toSupportedWeekStart } from './weeks';
+import { migratePlacementSettings, migrateTimelineSettings, periodStart } from './navigation';
 import {
   displayedDateStore,
   setupLocale,
@@ -114,7 +114,8 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
           if (checking) return true;
 
           const leaf = this.app.workspace.getLeaf(false);
-          const date = window.moment().clone().startOf(granularity);
+          // Calendared: the period's first day by the period rules (a quarter or year may not start in January, docs/adr/0039)
+          const date = periodStart(granularity, window.moment(), periodRulesFor(get(settingsStore)));
           createOrOpenNote({ leaf, date, granularity, confirmBeforeCreateOverride: false }).catch(console.error);
           return true;
         }
@@ -135,9 +136,9 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
           if (!granularity || !period) return false;
           if (checking) return true;
 
-          const weeks = weekSchemeFor(get(settingsStore).localeSettings);
-          const targetPeriod = shiftPeriod(period, pos === 'next' ? 1 : -1, weeks);
-          const { file: target } = getFileData(granularity, rangeOfPeriod(targetPeriod, weeks)!.start);
+          const rules = periodRulesFor(get(settingsStore));
+          const targetPeriod = shiftPeriod(period, pos === 'next' ? 1 : -1, rules);
+          const { file: target } = getFileData(granularity, rangeOfPeriod(targetPeriod, rules)!.start);
           if (target) {
             this.app.workspace.getLeaf(false).openFile(target).catch(console.error);
           } else {
@@ -356,7 +357,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     // Calendared: always follow the open note, but only when no day of it is on the displayed month already.
     // Otherwise clicking a year title would jump to January, or a week number to the month the week starts in.
     // `date` is the period's first day (docs/spec/periods.md)
-    if (!overlapsMonth(period, get(displayedDateStore), weekSchemeFor(get(settingsStore).localeSettings))) {
+    if (!overlapsMonth(period, get(displayedDateStore), periodRulesFor(get(settingsStore)))) {
       displayedDateStore.set(date);
     }
   }

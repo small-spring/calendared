@@ -38,8 +38,15 @@ describe("validateFormat: 書式の誤り（設定画面に出す文）", () => 
         expect(validateFormat("MM", "month")).toMatch(/^Ambiguous format\. Missing year/);
     });
 
-    it("ほかの周期と同じ書式は誤り（同じ名前のノートを 2 つの周期が取り合う）", () => {
-        expect(validateFormat("YYYY-MM", "year")).toBe("Duplicate format from Monthly Notes settings");
+    it("ほかの周期の書式は、記号の決まりで誤りになる（同じ名前のノートを 2 つの周期が取り合わない）", () => {
+        expect(validateFormat("YYYY-MM", "year")).toMatch(/^MM can't be used in yearly note names/);
+    });
+
+    it("その周期をまるごと含む周期の記号しか使えない（docs/adr/0040）", () => {
+        expect(validateFormat("GGGG-[W]WW-DD", "week")).toBe("DD can't be used in weekly note names. Use the week-based year (GGGG) and week (WW).");
+        expect(validateFormat("YYYY-[W]WW", "week")).toMatch(/^YYYY can't be used in weekly note names/);
+        expect(validateFormat("YYYY-[Q]Q MMM", "quarter")).toMatch(/^MMM can't be used in quarterly note names/);
+        expect(validateFormat("YYYY[年度]", "year")).toBe("");
     });
 
     it("その周期の今の書式と同じ値は誤りにしない（周期の書式は 1 つ）", () => {

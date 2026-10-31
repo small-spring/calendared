@@ -10,7 +10,7 @@ import { get } from "svelte/store";
 import { PluginService } from "@/app-service";
 import type { IFoldInfo } from "./types";
 import { join, notePath } from './note-path';
-import { weekSchemeFor } from '@/weeks';
+import { periodRulesFor } from '@/periods';
 
 
 export type TFileData = {
@@ -63,7 +63,7 @@ export function periodNotePath(
   dailyNotesPlugin: DnPluginSettings | null | undefined,
 ): string {
   const { settings: { format, folder } } = normalizePeriodSettings(granularity, periods, dailyNotesPlugin);
-  return notePath(granularity, date, { folder, format }, weekSchemeFor(localeSettings));
+  return notePath(granularity, date, { folder, format }, periodRulesFor({ periods, localeSettings }));
 }
 
 export function getFileData(
@@ -101,7 +101,7 @@ export function notesWithFormatIn(
 ): string[] {
   const vault = vaultSource();
   const { settings: { folder } } = normalizePeriodSettings(granularity, settings.periods, vault.dailyNotes());
-  return notesWithFormat(vault.markdownFiles(), granularity, { folder, format }, weekSchemeFor(settings.localeSettings));
+  return notesWithFormat(vault.markdownFiles(), granularity, { folder, format }, periodRulesFor(settings));
 }
 
 export async function getTemplateInfo(

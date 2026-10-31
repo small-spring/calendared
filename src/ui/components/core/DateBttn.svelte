@@ -13,6 +13,8 @@
   import type { Snippet } from "svelte";
   import { Sticker } from "..";
   import { Platform } from "obsidian";
+  import { samePeriod } from "@/navigation";
+  import { periodRulesFor } from "@/periods";
 
   interface Props {
     // Properties
@@ -61,7 +63,8 @@
     return isActiveOverride ?? openFile.path === file.path;
   });
 
-  let isToday = $derived(date.isSame($todayStore, granularity));
+  // Calendared: a quarter or year by its own start month (docs/adr/0039)
+  let isToday = $derived(samePeriod(granularity, date, $todayStore, periodRulesFor($settingsStore)));
   let isAdjacentMonth = $state(false);
 
   $effect.pre(() => {

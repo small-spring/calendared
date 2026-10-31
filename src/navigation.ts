@@ -1,6 +1,6 @@
 import { granularities } from "./constants";
 import type { IGranularity } from "./io/types";
-import type { WeekScheme } from "./weeks";
+import { cycleYearLabel, periodOf, rangeOfPeriod, type PeriodRules } from "./periods";
 
 // Calendared: the breadcrumbs and the mini calendar above a note (docs/adr/0031, 0032), apart from Obsidian so they can
 // be tested. They replace upstream's timeline
@@ -83,9 +83,14 @@ export function finestEnabled(enabled: Record<IGranularity, boolean>): IGranular
 }
 
 /** The first day of the period that contains the date (a week: the first day of its calendar row) */
-export function periodStart(granularity: IGranularity, date: moment.Moment, weeks: WeekScheme): moment.Moment {
-    if (granularity === "week") return weeks.rangeOf(weeks.weekOf(date))!.start;
-    return date.clone().startOf(granularity);
+export function periodStart(granularity: IGranularity, date: moment.Moment, rules: PeriodRules): moment.Moment {
+    // Calendared: quarters and years start in their own month (docs/adr/0039)
+    return rangeOfPeriod(periodOf(granularity, date, rules), rules)!.start;
+}
+
+/** Whether the two dates are in the same period (a quarter or year by its own start month) */
+export function samePeriod(granularity: IGranularity, a: moment.Moment, b: moment.Moment, rules: PeriodRules): boolean {
+    return periodStart(granularity, a, rules).isSame(periodStart(granularity, b, rules), "day");
 }
 
 /**
@@ -98,14 +103,14 @@ export function stripDates(
     date: moment.Moment,
     offset: number,
     dayLayout: DayLayout,
-    weeks: WeekScheme,
+    rules: PeriodRules,
 ): moment.Moment[] {
     const count = granularity === "day" ? 7 : 5;
     const side = Math.floor(count / 2);
-    const middle = periodStart(granularity, date, weeks).add(offset * count, granularity);
+    const middle = periodStart(granularity, date, rules).add(offset * count, granularity);
     const first =
         granularity === "day" && dayLayout === "week"
-            ? periodStart("week", middle, weeks)
+            ? periodStart("week", middle, rules)
             : middle.clone().subtract(side, granularity);
     return Array.from({ length: count }, (_, i) => first.clone().add(i, granularity));
 }
@@ -119,8 +124,10 @@ export type Crumb = {
 };
 
 /**
- * Where the note is, from the year down to the note itself ("2026 › Q4 › 10月 › W44 › 30日"). A week's year, quarter
- * and month are its Thursday's, the day ISO 8601 takes the week's year from, so they agree with its week number.
+ * Where the note is, from the year down to the note itself ("2026 › Q4 › 10月 › W44 › 30日"). The periods above are
+ * the ones containing the middle of the note's period (docs/adr/0039): a week's year, quarter and month are its
+ * Thursday's, the day ISO 8601 takes the week's year from, so they agree with its week number; a quarter's year is its
+ * second month's.
  * Disabled weeks and quarters are left out (you know where you are without them); disabled months and years stay,
  * but can't be opened. The last crumb, the note itself, always shows
  */
@@ -128,38 +135,45 @@ export function breadcrumbs(
     granularity: IGranularity,
     date: moment.Moment,
     enabled: Record<IGranularity, boolean>,
-    weeks: WeekScheme,
+    rules: PeriodRules,
 ): Crumb[] {
     const own = granularities.indexOf(granularity);
-    const thursday = granularity === "week" ? isoThursday(date, weeks) : date;
+    const middle =
+        granularity === "week"
+            ? isoThursday(date, rules)
+            : granularity === "quarter"
+              ? periodStart("quarter", date, rules).add(1, "month")
+              : date;
     return [...granularities]
         .reverse()
         .filter((g) => granularities.indexOf(g) >= own)
         .filter((g) => g === granularity || enabled[g] || g === "month" || g === "year")
         .map((g) => ({
             granularity: g,
-            date: periodStart(g, g === "week" || g === "day" ? date : thursday, weeks),
+            date: periodStart(g, g === granularity ? date : middle, rules),
             canOpen: g === granularity || enabled[g],
         }));
 }
 
 /** The Thursday of the ISO week a calendar row is named after (the row's Monday + 3 days) */
-function isoThursday(date: moment.Moment, weeks: WeekScheme): moment.Moment {
-    const { weekYear, week } = weeks.weekOf(date);
+function isoThursday(date: moment.Moment, rules: PeriodRules): moment.Moment {
+    const { weekYear, week } = rules.weeks.weekOf(date);
     return window.moment(`${weekYear}-W${String(week).padStart(2, "0")}-4`, "GGGG-[W]WW-E", true);
 }
 
 /** A crumb's text in the calendar's language: "2026", "Q4", "10月" / "Oct", "W44", "30日" / "30" */
-export function crumbText(granularity: IGranularity, date: moment.Moment, locale: string, weeks: WeekScheme): string {
-    switch (granularity) {
+export function crumbText(granularity: IGranularity, date: moment.Moment, locale: string, rules: PeriodRules): string {
+    const period = periodOf(granularity, date, rules);
+    switch (period.granularity) {
         case "year":
-            return String(date.year());
+            // Calendared: "2026–27" for a year that doesn't start in January (docs/adr/0039)
+            return cycleYearLabel(period, rules.year);
         case "quarter":
-            return `Q${date.quarter()}`;
+            return `Q${period.quarter}`;
         case "month":
             return new Intl.DateTimeFormat(locale, { month: "short" }).format(date.toDate());
         case "week":
-            return `W${String(weeks.weekOf(date).week).padStart(2, "0")}`;
+            return `W${String(period.week).padStart(2, "0")}`;
         case "day":
             return new Intl.DateTimeFormat(locale, { day: "numeric" }).format(date.toDate());
     }
@@ -173,9 +187,9 @@ export function isNowNote(
     note: { granularity: IGranularity; date: moment.Moment } | null,
     enabled: Record<IGranularity, boolean>,
     today: moment.Moment,
-    weeks: WeekScheme,
+    rules: PeriodRules,
 ): boolean {
     const granularity = finestEnabled(enabled);
     if (!note || note.granularity !== granularity) return false;
-    return periodStart(granularity, note.date, weeks).isSame(periodStart(granularity, today, weeks), "day");
+    return samePeriod(granularity, note.date, today, rules);
 }

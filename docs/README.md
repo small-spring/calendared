@@ -8,6 +8,7 @@ Calendared の開発向けの文書（日本語）。使う人向けの説明は
 - [spec/](spec/): 機能ごとの仕様
   - [spec/overview.md](spec/overview.md): 機能と設定項目の一覧（まずここ）
   - [spec/periods.md](spec/periods.md): 周期ノートの値の形と、週の定義
+  - [spec/fiscal-year.md](spec/fiscal-year.md): 四半期と年の始まりの月（使う人の例、パンくず、カレンダー）
   - [spec/stickers.md](spec/stickers.md): ステッカー機能
   - [spec/migrations.md](spec/migrations.md): 移行（書式の変換、ステッカーのプロパティの付け替え、移行の案内）
   - [spec/state.md](spec/state.md): 状態（ストア）の一覧と、状態管理の作り直しの記録

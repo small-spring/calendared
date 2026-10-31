@@ -1,6 +1,5 @@
 import { normalizePath } from "obsidian";
-import { formatPeriod, periodOf } from "@/periods";
-import type { WeekScheme } from "@/weeks";
+import { formatPeriod, periodOf, type PeriodRules } from "@/periods";
 import type { IGranularity } from "./types";
 
 // Credit: @creationix/path.js
@@ -35,9 +34,9 @@ export function notePath(
   granularity: IGranularity,
   date: moment.Moment,
   { folder, format }: { folder: string; format: string },
-  weeks: WeekScheme,
+  rules: PeriodRules,
 ): string {
-  let filename = formatPeriod(periodOf(granularity, date, weeks), format, weeks);
+  let filename = formatPeriod(periodOf(granularity, date, rules), format, rules);
   if (!filename.endsWith(".md")) {
     filename += ".md";
   }

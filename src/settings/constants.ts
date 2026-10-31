@@ -18,6 +18,11 @@ export interface PeriodSettings {
   format: string;
   folder: string;
   templatePath: string;
+
+  /** Calendared: quarters and years only. The month (1–12) the 12-month cycle starts in; missing is January (docs/adr/0039) */
+  startMonth?: number;
+  /** Calendared: quarters and years only. Which of the cycle's two years names its notes; missing is the start year */
+  yearInName?: "start" | "end";
 }
 
 export interface ISettings {

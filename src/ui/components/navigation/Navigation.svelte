@@ -18,7 +18,7 @@
   import { todayStore } from "@/stores";
   import { Arrow } from "@/ui";
   import { cn, eventHandlers, isControlPressed } from "@/ui/utils";
-  import { weekSchemeFor } from "@/weeks";
+  import { periodRulesFor } from "@/periods";
   import DateBttn from "../core/DateBttn.svelte";
 
   interface Props {
@@ -32,7 +32,7 @@
   const { isPeriodic, granularity, date, isSide = false }: Props = $props();
 
   let locale = $derived($settingsStore.localeSettings.localeOverride);
-  let weeks = $derived(weekSchemeFor($settingsStore.localeSettings));
+  let rules = $derived(periodRulesFor($settingsStore));
   let enabled = $derived(
     Object.fromEntries(
       Object.entries($settingsStore.periods).map(([g, period]) => [g, period.enabled]),
@@ -52,23 +52,23 @@
   let center = $derived.by(() => {
     if (isPeriodic && granularity && date) return { granularity, date };
     const g = finestEnabled(enabled);
-    return { granularity: g, date: periodStart(g, $todayStore, weeks) };
+    return { granularity: g, date: periodStart(g, $todayStore, rules) };
   });
 
   /** how many times ‹ › moved the mini calendar away from the note (kept while the tab shows the same note) */
   let offset = $state(0);
   let dates = $derived(
-    stripDates(center.granularity, center.date, offset, $settingsStore.miniCalendar.dayLayout, weeks),
+    stripDates(center.granularity, center.date, offset, $settingsStore.miniCalendar.dayLayout, rules),
   );
-  let centerStart = $derived(periodStart(center.granularity, center.date, weeks));
+  let centerStart = $derived(periodStart(center.granularity, center.date, rules));
   let isCenterShown = $derived(dates.some((d) => d.isSame(centerStart, "day")));
-  let crumbs = $derived(breadcrumbs(center.granularity, center.date, enabled, weeks));
+  let crumbs = $derived(breadcrumbs(center.granularity, center.date, enabled, rules));
 
   function open(event: MouseEvent, g: IGranularity, d: moment.Moment) {
     eventHandlers.onClick({ date: d, createNewSplitLeaf: isControlPressed(event), granularity: g });
   }
   function cellText(g: IGranularity, d: moment.Moment) {
-    return g === "day" ? inLocale(d, locale).format("D") : crumbText(g, d, locale, weeks);
+    return g === "day" ? inLocale(d, locale).format("D") : crumbText(g, d, locale, rules);
   }
 
   // ---- where it sits ----
@@ -158,7 +158,7 @@
           >
             {#each crumbs as crumb, i (crumb.granularity)}
               {@const isLast = i === crumbs.length - 1}
-              {@const text = crumbText(crumb.granularity, crumb.date, locale, weeks)}
+              {@const text = crumbText(crumb.granularity, crumb.date, locale, rules)}
               {#if i > 0}<span class="text-[var(--text-faint)]" aria-hidden="true">›</span>{/if}
               {#if isLast && isPeriodic}
                 <!-- the note itself: brings a moved mini calendar back to it -->
@@ -276,7 +276,7 @@
           <span bind:this={backIconEl} class="flex [&>svg]:w-3 [&>svg]:h-3"></span>
           {center.granularity === "day"
             ? new Intl.DateTimeFormat(locale, { month: "short", day: "numeric" }).format(center.date.toDate())
-            : crumbText(center.granularity, center.date, locale, weeks)}
+            : crumbText(center.granularity, center.date, locale, rules)}
         </button>
       </div>
     {/if}

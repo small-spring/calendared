@@ -1,6 +1,5 @@
 import { normalizePath } from "obsidian";
-import { formatPeriod, parsePeriod } from "@/periods";
-import type { WeekScheme } from "@/weeks";
+import { formatPeriod, parsePeriod, type PeriodRules } from "@/periods";
 import type { IGranularity } from "./types";
 
 /** Inside a backup folder upstream made (`periodic-notes-BACKUP-<timestamp>`) */
@@ -23,7 +22,7 @@ export function notesWithFormat(
   files: { path: string; basename: string; extension: string }[],
   granularity: IGranularity,
   { folder, format }: { folder: string; format: string },
-  weeks: WeekScheme,
+  rules: PeriodRules,
 ): string[] {
   const root = normalizePath(folder);
   const inFolder = (path: string) => root === "/" || path.startsWith(`${root}/`);
@@ -31,8 +30,8 @@ export function notesWithFormat(
   return files
     .filter((file) => file.extension === "md" && inFolder(file.path) && !isBackupPath(file.path))
     .filter((file) => {
-      const period = parsePeriod(file.basename, granularity, format, weeks);
-      return !!period && formatPeriod(period, format, weeks) === file.basename;
+      const period = parsePeriod(file.basename, granularity, format, rules);
+      return !!period && formatPeriod(period, format, rules) === file.basename;
     })
     .map((file) => file.path);
 }

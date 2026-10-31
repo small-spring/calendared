@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { periodRules } from "@/periods";
 import { weekSchemeFor } from "@/weeks";
 import { isBackupPath, notesWithFormat } from "./notes-by-format";
 
-const weeks = weekSchemeFor({ weekStartId: 1 });
+const weeks = periodRules(weekSchemeFor({ weekStartId: 1 }));
 const md = (path: string) => {
     const name = path.slice(path.lastIndexOf("/") + 1);
     const dot = name.lastIndexOf(".");

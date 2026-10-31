@@ -47,6 +47,7 @@
   // Calendared: a weekly format also shows the week at New Year, where names break most often
   const newYearPreview = (formatValue: string) => {
     const weeks = weekSchemeFor($settingsStore.localeSettings);
+    // the week around New Year, where week-based and calendar years differ: calendar on purpose
     const week = weeks.weekOf(window.moment().endOf("year"));
     const range = weeks.rangeOf(week);
     return { name: weeks.format(week, formatValue), range: range ? `${range.start.format("M/D")} – ${range.end.format("M/D")}` : "" };

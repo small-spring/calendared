@@ -31,6 +31,7 @@ Works on desktop and mobile. Needs Obsidian 1.13.1 or later.
   note even without the plugin.
 - **Weeks like Google Calendar**: Weeks start on Saturday, Sunday, or Monday, and week numbers follow ISO 8601. The
   same weeks are used everywhere: file names, the calendar, the breadcrumbs, and templates.
+- **Fiscal quarters and years**: Quarters and years can each start in any month (for example, a fiscal year from May).
 - **Migrations**: After changing a format or the sticker property, rename the old notes or move their stickers in one go,
   with a list to check first.
 
@@ -61,7 +62,8 @@ Works on desktop and mobile. Needs Obsidian 1.13.1 or later.
 ```
 
 - **Breadcrumbs**: Where the open note sits, from the year down. Click a larger period to open its note.
-  A weekly note belongs to the year, quarter, and month of its Thursday.
+  A weekly note belongs to the year, quarter, and month of its Thursday. A quarterly note belongs to the year of its
+  second month.
 - **Mini calendar**: The notes of the same period around the open one, with dots and stickers. Use ‹ › to look further.
   For daily notes it shows the calendar week (or three days on each side).
 - Both can be turned off, shown on phones only, or hidden on notes that aren't periodic notes. On notes that aren't
@@ -111,7 +113,24 @@ note instead, even in the editor. Pick other keys if you use those for editing.
   After changing a format, a warning under it tells you how many notes still have the old names and offers to rename them.
 - For weekly notes, use `GGGG` (ISO week-numbering year) and `WW` (ISO week), as in the default. The settings warn about
   formats that would number weeks differently around New Year, with a button to switch.
+- A format may only use tokens of periods that contain the whole period: the week-numbering year and week for weeks
+  (`YYYY` and `MM` can't be used, since a week can span two months or years), the year and quarter for quarters, and
+  the year for years. Other tokens show an error.
 - **Week starts on**: Saturday, Sunday, or Monday. Week numbers are always ISO 8601.
+
+## Quarters and years from any month
+
+On the Quarterly notes and Yearly notes pages, **Starts in** sets the month the quarters' year (or the year) starts in.
+Quarters and years are set separately; set the same month for both to keep them together.
+
+- With May, Q1 is May to July, and May 2026 to April 2027 is one year.
+- **Year in names** (shown when it isn't January): name that year after the year it starts (`2026`) or ends (`2027`).
+  `YYYY` and `Q` in the format write these numbers: starting in May and named after the year it ends,
+  `[FY]YYYY-[Q]Q` names February to April 2027 `FY2027-Q4`.
+- The breadcrumbs and the calendar write a year that doesn't start in January as `2026–27`.
+- Changing the month doesn't rename notes you already have: `2026-Q4` keeps its name and then stands for the new
+  fourth quarter.
+- Daily and monthly notes keep the calendar year (`2027-03` is March 2027).
 
 ## Templates
 
@@ -130,7 +149,7 @@ Pick a template file for each period. These placeholders are replaced when a not
 | Section | Settings |
 | --- | --- |
 | (top) | Week starts on, Open on startup, Calendar language, Confirm before creating notes, Open now button |
-| Periodic notes | Each period: on or off, format, folder, template |
+| Periodic notes | Each period: on or off, format, folder, template. Quarters and years: the month they start in, the year in names |
 | Period breadcrumbs | Show on (all devices / phones only), show on non-periodic notes |
 | Mini calendar | Show on, show on non-periodic notes, days shown, show stickers. Compact on desktop |
 | Stickers | Sticker button, sticker property, emoji search languages |
