@@ -25,6 +25,7 @@ import { getDailyNotesPlugin } from './utils';
 import { CalendarView } from './view';
 import { initEmojiSearch } from './ui/utils/emoji-locale';
 import { HOVER_LINK_SOURCE } from './ui/utils/event-handlers';
+import { trackSettingChanges } from './settings/migration-notice';
 import { getNoteSticker, isPeriodicNote, openStickerPicker, removeSticker, StickerActions } from './ui/sticker-actions';
 
 export default class PeriodicNotesCalendarPlugin extends Plugin {
@@ -59,6 +60,9 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
 
     // plugins
     await getDailyNotesPlugin()
+
+    // Calendared: remember the format or sticker property a change leaves behind, for the settings' notice (docs/adr/0035)
+    this.register(trackMigrationNotices());
 
     // sub settings
     const unsubSettingsStore = settingsStore.subscribe(this.saveSettings.bind(this))
@@ -393,4 +397,22 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     })
     new Notice(fragment, 10000)
   }
+}
+
+/**
+ * Calendared: keeps `migrationNotices` up to date as the format or sticker property changes. Compares copies of the
+ * values: some settings are changed in place (e.g. a period's format), so the previous settings object has the new value
+ */
+function trackMigrationNotices(): () => void {
+  const tracked = (s: ISettings) => ({
+    periods: Object.fromEntries(granularities.map((g) => [g, { format: s.periods[g].format }])) as Record<IGranularity, { format: string }>,
+    stickerProperty: s.stickerProperty,
+  });
+  let before = tracked(get(settingsStore));
+  return settingsStore.subscribe((s) => {
+    const after = tracked(s);
+    const notices = trackSettingChanges(s.migrationNotices, before, after);
+    before = after;
+    if (notices !== s.migrationNotices) settingsStore.update((current) => ({ ...current, migrationNotices: notices }));
+  });
 }

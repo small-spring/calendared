@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isReservedStickerProperty, stickerFrom, stickerProperty } from "./stickers";
+import { isReservedStickerProperty, stickerFrom, stickerFromValue, stickerProperty } from "./stickers";
 
 const on = { stickersEnabled: true, stickerProperty: "sticker" };
 const cacheWith = (frontmatter: Record<string, unknown>) => ({ frontmatter });
@@ -60,5 +60,21 @@ describe("stickerFrom: ノートのメタデータからステッカーを読む
         expect(stickerFrom(cacheWith({}), on)).toBeNull();
         expect(stickerFrom({}, on)).toBeNull();
         expect(stickerFrom(null, on)).toBeNull();
+    });
+});
+
+describe("stickerFromValue: プロパティの値をステッカーとして読む（移行の一覧で、絵文字でない値に印を付ける）", () => {
+    it("絵文字 1 文字なら、その絵文字", () => {
+        expect(stickerFromValue("😀")).toBe("😀");
+    });
+
+    it("リストなら、最初の絵文字 1 文字の要素", () => {
+        expect(stickerFromValue(["good", "👍"])).toBe("👍");
+    });
+
+    it("それ以外（文字、リンク、空）は null", () => {
+        expect(stickerFromValue("[[2026-07-01]]")).toBeNull();
+        expect(stickerFromValue(null)).toBeNull();
+        expect(stickerFromValue("👍good")).toBeNull();
     });
 });

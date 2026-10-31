@@ -2,6 +2,7 @@ import { DEFAULT_FORMATS_PER_GRANULARITY, granularities } from "@/constants";
 import { type IGranularity } from "@/io";
 import { sysLocaleKey, sysWeekStartId } from "../localization";
 import { toSupportedWeekStart } from "../weeks";
+import { NO_MIGRATION_NOTICES, type MigrationNotices } from "./migration-notice";
 import {
   DEFAULT_BREADCRUMBS,
   DEFAULT_MINI_CALENDAR,
@@ -37,6 +38,9 @@ export interface ISettings {
   stickerHeaderButton: boolean;
   /** Calendared: show the Open now button in the header of every note (docs/adr/0030) */
   openNowHeaderButton: boolean;
+
+  /** Calendared: the format or sticker property a change left behind, while the settings point to the migration (docs/adr/0035) */
+  migrationNotices: MigrationNotices;
 
   /** Whether to show a confirmation dialog before creating a new note */
   shouldConfirmBeforeCreate: boolean;
@@ -112,6 +116,7 @@ export const DEFAULT_SETTINGS: ISettings = Object.freeze({
   stickerHeaderButton: true,
   openNowHeaderButton: true,
   shouldConfirmBeforeCreate: true,
+  migrationNotices: NO_MIGRATION_NOTICES,
   yearsRangesStart: 2020,
 
   localeSettings: {

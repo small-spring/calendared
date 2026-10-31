@@ -40,9 +40,11 @@ export function stickerFrom(
 ): TSticker | null {
   if (!settings.stickersEnabled) return null;
 
-  const value: unknown = cache?.frontmatter?.[stickerProperty(settings.stickerProperty)];
-  const emoji = Array.isArray(value)
-    ? value.map(asEmoji).find((e) => e !== null) ?? null
-    : asEmoji(value);
+  const emoji = stickerFromValue(cache?.frontmatter?.[stickerProperty(settings.stickerProperty)]);
   return emoji ? { emoji } : null;
+}
+
+/** Calendared: the emoji a property's value shows as a sticker: a single emoji, or a list's first single-emoji item; else null */
+export function stickerFromValue(value: unknown): string | null {
+  return Array.isArray(value) ? value.map(asEmoji).find((e) => e !== null) ?? null : asEmoji(value);
 }

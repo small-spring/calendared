@@ -10,6 +10,7 @@
   import { type Writable } from "svelte/store";
   import FilepathsCount from "./FilepathsCount.svelte";
   import WeekFormatCheck from "./WeekFormatCheck.svelte";
+  import MigrationNotice from "../migrations/MigrationNotice.svelte";
 
   interface Props {
     settings: Writable<PeriodSettings>;
@@ -89,6 +90,8 @@
       )}
     />
   </div>
+  <!-- Calendared: right under the field, while notes still use the format it had before (docs/adr/0035) -->
+  <MigrationNotice which={granularity} />
   {#if granularity === "week"}
     <WeekFormatCheck {settings} />
   {/if}

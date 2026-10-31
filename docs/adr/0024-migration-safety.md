@@ -4,7 +4,7 @@ title: "移行の事故は、バックアップや「元に戻す」ではなく
 status: 採用
 date: 2026-10-30
 area: 設定
-implemented: false
+implemented: true
 aliases:
   - ADR-0024
   - settings ADR-C5

@@ -4,7 +4,7 @@ title: "移行は、ファイルの中身を書き換えないものだけを同
 status: 採用
 date: 2026-10-30
 area: 設定
-implemented: false
+implemented: true
 aliases:
   - ADR-0023
   - settings ADR-C4

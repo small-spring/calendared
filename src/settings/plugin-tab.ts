@@ -16,6 +16,7 @@ import { capitalize } from "@/utils";
 import { checkWeekFormat, weekSchemeFor } from "@/weeks";
 import {
   App,
+  type ButtonComponent,
   normalizePath,
   Notice,
   PluginSettingTab,
@@ -24,6 +25,7 @@ import {
   type SettingGroupItem,
   ToggleComponent,
 } from "obsidian";
+import { mount, unmount } from "svelte";
 import { get, type Writable } from "svelte/store";
 import writableDerived from "svelte-writable-derived";
 import type { ISettings, PeriodSettings } from "./constants";
@@ -33,6 +35,16 @@ import Format from "./ui/periods/Format.svelte";
 import { headingExtras, mountBelow, nameWithIcon } from "./ui/rows";
 import EmojiLanguages from "./ui/stickers/EmojiLanguages.svelte";
 import { FileSuggest } from "./ui/suggest";
+import MigrationNotice from "./ui/migrations/MigrationNotice.svelte";
+import {
+  forgetFinishedNotices,
+  formatNoticeCount,
+  formatRenamePlan,
+  openFormatRename,
+  openStickerMove,
+  stickerMovePlan,
+  stickerNoticeCount,
+} from "./ui/migrations";
 
 const settings = () => get(settingsStore);
 const periodName = (g: IGranularity) => `${capitalize(getPeriodicityFromGranularity(g))} notes`;
@@ -56,7 +68,7 @@ function withValueAt(value: unknown, path: string[], newValue: unknown): unknown
 
 /**
  * Calendared: the settings are written as definitions (Obsidian 1.13): one page divided by headings, with a page of its
- * own for each period and for migrations (docs/adr/0020, docs/plans/settings.md). Upstream drew two tabs with Svelte
+ * own for each period and for migrations (docs/adr/0020, docs/spec/overview.md). Upstream drew two tabs with Svelte
  */
 export class SettingsTab extends PluginSettingTab {
   private periodRowsQueued = false;
@@ -321,7 +333,7 @@ export class SettingsTab extends PluginSettingTab {
       const error = text.getValue() ? validateTemplate(text.getValue()) : "";
       if (error) setting.setErrorMessage(error);
     });
-    // Calendared: the template can be opened from here to edit it (docs/plans/settings.md)
+    // Calendared: the template can be opened from here to edit it (docs/spec/overview.md)
     let openButton: { setDisabled(disabled: boolean): unknown } | undefined;
     setting.addExtraButton((button) => {
       openButton = button;
@@ -468,6 +480,9 @@ export class SettingsTab extends PluginSettingTab {
                   if (!error && property !== settings().stickerProperty) this.setControlValue("stickerProperty", property);
                 });
               });
+              // Calendared: under the field, while notes still use the property it had before (docs/adr/0035)
+              const view = mount(MigrationNotice, { target: setting.infoEl.createDiv(), props: { which: "sticker" } });
+              return () => void unmount(view);
             },
           },
           // the box of languages (EmojiLanguages.svelte) stays inside the Stickers group with its description; a
@@ -482,19 +497,44 @@ export class SettingsTab extends PluginSettingTab {
     ];
   }
 
-  // Calendared: what migrations will do lives on a page of its own at the bottom (docs/plans/settings.md, "移行")
+  // Calendared: the migrations live on a page of its own at the bottom (docs/adr/0023, 0024, docs/spec/migrations.md).
+  // Each shows the list of notes it changes before it runs (review-modal.ts)
   private migrationPage(): SettingDefinitionItem {
     return {
       type: "page",
       name: "Migrate notes",
       desc: "Rename notes after changing a format, or move stickers after changing the sticker property.",
+      status: () => (anyMigrationNotice() ? "warning" : null),
       items: [
         {
           type: "group",
+          heading: "Rename notes to the current format",
+          cls: "calendared-heading-group",
+          extraButtons: [
+            headingExtras({
+              description: "Notes named in a previous format don't show in the calendar. Enter that format to rename them.",
+            }),
+          ],
+          items: granularities.map((g) => ({
+            name: periodName(g),
+            visible: () => settings().periods[g].enabled,
+            render: (setting: Setting) => this.renderFormatMigration(setting, g),
+          })),
+        },
+        {
+          type: "group",
+          heading: "Move stickers to the current property",
+          cls: "calendared-heading-group",
+          extraButtons: [
+            headingExtras({
+              description: "Stickers in a previous property don't show in the calendar. Only periodic notes are changed.",
+            }),
+          ],
           items: [
             {
-              name: "Not available yet",
-              desc: "Renaming notes to a new format and moving stickers to a new property will be here.",
+              name: "Previous property",
+              visible: () => settings().stickersEnabled,
+              render: (setting: Setting) => this.renderStickerMigration(setting),
             },
           ],
         },
@@ -502,8 +542,86 @@ export class SettingsTab extends PluginSettingTab {
     };
   }
 
+  private renderFormatMigration(setting: Setting, granularity: IGranularity) {
+    // the format before the last change, while its notice is up (docs/adr/0035)
+    let previous = settings().migrationNotices.formats[granularity] ?? "";
+    let button: ButtonComponent | undefined;
+    const refresh = () => {
+      const current = settings().periods[granularity].format;
+      // a format that can't name this period's notes (or is another period's) would read the wrong notes
+      const error = previous.trim() ? validateFormat(previous.trim(), granularity) : "";
+      setting.setErrorMessage(error || null);
+      const plan = previous.trim() && !error ? formatRenamePlan(granularity, previous.trim()) : [];
+      const renaming = plan.filter((row) => !row.conflict).length;
+      const desc = createFragment();
+      desc.createDiv({ text: `Current format: ${current}` });
+      if (previous.trim() && !error) {
+        desc.createDiv({
+          text:
+            plan.length === 0
+              ? `No notes named in ${previous.trim()}.`
+              : `${noteCount(plan.length)} named in ${previous.trim()}` + (plan.length > renaming ? ` (${plan.length - renaming} will be skipped).` : "."),
+        });
+      }
+      setting.setDesc(desc);
+      button?.setButtonText(plan.length === 0 || renaming === 0 ? "Review…" : `Rename ${noteCount(renaming)}…`).setDisabled(plan.length === 0);
+    };
+    setting.addText((text) =>
+      text
+        .setPlaceholder("Previous format")
+        .setValue(previous)
+        .onChange((value) => {
+          previous = value;
+          refresh();
+        }),
+    );
+    setting.addButton((b) => {
+      button = b;
+      b.onClick(() => openFormatRename(granularity, previous.trim(), refresh));
+    });
+    refresh();
+  }
+
+  private renderStickerMigration(setting: Setting) {
+    let previous = settings().migrationNotices.stickerProperty ?? "";
+    let button: ButtonComponent | undefined;
+    const refresh = () => {
+      const plan = previous.trim() ? stickerMovePlan(previous.trim()) : [];
+      const moving = plan.filter((row) => !row.conflict).length;
+      const desc = createFragment();
+      desc.createDiv({ text: `Current property: ${settings().stickerProperty}` });
+      if (previous.trim()) {
+        desc.createDiv({
+          text:
+            plan.length === 0
+              ? `No periodic notes have "${previous.trim()}".`
+              : `${noteCount(plan.length)} have "${previous.trim()}"` + (plan.length > moving ? ` (${plan.length - moving} will be skipped).` : "."),
+        });
+      }
+      setting.setDesc(desc);
+      button?.setButtonText(plan.length === 0 || moving === 0 ? "Review…" : `Move ${moving === 1 ? "1 sticker" : `${moving} stickers`}…`).setDisabled(plan.length === 0);
+    };
+    setting.addText((text) =>
+      text
+        // eslint-disable-next-line obsidianmd/ui/sentence-case -- a property name, written as it is
+        .setPlaceholder("mood")
+        .setValue(previous)
+        .onChange((value) => {
+          previous = value;
+          refresh();
+        }),
+    );
+    setting.addButton((b) => {
+      button = b;
+      b.onClick(() => openStickerMove(previous.trim(), refresh));
+    });
+    refresh();
+  }
+
   hide() {
     super.hide();
+    // Calendared: a notice whose notes were all renamed or moved elsewhere is done (docs/adr/0035)
+    forgetFinishedNotices();
 
     // Calendared: a period has one format (docs/adr/0019). An empty or invalid one is replaced with the default, so
     // creating a note always has a valid format
@@ -548,6 +666,14 @@ export class SettingsTab extends PluginSettingTab {
   }
 }
 
+const noteCount = (n: number) => `${n} ${n === 1 ? "note" : "notes"}`;
+
+/** Calendared: notes still use a format or sticker property from before a change (docs/adr/0035) */
+function anyMigrationNotice(): boolean {
+  const s = settings();
+  return granularities.some((g) => formatNoticeCount(g, s) > 0) || stickerNoticeCount(s) > 0;
+}
+
 function coreDailyNotesOn(): boolean {
   const app = PluginService.getPlugin()?.app;
   return !!app?.internalPlugins?.getPluginById<DnPluginSettings>(DAILY_NOTES_PLUGIN_ID)?.enabled;
@@ -567,6 +693,7 @@ function periodNeedsAttention(granularity: IGranularity): boolean {
   const period = settings().periods[granularity];
   if (!period.enabled) return false;
   if (validateFormat(period.format, granularity)) return true;
+  if (formatNoticeCount(granularity, settings()) > 0) return true;
   if (granularity !== "week") return false;
   const check = checkWeekFormat(period.format.trim(), weekSchemeFor(settings().localeSettings));
   return !!(check.unreadable || check.mismatched);

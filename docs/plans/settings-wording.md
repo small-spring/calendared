@@ -2,7 +2,7 @@
 
 2026-10-31 に、設定画面の文言の見直し案を書き、設定画面を宣言で書く形に組み直すときにほとんどを直した
 （[customizations.md](../customizations.md)）。ここには、まだ決めていない案と、新しい文を書くときの決まりだけを残す。
-決めたら [settings.md](settings.md) か [todo.md](../todo.md) に移し、このファイルは消す。
+決めたら [spec/overview.md](../spec/overview.md) か [todo.md](../todo.md) に移し、このファイルは消す。
 
 ## 新しい文を書くときの決まり
 

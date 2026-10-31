@@ -252,3 +252,39 @@
 .calendared-language-add span {
   display: flex;
 }
+
+/* Calendared: the migrations' list (settings/ui/migrations/review-modal.ts) and notice (docs/adr/0035). Provisional */
+.calendared-migration-backup {
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+}
+.calendared-migration-list {
+  max-height: 40vh;
+  overflow-y: auto;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s);
+  padding: var(--size-4-1) var(--size-4-2);
+}
+.calendared-migration-row {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4-1);
+  padding: 2px 0;
+  font-size: var(--font-ui-small);
+}
+.calendared-migration-conflict-heading {
+  margin-bottom: var(--size-4-1);
+  font-size: var(--font-ui-small);
+  color: var(--text-muted);
+}
+.calendared-migration-notice {
+  margin-top: var(--size-4-2);
+  margin-bottom: var(--size-4-2);
+}
+.calendared-migration-warning {
+  color: var(--text-warning);
+  font-size: var(--font-ui-small);
+}
+.calendared-migration-row .calendared-migration-warning {
+  margin-right: var(--size-4-1);
+}

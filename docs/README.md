@@ -9,6 +9,7 @@ Calendared の開発向けの文書（日本語）。使う人向けの説明は
   - [spec/overview.md](spec/overview.md): 機能と設定項目の一覧（まずここ）
   - [spec/periods.md](spec/periods.md): 周期ノートの値の形と、週の定義
   - [spec/stickers.md](spec/stickers.md): ステッカー機能
+  - [spec/migrations.md](spec/migrations.md): 移行（書式の変換、ステッカーのプロパティの付け替え、移行の案内）
   - [spec/state.md](spec/state.md): 状態（ストア）の一覧と、状態管理の作り直しの記録
 - [customizations.md](customizations.md): 元の版との違い（変更の記録）。変更を終えたら 1〜2 行で足す。GPL-3.0 の「改変したことと日付」の記録も兼ねる
 
@@ -22,7 +23,7 @@ Calendared の開発向けの文書（日本語）。使う人向けの説明は
 
 - [todo.md](todo.md): 作業の一覧（機能・不具合・公開の手続き・いつか・見送ったこと）。やることはここだけに書く
 - [plans/](plans/): これから作るものの設計（目指す姿と、決めることの一覧）
-  - [plans/settings.md](plans/settings.md): 設定画面の整理
+  - [plans/sticker-kinds.md](plans/sticker-kinds.md): ステッカーを複数の種類にする（いつか）の設計
   - [plans/settings-wording.md](plans/settings-wording.md): 設定画面の名前・説明・並び順を見直した案の一覧（どれを直すかは未定）
   - [plans/navigation.md](plans/navigation.md): ノートの間の移動（タイムライン・Open now・カレンダー）の要求と案
 

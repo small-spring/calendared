@@ -48,5 +48,5 @@ aliases:
   - 戻るボタンを帯の端に足すと、出たときに ‹ › の場所がずれ、続けて押せなかった（モックで確かめた）
 - **結果**: 今の設定の「Unique timelines」「Periodic notes timeline view mode」「Non-periodic notes timeline view mode」は消え、
   「Timeline」と「Show timeline everywhere」は機能ごとの設定に分かれる。週の端の日のノートで「週ごと」にしていると、片側の隣の日が帯に出ない
-  （› で次の週に送ってから押す）。設定画面での並べ方は [plans/settings.md](../plans/settings.md) のタイムラインの節
+  （› で次の週に送ってから押す）。設定画面での並べ方は [spec/overview.md](../spec/overview.md) の「4. パンくずとミニカレンダー」
 - **追記（2026-10-31）**: 「出さない」は出す場所の選択肢から外し、見出しのトグルでオン・オフする形にした（[ADR-0033](0033-heading-toggles.md)）
