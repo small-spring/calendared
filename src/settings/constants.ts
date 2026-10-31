@@ -50,9 +50,6 @@ export interface ISettings {
   /** Whether to show a confirmation dialog before creating a new note */
   shouldConfirmBeforeCreate: boolean;
 
-  /** Starting year for the year range selector */
-  yearsRangesStart: 2020;
-
   /** Locale and display settings */
   localeSettings: {
     /** Override for the default locale */
@@ -105,6 +102,8 @@ export const REMOVED_SETTINGS = [
   "shouldConfirmBeforeMoveAllFiles",
   "shouldConfirmBeforeDeleteFile",
   "shouldConfirmBeforeDeleteAllFiles",
+  // Calendared: saved but never read; the year view's ranges start from YEARS_RANGES_START
+  "yearsRangesStart",
 ] as const;
 /** Calendared: per-period settings of removed features (`periods.<granularity>.preview`: TODO / preview sections) */
 export const REMOVED_PERIOD_SETTINGS = ["preview"] as const;
@@ -122,7 +121,6 @@ export const DEFAULT_SETTINGS: ISettings = Object.freeze({
   openNowHeaderButton: true,
   shouldConfirmBeforeCreate: true,
   migrationNotices: NO_MIGRATION_NOTICES,
-  yearsRangesStart: 2020,
 
   localeSettings: {
     localeOverride: sysLocaleKey,
