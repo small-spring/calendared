@@ -14,11 +14,11 @@ type NoteInfo = { isPeriodic: boolean; granularity: IGranularity | null; date: m
  * and removed timelines by deleting their elements without unmounting them, so a tab could keep another note's
  * timeline, a note could lose its own, and every removed timeline kept its observers.
  *
- * Each tab keeps its own while it shows the same note, so moving the mini calendar survives switching tabs; a tab
+ * Each tab keeps its own while it shows the same note, read as the same period, so moving the mini calendar survives switching tabs; a tab
  * showing another note gets a new one, and a closed tab's is unmounted
  */
 export class NavigationSync<Leaf extends object, Component, File extends { path: string }> {
-  private shown = new Map<Leaf, { path: string; target: unknown; component: Component }>();
+  private shown = new Map<Leaf, { path: string; target: unknown; props: NavigationMountProps; component: Component }>();
 
   constructor(
     private ops: {
@@ -44,14 +44,17 @@ export class NavigationSync<Leaf extends object, Component, File extends { path:
         this.remove(leaf);
         continue;
       }
-      if (current && current.path === file.path && current.target === target) continue;
-      this.remove(leaf);
-
       const props: NavigationMountProps =
         note.isPeriodic && note.granularity && note.date
           ? { isPeriodic: true, granularity: note.granularity, date: note.date }
           : { isPeriodic: false, granularity: null, date: null };
-      this.shown.set(leaf, { path: file.path, target, component: this.ops.mount(leaf, props) });
+      // Calendared: the same note reads differently after the settings change (its format, the week start, the
+      // quarters' and years' start month), so what it was read as counts too
+      if (current && current.path === file.path && current.target === target && sameProps(current.props, props)) {
+        continue;
+      }
+      this.remove(leaf);
+      this.shown.set(leaf, { path: file.path, target, props, component: this.ops.mount(leaf, props) });
     }
 
     for (const leaf of [...this.shown.keys()]) {
@@ -70,4 +73,9 @@ export class NavigationSync<Leaf extends object, Component, File extends { path:
     this.shown.delete(leaf);
     this.ops.unmount(current.component);
   }
+}
+
+function sameProps(a: NavigationMountProps, b: NavigationMountProps): boolean {
+  if (!a.isPeriodic || !b.isPeriodic) return a.isPeriodic === b.isPeriodic;
+  return a.granularity === b.granularity && a.date.valueOf() === b.date.valueOf();
 }

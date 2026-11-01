@@ -1,5 +1,6 @@
 import moment from "moment";
 import { beforeEach, describe, expect, it } from "vitest";
+import type { IGranularity } from "@/io/types";
 import { NavigationSync, type NavigationMountProps } from "./sync";
 
 // Which breadcrumbs and mini calendar each tab (leaf) shows, kept apart from Obsidian (docs/adr/0017). Tabs, their notes and
@@ -11,8 +12,10 @@ type Note = { path: string; basename: string };
 
 const note = (path: string): Note => ({ path, basename: path.slice(path.lastIndexOf("/") + 1, -3) });
 // periodic notes in these tests: daily notes named YYYY-MM-DD and monthly notes named YYYY-MM
+// the formats can change, as when the settings change
+let formats: [IGranularity, string][];
 const read = (file: Note) => {
-    for (const [granularity, format] of [["day", "YYYY-MM-DD"], ["month", "YYYY-MM"]] as const) {
+    for (const [granularity, format] of formats) {
         const date = moment(file.basename, format, true);
         if (date.isValid()) return { isPeriodic: true, granularity, date };
     }
@@ -34,6 +37,7 @@ describe("NavigationSync: タブごとに、そのタブのノートのパンく
     beforeEach(() => {
         mounted = [];
         leaves = new Map();
+        formats = [["day", "YYYY-MM-DD"], ["month", "YYYY-MM"]];
         sync = new NavigationSync<Leaf, Component, Note>({
             mount: (leaf, props) => {
                 const component = { leaf: leaf.name, props, unmounted: false };
@@ -113,6 +117,49 @@ describe("NavigationSync: タブごとに、そのタブのノートのパンく
         sync.sync([tab("A", note("日記/2026-10-30.md"))], settings);
         sync.sync([tab("A", note("日記/2026-10-31.md"))], settings);
         expect(live()[0].props.date!.format("YYYY-MM-DD")).toBe("2026-10-31");
+    });
+
+    describe("設定が変わって、同じノートの読み取り結果が変わったとき（書式・週の始まり・四半期と年の始まりの月）", () => {
+        it("周期ノートでなくなったら、ふつうのノートとして付け直す", () => {
+            const on = { ...settings, other: true };
+            sync.sync([tab("A", note("日記/2026-10-30.md"))], on);
+            formats = [["day", "DD.MM.YYYY"]];
+            sync.sync([tab("A", note("日記/2026-10-30.md"))], on);
+            expect(mounted[0].unmounted).toBe(true);
+            expect(live()[0].props).toEqual({ isPeriodic: false, granularity: null, date: null });
+        });
+
+        it("ふつうのノートが周期ノートになったら、周期ノートとして付け直す", () => {
+            const on = { ...settings, other: true };
+            sync.sync([tab("A", note("日記/30.10.2026.md"))], on);
+            formats = [["day", "DD.MM.YYYY"]];
+            sync.sync([tab("A", note("日記/30.10.2026.md"))], on);
+            expect(live()).toHaveLength(1);
+            expect(live()[0].props.date!.format("YYYY-MM-DD")).toBe("2026-10-30");
+        });
+
+        it("別の日付・周期と読めるようになったら、付け直す", () => {
+            sync.sync([tab("A", note("日記/2026-10.md"))], settings);
+            formats = [["day", "YYYY-DD"]];
+            sync.sync([tab("A", note("日記/2026-10.md"))], settings);
+            expect(live()).toHaveLength(1);
+            expect(live()[0].props.granularity).toBe("day");
+        });
+
+        it("同じ周期の別の日付と読めるようになったら、付け直す", () => {
+            sync.sync([tab("A", note("日記/2026-10-11.md"))], settings);
+            formats = [["day", "YYYY-DD-MM"]];
+            sync.sync([tab("A", note("日記/2026-10-11.md"))], settings);
+            expect(live()).toHaveLength(1);
+            expect(live()[0].props.date!.format("YYYY-MM-DD")).toBe("2026-11-10");
+        });
+
+        it("読み取り結果が同じなら作り直さない（日付は別のオブジェクトでもよい）", () => {
+            sync.sync([tab("A", note("日記/2026-10-30.md"))], settings);
+            formats = [["day", "YYYY-MM-DD"]];
+            sync.sync([tab("A", note("日記/2026-10-30.md"))], settings);
+            expect(mounted).toHaveLength(1);
+        });
     });
 
     describe("ふつうのノート", () => {
