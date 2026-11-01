@@ -8,7 +8,6 @@ type TOnClickParams = {
   date: moment.Moment;
   createNewSplitLeaf: boolean;
   granularity: IGranularity;
-  openState?: Record<string, unknown>;
 };
 type TOnHoverParams = {
   event: PointerEvent | null;
@@ -23,13 +22,11 @@ const onClick = async ({
   date,
   createNewSplitLeaf,
   granularity,
-  openState,
 }: TOnClickParams): Promise<void> => {
   const leaf = PluginService.getPlugin()?.app.workspace.getLeaf(createNewSplitLeaf) ?? null;
   createOrOpenNote({
     leaf,
     date,
-    openState,
     granularity,
   }).catch(console.error);
 };

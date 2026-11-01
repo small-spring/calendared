@@ -14,12 +14,10 @@ export async function createOrOpenNote({
   leaf,
   date,
   granularity,
-  openState,
   confirmBeforeCreateOverride = get(settingsStore).shouldConfirmBeforeCreate,
 }: {
   leaf: WorkspaceLeaf | null;
   date: moment.Moment;
-  openState?: Record<string, unknown>;
   granularity: IGranularity;
   confirmBeforeCreateOverride?: boolean;
 }) {
@@ -30,7 +28,7 @@ export async function createOrOpenNote({
   async function openFile(file: TFile | undefined | null) {
     if (file) {
       // Calendared: the calendar's selection follows from opening the note (docs/adr/0015)
-      await leaf?.openFile(file, openState);
+      await leaf?.openFile(file);
     }
   }
 

@@ -117,7 +117,6 @@
       <Dot
         className="w-1"
         isVisible={!!title.fileData.file}
-        isFilled={!!title.fileData.file}
       />
     </div>
   </div>

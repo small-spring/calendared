@@ -129,7 +129,6 @@
     <Dot
       className={cn((compactDot || Platform.isPhone) && "w-1")}
       isVisible={!!file}
-      isFilled={!!file}
       {isActive}
     />
   </div>

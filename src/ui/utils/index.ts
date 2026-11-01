@@ -1,7 +1,5 @@
 import { Platform, setIcon } from 'obsidian';
 
-export type { IMonth, IWeek } from '@/calendar-locale';
-
 export function isControlPressed(e: MouseEvent | KeyboardEvent): boolean {
   return Platform.isMacOS ? e.metaKey : e.ctrlKey;
 }

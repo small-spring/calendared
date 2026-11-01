@@ -11,8 +11,6 @@
   }
 
   let { onClick, tooltip, direction, className = "" }: Props = $props();
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 </script>
 
 <Button
