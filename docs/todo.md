@@ -16,7 +16,55 @@
 
 ### 機能・不具合
 
-（今はない）
+2026-11-01 に、古いコードと想定と違いそうな動きをもう一度洗い出したもの。「たぶん」は、コードを読んだだけで、起きるかをまだ確かめていない — どれも Claude
+
+- 不具合: 書式の重複チェック（`src/io/validation/format.ts` の `checkIfDuplicateFormat`）が、ほかの周期のまちがった書式とも比べる。
+  月の書式に日と同じ `DD.MM.YYYY` を入れて設定画面を閉じると、日の正しい書式まで既定に戻る。書式は周期ごとに使える記号が違う
+  （[ADR-0040](adr/0040-format-tokens-per-period.md)）ので、正しい書式どうしはぶつからない。チェックごと消せるか考える
+- 不具合: 四半期・年を 1 月以外から始めたとき、書式の `y`・`yyyy`・`yo`・`YYYYY` が暦の年で書かれる（`src/periods.ts` の `withNameNumbers`）。
+  作ったノートがカレンダーに出ず、作り直される。ADR-0040 の表では年の記号は `YYYY YY Y` だけなので、`src/format-tokens.ts` で許すものを表に合わせる。
+  年が足りないときの文言「year (Y, y, gg or GG)」も、その周期で使える記号だけにする
+- 不具合: 大文字・小文字だけ違う名前への書式の変換（`2026-w44` → `2026-W44`）が、ノート自身とぶつかったことになる（`src/migrations.ts` の `planFormatRenames`）。
+  [spec/migrations.md](spec/migrations.md) では、ぶつかるのはほかのファイル
+- 不具合: カレンダーの言語に `x-pseudo`・`oc-lnc` を選ぶと、パンくずの月・日の表記（`Intl.DateTimeFormat`）がエラーになる（`src/navigation.ts`、`Navigation.svelte`）。
+  月・日の表記を moment にそろえるか、Intl が知らない言語を一覧から外す
+- 不具合: 設定を変えても、開いているノートのパンくず・ミニカレンダーが古いまま（`src/ui/components/navigation/sync.ts` は、同じノートなら作り直さない）。
+  書式・週の始まり・四半期と年の始まりの月を変えたとき。ノートの読み取り結果も比べる
+- 不具合: 起動時に開くノートだけ、日付に「今」を渡す（`src/main.ts`）。週・月・四半期・年のテンプレートの `{{date}}` が、コマンドや Open now で作ったとき
+  （その期間の最初の日）と違う
+- 不具合: 周期をオフにすると、その周期の移行の知らせが Migrate notes の警告に残るのに、押せる行が出ない（`src/settings/plugin-tab.ts` の `anyMigrationNotice`）
+- 不具合（たぶん）: 書式を入力して 0.5 秒以内に設定画面を閉じると、閉じるときの確かめのあとで、まちがった書式が保存される（`Format.svelte` の `debounce`）
+- 不具合（たぶん）: 設定画面を閉じるとき、オフの周期の書式も確かめて黙って既定に戻す（`plugin-tab.ts` の `hide`）。オフの周期の書式は、今あるノートを開くのに使っている
+- 不具合（たぶん）: カレンダーがエディタの場所にあって選ばれているとき、カレンダーを開く・閉じるコマンドで、中身のないビューが残る（`src/main.ts` の `leaf.view.unload()`。元の版のコード）
+- 不具合（たぶん）: テンプレートの候補を出したまま設定画面を閉じると、矢印キー・Enter の割り当てが残る（`src/settings/ui/suggest.ts` の `destroy` が `close` を呼ばない）
+- 不具合（たぶん）: ステッカーのピッカーを別ウィンドウのノートから開くと、メインのウィンドウに出る（`src/ui/sticker-picker.ts` が `document`・`window` を使う）
+- 不具合（たぶん）: Markdown でないファイルの名前を変えても、書式がまちがっているという知らせが出うる（`main.ts` の `onFileRenamed` に `.md` の確かめがない）
+- 整理: 元の版の、使われない設定を読み込むときに捨てる（`REMOVED_SETTINGS` に `stickerPrefix`・`lastUsedStickerPrefixes`・`shouldConfirmBeforeStickerMigrate`、
+  1.2 より前の `viewLeafPosition`・`leafViewEnabled`・`validFormats` など）。設定を読み込むときの重ね方が 1 段だけなので、入れ子の設定に足した項目の既定値が入らないのも直す
+- 整理: 使われていないものを消す: `src/ui/components/navigation/index.ts`、`trim()`・`basename()`、`WorkspaceLeaf.height`、`openState`、`localeDataStore.weekdays`、
+  `IMonth`/`IWeek` の再エクスポート、`#emoji-modal` の CSS、点の白抜きの表示、`suggestionsContainerCreated`。最初の起動の余分な保存と、`main.ts` のずれたコメントも
+- 整理: カレンダーのマスに何百も付いている同じ `id`（`id="dot"`、`id="date-text"` など。どこからも使われていない）を消す
+- 整理: 週の計算を、週の決め方の部品（[ADR-0014](adr/0014-swappable-week-scheme.md)）に聞く形にそろえる（`navigation.ts` の `isoThursday`、
+  `calendar-locale.ts` の `monthGrid`、`weeks.ts` の `isoWeekFormatFor` は書式を記号に分ける部品も使う）
+- 整理: 画面の部品の後片づけ（確認のモーダル、ファイルの候補、書式の知らせで、作った Svelte の部品を消していない）。`DateBttn.svelte` の `isAdjacentMonth` を `$derived` に。
+  曜日の見出しを、週の並びと同じ設定から作る（`localeDataStore` をなくす）
+- 整理: 小さな文言など: 矢印のツールチップ「Previous Month」を文の書き方に（「Range」もわかりにくい）、「Create note」のアイコン `document` を確かめる、
+  `src/locales.ts` の言語名（先頭の空白、Lybia、Malay が 2 つ、システムの言語が大文字・小文字の違いで 2 回出る）、`emoji-search.ts` の先頭の説明
+- 整理: 書式の `Qo`・`Mo`・`Wo`・`wo` は moment が読み返せない。今の確かめで弾かれているかを見て、ADR-0040 の表と合わせる
+- 整理: ADR-0039 を守るテスト（`period-rules-guard.test.ts`）が、`.year()` や `.add(n, 'quarter')` を見ていない。`parsePeriod` が 1 月始まりのときだけ書き戻して確かめないのもそろえる
+- 整理: テストを見直す。多すぎるテスト（同じことを何度も確かめている、作りの細部に頼っている）を消し、まとめるべきテストをまとめる。
+  消す前に、そのテストだけが守っている振る舞いがないかを見る。夏時間のある時間帯（`TZ=America/Sao_Paulo` など）でも通るかも確かめる
+
+### 決めること
+
+- カレンダーの言語を変えると、週の始まりもその言語の既定に戻る（`src/stores/locale.ts` の `switchLocale`。わざとそうしている）。
+  週の始まりが変わると、今ある週のノートが指す 7 日が変わる（[ADR-0011](adr/0011-week-follows-calendar.md)）。戻さないか、知らせるか — 自分
+- Ctrl/Cmd を押しながら日付を押すと、新しいタブで開く（`getLeaf(true)`）。仕様は「横に開く」。どちらにするか（右クリックの「Open to the right」はある）— 自分
+- 周期ノートかどうかを名前だけで決め、フォルダを見ていない（`src/io/validation/index.ts` の `isValidPeriodicNote`）。件数と移行は周期のフォルダの中だけ。
+  フォルダの外の同じ名前のノートにも、ステッカーのボタンや前・次のノートを出してよいか — 自分
+- 起動時に開く周期をオフにしてオンに戻すと、起動時に開く設定も黙って戻る。オフにしたときに消すか — 自分
+- カレンダーの言語の既定を、OS の言語（`navigator.languages`）から取っている。仕様は「Obsidian の言語」。どちらに合わせるか — 自分
+- 元の版の書式の一覧を 1 つにしたとき（読み込むとき）、使わなくなった書式のノートについて移行の知らせを出さない。元の版から移る人のために出すか — 自分
 
 ### 確かめる
 
