@@ -16,10 +16,7 @@
 
 ### 機能・不具合
 
-- 不具合: `npm run deploy` の読み込み確認（`scripts/check-load.cjs`）が「Class constructors cannot be invoked without 'new'」で落ち、
-  Vault にコピーできない — Claude。2026-11-01 のテストの見直しで見つけた（その前の `custom` でも落ちる）。
-  `src/localization.ts` が読み込むときに `getLanguage()` を呼ぶが、確認用の偽の Obsidian は何でもクラスで返すので、関数として呼べない。
-  偽の Obsidian の値を、呼んでも `new` してもよいもの（`fake()` のように）にすれば直りそう
+（今はない）
 
 ### 共通化
 
