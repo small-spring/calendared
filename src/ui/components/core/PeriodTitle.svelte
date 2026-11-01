@@ -20,7 +20,7 @@
   import { settingsStore } from "@/settings";
   import { vaultSource } from "@/io";
   import { cn, eventHandlers, isControlPressed } from "@/ui/utils";
-  import { capitalize } from "@/utils";
+  import { turnedOffMessage } from "@/period-words";
   import { inLocale } from "@/calendar-locale";
   import Button from "./Button.svelte";
   import Dot from "./Dot.svelte";
@@ -81,7 +81,7 @@
       )}
       aria-label={canOpen
         ? `Open ${periodicity} note`
-        : `${capitalize(periodicity)} notes are turned off in settings`}
+        : turnedOffMessage(title.granularity)}
       onclick={(event) => {
         eventHandlers.onClick({
           date,

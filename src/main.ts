@@ -24,6 +24,7 @@ import { initEmojiSearch } from './ui/utils/emoji-locale';
 import { HOVER_LINK_SOURCE } from './ui/utils/event-handlers';
 import { trackSettingChanges } from './settings/migration-notice';
 import { openAtStartupOf } from './settings/period-switch';
+import { currentNoteName } from './period-words';
 import { getNoteSticker, isPeriodicNote, openStickerPicker, removeSticker, StickerActions } from './ui/sticker-actions';
 
 export default class PeriodicNotesCalendarPlugin extends Plugin {
@@ -94,17 +95,10 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     });
 
     // Calendared: named after the period ("today's", "this week's"); ids are upstream's so existing hotkeys keep working
-    const currentPeriodNames: Record<IGranularity, string> = {
-      day: "Open today's note",
-      week: "Open this week's note",
-      month: "Open this month's note",
-      quarter: "Open this quarter's note",
-      year: "Open this year's note",
-    };
     granularities.forEach((granularity) => {
       this.addCommand({
         id: `create-current-${getPeriodicityFromGranularity(granularity)}-note`,
-        name: currentPeriodNames[granularity],
+        name: currentNoteName(granularity, "open"),
         // Calendared: upstream used `callback`. With `checkCallback`, Obsidian asks first (checking = true)
         // and hides the command while its period is disabled in settings
         checkCallback: (checking) => {

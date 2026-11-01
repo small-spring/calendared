@@ -7,7 +7,7 @@ import { getPeriodicityFromGranularity, replaceTemplateContents } from "./parse"
 import { type IGranularity } from "./types";
 import { ensureFolderExists, getNotePath, getTemplateInfo } from "./vault";
 import { PluginService } from "@/app-service";
-import { capitalize } from "@/utils";
+import { turnedOffMessage } from "@/period-words";
 import { periodRulesFor, periodStart } from "@/periods";
 import { refreshToday } from "@/stores/dates";
 
@@ -44,7 +44,7 @@ export async function createOrOpenNote({
     // Calendared: upstream created the note even when its period was disabled in settings.
     // Existing notes still open (above); only creation is blocked.
     if (!get(settingsStore).periods[granularity].enabled) {
-      return new Notice(`${capitalize(periodicity)} notes are turned off in settings`);
+      return new Notice(turnedOffMessage(granularity));
     }
 
     if (confirmBeforeCreateOverride) {

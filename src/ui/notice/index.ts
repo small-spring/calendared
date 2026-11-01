@@ -1,5 +1,5 @@
-import { getPeriodicityFromGranularity, type IGranularity } from "@/io";
-import { capitalize } from "@/utils";
+import { type IGranularity } from "@/io";
+import { periodicityTitle } from "@/period-words";
 
 /**
  * The notice for a note named in a period's folder that its format doesn't read.
@@ -11,7 +11,7 @@ export function invalidFormatNotice({ granularity, filepath, formatValue, error 
     formatValue: string;
     error: string;
 }): DocumentFragment {
-    const periodicity = capitalize(getPeriodicityFromGranularity(granularity));
+    const periodicity = periodicityTitle(granularity);
     const fragment = createFragment();
     fragment.createEl("p", { cls: "m-0 text-[--text-warning]", text: `Warning: ${error}` });
     const message = fragment.createEl("p", { cls: "m-0" });
