@@ -17,7 +17,6 @@ interface Suggestion<T> {
 abstract class BaseSuggest<T> extends PopoverSuggest<T> {
   suggestionContainerEl: HTMLDivElement;
   suggestionItemsContainerEl: HTMLDivElement;
-  suggestionsContainerCreated: boolean;
   inputEl: HTMLInputElement;
   suggestions: Suggestion<T>[] = [];
   selectedSuggestionIdx: number;
@@ -42,7 +41,6 @@ abstract class BaseSuggest<T> extends PopoverSuggest<T> {
     this.suggestionItemsContainerEl = this.suggestionContainerEl.createDiv({
       cls: "suggestion",
     })
-    this.suggestionsContainerCreated = true;
 
     this.setupEventListeners();
   }
@@ -89,6 +87,8 @@ abstract class BaseSuggest<T> extends PopoverSuggest<T> {
     this.autoUpdateCleanup = null;
   }
   destroy() {
+    // Calendared: closing the settings with the suggestions open left the arrow/Enter keys taken (the scope) and autoUpdate running
+    if (this.suggestionContainerEl.isConnected) this.close();
     this.suggestionContainerEl.remove();
     if (this.inputEvHandlers) {
       (Object.entries(this.inputEvHandlers) as [keyof WindowEventMap, WindowEventHandler<keyof WindowEventMap>][]).forEach(([event, handler]) =>
