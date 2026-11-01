@@ -80,7 +80,7 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 | --- | --- |
 | Open today's note / this week's / this month's / this quarter's / this year's note | 今の期間のノートを開く（なければ作る）。無効な周期のものは出ない |
 | Open previous / next periodic note | 開いている周期ノートの前・後を開く。ないときは作らず通知する |
-| Toggle calendar interface | カレンダーのペインを開閉する（リボンのアイコンも同じ） |
+| Toggle calendar interface | カレンダーのペインを開閉する（リボンのアイコンも同じ）。エディタの場所のタブで選ばれているときは、タブを閉じて右のサイドバーに戻す |
 | Manage sticker / Remove sticker | 開いているノートのステッカーを付ける・外す |
 
 既定のホットキーは付けない。

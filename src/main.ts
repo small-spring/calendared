@@ -271,6 +271,8 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
 
     if (!leaf) {
       leaf = ViewManager.initView() as WorkspaceLeaf & { containerEl: HTMLElement; tabHeaderEl: HTMLElement };
+      // Calendared: no leaf could be made (no right sidebar); upstream read `tabHeaderEl` of null
+      if (!leaf) return;
       const leafActive = leaf.tabHeaderEl.className.includes('is-active');
       if ((crrSplit && 'collapsed' in crrSplit && crrSplit.collapsed) || !leafActive) {
         ViewManager.revealView().catch(console.error);
@@ -286,7 +288,9 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     if (crrSplit instanceof WorkspaceRoot) {
       if (leafActive) {
         // a. root split && leaf active
-        leaf.view.unload();
+        // Calendared: close the tab and put the calendar back in the right sidebar. Upstream unloaded the view only,
+        // which left the tab open with nothing in it (initView found the same leaf and kept it)
+        leaf.detach();
         ViewManager.initView({ active: false });
       } else {
         // b. root split && leaf NOT active
