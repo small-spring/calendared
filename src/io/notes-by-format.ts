@@ -1,11 +1,11 @@
 import { normalizePath } from "obsidian";
-import { formatPeriod, parsePeriod, type PeriodRules } from "@/periods";
+import { parsePeriod, type PeriodRules } from "@/periods";
 import type { IGranularity } from "./types";
 
 /**
  * Calendared: the paths of the notes a format reads in a period's folder (and the folders under it): Markdown files
- * named exactly what the format writes for some period. Counted from the vault each time the settings show them
- * (docs/adr/0016); upstream kept the list in the settings (data.json) and updated it on every file event
+ * named exactly what the format writes for some period (parsePeriod checks it). Counted from the vault each time the
+ * settings show them (docs/adr/0016); upstream kept the list in the settings (data.json) and updated it on every file event
  */
 export function notesWithFormat(
   files: { path: string; basename: string; extension: string }[],
@@ -15,10 +15,7 @@ export function notesWithFormat(
 ): string[] {
   return files
     .filter((file) => file.extension === "md" && isInFolder(file.path, folder))
-    .filter((file) => {
-      const period = parsePeriod(file.basename, granularity, format, rules);
-      return !!period && formatPeriod(period, format, rules) === file.basename;
-    })
+    .filter((file) => !!parsePeriod(file.basename, granularity, format, rules))
     .map((file) => file.path);
 }
 
