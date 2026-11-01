@@ -44,14 +44,13 @@ export function notePath(
 }
 
 /**
- * Calendared: the template file a period's template setting names, with ".md" added when it is left out ("" for no
- * template). The settings, their check and creating a note all read it through this; creating a note used to read the
- * setting as it was, so a template saved without ".md" was read as empty
+ * Calendared: the template file a period's template setting names ("" for no template). Nothing is added: the setting
+ * is the file's path as it is, ".md" included (docs/adr/0049). The settings, their check and creating a note all read
+ * it through this; upstream added ".md" in the settings but not when creating a note
  */
 export function templateFilePath(template: string): string {
   const path = normalizePath(template.trim());
-  if (!template.trim() || path === "/") return "";
-  return path.endsWith(".md") ? path : `${path}.md`;
+  return !template.trim() || path === "/" ? "" : path;
 }
 
 /** Calendared: a note's name from its path: no folder, no ".md" */

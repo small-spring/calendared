@@ -33,8 +33,8 @@ function fake() {
 // ---------------------------------------------------------------------------
 // 2. Fake modules that only exist inside Obsidian.
 //    The bundle keeps these as `require("obsidian")` etc. (see `external` in vite.config.ts).
-//    Every export is a class that can also be called, so `class X extends Plugin {}`, `new Notice()` and
-//    functions such as `getLanguage()` all work.
+//    Every export is a fake, so `class X extends Plugin {}`, `new Notice()` and `getLanguage()` all work.
+//    (Calendared: exports were classes, so calling a function like getLanguage() while loading failed)
 // ---------------------------------------------------------------------------
 const OBSIDIAN_ONLY_MODULES = ["obsidian", "electron"];
 const isObsidianOnly = (request) =>
@@ -47,16 +47,7 @@ Module._load = function (request, ...rest) {
       {},
       {
         get: (_target, key) =>
-          key === "__esModule"
-            ? false
-            : new Proxy(
-                class {
-                  constructor() {
-                    return fake();
-                  }
-                },
-                { apply: () => fake() },
-              ),
+          key === "__esModule" ? false : fake(),
       },
     );
   }

@@ -71,6 +71,11 @@ obsidian plugin:reload id=calendared
 
   撮るときは、同じウィンドウで `w.focus()` のあと `w.webContents.capturePage()` の結果を `toPNG()` でファイルに書く。
   設定画面を開くのは `obsidian command id=app:open-settings`、Calendared のページへは `app.setting.openTabById('calendared')`
+- 設定画面を開いたまま `eval` でカレンダーを押すと、確認のモーダルや右クリックのメニューは、最後に前にあった設定のウィンドウのほうに出る
+  （手で押すときは押したウィンドウが前に来るので起きない）。モーダルは設定のウィンドウの `.modal-container` を読み、メニューの中身は
+  `require('obsidian').Menu.prototype.showAtMouseEvent` を一時的に包んで `this.items` を読む。設定を閉じて開き直すと、閉じた設定の
+  ウィンドウが隠れたまま残ることがあるので、`isVisible()` のものを選ぶ
+- `.` で始まるファイル（`.keep.md` など）は Obsidian のノートとして読まれない（`getAbstractFileByPath` が null）。試すノートには使わない
 
 ## テスト
 

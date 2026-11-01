@@ -149,8 +149,11 @@ Quarters and years are set separately; set the same month for both to keep them 
 
 ## Templates
 
-Pick a template file for each period. If the file isn't there (the settings say "Template file not found"), new notes
-start empty; no template file is made. These placeholders are replaced when a note is created:
+Pick a template file for each period. The setting is the file's path as it is, `.md` included (picking from the
+suggestions fills it in); a path to a file that isn't there is not saved. Renaming or moving the template (or its
+folder) in Obsidian updates the setting. If the file is gone later (deleted, or moved outside Obsidian), the settings
+say "Template file not found", and new notes start empty with a notice that the template wasn't found; no template
+file is made. With no template set, new notes start empty. These placeholders are replaced when a note is created:
 
 | Placeholder | Becomes |
 | --- | --- |

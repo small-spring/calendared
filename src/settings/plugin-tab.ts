@@ -333,12 +333,14 @@ export class SettingsTab extends PluginSettingTab {
     let suggest: FileSuggest | undefined;
     setting.addText((text) => {
       text
-        .setPlaceholder(`templates/${getPeriodicityFromGranularity(granularity)}`)
+        // Calendared: the file's path as it is, ".md" included; nothing is added to it (docs/adr/0049)
+        .setPlaceholder(`templates/${getPeriodicityFromGranularity(granularity)}.md`)
         .setValue(settings().periods[granularity].templatePath)
         .onChange((value) => {
           const path = templateFilePath(value);
           const error = path ? validateTemplate(path) : "";
-          setting.setErrorMessage(error || null);
+          // Calendared: a file that isn't there is not saved; the saved value stays (docs/adr/0049)
+          setting.setErrorMessage(error ? `${error} (not saved)` : null);
           if (error) return;
           settingsStore.update((s) => withValueAt(s, ["periods", granularity, "templatePath"], path) as ISettings);
           showOpenLink();

@@ -206,20 +206,26 @@ describe("getTemplateInfo: ノートを作るときのテンプレートの中�
         expect(await getTemplateInfo("テンプレート/日.md", "day")).toBe("# {{title}}");
     });
 
-    it("パスに .md がなくても、そのテンプレートを読む（前の版で .md なしで保存された設定）", async () => {
+    it("パスに .md がなければ補わない。そのパスのファイルはないので、空にして知らせる（前の版で .md なしで保存された設定）", async () => {
+        Notice.shown.length = 0;
         fake.files.set("テンプレート/日.md", fileAt("テンプレート/日.md"));
         fake.contents.set("テンプレート/日.md", "# {{title}}");
-        expect(await getTemplateInfo("テンプレート/日", "day")).toBe("# {{title}}");
+        expect(await getTemplateInfo("テンプレート/日", "day")).toBe("");
+        expect(Notice.shown).toEqual(["Daily note template not found: テンプレート/日"]);
     });
 
-    it("テンプレートを選んでいなければ、空", async () => {
+    it("テンプレートを選んでいなければ、空。知らせない", async () => {
+        Notice.shown.length = 0;
         expect(await getTemplateInfo("", "day")).toBe("");
         expect(fake.created).toEqual([]);
+        expect(Notice.shown).toEqual([]);
     });
 
-    it("テンプレートのファイルがなければ、空として扱い、ファイルもフォルダも作らない", async () => {
-        expect(await getTemplateInfo("テンプレート/日.md", "day")).toBe("");
+    it("テンプレートのファイルがなければ、空として扱い、その周期の言葉で知らせる。ファイルもフォルダも作らない", async () => {
+        Notice.shown.length = 0;
+        expect(await getTemplateInfo("テンプレート/週.md", "week")).toBe("");
         expect(fake.created).toEqual([]);
+        expect(Notice.shown).toEqual(["Weekly note template not found: テンプレート/週.md"]);
     });
 
     it("パスにあるのがフォルダなら、ないのと同じ", async () => {

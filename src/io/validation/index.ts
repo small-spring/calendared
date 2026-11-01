@@ -63,7 +63,7 @@ export function validateTemplate(template: string): string {
         return "";
     }
 
-    // Calendared: the same path as creating a note reads
+    // Calendared: the same path as creating a note reads; ".md" is not added (docs/adr/0049)
     const normalizedTemplate = templateFilePath(template);
     if (!normalizedTemplate) {
         return "";

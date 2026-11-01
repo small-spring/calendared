@@ -9,6 +9,7 @@ import { PluginService } from "@/app-service";
 import { join, notePath, templateFilePath } from './note-path';
 import { periodRulesFor } from '@/periods';
 import { getPeriodicityFromGranularity } from "./parse";
+import { periodicityTitle } from "@/period-words";
 
 
 export type TFileData = {
@@ -87,7 +88,8 @@ export function notesWithFormatIn(
 
 /**
  * Calendared: a missing template is read as empty and not created, matching the settings' "Template file not found"
- * (upstream created an empty file there). The message names the note's period, not always "daily"
+ * (upstream created an empty file there), and a notice says so. With no template set, the note starts empty without
+ * one (docs/adr/0049). The messages name the note's period, not always "daily"
  */
 export async function getTemplateInfo(
   template: string,
@@ -95,7 +97,6 @@ export async function getTemplateInfo(
 ): Promise<string> {
   const app = PluginService.getPlugin()?.app;
 
-  // Calendared: ".md" is added as in the settings, also to a path saved without it (docs/spec/overview.md)
   const normalizedPath = templateFilePath(template);
   if (!normalizedPath) {
     return "";
@@ -103,6 +104,7 @@ export async function getTemplateInfo(
 
   const abstractFile = app?.vault.getAbstractFileByPath(normalizedPath);
   if (!(abstractFile instanceof TFile)) {
+    new Notice(`${periodicityTitle(granularity)} note template not found: ${normalizedPath}`);
     return "";
   }
 
