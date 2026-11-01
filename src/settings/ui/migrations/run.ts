@@ -4,6 +4,7 @@ import { granularities } from "@/constants";
 import { type IGranularity, notesWithFormatIn, vaultSource } from "@/io";
 import { moveSticker, planFormatRenames, planStickerMoves, type PlannedRename, type PlannedStickerMove } from "@/migrations";
 import { stickerProperty } from "@/stickers";
+import { getStickerProperty } from "@/ui/utils/emoji-picker";
 import { periodRulesFor } from "@/periods";
 import { get } from "svelte/store";
 import type { ISettings } from "../../constants";
@@ -62,7 +63,7 @@ export async function moveStickers(
   onProgress: (done: number) => void,
 ): Promise<MigrationResult> {
   const app = PluginService.getPlugin()!.app;
-  const toProperty = stickerProperty(get(settingsStore).stickerProperty);
+  const toProperty = getStickerProperty();
   const result = { changed: 0, skipped: 0 };
   for (const [i, { path }] of moves.entries()) {
     const file = app.vault.getFileByPath(path);

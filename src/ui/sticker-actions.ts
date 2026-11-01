@@ -4,7 +4,7 @@
 import { PluginService } from "@/app-service";
 import { periodicNoteOf } from "@/io/validation";
 import { openStickerPicker } from "@/ui/sticker-picker";
-import { getSticker, removeSticker } from "@/ui/utils/emoji-picker";
+import { getNoteSticker, removeSticker } from "@/ui/utils/emoji-picker";
 import { settingsStore } from "@/settings";
 import { MarkdownView, TFile, setIcon } from "obsidian";
 import { get } from "svelte/store";
@@ -15,10 +15,6 @@ export const STICKER_BUTTON_ICON = "smile-plus";
 
 export function isPeriodicNote(file: TFile | null | undefined): file is TFile {
   return !!file && !!periodicNoteOf(file);
-}
-
-export function getNoteSticker(file: TFile) {
-  return getSticker(PluginService.getPlugin()?.app.metadataCache.getFileCache(file));
 }
 
 export class StickerActions {
@@ -84,4 +80,4 @@ export class StickerActions {
   }
 }
 
-export { openStickerPicker, removeSticker };
+export { getNoteSticker, openStickerPicker, removeSticker };

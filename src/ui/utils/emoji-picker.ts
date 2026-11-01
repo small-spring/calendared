@@ -4,7 +4,7 @@ import { settingsStore } from "@/settings";
 import { getEmojiPickerLocale } from "./emoji-locale";
 import { Picker } from "emoji-mart";
 import { stickerFrom, stickerProperty, type TSticker } from "@/stickers";
-import { type CachedMetadata, type TFile } from "obsidian";
+import { type TFile } from "obsidian";
 import { get } from "svelte/store";
 import { PluginService } from "@/app-service";
 import { stickerPickerNoteStore } from "@/stores/sticker-picker";
@@ -180,9 +180,12 @@ export function getStickerProperty(): string {
   return stickerProperty(get(settingsStore).stickerProperty);
 }
 
-/** Calendared: a note's sticker under the current settings (see stickerFrom) */
-export function getSticker(cache: CachedMetadata | null | undefined): TSticker | null {
-  return stickerFrom(cache, get(settingsStore));
+/**
+ * Calendared: a note's sticker under the current settings (see stickerFrom), for the header button, the commands and
+ * the picker. The calendar reads it through noteAt instead, with the settings it reads reactively
+ */
+export function getNoteSticker(file: TFile): TSticker | null {
+  return stickerFrom(PluginService.getPlugin()?.app.metadataCache.getFileCache(file), get(settingsStore));
 }
 
 /**

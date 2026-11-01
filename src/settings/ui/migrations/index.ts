@@ -1,7 +1,8 @@
 // Calendared: opening the migrations (docs/adr/0023, 0024) and the notice's "Keep as is" (docs/adr/0035). The wording is provisional
 import { PluginService } from "@/app-service";
 import { getPeriodicityFromGranularity, type IGranularity } from "@/io";
-import { stickerFromValue, stickerProperty } from "@/stickers";
+import { stickerFromValue } from "@/stickers";
+import { getStickerProperty } from "@/ui/utils/emoji-picker";
 import { ButtonComponent, Modal } from "obsidian";
 import { get } from "svelte/store";
 import { settingsStore } from "../../store";
@@ -62,7 +63,7 @@ export function openFormatRename(granularity: IGranularity, fromFormat: string, 
 /** The list of periodic notes with the `fromProperty` property, to move their stickers to the current property */
 export function openStickerMove(fromProperty: string, onDone: () => void = () => {}) {
   const plan = stickerMovePlan(fromProperty);
-  const toProperty = stickerProperty(get(settingsStore).stickerProperty);
+  const toProperty = getStickerProperty();
   // values that aren't an emoji can still be moved; they just won't show as stickers (docs/spec/stickers.md, "読み方")
   const notEmoji = plan.filter((row) => !row.conflict && !stickerFromValue(row.value)).length;
   const moving = plan.filter((row) => !row.conflict).length;
