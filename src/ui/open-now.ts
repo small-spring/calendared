@@ -1,8 +1,9 @@
 // Calendared: "Open now" opens now's note in the finest period in use (today's, if days are used) and moves the
 // calendar to today (docs/adr/0030). It sits in every note's header (like the sticker button, `view.addAction`) and
 // in the calendar's header, where it replaces upstream's ⌖ ("go to current month")
-import { MarkdownView, getIcon, type TFile } from "obsidian";
+import { getIcon, type TFile } from "obsidian";
 import { get } from "svelte/store";
+import { ViewActions } from "./view-actions";
 
 import { PluginService } from "@/app-service";
 import { openCurrentNote } from "@/io";
@@ -49,7 +50,7 @@ export function openNow() {
 
 export class OpenNowActions {
   /** the header button added to each Markdown view */
-  private buttons = new Map<MarkdownView, HTMLElement>();
+  private buttons = new ViewActions();
 
   /** Add or remove the button on every open Markdown view, and dim it where now's note is already open */
   refresh() {
@@ -61,33 +62,19 @@ export class OpenNowActions {
       return;
     }
 
-    const views = new Set<MarkdownView>();
-    for (const leaf of app.workspace.getLeavesOfType("markdown")) {
-      if (leaf.view instanceof MarkdownView) views.add(leaf.view);
-    }
-    for (const [view, button] of this.buttons) {
-      if (!views.has(view)) {
-        button.remove();
-        this.buttons.delete(view);
-      }
-    }
-
-    for (const view of views) {
-      let button = this.buttons.get(view);
-      if (!button) {
-        button = view.addAction(openNowIcon(), "Open now", () => {
-          // opens in this tab: make it the active one first, so a click on a background pane's header goes there
-          app.workspace.setActiveLeaf(view.leaf, { focus: true });
-          openNow();
-        });
-        this.buttons.set(view, button);
-      }
+    // on every note, periodic or not
+    const icon = openNowIcon();
+    for (const view of this.buttons.openViews(app)) {
+      const button = this.buttons.ensure(view, icon, "Open now", () => {
+        // opens in this tab: make it the active one first, so a click on a background pane's header goes there
+        app.workspace.setActiveLeaf(view.leaf, { focus: true });
+        openNow();
+      });
       button.toggleClass("calendared-open-now-is-now", isNowNoteFile(view.file));
     }
   }
 
   removeAll() {
-    for (const button of this.buttons.values()) button.remove();
-    this.buttons.clear();
+    this.buttons.removeAll();
   }
 }

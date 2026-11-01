@@ -8,6 +8,7 @@ import { getSticker, removeSticker } from "@/ui/utils/emoji-picker";
 import { settingsStore } from "@/settings";
 import { MarkdownView, TFile, setIcon } from "obsidian";
 import { get } from "svelte/store";
+import { ViewActions } from "./view-actions";
 
 /** also shown next to the setting that turns the button on and off */
 export const STICKER_BUTTON_ICON = "smile-plus";
@@ -22,7 +23,7 @@ export function getNoteSticker(file: TFile) {
 
 export class StickerActions {
   /** the header button added to each Markdown view showing a periodic note */
-  private buttons = new Map<MarkdownView, HTMLElement>();
+  private buttons = new ViewActions();
 
   /** Add, update or remove the button on every open Markdown view to match the note it shows */
   refresh() {
@@ -35,41 +36,24 @@ export class StickerActions {
       return;
     }
 
-    const views = new Set<MarkdownView>();
-    for (const leaf of app.workspace.getLeavesOfType("markdown")) {
-      if (leaf.view instanceof MarkdownView) views.add(leaf.view);
-    }
-
-    // views that were closed
-    for (const [view, button] of this.buttons) {
-      if (!views.has(view)) {
-        button.remove();
-        this.buttons.delete(view);
-      }
-    }
-
-    for (const view of views) {
+    for (const view of this.buttons.openViews(app)) {
       const file = view.file;
-      let button = this.buttons.get(view);
 
+      // unlike Open now, the button is only on periodic notes
       if (!isPeriodicNote(file)) {
-        button?.remove();
-        this.buttons.delete(view);
+        this.buttons.remove(view);
         continue;
       }
 
-      if (!button) {
-        // the click reads `view.file` then, so the button follows the note when the tab switches notes
-        // Calendared: named like the command and the calendar's menu item ("Manage sticker"); it was "Add sticker"
-        button = view.addAction(STICKER_BUTTON_ICON, "Manage sticker", (event) => {
-          // the picker closes on any click outside it; keep this click from reaching that listener
-          event.stopPropagation();
-          if (isPeriodicNote(view.file)) {
-            openStickerPicker(view.file, (event.currentTarget as Element | null) ?? view.containerEl);
-          }
-        });
-        this.buttons.set(view, button);
-      }
+      // the click reads `view.file` then, so the button follows the note when the tab switches notes
+      // Calendared: named like the command and the calendar's menu item ("Manage sticker"); it was "Add sticker"
+      const button = this.buttons.ensure(view, STICKER_BUTTON_ICON, "Manage sticker", (event) => {
+        // the picker closes on any click outside it; keep this click from reaching that listener
+        event.stopPropagation();
+        if (isPeriodicNote(view.file)) {
+          openStickerPicker(view.file, (event.currentTarget as Element | null) ?? view.containerEl);
+        }
+      });
 
       // metadata updates arrive on nearly every keystroke: only redraw when the sticker actually changed
       const sticker = getNoteSticker(file);
@@ -96,8 +80,7 @@ export class StickerActions {
   }
 
   removeAll() {
-    for (const button of this.buttons.values()) button.remove();
-    this.buttons.clear();
+    this.buttons.removeAll();
   }
 }
 
