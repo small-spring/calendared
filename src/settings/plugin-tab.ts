@@ -339,7 +339,8 @@ export class SettingsTab extends PluginSettingTab {
         .onChange((value) => {
           const path = templateFilePath(value);
           const error = path ? validateTemplate(path) : "";
-          setting.setErrorMessage(error || null);
+          // Calendared: a file that isn't there is not saved; the saved value stays (docs/adr/0049)
+          setting.setErrorMessage(error ? `${error} (not saved)` : null);
           if (error) return;
           settingsStore.update((s) => withValueAt(s, ["periods", granularity, "templatePath"], path) as ISettings);
           showOpenLink();

@@ -24,6 +24,7 @@ import { initEmojiSearch } from './ui/utils/emoji-locale';
 import { HOVER_LINK_SOURCE } from './ui/utils/event-handlers';
 import { trackSettingChanges } from './settings/migration-notice';
 import { openAtStartupOf } from './settings/period-switch';
+import { followTemplateRename } from './settings/template-rename';
 import { currentNoteName } from './period-words';
 import { getNoteSticker, isPeriodicNote, MANAGE_STICKER, openStickerPicker, removeSticker, StickerActions } from './ui/sticker-actions';
 
@@ -287,6 +288,13 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     );
     this.registerEvent(
       this.app.vault.on('rename', (file) => this.onFileRenamed(file))
+    );
+    // Calendared: a template setting follows its file when it is renamed or moved (docs/adr/0049)
+    this.registerEvent(
+      this.app.vault.on('rename', (file, oldPath) => {
+        const periods = followTemplateRename(get(settingsStore).periods, oldPath, file.path);
+        if (periods) settingsStore.update((s) => ({ ...s, periods }));
+      })
     );
     this.registerEvent(
       this.app.workspace.on('file-open', (file) => this.onFileOpen(file))
