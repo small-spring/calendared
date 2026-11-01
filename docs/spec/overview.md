@@ -72,7 +72,7 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 | 表示名 | 場所 | キー | 既定 | 内容 |
 | --- | --- | --- | --- | --- |
 | Week starts on | （一番上） | `localeSettings.weekStartId` | Obsidian の言語の既定（土・日・月に寄せる） | 週の始まり |
-| Open on startup | （一番上） | `periods.<周期>.openAtStartup` | Nothing | 起動時に開くノート（Nothing / Today's note / This week's note …。オンの周期だけ出る） |
+| Open on startup | （一番上） | `periods.<周期>.openAtStartup` | Nothing | 起動時に開くノート（Nothing / Today's note / This week's note …。オンの周期だけ出る）。選んだ周期をオフにすると Nothing に戻り、オンに戻しても起動時には開かない（[ADR-0045](../adr/0045-startup-off-with-period.md)） |
 
 確認を出すかどうかの設定は「6. 確認」にまとめた。コアのデイリーノートがオンのときは、「Periodic notes」の見出しの下に、
 同じ日のノートが 2 つできうることを説明の文で知らせる（[ADR-0034](../adr/0034-no-settings-import.md)）。

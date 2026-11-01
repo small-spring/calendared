@@ -27,6 +27,20 @@ describe("setPeriodEnabled: 周期のオン・オフ", () => {
         expect(enabled(setPeriodEnabled(periods(["day", "week"]), "day", false))).toEqual(["week"]);
     });
 
+    it("起動時に開く周期をオフにしたら、起動時に開く設定も Nothing にする。オンに戻しても起動時には開かない", () => {
+        const off = setPeriodEnabled(periods(["day", "week"], "week"), "week", false);
+        expect(openAtStartupOf(off)).toBe("none");
+        expect(openAtStartupOf(setPeriodEnabled(off, "week", true))).toBe("none");
+    });
+
+    it("ほかの周期をオフにしても、起動時に開く設定は変わらない", () => {
+        expect(openAtStartupOf(setPeriodEnabled(periods(["day", "week"], "week"), "day", false))).toBe("week");
+    });
+
+    it("最後の 1 つでオフにできないときは、起動時に開く設定も変わらない", () => {
+        expect(openAtStartupOf(setPeriodEnabled(periods(["week"], "week"), "week", false))).toBe("week");
+    });
+
     it("元の設定は書き換えない", () => {
         const before = periods(["day", "week"]);
         setPeriodEnabled(before, "day", false);
