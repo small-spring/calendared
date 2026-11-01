@@ -237,3 +237,4 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 - 使われていないもの（`navigation/index.ts`、`openState`、`IMonth`/`IWeek` の再エクスポート、`#emoji-modal` の CSS、点の白抜きの表示、`suggestionsContainerCreated`）と、カレンダーのマスに何百も付いていた同じ `id` を消した〔2026-11-01〕
 - 確認のモーダル・ファイルの候補・書式の知らせで、作った Svelte の部品を残さないようにした。曜日の見出しを表の 1 行目の日付から作り、`localeDataStore` をなくした。`isAdjacentMonth` を `$derived` にした〔2026-11-01〕
 - 同じ処理をばらばらに書いていた所を 1 つずつにした（振る舞いと見た目は変えていない）: 周期ノートかの判定（`periodicNoteOf`・`periodOfNote`）、オンの周期・起動時の周期・周期の決まりのストア、`periodStart`・`samePeriod` を periods.ts へ、見出しバーのボタン（`ViewActions`）、ステッカーの読み方、周期の言葉（`period-words.ts`）、日付のボタンの押す・右クリック・ホバー、カレンダーの見出し、移行の画面の数の書き方、アイコン、バーを出すかの判定、週の読み戻しと日付の範囲〔2026-11-01〕
+- テストを見直した（427 件 → 417 件。守っている振る舞いは減らしていない）: ほかのテストと同じことを確かめていたテストを消し、似たテストを `it.each` にまとめた。テストの道具（日付、週の始まり、既定の書式、ファイル、設定の置き換え）を `src/test-fixtures.ts` に、TS のモジュールの期間の決まりを `periodRulesStore` にそろえた。夏時間のある時間帯で動かす `npm run test:dst` を足した〔2026-11-01〕
