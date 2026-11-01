@@ -120,7 +120,7 @@ export class SettingsTab extends PluginSettingTab {
     if (key === "weekStart") {
       updateWeekStartSetting(defaultWeekdays.indexOf(value as string));
     } else if (key === "calendarLanguage") {
-      // also resets the week start to the language's, so its choices and value are read again
+      // the week start's choices are named in the calendar's language, so read them again (the week start stays; docs/adr/0047)
       switchLocale(value as string);
       this.update();
     } else if (key === "openAtStartup") {
