@@ -37,6 +37,34 @@
 - 整理: テストを見直す。多すぎるテスト（同じことを何度も確かめている、作りの細部に頼っている）を消し、まとめるべきテストをまとめる。
   消す前に、そのテストだけが守っている振る舞いがないかを見る。夏時間のある時間帯（`TZ=America/Sao_Paulo` など）でも通るかも確かめる
 
+### 共通化
+
+2026-11-01 に、同じ処理がばらばらに書かれている所を洗い出したもの。振る舞いは変えない（先に今の振る舞いをテストで固定する）。上ほど効果が大きい — どれも Claude
+
+- 不具合: テンプレートのパスの `.md` の補い方が 3 か所で違う。設定画面と `validateTemplate` は補うが、ノートを作るとき（`src/io/vault.ts` の `getTemplateInfo`）は補わないので、
+  `.md` なしで保存されたテンプレートは空として読まれる。`templateFilePath()` を 1 つ作って全部で使う
+- 周期ノートかどうかの判定（`typeof isValid === "boolean" && !!date && !!granularity` など）が `main.ts`・`open-now.ts`・`sticker-actions.ts`・`navigation/manager.ts` に
+  別々の書き方である。`isValidPeriodicNote` の隣に `periodicNoteOf(file)`（周期ノートでなければ null）を作る。「このフォルダのこの書式のノートか」の決まり
+  （ADR-0044）も `validation/index.ts` と `notes-by-format.ts` で 2 回書いているので 1 つにする
+- 設定の読み方: オンの周期の一覧が 3 か所（`open-now.ts`・`Calendar.svelte`・`Navigation.svelte`）、起動時に開く周期が 2 か所（`io/utils.ts` と
+  `period-switch.ts` の `openAtStartupOf`）。`period-switch.ts` にまとめる。`periodRulesFor(get(settingsStore))` が約 15 か所にあり、`DateBttn.svelte` はマスごとに作り直しているので、
+  `settings/store.ts` に `derived` のストアを 1 つ置く
+- 「今の期間のノートを開く」が 3 か所（`main.ts` のコマンドと起動時、`open-now.ts`）。`create-or-open-note.ts` に 1 つ作る。「今」をコマンドは `window.moment()`、
+  Open now は `todayStore` で取っていて、日付が変わってから最大 1 分ずれるので、どちらかにそろえる。`periodStart`・`samePeriod` は `navigation.ts` から `periods.ts` へ
+- ノートの見出しバーのボタン（ステッカーと Open now）を、どちらも同じ仕組み（ビューごとの Map、閉じたビューの片づけ、`addAction`）で別々に書いている。
+  `src/ui/view-actions.ts` に 1 つ作る（ステッカーは周期ノートでなくなったら消し、Open now は消さない違いを残す）
+- ステッカーの読み方が 3 つの関数とその場の書き方 2 か所、ステッカーのプロパティの読み方がその場の書き方 3 か所。1 つずつにする
+- 周期の言葉: `capitalize(getPeriodicityFromGranularity(g))` が 6 か所、「… notes are turned off in settings」が 2 か所、「今日のノート」などの表が `main.ts` と
+  `plugin-tab.ts` に 2 つ。`src/period-words.ts` にまとめる（コマンドの ID は変えない）
+- 押す・右クリック・ホバーのつなぎ方と「開いているノートか」の判定が、`DateBttn.svelte`・`PeriodTitle.svelte`・`Navigation.svelte` に 3 回。`event-handlers.ts` に 1 つ作る
+- カレンダーの見出し: 年の見出しの設定が 3 か所（`YearHeader`・`MonthHeader`・`MonthPicker`）、「年の始まりから 12 か月」が 2 か所、月の前後の移動が 2 か所、矢印の大きさのクラスがその場で 3 種類
+- 移行の画面: 「n note(s)」が 3 か所、「n sticker(s)」が 3 か所、パスからファイル名を取るのが 2 か所。書式とステッカーの移行の行（`plugin-tab.ts` の `renderFormatMigration`・
+  `renderStickerMigration`）がほぼ同じなので 1 つにする
+- アイコン: `useIcon` があるのに 4 か所で `$effect` + `setIcon` を書いている。ステッカーのアイコン名が `smile-plus` と `lucide-smile-plus` で違う。「Manage sticker」が 5 か所
+- 小さなもの: パンくず・ミニカレンダーを出すかの判定が 2 か所（`manager.ts`・`Navigation.svelte`）、週の書式の書き戻しの確かめが 2 か所（`format.ts`・`weeks.ts`）、
+  週の「M/D – M/D」の表記が 2 か所（`Format.svelte`・`WeekFormatCheck.svelte`）
+- テストの道具（ファイルを作る、日付、月曜始まり・日曜始まりの決まり、設定の `vi.mock`）が多くのテストに写してある。`src/test-fixtures.ts` にまとめる（下のテストの見直しと一緒に）
+
 ### 決めたこと（2026-11-01。作るときに ADR に書く）
 
 - カレンダーの言語を変えても、週の始まりは戻さない（`src/stores/locale.ts` の `switchLocale`）。週の始まりが変わると、
