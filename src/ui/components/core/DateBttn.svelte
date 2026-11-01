@@ -1,13 +1,13 @@
 <script lang="ts">
   import { type IGranularity } from "@/io";
 
-  import { noteAt, vaultSource } from "@/io";
+  import { noteAt } from "@/io";
   import { periodRulesStore, settingsStore } from "@/settings";
   import {
     displayedDateStore,
     todayStore,
   } from "@/stores/";
-  import { cn, eventHandlers, isControlPressed } from "@/ui/utils";
+  import { cn, isOpenNote, noteButtonEvents } from "@/ui/utils";
   import { Button } from "@/ui/components/core";
   import Dot from "./Dot.svelte";
   import type { Snippet } from "svelte";
@@ -46,14 +46,8 @@
   let { file, sticker } = $derived(noteAt(granularity, date, $settingsStore));
   // Calendared: selected when its note is the open one, read from Obsidian (docs/adr/0015); upstream kept the
   // selection in a store that several places wrote, which could drift from the open note
-  let isActive = $derived.by(() => {
-    const openFile = vaultSource().activeFile();
-    if (!openFile || !file) {
-      return false;
-    }
-
-    return openFile.path === file.path;
-  });
+  let isActive = $derived(isOpenNote(file));
+  let events = $derived(noteButtonEvents(granularity, date, { file, sticker }));
 
   // Calendared: a quarter or year by its own start month (docs/adr/0039)
   let isToday = $derived(samePeriod(granularity, date, $todayStore, $periodRulesStore));
@@ -87,28 +81,10 @@
       onSelect();
       return;
     }
-    eventHandlers.onClick({
-      date,
-      inNewTab: isControlPressed(event),
-      granularity,
-    });
+    events.open(event);
   }}
-  oncontextmenu={(event) =>
-    eventHandlers.onContextMenu({
-      event,
-      fileData: {
-        file,
-        sticker,
-      },
-      date,
-      granularity,
-    })}
-  onpointerenter={(event) => {
-    eventHandlers.onHover({
-      event,
-      file,
-    });
-  }}
+  oncontextmenu={(event) => events.menu(event)}
+  onpointerenter={(event) => events.hover(event)}
 >
   <span class="relative">
     {#if displaySticker}

@@ -19,7 +19,7 @@
   import { enabledPeriods } from "@/settings/period-switch";
   import { todayStore } from "@/stores";
   import { Arrow } from "@/ui";
-  import { cn, eventHandlers, isControlPressed } from "@/ui/utils";
+  import { cn, eventHandlers, isControlPressed, noteButtonEvents } from "@/ui/utils";
   import DateBttn from "../core/DateBttn.svelte";
 
   interface Props {
@@ -168,7 +168,7 @@
                   onclick={() => (offset = 0)}>{text}</button
                 >
               {:else if crumb.canOpen}
-                {@const fileData = noteAt(crumb.granularity, crumb.date, $settingsStore)}
+                {@const events = noteButtonEvents(crumb.granularity, crumb.date, noteAt(crumb.granularity, crumb.date, $settingsStore))}
                 <button
                   class={cn(
                     "calendared-crumb !h-auto !px-1 !py-0 !shadow-none !bg-transparent text-[var(--text-muted)] hover:!text-[var(--text-normal)] hover:!bg-[var(--background-modifier-hover)]",
@@ -178,17 +178,10 @@
                   onclick={(event) => {
                     // another note: its rightmost crumb (now) first brings a moved mini calendar back, then opens
                     if (isLast && offset !== 0) offset = 0;
-                    else open(event, crumb.granularity, crumb.date);
+                    else events.open(event);
                   }}
-                  oncontextmenu={(event) =>
-                    eventHandlers.onContextMenu({
-                      event,
-                      fileData,
-                      date: crumb.date,
-                      granularity: crumb.granularity,
-                    })}
-                  onpointerenter={(event) =>
-                    eventHandlers.onHover({ event, file: fileData.file })}
+                  oncontextmenu={(event) => events.menu(event)}
+                  onpointerenter={(event) => events.hover(event)}
                   >{text}</button
                 >
               {:else}
