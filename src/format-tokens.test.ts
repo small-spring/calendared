@@ -1,3 +1,4 @@
+import moment from "moment";
 import { describe, expect, it } from "vitest";
 import { disallowedTokens, formatTokenGuide, missingTokens, tokenize } from "./format-tokens";
 
@@ -21,6 +22,12 @@ describe("tokenize: 書式を記号と文字に分ける", () => {
     it("[ ] の中は記号にしない。\\ で 1 文字を文字にできる", () => {
         expect(tokenize("[YYYY年度]")).toEqual([{ kind: "text", text: "YYYY年度" }]);
         expect(tokenize("\\QQ")).toEqual([{ kind: "text", text: "Q" }, { kind: "token", token: "Q" }]);
+    });
+
+    it("\\ のあとが記号なら、moment と同じく記号ひとつ分を文字にする", () => {
+        expect(moment("2026-10-30").format("\\MMM")).toBe("MMM");
+        expect(tokenize("\\MMM")).toEqual([{ kind: "text", text: "MMM" }]);
+        expect(tokenize("\\www")).toEqual([{ kind: "text", text: "ww" }, { kind: "token", token: "w" }]);
     });
 });
 

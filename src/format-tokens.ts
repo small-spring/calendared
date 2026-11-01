@@ -6,10 +6,12 @@ import type { IGranularity } from "./io/types";
 export type FormatPart = { kind: "token"; token: string } | { kind: "text"; text: string };
 
 /** moment's format tokens, longest first where one is the start of another (as in moment's own tokenizer) */
-const TOKEN_RE =
-    /\[([^\]]*)\]|\\(.)|(LTS|LT|LL?L?L?|l{1,4}|[Hh]mm(?:ss)?|Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[ow]?|W[oW]?|Qo?|N{1,5}|YYYYYY|YYYYY|YYYY|YY|y{2,4}|yo?|gg(?:ggg?)?|GG(?:GGG?)?|e|E|a|A|hh?|HH?|kk?|mm?|ss?|S{1,9}|x|X|zz?|ZZ?|Y)|([\s\S])/g;
+const TOKENS =
+    "LTS|LT|LL?L?L?|l{1,4}|[Hh]mm(?:ss)?|Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[ow]?|W[oW]?|Qo?|N{1,5}|YYYYYY|YYYYY|YYYY|YY|y{2,4}|yo?|gg(?:ggg?)?|GG(?:GGG?)?|e|E|a|A|hh?|HH?|kk?|mm?|ss?|S{1,9}|x|X|zz?|ZZ?|Y";
+// Calendared: like moment, \ makes the whole token after it text (\MMM is "MMM"), or else one character
+const TOKEN_RE = new RegExp(`\\[([^\\]]*)\\]|\\\\(${TOKENS}|[\\s\\S])|(${TOKENS})|([\\s\\S])`, "g");
 
-/** The format's tokens and text, in order. Text in [brackets] and a character after \ are text */
+/** The format's tokens and text, in order. Text in [brackets] and a token (or character) after \ are text */
 export function tokenize(format: string): FormatPart[] {
     const parts: FormatPart[] = [];
     for (const m of format.matchAll(TOKEN_RE)) {
@@ -19,6 +21,16 @@ export function tokenize(format: string): FormatPart[] {
         else parts.push({ kind: "text", text: m[4] });
     }
     return parts;
+}
+
+/** The parts written back as a format: tokens as they are, text bare when moment would read it as text, else in [brackets] */
+export function untokenize(parts: FormatPart[]): string {
+    return parts.map((part) => {
+        if (part.kind === "token") return part.token;
+        if (/^[^A-Za-z[\]\\]*$/.test(part.text)) return part.text;
+        // text with ] can't go in [brackets]: each character after \ instead
+        return part.text.includes("]") ? [...part.text].map((c) => `\\${c}`).join("") : `[${part.text}]`;
+    }).join("");
 }
 
 type TokenKind = "year" | "weekYear" | "quarter" | "month" | "week" | "day" | "time" | "unusable";

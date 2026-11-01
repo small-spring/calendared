@@ -10,6 +10,7 @@
     breadcrumbs,
     crumbText,
     finestEnabled,
+    monthDayText,
     periodStart,
     showsOn,
     stripDates,
@@ -275,7 +276,7 @@
         >
           <span bind:this={backIconEl} class="flex [&>svg]:w-3 [&>svg]:h-3"></span>
           {center.granularity === "day"
-            ? new Intl.DateTimeFormat(locale, { month: "short", day: "numeric" }).format(center.date.toDate())
+            ? monthDayText(center.date, locale)
             : crumbText(center.granularity, center.date, locale, rules)}
         </button>
       </div>

@@ -135,8 +135,17 @@ export function formatPeriod(period: PeriodName, format: string, rules: PeriodRu
   return start.format(format);
 }
 
-/** The period a periodic note's file name stands for; null if it doesn't match the format or no such period exists */
+/**
+ * The period a periodic note's file name stands for; null if it doesn't match the format or no such period exists.
+ * The name must be exactly what the format writes for that period (moment also reads "october" for MMMM, for example)
+ */
 export function parsePeriod(fileName: string, granularity: IGranularity, format: string, rules: PeriodRules): PeriodName | null {
+  const period = readPeriod(fileName, granularity, format, rules);
+  return period && formatPeriod(period, format, rules) === fileName ? period : null;
+}
+
+/** The period moment reads from the name, which may not write back the same */
+function readPeriod(fileName: string, granularity: IGranularity, format: string, rules: PeriodRules): PeriodName | null {
   if (granularity === 'week') {
     const week = rules.weeks.parse(fileName, format);
     return week && { granularity, ...week };
@@ -144,12 +153,11 @@ export function parsePeriod(fileName: string, granularity: IGranularity, format:
   const date = window.moment(fileName, format, true);
   if (!date.isValid()) return null;
   if ((granularity === 'quarter' || granularity === 'year') && rules[granularity].startMonth !== 1) {
-    // moment reads the numbers in the name as a calendar date; take them as the name's numbers instead, and keep
-    // the name only if it writes back the same (a format with other tokens, like a month, can't be read this way)
-    const period: PeriodName = granularity === 'quarter'
+    // moment reads the numbers in the name as a calendar date; take them as the name's numbers instead (a format with
+    // other tokens, like a month, then doesn't write back the same)
+    return granularity === 'quarter'
       ? { granularity, year: date.year(), quarter: date.quarter() }
       : { granularity, year: date.year() };
-    return formatPeriod(period, format, rules) === fileName ? period : null;
   }
   return periodOf(granularity, date, rules);
 }

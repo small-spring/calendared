@@ -3,7 +3,7 @@ import { settingsStore } from '@/settings';
 import { get } from 'svelte/store';
 import { type IGranularity } from '../types';
 import { normalizePath } from 'obsidian';
-import { formatPeriod, parsePeriod, periodRulesFor, rangeOfPeriod, type PeriodName } from '@/periods';
+import { parsePeriod, periodRulesFor, rangeOfPeriod, type PeriodName } from '@/periods';
 import { PluginService } from '@/app-service';
 import { vaultSource } from '../vault-source';
 import { isInFolder } from '../notes-by-format';
@@ -27,9 +27,9 @@ export function isValidPeriodicNote(file: { path: string; basename: string; exte
         // Calendared: a period has one format (docs/adr/0019)
         const { format, folder } = get(settingsStore).periods[granularity];
         if (!format.trim() || !isInFolder(file.path, folder)) continue;
+        // the name must be exactly what this format writes for that period (parsePeriod checks it)
         const period = parsePeriod(fileName, granularity, format, rules);
-        // the name must be exactly what this format writes for that period
-        if (!period || formatPeriod(period, format, rules) !== fileName) continue;
+        if (!period) continue;
 
         const date = rangeOfPeriod(period, rules)!.start;
         return { isValid: !validateFormat(format, granularity), granularity, date, period, format };

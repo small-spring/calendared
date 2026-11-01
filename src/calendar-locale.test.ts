@@ -2,6 +2,7 @@ import moment from "moment";
 import "moment/locale/en-gb";
 import { describe, expect, it } from "vitest";
 import { inLocale, localeWeekStart, monthGrid, weekdayNames } from "./calendar-locale";
+import { createIsoWeekScheme } from "./weeks";
 
 // loading a locale switches moment to it; go back to English like test-setup.ts does
 moment.locale("en");
@@ -62,7 +63,7 @@ describe("localeWeekStart: その言語のふつうの週の始まり（0 = 日�
 
 describe("monthGrid: カレンダーに並べる 6 週・42 日", () => {
     it("月の 1 日を含む週の始まりから、42 日を 7 日ずつ並べる", () => {
-        const grid = monthGrid(date("2026-10-15"), 1); // 2026-10-01 is a Thursday
+        const grid = monthGrid(date("2026-10-15"), createIsoWeekScheme(1)); // 2026-10-01 is a Thursday
         expect(grid).toHaveLength(6);
         expect(grid.every((week) => week.days.length === 7)).toBe(true);
         expect(ymd(grid[0].days[0])).toBe("2026-09-28");
@@ -70,16 +71,22 @@ describe("monthGrid: カレンダーに並べる 6 週・42 日", () => {
     });
 
     it("週の始まりに合わせて、最初の日がずれる", () => {
-        expect(ymd(monthGrid(date("2026-10-15"), 0)[0].days[0])).toBe("2026-09-27");
-        expect(ymd(monthGrid(date("2026-10-15"), 6)[0].days[0])).toBe("2026-09-26");
+        expect(ymd(monthGrid(date("2026-10-15"), createIsoWeekScheme(0))[0].days[0])).toBe("2026-09-27");
+        expect(ymd(monthGrid(date("2026-10-15"), createIsoWeekScheme(6))[0].days[0])).toBe("2026-09-26");
+    });
+
+    it("1 日が週の始まりの日なら、1 日から並べる", () => {
+        // 2026-11-01 is a Sunday
+        expect(ymd(monthGrid(date("2026-11-20"), createIsoWeekScheme(0))[0].days[0])).toBe("2026-11-01");
+        expect(ymd(monthGrid(date("2026-11-20"), createIsoWeekScheme(1))[0].days[0])).toBe("2026-10-26");
     });
 
     it("1 日が週の始まりの曜日なら、1 日から始まる", () => {
-        expect(ymd(monthGrid(date("2026-06-20"), 1)[0].days[0])).toBe("2026-06-01"); // a Monday
+        expect(ymd(monthGrid(date("2026-06-20"), createIsoWeekScheme(1))[0].days[0])).toBe("2026-06-01"); // a Monday
     });
 
     it("日付の言語に関係なく同じ（曜日の名前で探さない）", () => {
-        const ja = monthGrid(date("2026-10-15").locale("ja"), 1);
+        const ja = monthGrid(date("2026-10-15").locale("ja"), createIsoWeekScheme(1));
         expect(ymd(ja[0].days[0])).toBe("2026-09-28");
     });
 });

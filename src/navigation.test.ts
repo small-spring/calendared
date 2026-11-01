@@ -1,10 +1,15 @@
 import moment from "moment";
+import "moment/locale/fa";
+import "moment/locale/oc-lnc";
+import "moment/locale/tlh";
+import "moment/locale/x-pseudo";
 import { describe, expect, it } from "vitest";
 import {
     breadcrumbs,
     crumbText,
     finestEnabled,
     isNowNote,
+    monthDayText,
     migratePlacementSettings,
     migrateTimelineSettings,
     showsOn,
@@ -13,6 +18,9 @@ import {
 } from "./navigation";
 import { periodRules } from "./periods";
 import { createIsoWeekScheme } from "./weeks";
+
+// loading a locale switches moment to it; go back to English like test-setup.ts does
+moment.locale("en");
 
 const d = (s: string) => moment(s, "YYYY-MM-DD");
 const ymd = (dates: moment.Moment[]) => dates.map((x) => x.format("YYYY-MM-DD"));
@@ -218,6 +226,13 @@ describe("breadcrumbs: 開いているノートの位置を、上の周期から
         expect(crumbs("week", d("2025-12-28"), ALL, sundayWeeks)[3]).toBe("week:2025-12-28");
     });
 
+    it("週: 日・土曜始まりで、行の真ん中と木曜日の月が違っても、木曜日の月になる", () => {
+        // 2024-02-01 は木曜日。日曜始まりの行 1/28〜2/3 の真ん中（水曜日）は 1/31、土曜始まりの行 1/27〜2/2 の真ん中は 1/30
+        const saturdayWeeks = periodRules(createIsoWeekScheme(6));
+        expect(crumbs("week", d("2024-01-28"), ALL, sundayWeeks)[2]).toBe("month:2024-02-01");
+        expect(crumbs("week", d("2024-01-27"), ALL, saturdayWeeks)[2]).toBe("month:2024-02-01");
+    });
+
     it("日: 週のパンくずは、日を含む行（週の始まりは週の決め方から）", () => {
         expect(crumbs("day", d("2026-11-01"), ALL, sundayWeeks)[3]).toBe("week:2026-11-01");
         expect(crumbs("day", d("2026-11-01"), ALL, mondayWeeks)[3]).toBe("week:2026-10-26");
@@ -250,9 +265,23 @@ describe("crumbText: パンくずの文字（カレンダーの言語）", () =>
         expect(crumbText("day", d("2026-10-30"), "ja", mondayWeeks)).toBe("30日");
     });
 
-    it("英語: 月は短い名前、日は数字だけ", () => {
+    it("英語: 月は短い名前、日はその言語の日の書き方（moment の Do）", () => {
         expect(crumbText("month", d("2026-10-01"), "en", mondayWeeks)).toBe("Oct");
-        expect(crumbText("day", d("2026-10-30"), "en", mondayWeeks)).toBe("30");
+        expect(crumbText("day", d("2026-10-30"), "en", mondayWeeks)).toBe("30th");
+    });
+
+    it("月・日は、カレンダー本体と同じ moment の言語データで書く（Intl が知らない言語でも止まらない）", () => {
+        expect(crumbText("month", d("2026-10-01"), "x-pseudo", mondayWeeks)).toBe("~Óct");
+        expect(crumbText("day", d("2026-10-30"), "x-pseudo", mondayWeeks)).toBe("30th");
+        expect(crumbText("month", d("2026-10-01"), "oc-lnc", mondayWeeks)).toBe("oct.");
+        expect(crumbText("month", d("2026-10-01"), "tlh", mondayWeeks)).toBe("jar wa’maH");
+        // Intl writes Persian with the Persian calendar (2026-10-30 is "آبان ۸"); the calendar is Gregorian
+        expect(crumbText("month", d("2026-10-01"), "fa", mondayWeeks)).toBe("اکتبر");
+    });
+
+    it("ミニカレンダーの戻るボタン: 月と日", () => {
+        expect(monthDayText(d("2026-10-30"), "ja")).toBe("10月 30日");
+        expect(monthDayText(d("2026-10-30"), "en")).toBe("Oct 30th");
     });
 
     it("週番号は週の決め方から、2 桁にする", () => {

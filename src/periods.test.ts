@@ -102,6 +102,13 @@ describe("formatPeriod / parsePeriod: ファイル名", () => {
         expect(parsePeriod("2027-W53", "week", FORMATS.week, mondayWeeks)).toBeNull();
         expect(parsePeriod("メモ", "day", FORMATS.day, mondayWeeks)).toBeNull();
     });
+
+    it("読めても、同じ書式で書き戻して同じ名前にならないものは読まない（どの周期・区切りでも）", () => {
+        // moment reads month names in any case; the name the format writes is "October"
+        expect(parsePeriod("2026-october", "month", "YYYY-MMMM", mondayWeeks)).toBeNull();
+        expect(parsePeriod("2026-october-30", "day", "YYYY-MMMM-DD", mondayWeeks)).toBeNull();
+        expect(parsePeriod("2026-October", "month", "YYYY-MMMM", mondayWeeks)).toEqual({ granularity: "month", year: 2026, month: 10 });
+    });
 });
 
 describe.each(["day", "week", "month", "quarter", "year"] as const)("どの周期でも守る約束（%s）", (granularity) => {

@@ -18,22 +18,15 @@
 
 2026-11-01 に、古いコードと想定と違いそうな動きをもう一度洗い出したもの。「たぶん」は、コードを読んだだけで、起きるかをまだ確かめていない — どれも Claude
 
-- 不具合: カレンダーの言語に `x-pseudo`・`oc-lnc` を選ぶと、パンくずの月・日の表記（`Intl.DateTimeFormat`）がエラーになる（`src/navigation.ts`、`Navigation.svelte`）。
-  月・日の表記を moment にそろえるか、Intl が知らない言語を一覧から外す
-- 不具合: 設定を変えても、開いているノートのパンくず・ミニカレンダーが古いまま（`src/ui/components/navigation/sync.ts` は、同じノートなら作り直さない）。
-  書式・週の始まり・四半期と年の始まりの月を変えたとき。ノートの読み取り結果も比べる
 - 不具合（たぶん）: テンプレートの候補を出したまま設定画面を閉じると、矢印キー・Enter の割り当てが残る（`src/settings/ui/suggest.ts` の `destroy` が `close` を呼ばない）
 - 不具合（たぶん）: ステッカーのピッカーを別ウィンドウのノートから開くと、メインのウィンドウに出る（`src/ui/sticker-picker.ts` が `document`・`window` を使う）
 - 整理: 使われていないものを消す: `src/ui/components/navigation/index.ts`、`openState`、`localeDataStore.weekdays`、
   `IMonth`/`IWeek` の再エクスポート、`#emoji-modal` の CSS、点の白抜きの表示、`suggestionsContainerCreated`
 - 整理: カレンダーのマスに何百も付いている同じ `id`（`id="dot"`、`id="date-text"` など。どこからも使われていない）を消す
-- 整理: 週の計算を、週の決め方の部品（[ADR-0014](adr/0014-swappable-week-scheme.md)）に聞く形にそろえる（`navigation.ts` の `isoThursday`、
-  `calendar-locale.ts` の `monthGrid`、`weeks.ts` の `isoWeekFormatFor` は書式を記号に分ける部品も使う）
 - 整理: 画面の部品の後片づけ（確認のモーダル、ファイルの候補、書式の知らせで、作った Svelte の部品を消していない）。`DateBttn.svelte` の `isAdjacentMonth` を `$derived` に。
   曜日の見出しを、週の並びと同じ設定から作る（`localeDataStore` をなくす）
 - 整理: 小さな文言など: 矢印のツールチップ「Previous Month」を文の書き方に（「Range」もわかりにくい）、「Create note」のアイコン `document` を確かめる、
   `src/locales.ts` の言語名（先頭の空白、Lybia、Malay が 2 つ、システムの言語が大文字・小文字の違いで 2 回出る）、`emoji-search.ts` の先頭の説明
-- 整理: ADR-0039 を守るテスト（`period-rules-guard.test.ts`）が、`.year()` や `.add(n, 'quarter')` を見ていない。`parsePeriod` が 1 月始まりのときだけ書き戻して確かめないのもそろえる
 - 整理: テストを見直す。多すぎるテスト（同じことを何度も確かめている、作りの細部に頼っている）を消し、まとめるべきテストをまとめる。
   消す前に、そのテストだけが守っている振る舞いがないかを見る。夏時間のある時間帯（`TZ=America/Sao_Paulo` など）でも通るかも確かめる
 

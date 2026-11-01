@@ -1,3 +1,5 @@
+import { tokenize, untokenize } from "./format-tokens";
+
 // Calendared: the week scheme decides what a "week" is (docs/adr/0011, 0012, 0014).
 // Everything else asks it instead of counting weeks itself, so another scheme can be added later
 
@@ -9,6 +11,11 @@ export interface WeekScheme {
     weekOf(date: moment.Moment): WeekName;
     /** first and last day of the week (one row of the calendar); null if no such week exists */
     rangeOf(week: WeekName): { start: moment.Moment; end: moment.Moment } | null;
+    /**
+     * the day of the week its week-based year is taken from (ISO 8601: the Thursday); the breadcrumbs take the week's
+     * quarter and month from it too. null if no such week exists
+     */
+    yearDayOf(week: WeekName): moment.Moment | null;
     /** the week `amount` weeks before (negative) or after (positive) */
     shift(week: WeekName, amount: number): WeekName;
     /** a weekly note's file name */
@@ -45,6 +52,7 @@ export function createIsoWeekScheme(weekStart: number): WeekScheme {
             const start = monday.subtract(toMonday, "days");
             return { start, end: start.clone().add(6, "days") };
         },
+        yearDayOf: (week) => mondayOf(week)?.add(3, "days") ?? null,
         shift: (week, amount) => nameOfMonday(requireMondayOf(week).add(amount, "weeks")),
         // the row's Monday carries the ISO week-based year and week number, so ISO tokens (GGGG, WW) name the row
         format: (week, format) => requireMondayOf(week).format(format),
@@ -71,12 +79,16 @@ export function weekSchemeFor(settings: { weekStartId: number }): WeekScheme {
 }
 
 /**
- * The ISO version of a weekly note format: only the year and week tokens change (YYYY / gggg → GGGG, ww → WW),
+ * The ISO version of a weekly note format: only the year and week tokens change (YYYY / Y / gggg → GGGG, ww → WW),
  * the rest and anything in [brackets] stays. Used to suggest a format that matches the calendar's week numbers
  */
 export function isoWeekFormatFor(format: string): string {
-    const replacements: Record<string, string> = { YYYY: "GGGG", YY: "GG", gggg: "GGGG", gg: "GG", ww: "WW", w: "W" };
-    return format.replace(/\[[^\]]*\]|Y+|g+|w+/g, (token) => replacements[token] ?? token);
+    const replacements: Record<string, string> = { YYYY: "GGGG", YY: "GG", Y: "GGGG", gggg: "GGGG", gg: "GG", ww: "WW", w: "W" };
+    return untokenize(
+        tokenize(format).map((part) =>
+            part.kind === "token" ? { kind: "token", token: replacements[part.token] ?? part.token } : part,
+        ),
+    );
 }
 
 /** The years checked by `checkWeekFormat`: every weekday January 1 can fall on, in leap and common years */

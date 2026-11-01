@@ -25,7 +25,7 @@ Works on desktop and mobile. Needs Obsidian 1.13.1 or later.
   its notes; a note with the same name elsewhere is an ordinary note.
 - **Calendar**: A month calendar in the sidebar. Click a date, a week number, the month, or the year to open its note
   (or create it). Dots show which notes exist, and stickers show on top.
-- **Breadcrumbs and mini calendar**: A strip above every note. The breadcrumbs (`2026 › Q4 › Oct › W44 › 30`) open the
+- **Breadcrumbs and mini calendar**: A strip above every note. The breadcrumbs (`2026 › Q4 › Oct › W44 › 30th`) open the
   note of the larger periods. The mini calendar shows the notes just before and after in the same period.
 - **Open now**: One button that opens the current note of your finest period (today's note, if you use daily notes).
 - **Stickers**: Give a periodic note one emoji. It is saved in a note property (`sticker: 👍`), so it stays with the
@@ -58,7 +58,7 @@ Works on desktop and mobile. Needs Obsidian 1.13.1 or later.
 ## Breadcrumbs and mini calendar
 
 ```
-            2026 › Q4 › Oct › W44 › 30              ← breadcrumbs
+            2026 › Q4 › Oct › W44 › 30th            ← breadcrumbs
 ‹   Mon 27   Tue 28   Wed 29  [Thu 30]  Fri 31   Sat 1   Sun 2   ›   ← mini calendar
 ```
 
