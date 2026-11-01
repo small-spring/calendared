@@ -81,6 +81,16 @@ describe("disallowedTokens: その周期の書式に使えない記号", () => {
         expect(disallowedTokens("Y-YY-YYYY", "year")).toEqual([]);
     });
 
+    it("moment が読み返せない序数（Qo・Mo・Wo・wo・do・DDDo）は使えない。日の Do は読み返せるので使える", () => {
+        expect(disallowedTokens("YYYY-Qo", "quarter")).toEqual(["Qo"]);
+        expect(disallowedTokens("YYYY-Mo", "month")).toEqual(["Mo"]);
+        expect(disallowedTokens("GGGG-[W]Wo", "week")).toEqual(["Wo"]);
+        expect(disallowedTokens("gggg-[W]wo", "week")).toEqual(["wo"]);
+        expect(disallowedTokens("YYYY-MM-DD do", "day")).toEqual(["do"]);
+        expect(disallowedTokens("YYYY-MM-DDDo", "day")).toEqual(["DDDo"]);
+        expect(disallowedTokens("YYYY-MM-Do", "day")).toEqual([]);
+    });
+
     it("同じ記号は 1 回だけ挙げる", () => {
         expect(disallowedTokens("YYYY-DD-DD", "month")).toEqual(["DD"]);
     });
@@ -121,7 +131,7 @@ describe("missingTokens: その周期の名前を 1 つに決めるのに足り�
         expect(missingTokens("YY-MMMM", "month")).toBeNull();
         expect(missingTokens("YYYY-MM-Do", "day")).toBeNull();
         expect(missingTokens("gggg-[W]ww", "week")).toBeNull();
-        expect(missingTokens("YYYY-Qo", "quarter")).toBeNull();
+        expect(missingTokens("YY-[Q]Q", "quarter")).toBeNull();
     });
 
     it("時刻を含まないまとめた日付（LL など）は、それだけで日を決める", () => {

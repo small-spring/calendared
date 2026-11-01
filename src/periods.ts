@@ -130,7 +130,7 @@ export function formatPeriod(period: PeriodName, format: string, rules: PeriodRu
   if (!start) throw new Error(`No such ${period.granularity}: ${JSON.stringify(period)}`);
   if (period.granularity === 'quarter' || period.granularity === 'year') {
     // a cycle that doesn't start in January: the year (and quarter) tokens write the name's numbers, not the first day's
-    if (rules[period.granularity].startMonth !== 1) return start.format(withNameNumbers(format, period, start));
+    if (rules[period.granularity].startMonth !== 1) return start.format(withNameNumbers(format, period));
   }
   return start.format(format);
 }
@@ -198,13 +198,12 @@ function startOfPeriod(period: Exclude<PeriodName, { granularity: 'week' }>, rul
  * The format with its year and quarter tokens written as [literal] text of the name's numbers (docs/adr/0041).
  * Other text stays, kept in [brackets]
  */
-function withNameNumbers(format: string, period: Extract<PeriodName, { granularity: 'quarter' | 'year' }>, start: moment.Moment): string {
+function withNameNumbers(format: string, period: Extract<PeriodName, { granularity: 'quarter' | 'year' }>): string {
   const literal = (text: string) => `[${text}]`;
   return tokenize(format).map((part) => {
     if (part.kind === 'text') return literal(part.text);
     const { token } = part;
     if (period.granularity === 'quarter' && token === 'Q') return literal(String(period.quarter));
-    if (period.granularity === 'quarter' && token === 'Qo') return literal(start.localeData().ordinal(period.quarter));
     if (token === 'YY') return literal(String(period.year).slice(-2).padStart(2, '0'));
     if (token === 'YYYY') return literal(String(period.year).padStart(4, '0'));
     if (token === 'Y') return literal(String(period.year));

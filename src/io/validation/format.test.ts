@@ -75,6 +75,13 @@ describe("validateFormat: 書式の誤り（設定画面に出す文）", () => 
         expect(validateFormat("yyyy-[Q]Q", "quarter")).toMatch(/^yyyy can't be used in quarterly note names/);
     });
 
+    it("moment が読み返せない序数は、使えない記号として誤りにする（docs/adr/0040）", () => {
+        expect(validateFormat("YYYY-Qo", "quarter")).toBe("Qo can't be used in quarterly note names. Use the year and quarter (Q).");
+        expect(validateFormat("YYYY-Mo", "month")).toMatch(/^Mo can't be used in monthly note names/);
+        expect(validateFormat("GGGG-[W]Wo", "week")).toMatch(/^Wo can't be used in weekly note names/);
+        expect(validateFormat("gggg-[W]wo", "week")).toMatch(/^wo can't be used in weekly note names/);
+    });
+
     it("年の何日目（DDDD）だけでは、日に月が足りない", () => {
         expect(validateFormat("YYYY-DDDD", "day")).toMatch(/^Ambiguous format\. Missing month \(M\) info/);
     });

@@ -28,11 +28,14 @@ function kindOf(token: string): TokenKind {
     // Calendared: other ways to write the year (y, yyyy, yo, YYYYY) are written as the calendar year even when quarters
     // and years start in another month, so no period may use them (docs/adr/0040)
     if (/^(Y+|y+|yo)$/.test(token)) return "unusable";
+    // Calendared: ordinals moment can't read back (Qo, Mo, Wo, wo, do, DDDo), so a name written with them is never
+    // found again. Do can be read (docs/adr/0040)
+    if (/^(Qo|Mo|Wo|wo|do|DDDo)$/.test(token)) return "unusable";
     if (/^(g+|G+)$/.test(token)) return "weekYear";
-    if (/^Qo?$/.test(token)) return "quarter";
-    if (/^M+$|^Mo$/.test(token)) return "month";
-    if (/^[wW][oWw]?$/.test(token)) return "week";
-    if (/^(D+|DDDo|Do|d+|do|e|E)$/.test(token)) return "day";
+    if (token === "Q") return "quarter";
+    if (/^M+$/.test(token)) return "month";
+    if (/^[wW][Ww]?$/.test(token)) return "week";
+    if (/^(D+|Do|d+|e|E)$/.test(token)) return "day";
     // dates without a time (L, LL, l, ll) name a day; LLL and the rest include a time
     if (/^(LL?|ll?)$/.test(token)) return "day";
     return "time";
@@ -86,7 +89,7 @@ export function missingTokens(format: string, granularity: IGranularity): string
             // an ISO week date (GGGG-[W]WW-E) names the day by its weekday
             if (has("week")) return tokens.some((t) => /^(d+|do|e|E)$/.test(t)) ? null : "weekday (E)";
             if (!has("month")) return "month (M)";
-            return tokens.some((t) => /^D+$|^D+o$/.test(t)) ? null : "day (D)";
+            return tokens.some((t) => /^(D+|Do)$/.test(t)) ? null : "day (D)";
         case "year":
             return null;
     }
