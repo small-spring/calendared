@@ -26,7 +26,7 @@
 
 <Header
     nav={{
-        type: "range",
+        type: "12 years",
         showingCrrDate: showingCurrentRange,
         decrement: () => {
             yearsRanges.updateRanges({

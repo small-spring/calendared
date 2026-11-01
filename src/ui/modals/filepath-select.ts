@@ -1,8 +1,6 @@
 import { PluginService } from '@/app-service';
 import { FuzzyMatch, FuzzySuggestModal, Notice, TAbstractFile, TFile } from 'obsidian';
-import { mount } from "svelte";
 import { genNoticeFragment } from '../utils';
-import Suggestion from "./components/Suggestion.svelte";
 import { ModalManager } from './modals-manager';
 
 /** Calendared: the notes a period's format reads, to search and open (docs/adr/0022). */
@@ -37,12 +35,12 @@ export class FilepathModal extends FuzzySuggestModal<string> {
   }
 
   renderSuggestion(result: FuzzyMatch<string>, el: HTMLElement) {
+    // Calendared: plain DOM rather than a Svelte component per row, which was never unmounted
     const filepath = result.item;
-
-    mount(Suggestion, {
-      target: el,
-      props: { filepath },
-    })
+    const row = el.createDiv({ cls: "px-0 flex items-baseline" });
+    row.createSpan({ cls: "font-medium", text: filepath.split("/").pop() || "" });
+    const folder = filepath.substring(0, filepath.lastIndexOf("/"));
+    if (folder) row.createSpan({ cls: "opacity-70 [font-size:var(--font-ui-smaller)] h-4 ml-2", text: `in ${folder}` });
   }
 
   onChooseItem(filePath: string) {

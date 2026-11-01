@@ -18,15 +18,6 @@
 
 2026-11-01 に、古いコードと想定と違いそうな動きをもう一度洗い出したもの。「たぶん」は、コードを読んだだけで、起きるかをまだ確かめていない — どれも Claude
 
-- 不具合（たぶん）: テンプレートの候補を出したまま設定画面を閉じると、矢印キー・Enter の割り当てが残る（`src/settings/ui/suggest.ts` の `destroy` が `close` を呼ばない）
-- 不具合（たぶん）: ステッカーのピッカーを別ウィンドウのノートから開くと、メインのウィンドウに出る（`src/ui/sticker-picker.ts` が `document`・`window` を使う）
-- 整理: 使われていないものを消す: `src/ui/components/navigation/index.ts`、`openState`、`localeDataStore.weekdays`、
-  `IMonth`/`IWeek` の再エクスポート、`#emoji-modal` の CSS、点の白抜きの表示、`suggestionsContainerCreated`
-- 整理: カレンダーのマスに何百も付いている同じ `id`（`id="dot"`、`id="date-text"` など。どこからも使われていない）を消す
-- 整理: 画面の部品の後片づけ（確認のモーダル、ファイルの候補、書式の知らせで、作った Svelte の部品を消していない）。`DateBttn.svelte` の `isAdjacentMonth` を `$derived` に。
-  曜日の見出しを、週の並びと同じ設定から作る（`localeDataStore` をなくす）
-- 整理: 小さな文言など: 矢印のツールチップ「Previous Month」を文の書き方に（「Range」もわかりにくい）、「Create note」のアイコン `document` を確かめる、
-  `src/locales.ts` の言語名（先頭の空白、Lybia、Malay が 2 つ、システムの言語が大文字・小文字の違いで 2 回出る）、`emoji-search.ts` の先頭の説明
 - 整理: テストを見直す。多すぎるテスト（同じことを何度も確かめている、作りの細部に頼っている）を消し、まとめるべきテストをまとめる。
   消す前に、そのテストだけが守っている振る舞いがないかを見る。夏時間のある時間帯（`TZ=America/Sao_Paulo` など）でも通るかも確かめる
 
@@ -57,13 +48,6 @@
 - 小さなもの: パンくず・ミニカレンダーを出すかの判定が 2 か所（`manager.ts`・`Navigation.svelte`）、週の書式の書き戻しの確かめが 2 か所（`format.ts`・`weeks.ts`）、
   週の「M/D – M/D」の表記が 2 か所（`Format.svelte`・`WeekFormatCheck.svelte`）
 - テストの道具（ファイルを作る、日付、月曜始まり・日曜始まりの決まり、設定の `vi.mock`）が多くのテストに写してある。`src/test-fixtures.ts` にまとめる（下のテストの見直しと一緒に）
-
-### 決めたこと（2026-11-01。作るときに ADR に書く）
-
-- カレンダーの言語を変えても、週の始まりは戻さない（`src/stores/locale.ts` の `switchLocale`）。週の始まりが変わると、
-  今ある週のノートが指す 7 日が変わる（[ADR-0011](adr/0011-week-follows-calendar.md)）— Claude
-- Ctrl/Cmd を押しながら日付を押すと新しいタブで開く、今の動きのままにする。仕様の「横に開く」を直し、`createNewSplitLeaf` の名前も合わせる — Claude
-- カレンダーの言語の既定を、OS の言語（`navigator.languages`）ではなく Obsidian の言語から取る（仕様に合わせる）— Claude
 
 ### 確かめる
 

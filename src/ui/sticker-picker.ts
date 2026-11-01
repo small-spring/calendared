@@ -1,4 +1,4 @@
-// Calendared: the sticker picker (StickerPicker.svelte) as one box mounted on document.body
+// Calendared: the sticker picker (StickerPicker.svelte) as one box mounted on the body of the window it opens in
 import { MODAL_CLASS, STICKER_PICKER_ID } from "@/constants";
 import { stickerPickerNoteStore } from "@/stores/sticker-picker";
 import StickerPickerComponent from "@/ui/components/StickerPicker.svelte";
@@ -17,6 +17,9 @@ class StickerPicker {
   private stopFollowingAnchor: (() => void) | null = null;
   private modalObserver: MutationObserver | null = null;
   private opened = false;
+  /** the document (window) the picker is mounted in: the one of the note it was opened from, which may be a pop-out window */
+  readonly doc: Document;
+  private readonly win: Window;
 
   private readonly onWindowClick = (event: MouseEvent) => {
     // a click outside the picker closes it
@@ -26,16 +29,18 @@ class StickerPicker {
     if (event.key === "Escape") this.close({ returnFocus: true });
   };
 
-  constructor() {
+  constructor(doc: Document) {
+    this.doc = doc;
+    this.win = doc.defaultView ?? window;
     // Calendared: drop a picker a previous load of the plugin left behind (versions without onunload cleanup),
     // otherwise the lookup by id below finds the stale one instead of ours
-    document.querySelectorAll(`#${STICKER_PICKER_ID}`).forEach((staleEl) => staleEl.remove());
+    doc.querySelectorAll(`#${STICKER_PICKER_ID}`).forEach((staleEl) => staleEl.remove());
 
     this.component = mount(StickerPickerComponent, {
-      target: document.body,
+      target: doc.body,
       props: { close: () => this.close() },
     });
-    this.el = document.getElementById(STICKER_PICKER_ID) as HTMLElement;
+    this.el = doc.getElementById(STICKER_PICKER_ID) as HTMLElement;
   }
 
   open(anchorEl: Element) {
@@ -60,11 +65,11 @@ class StickerPicker {
       );
       if (modalAdded) this.close();
     });
-    this.modalObserver.observe(document.body, { childList: true });
+    this.modalObserver.observe(this.doc.body, { childList: true });
 
-    window.addEventListener("click", this.onWindowClick);
-    window.addEventListener("auxclick", this.onWindowClick);
-    window.addEventListener("keydown", this.onWindowKeydown);
+    this.win.addEventListener("click", this.onWindowClick);
+    this.win.addEventListener("auxclick", this.onWindowClick);
+    this.win.addEventListener("keydown", this.onWindowKeydown);
 
     this.searchInput()?.focus();
   }
@@ -81,9 +86,9 @@ class StickerPicker {
     this.modalObserver?.disconnect();
     this.modalObserver = null;
 
-    window.removeEventListener("click", this.onWindowClick);
-    window.removeEventListener("auxclick", this.onWindowClick);
-    window.removeEventListener("keydown", this.onWindowKeydown);
+    this.win.removeEventListener("click", this.onWindowClick);
+    this.win.removeEventListener("auxclick", this.onWindowClick);
+    this.win.removeEventListener("keydown", this.onWindowKeydown);
 
     this.searchInput()?.blur();
     if (returnFocus && this.anchorEl instanceof HTMLElement) this.anchorEl.focus();
@@ -115,7 +120,10 @@ let picker: StickerPicker | null = null;
 export function openStickerPicker(file: TFile, anchorEl: Element) {
   const cache = PluginService.getPlugin()?.app.metadataCache.getFileCache(file);
   stickerPickerNoteStore.set({ file, sticker: stickerFrom(cache, get(settingsStore)) });
-  picker ??= new StickerPicker();
+  // Calendared: open in the window of what it was opened from (a note in a pop-out window), not always the main one.
+  // One picker at a time: opening in another window takes it out of the previous one
+  if (picker && picker.doc !== anchorEl.ownerDocument) destroyStickerPicker();
+  picker ??= new StickerPicker(anchorEl.ownerDocument);
   picker.open(anchorEl);
 }
 

@@ -11,8 +11,6 @@
   }
 
   let { onClick, tooltip, direction, className = "" }: Props = $props();
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 </script>
 
 <Button
@@ -25,7 +23,6 @@
     Platform.isPhone &&
       "relative !px-2.5 [&>svg]:w-2 after:absolute after:inset-x-0 after:-inset-y-2.5 after:content-['']",
   )}
-  id="arrow"
   onclick={onClick}
   aria-label={tooltip}
 >

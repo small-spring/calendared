@@ -6,7 +6,7 @@ import { getPeriodicityFromGranularity, IGranularity } from "@/io";
 import type { DnPluginSettings } from "@/io/settings";
 import { validateFolder, validateFormat, validateTemplate } from "@/io/validation";
 import locales from "@/locales";
-import { defaultWeekdays, sysLocaleKey } from "@/localization";
+import { defaultWeekdays, obsidianLocaleKey } from "@/localization";
 import { showsOn } from "@/navigation";
 import { formatPeriod, periodRules, rangeOfPeriod, yearCycleOf, type PeriodName } from "@/periods";
 import { switchLocale, updateWeekStartSetting } from "@/stores";
@@ -120,7 +120,7 @@ export class SettingsTab extends PluginSettingTab {
     if (key === "weekStart") {
       updateWeekStartSetting(defaultWeekdays.indexOf(value as string));
     } else if (key === "calendarLanguage") {
-      // also resets the week start to the language's, so its choices and value are read again
+      // the week start's choices are named in the calendar's language, so read them again (the week start stays; docs/adr/0047)
       switchLocale(value as string);
       this.update();
     } else if (key === "openAtStartup") {
@@ -159,10 +159,11 @@ export class SettingsTab extends PluginSettingTab {
     for (const i of [6, 0, 1]) weekStartOptions[defaultWeekdays[i]] = names[i];
 
     const languageOptions: Record<string, string> = {
-      [sysLocaleKey]: `Same as system (${locales.get(sysLocaleKey) || sysLocaleKey})`,
+      // Calendared: Obsidian's language rather than the OS's (docs/adr/0046)
+      [obsidianLocaleKey]: `Same as Obsidian (${locales.get(obsidianLocaleKey) || obsidianLocaleKey})`,
     };
     for (const key of window.moment.locales()) {
-      if (key !== sysLocaleKey) languageOptions[key] = locales.get(key) || key;
+      if (key !== obsidianLocaleKey) languageOptions[key] = locales.get(key) || key;
     }
 
     const startupOptions: Record<string, string> = { none: "Nothing" };

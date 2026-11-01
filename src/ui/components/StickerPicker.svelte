@@ -71,11 +71,6 @@
 </div>
 
 <style lang="postcss">
-    #emoji-modal {
-        padding: 0px;
-        min-width: unset;
-        width: unset !important;
-    }
     /* Obsidian's warning style (as on its warning menu items): red icon, red background with light icon on hover */
     .pnc-sticker-remove {
         color: var(--text-error);

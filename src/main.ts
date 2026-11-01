@@ -1,7 +1,6 @@
 import { DEFAULT_SETTINGS, settingsFromSaved, settingsStore, SettingsTab, type ISettings } from '@/settings';
-import { InvalidFormat, ViewManager } from '@/ui';
+import { invalidFormatNotice, ViewManager } from '@/ui';
 import { MarkdownView, Notice, Plugin, TAbstractFile, TFile, WorkspaceLeaf, WorkspaceRoot } from 'obsidian';
-import { mount } from 'svelte';
 import { get } from 'svelte/store';
 import { PluginService } from './app-service';
 import { CALENDAR_LUCIDE_ICON, granularities, LEAF_TYPE } from './constants';
@@ -13,7 +12,6 @@ import { overlapsMonth, periodRulesFor, rangeOfPeriod, shiftPeriod } from './per
 import { periodStart } from './navigation';
 import {
   displayedDateStore,
-  setupLocale,
   themeStore,
   todayStore,
 } from './stores';
@@ -78,7 +76,6 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     // Calendared: a row in the Page preview settings, where Ctrl/Cmd on hover is switched (docs/adr/0026)
     this.registerHoverLinkSource(HOVER_LINK_SOURCE, { display: "Calendared", defaultMod: true });
 
-    setupLocale()
     // Calendared: the picker's search in Obsidian's language, from keywords downloaded on request (emoji-search.ts)
     initEmojiSearch(this.app, this.manifest.dir ?? `${this.app.vault.configDir}/plugins/${this.manifest.id}`).catch(console.error);
     this.handleRibbon();
@@ -364,18 +361,12 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     const { isValid, granularity, format } = isValidPeriodicNote(file);
     if (isValid !== false) return;
 
-    const fragment = document.createDocumentFragment();
-    mount(InvalidFormat, {
-      // @ts-ignore
-      target: fragment,
-      props: {
-        granularity,
-        filepath: file.path,
-        formatValue: format,
-        error: validateFormat(format, granularity)
-      }
-    })
-    new Notice(fragment, 10000)
+    new Notice(invalidFormatNotice({
+      granularity,
+      filepath: file.path,
+      formatValue: format,
+      error: validateFormat(format, granularity),
+    }), 10000)
   }
 }
 

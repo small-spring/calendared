@@ -36,7 +36,8 @@ export const onInputKeydown = (ev: KeyboardEvent) => {
   if (ev.key === 'ArrowUp') {
     const root = input.getRootNode();
     const emojiSelected = root instanceof ShadowRoot && root.querySelector('.category button[aria-selected]');
-    const removeButton = document.getElementById(STICKER_PICKER_ID)?.querySelector<HTMLElement>('.pnc-sticker-remove');
+    // Calendared: the picker's own document, which is a pop-out window's when opened from one
+    const removeButton = input.ownerDocument.getElementById(STICKER_PICKER_ID)?.querySelector<HTMLElement>('.pnc-sticker-remove');
     if (!emojiSelected && removeButton) {
       ev.preventDefault();
       ev.stopImmediatePropagation();

@@ -30,12 +30,12 @@ export function openNoteMenu({ event, fileData, date, granularity }: NoteMenuPar
     menu.addItem((item) => {
       item
         .setTitle("Create note")
-        .setIcon("document")
+        .setIcon("lucide-file-plus")
         .onClick(() => {
           eventHandlers.onClick({
             date,
             granularity,
-            createNewSplitLeaf: isControlPressed(event)
+            inNewTab: isControlPressed(event)
           }).catch(console.error);
         });
     });

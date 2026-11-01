@@ -59,19 +59,12 @@
 
   // Calendared: a quarter or year by its own start month (docs/adr/0039)
   let isToday = $derived(samePeriod(granularity, date, $todayStore, periodRulesFor($settingsStore)));
-  let isAdjacentMonth = $state(false);
-
-  $effect.pre(() => {
-    if (ignoreAdjacentMonth) return;
-
-    if (granularity === "day" && date && $displayedDateStore) {
-      isAdjacentMonth = !date.isSame($displayedDateStore, "month");
-    }
-  });
+  let isAdjacentMonth = $derived(
+    !ignoreAdjacentMonth && granularity === "day" && !date.isSame($displayedDateStore, "month"),
+  );
 </script>
 
 <Button
-  id={`${granularity}-bttn`}
   class={cn(
     "date-bttn",
     "relative !h-auto w-full flex flex-col font-medium rounded-[--radius-s] tabular-nums transition-colors text-center",
@@ -98,7 +91,7 @@
     }
     eventHandlers.onClick({
       date,
-      createNewSplitLeaf: isControlPressed(event),
+      inNewTab: isControlPressed(event),
       granularity,
     });
   }}
@@ -119,7 +112,7 @@
     });
   }}
 >
-  <span id="date-text" class="relative">
+  <span class="relative">
     {#if displaySticker}
       <Sticker sticker={sticker?.emoji} />
     {/if}
@@ -129,7 +122,6 @@
     <Dot
       className={cn((compactDot || Platform.isPhone) && "w-1")}
       isVisible={!!file}
-      isFilled={!!file}
       {isActive}
     />
   </div>

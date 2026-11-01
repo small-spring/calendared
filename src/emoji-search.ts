@@ -1,9 +1,9 @@
 /**
- * Calendared: searching the sticker picker in your own language (docs/guides/publishing.md). emoji-mart only searches
- * English. Keywords for other languages (data/emoji-keywords/, made from Unicode CLDR) are not bundled: all of them
- * together are about 3.4 MB. When the user turns searching in Obsidian's language on, the file for that language is
- * downloaded once and kept in the plugin's folder; turning it off keeps the file, so turning it on again needs no
- * download. Nothing but the file name (the language) is sent.
+ * Calendared: searching the sticker picker in other languages besides English, which emoji-mart searches already.
+ * Keywords for other languages (data/emoji-keywords/, made from Unicode CLDR) are not bundled: all of them together are
+ * about 3.4 MB. The user adds languages from a list in the sticker settings (docs/adr/0037); each added language's file
+ * is downloaded once and kept in the plugin's folder, and removing the language deletes it. Nothing but the file name
+ * (the language) is sent (README, "Network use")
  */
 
 /**

@@ -30,7 +30,7 @@
 | `internalFileModStore` | 「自分でファイルを作っている・名前を変えている・消している最中」の目印と、「メタデータが変わった」合図 | ノートの作成、書式の付け替え、一括削除、メタデータの変化（`Math.random()` の値を入れる） | 目印と合図という別の役目を 1 つの値で兼ねている。合図に乱数を使っている。2026-10-30 に合図をやめ、目印だけ残した。目印も一覧と一緒に消した |
 | `notesChangedStore` | 「ノートの情報を描き直す」合図 | （`settingsStore` と `internalFileModStore` の変化から作る） | 設定のどこが変わっても発火する（ノートの一覧が設定に入っているため）。カレンダーの全マスが計算し直す。2026-10-30 に消した（窓口から読む） |
 | `todayStore` | 今日 | `View.svelte` の 1 分ごとの確認 | 問題なし |
-| `localeDataStore` / `localeSwitched` | 曜日の名前、言語を変えた合図 | 言語・週の始まりの変更 | 合図に乱数（`Math.random()`）。2026-10-30 に `localeSwitched` を消した（タイムラインは設定の言語を読む）。`localeDataStore` は言語の扱いの作り直しで見直す |
+| `localeDataStore` / `localeSwitched` | 曜日の名前、言語を変えた合図 | 言語・週の始まりの変更 | 合図に乱数（`Math.random()`）。2026-10-30 に `localeSwitched` を消した（タイムラインは設定の言語を読む）。2026-11-01 に `localeDataStore` も消した（曜日の見出しは表の 1 行目の日付から作る） |
 | `yearsRanges` | 年のビューの範囲 | 年のビュー | 複雑だが、年のビューは日・月を無効にしたときだけ出る |
 | `stickerPickerNoteStore` | ステッカーのピッカーの対象 | ステッカーの操作 | 問題なし |
 | `themeStore` | ライト・ダーク | 起動時、テーマの変化 | 問題なし |

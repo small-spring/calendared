@@ -4,27 +4,22 @@
     interface Props {
         className?: string;
         isVisible?: boolean;
-        isFilled?: boolean;
         isActive?: boolean;
     }
 
     let {
         className = "",
         isVisible = true,
-        isFilled = false,
         isActive = false,
     }: Props = $props();
 </script>
 
 {#if isVisible}
     <svg
-        id="dot"
         class={cn(
-            "inline-block h-[6px] w-[6px] mx-0 my-[1px] fill-transparent",
-            "stroke-[--color-dot]",
-            isActive && "stroke-[--text-on-accent]",
-            isFilled && "fill-[--color-dot]",
-            isActive && isFilled && "fill-[--text-on-accent]",
+            "inline-block h-[6px] w-[6px] mx-0 my-[1px]",
+            "stroke-[--color-dot] fill-[--color-dot]",
+            isActive && "stroke-[--text-on-accent] fill-[--text-on-accent]",
             className,
         )}
         viewBox="0 0 6 6"

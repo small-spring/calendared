@@ -79,14 +79,13 @@
         isActive &&
           "!text-[--text-on-accent] !bg-[--interactive-accent] !shadow-[0px_0px_0_5px_var(--interactive-accent)] hover:!bg-[--interactive-accent-hover] hover:!shadow-[0px_0px_0_5px_var(--interactive-accent-hover)]",
       )}
-      id={title.granularity}
       aria-label={canOpen
         ? `Open ${periodicity} note`
         : `${capitalize(periodicity)} notes are turned off in settings`}
       onclick={(event) => {
         eventHandlers.onClick({
           date,
-          createNewSplitLeaf: isControlPressed(event),
+          inNewTab: isControlPressed(event),
           granularity: title.granularity,
         });
         onOpen?.();
@@ -117,7 +116,6 @@
       <Dot
         className="w-1"
         isVisible={!!title.fileData.file}
-        isFilled={!!title.fileData.file}
       />
     </div>
   </div>

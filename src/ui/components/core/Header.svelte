@@ -1,6 +1,5 @@
 <script lang="ts">
   import { cn } from "@/ui/utils";
-  import { capitalize } from "@/utils";
   import Arrow from "./Arrow.svelte";
   import PeriodTitle, { type TTitle } from "./PeriodTitle.svelte";
   import { type Snippet } from "svelte";
@@ -23,7 +22,8 @@
 
     /** Calendared: replaces upstream's `bottomNavSnippet` (DateNavigator) */
     nav: {
-      type: string;
+      /** Calendared: what the arrows move by, in the tooltips' words ("Previous month") */
+      type: "month" | "year" | "12 years";
       showingCrrDate: boolean;
       decrement: () => void;
       increment: () => void;
@@ -116,13 +116,13 @@
     <Arrow
       direction="left"
       onClick={nav.decrement}
-      tooltip={`Previous ${capitalize(nav.type)}`}
+      tooltip={`Previous ${nav.type}`}
       className="!h-auto !py-0.5 !px-1 [&>svg]:w-1.5"
     />
     <Arrow
       direction="right"
       onClick={nav.increment}
-      tooltip={`Next ${capitalize(nav.type)}`}
+      tooltip={`Next ${nav.type}`}
       className="!h-auto !py-0.5 !px-1 [&>svg]:w-1.5"
     />
   </div>
