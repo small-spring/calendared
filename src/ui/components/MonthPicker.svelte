@@ -1,10 +1,9 @@
 <script lang="ts">
     // Calendared: month picker shown as a popover from the header's year chevron.
     // Replaces upstream's "Month" tab (YearHeader + months table in Calendar.svelte).
-    import { crumbText, periodStart } from "@/navigation";
-    import { periodRulesFor } from "@/periods";
-    import { noteAt } from "@/io";
-    import { settingsStore } from "@/settings";
+    import { monthsOfYear, periodStart } from "@/periods";
+    import { yearTitle } from "./core/year-title";
+    import { periodRulesStore, settingsStore } from "@/settings";
     import { displayedDateStore, todayStore } from "@/stores";
     import { cn } from "@/ui/utils";
     import { inLocale } from "@/calendar-locale";
@@ -19,11 +18,9 @@
     let { onPick }: Props = $props();
 
     // Calendared: the year by its own start month, its 12 months from there (docs/adr/0039)
-    let rules = $derived(periodRulesFor($settingsStore));
-    let pickerYear = $state(periodStart("year", $displayedDateStore, periodRulesFor($settingsStore)));
-    let months = $derived(Array.from({ length: 12 }, (_, i) => pickerYear.clone().add(i, "months")));
-    // Calendared: read through the vault source with the settings read reactively (docs/adr/0016)
-    let yearFileData = $derived(noteAt("year", pickerYear, $settingsStore));
+    let rules = $derived($periodRulesStore);
+    let pickerYear = $state(periodStart("year", $displayedDateStore, $periodRulesStore));
+    let months = $derived(monthsOfYear(pickerYear, rules));
 </script>
 
 <div class="flex items-center justify-between mb-1">
@@ -31,17 +28,12 @@
         direction="left"
         onClick={() => (pickerYear = pickerYear.clone().subtract(1, "year"))}
         tooltip="Previous year"
-        className="!h-auto !py-1 !px-2 [&>svg]:w-1.5"
+        size="picker"
     />
     <!-- like every other year label, opens (or creates) the yearly note -->
     <PeriodTitle
         date={pickerYear}
-        title={{
-            granularity: "year",
-            fileData: yearFileData,
-            formatValue: "YYYY",
-            text: crumbText("year", pickerYear, $settingsStore.localeSettings.localeOverride, rules),
-        }}
+        title={yearTitle(pickerYear, $settingsStore, rules)}
         textClassName="text-sm"
         onOpen={onPick}
     />
@@ -49,7 +41,7 @@
         direction="right"
         onClick={() => (pickerYear = pickerYear.clone().add(1, "year"))}
         tooltip="Next year"
-        className="!h-auto !py-1 !px-2 [&>svg]:w-1.5"
+        size="picker"
     />
 </div>
 <div class="grid grid-cols-3 gap-0.5">

@@ -18,9 +18,8 @@
   // Used by the header and the month picker so every title follows the same rules.
   import { getPeriodicityFromGranularity } from "@/io";
   import { settingsStore } from "@/settings";
-  import { vaultSource } from "@/io";
-  import { cn, eventHandlers, isControlPressed } from "@/ui/utils";
-  import { capitalize } from "@/utils";
+  import { cn, isOpenNote, noteButtonEvents } from "@/ui/utils";
+  import { turnedOffMessage } from "@/period-words";
   import { inLocale } from "@/calendar-locale";
   import Button from "./Button.svelte";
   import Dot from "./Dot.svelte";
@@ -55,10 +54,8 @@
   // the open note looks selected wherever it shows up on the calendar, like the date buttons.
   // The background is drawn with a shadow so the selected title keeps its size and nothing shifts
   // Calendared: the open note as Obsidian knows it (docs/adr/0015)
-  let isActive = $derived(
-    !!title.fileData.file &&
-      vaultSource().activeFile()?.path === title.fileData.file.path,
-  );
+  let isActive = $derived(isOpenNote(title.fileData.file));
+  let events = $derived(noteButtonEvents(title.granularity, date, title.fileData));
 </script>
 
 <!--
@@ -81,28 +78,13 @@
       )}
       aria-label={canOpen
         ? `Open ${periodicity} note`
-        : `${capitalize(periodicity)} notes are turned off in settings`}
+        : turnedOffMessage(title.granularity)}
       onclick={(event) => {
-        eventHandlers.onClick({
-          date,
-          inNewTab: isControlPressed(event),
-          granularity: title.granularity,
-        });
+        events.open(event);
         onOpen?.();
       }}
-      oncontextmenu={(event) =>
-        eventHandlers.onContextMenu({
-          event,
-          fileData: title.fileData,
-          date,
-          granularity: title.granularity,
-        })}
-      onpointerenter={(event) => {
-        eventHandlers.onHover({
-          event,
-          file: title.fileData.file,
-        });
-      }}
+      oncontextmenu={(event) => events.menu(event)}
+      onpointerenter={(event) => events.hover(event)}
     >
       <span class="relative">
         {title.text ?? inLocale(date, $settingsStore.localeSettings.localeOverride).format(title.formatValue)}

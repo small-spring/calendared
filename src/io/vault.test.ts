@@ -241,6 +241,12 @@ describe("getTemplateInfo: ノートを作るときのテンプレートの中�
         expect(await getTemplateInfo("テンプレート/日.md", "day")).toBe("# {{title}}");
     });
 
+    it("パスに .md がなくても、そのテンプレートを読む（前の版で .md なしで保存された設定）", async () => {
+        fake.files.set("テンプレート/日.md", fileAt("テンプレート/日.md"));
+        fake.contents.set("テンプレート/日.md", "# {{title}}");
+        expect(await getTemplateInfo("テンプレート/日", "day")).toBe("# {{title}}");
+    });
+
     it("テンプレートを選んでいなければ、空", async () => {
         expect(await getTemplateInfo("", "day")).toBe("");
         expect(fake.created).toEqual([]);

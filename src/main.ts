@@ -4,14 +4,14 @@ import { MarkdownView, Notice, Plugin, TAbstractFile, TFile, WorkspaceLeaf, Work
 import { get } from 'svelte/store';
 import { PluginService } from './app-service';
 import { CALENDAR_LUCIDE_ICON, granularities, LEAF_TYPE } from './constants';
-import { createOrOpenNote, getFileData, getStartupNoteGranularity, initVaultSource } from './io';
+import { getFileData, initVaultSource, openCurrentNote } from './io';
 import { getPeriodicityFromGranularity } from './io/parse';
 import type { IGranularity } from './io/types';
-import { isValidPeriodicNote, validateFormat } from './io/validation';
+import { isValidPeriodicNote, periodicNoteOf, validateFormat } from './io/validation';
 import { overlapsMonth, periodRulesFor, rangeOfPeriod, shiftPeriod } from './periods';
-import { periodStart } from './navigation';
 import {
   displayedDateStore,
+  refreshToday,
   themeStore,
   todayStore,
 } from './stores';
@@ -23,8 +23,9 @@ import { CalendarView } from './view';
 import { initEmojiSearch } from './ui/utils/emoji-locale';
 import { HOVER_LINK_SOURCE } from './ui/utils/event-handlers';
 import { trackSettingChanges } from './settings/migration-notice';
-import { nextToday } from './today';
-import { getNoteSticker, isPeriodicNote, openStickerPicker, removeSticker, StickerActions } from './ui/sticker-actions';
+import { openAtStartupOf } from './settings/period-switch';
+import { currentNoteName } from './period-words';
+import { getNoteSticker, isPeriodicNote, MANAGE_STICKER, openStickerPicker, removeSticker, StickerActions } from './ui/sticker-actions';
 
 export default class PeriodicNotesCalendarPlugin extends Plugin {
   /** Calendared: sticker button in the header of periodic notes */
@@ -67,7 +68,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     this.register(settingsStore.subscribe(() => this.openNowActions.refresh()));
     // Calendared: upstream's calendar view kept today current with its own timer, so with the pane closed
     // the date went stale. The plugin does it now; the header's Open now button is re-dimmed on a new day
-    this.registerInterval(window.setInterval(updateToday, 1000 * 60));
+    this.registerInterval(window.setInterval(refreshToday, 1000 * 60));
     this.register(todayStore.subscribe(() => this.openNowActions.refresh()));
     // Calendared: add or remove the breadcrumbs and mini calendar when the settings change which notes show them
     this.register(settingsStore.subscribe(() => NavigationManager.instance?.syncAll()));
@@ -94,27 +95,18 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     });
 
     // Calendared: named after the period ("today's", "this week's"); ids are upstream's so existing hotkeys keep working
-    const currentPeriodNames: Record<IGranularity, string> = {
-      day: "Open today's note",
-      week: "Open this week's note",
-      month: "Open this month's note",
-      quarter: "Open this quarter's note",
-      year: "Open this year's note",
-    };
     granularities.forEach((granularity) => {
       this.addCommand({
         id: `create-current-${getPeriodicityFromGranularity(granularity)}-note`,
-        name: currentPeriodNames[granularity],
+        name: currentNoteName(granularity, "open"),
         // Calendared: upstream used `callback`. With `checkCallback`, Obsidian asks first (checking = true)
         // and hides the command while its period is disabled in settings
         checkCallback: (checking) => {
           if (!get(settingsStore).periods[granularity].enabled) return false;
           if (checking) return true;
 
-          const leaf = this.app.workspace.getLeaf(false);
-          // Calendared: the period's first day by the period rules (a quarter or year may not start in January, docs/adr/0039)
-          const date = periodStart(granularity, window.moment(), periodRulesFor(get(settingsStore)));
-          createOrOpenNote({ leaf, date, granularity, confirmBeforeCreateOverride: false }).catch(console.error);
+          openCurrentNote(granularity, { leaf: this.app.workspace.getLeaf(false), confirmBeforeCreateOverride: false })
+            .catch(console.error);
           return true;
         }
       });
@@ -130,8 +122,9 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
         checkCallback: (checking) => {
           const file = this.app.workspace.getActiveFile();
           if (!file) return false;
-          const { granularity, period } = isValidPeriodicNote(file);
-          if (!granularity || !period) return false;
+          const note = periodicNoteOf(file);
+          if (!note) return false;
+          const { granularity, period } = note;
           if (checking) return true;
 
           const rules = periodRulesFor(get(settingsStore));
@@ -150,7 +143,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     // Calendared: sticker commands for the open periodic note (hidden from the palette otherwise)
     this.addCommand({
       id: 'manage-sticker',
-      name: 'Manage sticker',
+      name: MANAGE_STICKER,
       checkCallback: (checking) => {
         const view = this.app.workspace.getActiveViewOfType(MarkdownView);
         if (!get(settingsStore).stickersEnabled || !isPeriodicNote(view?.file)) return false;
@@ -188,14 +181,12 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
       this.openNowActions.refresh();
 
       // open note at startup
-      const startupNoteGranularity = getStartupNoteGranularity();
-      if (startupNoteGranularity) {
-        await createOrOpenNote({
+      const startupNoteGranularity = openAtStartupOf(get(settingsStore).periods);
+      if (startupNoteGranularity !== "none") {
+        // Calendared: the period's first day, as the commands and Open now pass. Upstream passed now, so a template's
+        // {{date}} differed from a note made by a command (docs/adr/0039)
+        await openCurrentNote(startupNoteGranularity, {
           leaf: this.app.workspace.getLeaf(),
-          // Calendared: the period's first day, as the commands and Open now pass. Upstream passed now, so a template's
-          // {{date}} differed from a note made by a command (docs/adr/0039)
-          date: periodStart(startupNoteGranularity, window.moment(), periodRulesFor(get(settingsStore))),
-          granularity: startupNoteGranularity,
           confirmBeforeCreateOverride: false,
         });
       }
@@ -324,8 +315,9 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
    */
   private onFileOpen(file: TFile | null) {
     if (!file) return;
-    const { isValid, date, period } = isValidPeriodicNote(file);
-    if (typeof isValid !== "boolean" || !date || !period) return;
+    const note = periodicNoteOf(file);
+    if (!note) return;
+    const { date, period } = note;
 
     // Calendared: always follow the open note, but only when no day of it is on the displayed month already.
     // Otherwise clicking a year title would jump to January, or a week number to the month the week starts in.
@@ -368,13 +360,6 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
       error: validateFormat(format, granularity),
     }), 10000)
   }
-}
-
-/** Calendared: set today, and the calendar's month when it showed today's (src/today.ts) */
-function updateToday() {
-  const next = nextToday(get(todayStore), get(displayedDateStore), window.moment());
-  if (next.today) todayStore.set(next.today);
-  if (next.displayed) displayedDateStore.set(next.displayed);
 }
 
 /**

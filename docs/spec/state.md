@@ -25,11 +25,11 @@
 | `settingsStore` | 設定（`data.json`） | 設定画面、各所 | ノートの一覧（下）も入っている。どこかが変わるたびに `data.json` 全体を書き直す |
 | ↳ `filepaths` / `filepathsByFormatValue` | 周期ノートの一覧（パス → 書式） | 起動時に作り直す（`storeAllVaultPeriodicFilepaths`）、ファイルの作成・名前変更・削除、書式の変更 | 設定ではないのに `data.json` に保存している。自分の Vault で約 500 件、46 KB（`data.json` 55 KB のうち）。起動時にどうせ作り直すので、保存する意味がない。2026-10-30 に消した（`data.json` は 4 KB になった） |
 | `activeFileStore` | 選択中のノート（ファイル・日付・周期） | `onFileOpen`、ノートを開く処理（`create-or-open-note.ts`） | 開いているノートの写し。2 か所が書き換える。日付と周期はどこからも読まれていない。2026-10-30 に消した（窓口の `activeFile()` から読む） |
-| `displayedDateStore` | カレンダーが表示している月 | ノートを開いたとき（`onFileOpen`）、‹ › と ⌖、月の吹き出し、月・年のビュー、日付が変わったとき（`View.svelte` の 1 分ごとの確認） | 書き換える場所は多いが、どれも「ユーザーの移動」か「開いたノートへの追従」か「日付の変化」。ただし謎が 1 つある（4.） |
+| `displayedDateStore` | カレンダーが表示している月 | ノートを開いたとき（`onFileOpen`）、‹ › と ⌖、月の吹き出し、月・年のビュー、日付が変わったとき（`refreshToday`。プラグインの 1 分ごとの確認と、今の期間のノートを開く前） | 書き換える場所は多いが、どれも「ユーザーの移動」か「開いたノートへの追従」か「日付の変化」。ただし謎が 1 つある（4.） |
 | `timelineParentFileStore` | タイムラインを出しているノート | `TimelineManager.layoutSync` | 全体で 1 つ。タブごとに持つべき（不具合 (4)）。2026-10-30 に消した（`TimelineSync` がタブごとに持つ） |
 | `internalFileModStore` | 「自分でファイルを作っている・名前を変えている・消している最中」の目印と、「メタデータが変わった」合図 | ノートの作成、書式の付け替え、一括削除、メタデータの変化（`Math.random()` の値を入れる） | 目印と合図という別の役目を 1 つの値で兼ねている。合図に乱数を使っている。2026-10-30 に合図をやめ、目印だけ残した。目印も一覧と一緒に消した |
 | `notesChangedStore` | 「ノートの情報を描き直す」合図 | （`settingsStore` と `internalFileModStore` の変化から作る） | 設定のどこが変わっても発火する（ノートの一覧が設定に入っているため）。カレンダーの全マスが計算し直す。2026-10-30 に消した（窓口から読む） |
-| `todayStore` | 今日 | `View.svelte` の 1 分ごとの確認 | 問題なし |
+| `todayStore` | 今日 | `refreshToday`（プラグインの 1 分ごとの確認と、今の期間のノートを開く前） | 問題なし |
 | `localeDataStore` / `localeSwitched` | 曜日の名前、言語を変えた合図 | 言語・週の始まりの変更 | 合図に乱数（`Math.random()`）。2026-10-30 に `localeSwitched` を消した（タイムラインは設定の言語を読む）。2026-11-01 に `localeDataStore` も消した（曜日の見出しは表の 1 行目の日付から作る） |
 | `yearsRanges` | 年のビューの範囲 | 年のビュー | 複雑だが、年のビューは日・月を無効にしたときだけ出る |
 | `stickerPickerNoteStore` | ステッカーのピッカーの対象 | ステッカーの操作 | 問題なし |

@@ -1,7 +1,9 @@
 // Calendared: opening the migrations (docs/adr/0023, 0024) and the notice's "Keep as is" (docs/adr/0035). The wording is provisional
 import { PluginService } from "@/app-service";
-import { getPeriodicityFromGranularity, type IGranularity } from "@/io";
-import { stickerFromValue, stickerProperty } from "@/stickers";
+import { getPeriodicityFromGranularity, noteNameOf, type IGranularity } from "@/io";
+import { countOf } from "@/utils";
+import { stickerFromValue } from "@/stickers";
+import { getStickerProperty } from "@/ui/utils/emoji-picker";
 import { ButtonComponent, Modal } from "obsidian";
 import { get } from "svelte/store";
 import { settingsStore } from "../../store";
@@ -17,9 +19,8 @@ import {
 
 export * from "./run";
 
-const notes = (n: number) => `${n} ${n === 1 ? "note" : "notes"}`;
+const notes = (n: number) => countOf(n, "note");
 const withoutExtension = (path: string) => path.replace(/\.md$/, "");
-const nameOf = (path: string) => withoutExtension(path.slice(path.lastIndexOf("/") + 1));
 
 function showValue(value: unknown): string {
   if (value === null || value === undefined || value === "") return "(empty)";
@@ -41,7 +42,7 @@ export function openFormatRename(granularity: IGranularity, fromFormat: string, 
   new MigrationReviewModal({
     title: `Rename ${periodicity} notes`,
     description: `Notes named in ${fromFormat} get names in ${toFormat}, the current format. Links to them are updated when "Automatically update internal links" is on (Settings › Files and links).`,
-    rows: plan.map((row) => ({ key: row.from, from: withoutExtension(row.from), to: nameOf(row.to), conflict: row.conflict })),
+    rows: plan.map((row) => ({ key: row.from, from: withoutExtension(row.from), to: noteNameOf(row.to), conflict: row.conflict })),
     separator: " → ",
     conflictHeading: "Skipped: a note with the new name already exists",
     actionLabel: (n) => `Rename ${notes(n)}`,
@@ -62,7 +63,7 @@ export function openFormatRename(granularity: IGranularity, fromFormat: string, 
 /** The list of periodic notes with the `fromProperty` property, to move their stickers to the current property */
 export function openStickerMove(fromProperty: string, onDone: () => void = () => {}) {
   const plan = stickerMovePlan(fromProperty);
-  const toProperty = stickerProperty(get(settingsStore).stickerProperty);
+  const toProperty = getStickerProperty();
   // values that aren't an emoji can still be moved; they just won't show as stickers (docs/spec/stickers.md, "読み方")
   const notEmoji = plan.filter((row) => !row.conflict && !stickerFromValue(row.value)).length;
   const moving = plan.filter((row) => !row.conflict).length;
@@ -84,12 +85,12 @@ export function openStickerMove(fromProperty: string, onDone: () => void = () =>
       : undefined,
     separator: ": ",
     conflictHeading: `Skipped: already has "${toProperty}"`,
-    actionLabel: (n) => `Move ${n === 1 ? "1 sticker" : `${n} stickers`}`,
+    actionLabel: (n) => `Move ${countOf(n, "sticker")}`,
     runningLabel: (done, total) => `Moving… ${done}/${total}`,
     run: (keys, onProgress) => moveStickers(plan.filter((row) => keys.includes(row.path)), fromProperty, onProgress),
     resultMessage: ({ changed, skipped }) => {
       const all = skipped + plan.filter((row) => row.conflict).length;
-      return `Moved ${changed === 1 ? "1 sticker" : `${changed} stickers`}.` + (all ? ` Skipped ${all}: already has "${toProperty}".` : "");
+      return `Moved ${countOf(changed, "sticker")}.` + (all ? ` Skipped ${all}: already has "${toProperty}".` : "");
     },
     onDone: () => {
       forgetFinishedNotices();

@@ -116,7 +116,7 @@ Calendared ではタグ形式を **読まない** ので、元の版で付けた
 
 | 内容 | 場所 |
 |---|---|
-| 付ける（`setSticker`）・読む（`getSticker`）・プロパティ名（`getStickerProperty`）・禁止リスト（`RESERVED_STICKER_PROPERTIES`） | `src/ui/utils/emoji-picker.ts` |
+| 付ける（`setSticker`）・今の設定で読む（`getNoteSticker`。設定を引数で受ける `stickerFrom` は `src/stickers.ts`）・プロパティ名（`getStickerProperty`）・禁止リスト（`RESERVED_STICKER_PROPERTIES`） | `src/ui/utils/emoji-picker.ts` |
 | 絵文字ピッカーの表示言語・検索の言語 | `src/ui/utils/emoji-locale.ts`、`src/emoji-search.ts`、`data/emoji-keywords/`、`scripts/build-emoji-keywords.mjs`、設定は `src/settings/ui/tabs/calendar/EmojiLanguages.svelte`・`AddEmojiLanguages.svelte` |
 | 絵文字ピッカーの表示 | `src/ui/utils/emoji-picker.ts`（`initializePicker`）、`src/ui/components/StickerPicker.svelte`、`src/ui/sticker-picker.ts`（開く・閉じる・位置） |
 | 見出しバーのボタン（`StickerActions`）、ピッカーを開く・外す共通処理（`openStickerPicker`, `removeSticker`） | `src/ui/sticker-actions.ts`、`src/ui/sticker-picker.ts`（`openStickerPicker`）、`src/ui/utils/emoji-picker.ts`（`removeSticker`） |
@@ -130,7 +130,7 @@ Calendared ではタグ形式を **読まない** ので、元の版で付けた
 
 **付けるとき**
 
-0. `stickersEnabled` がオフなら、どの入口も出ない（`getSticker` も常に「なし」を返す）
+0. `stickersEnabled` がオフなら、どの入口も出ない（`stickerFrom` も常に「なし」を返す）
 1. 見出しバーのボタン・コマンド・カレンダーの右クリックの「Manage sticker」が、どれも `openStickerPicker`（`src/ui/sticker-actions.ts`）を呼ぶ。
    対象ノートの情報を `stickerPickerNoteStore` に入れ、絵文字ピッカーの吹き出しをボタン（やメニュー）の位置に開く
 2. 絵文字を選ぶと `initializePicker` の `onEmojiSelect` が、**その時点の** `stickerPickerNoteStore` からノートを取り、`setSticker` を呼ぶ

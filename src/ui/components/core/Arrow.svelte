@@ -7,10 +7,17 @@
     onClick: (ev: MouseEvent) => void;
     tooltip: string;
     direction: "left" | "right";
+    /** Calendared: where it sits: the calendar's headers, the month picker, or the breadcrumbs bar */
+    size?: "header" | "picker" | "bar";
     className?: string;
   }
 
-  let { onClick, tooltip, direction, className = "" }: Props = $props();
+  let { onClick, tooltip, direction, size, className = "" }: Props = $props();
+  const SIZES = {
+    header: "!h-auto !py-0.5 !px-1 [&>svg]:w-1.5",
+    picker: "!h-auto !py-1 !px-2 [&>svg]:w-1.5",
+    bar: "!h-auto !py-0.5",
+  };
 </script>
 
 <Button
@@ -18,6 +25,7 @@
     "flex items-center !px-1.5",
     direction === "right" && "[transform:rotate(180deg)]",
     Platform.isPhone ? "[&>svg]:w-3.5" : "[&>svg]:w-2.5",
+    size && SIZES[size],
     className,
     // Calendared: easier to hit with a finger. Wider for real; taller only by an invisible area, so the header keeps its height
     Platform.isPhone &&

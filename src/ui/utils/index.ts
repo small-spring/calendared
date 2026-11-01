@@ -1,8 +1,4 @@
-import { Platform, setIcon } from 'obsidian';
-
-export function isControlPressed(e: MouseEvent | KeyboardEvent): boolean {
-  return Platform.isMacOS ? e.metaKey : e.ctrlKey;
-}
+import { setIcon } from 'obsidian';
 
 export function isWeekend(date: moment.Moment): boolean {
   return date.isoWeekday() === 6 || date.isoWeekday() === 7;

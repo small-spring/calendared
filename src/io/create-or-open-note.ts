@@ -6,9 +6,11 @@ import CreateNote from "./CreateNote.svelte";
 import { getPeriodicityFromGranularity, replaceTemplateContents } from "./parse";
 import { type IGranularity } from "./types";
 import { ensureFolderExists, getNotePath, getTemplateInfo } from "./vault";
+import { noteNameOf } from "./note-path";
 import { PluginService } from "@/app-service";
-import { capitalize } from "@/utils";
-import { periodRulesFor } from "@/periods";
+import { turnedOffMessage } from "@/period-words";
+import { periodRulesFor, periodStart } from "@/periods";
+import { refreshToday } from "@/stores/dates";
 
 export async function createOrOpenNote({
   leaf,
@@ -23,7 +25,7 @@ export async function createOrOpenNote({
 }) {
   const normalizedPath = getNotePath(granularity, date);
   // Calendared: the name the note gets, not moment's (moment writes calendar quarters and years; docs/adr/0039)
-  const filename = normalizedPath.slice(normalizedPath.lastIndexOf("/") + 1).replace(/\.md$/, "");
+  const filename = noteNameOf(normalizedPath);
 
   async function openFile(file: TFile | undefined | null) {
     if (file) {
@@ -43,7 +45,7 @@ export async function createOrOpenNote({
     // Calendared: upstream created the note even when its period was disabled in settings.
     // Existing notes still open (above); only creation is blocked.
     if (!get(settingsStore).periods[granularity].enabled) {
-      return new Notice(`${capitalize(periodicity)} notes are turned off in settings`);
+      return new Notice(turnedOffMessage(granularity));
     }
 
     if (confirmBeforeCreateOverride) {
@@ -74,6 +76,19 @@ export async function createOrOpenNote({
       await openFile(newFile);
     }
   }
+}
+
+/**
+ * Calendared: open (or create) the note of the period that contains today, for the commands, startup and Open now.
+ * Today is read from the clock first, so all of them and the calendar agree on it (docs/adr/0030). The date passed on is
+ * the period's first day, so a template's {{date}} is the same however the note is made (docs/adr/0039)
+ */
+export function openCurrentNote(
+  granularity: IGranularity,
+  { leaf, confirmBeforeCreateOverride }: { leaf: WorkspaceLeaf | null; confirmBeforeCreateOverride?: boolean },
+) {
+  const date = periodStart(granularity, refreshToday(), periodRulesFor(get(settingsStore)));
+  return createOrOpenNote({ leaf, date, granularity, confirmBeforeCreateOverride });
 }
 
 export async function createNote(granularity: IGranularity, date: moment.Moment) {

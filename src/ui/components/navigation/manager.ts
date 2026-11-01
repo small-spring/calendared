@@ -3,8 +3,8 @@ import { mount, unmount } from "svelte";
 import { get } from "svelte/store";
 
 import { PluginService } from "@/app-service";
-import { isValidPeriodicNote } from "@/io/validation";
-import { showsOn } from "@/navigation";
+import { periodicNoteOf } from "@/io/validation";
+import { barShows } from "@/navigation";
 import { settingsStore } from "@/settings";
 import Navigation from "./Navigation.svelte";
 import { NavigationSync } from "./sync";
@@ -26,9 +26,8 @@ export default class NavigationManager {
       }),
     unmount: (component) => void unmount(component),
     read: (file) => {
-      const { isValid, granularity, date } = isValidPeriodicNote(file);
-      const isPeriodic = typeof isValid === "boolean" && !!date && !!granularity;
-      return { isPeriodic, granularity: isPeriodic ? granularity : null, date: isPeriodic ? date : null };
+      const note = periodicNoteOf(file);
+      return { isPeriodic: !!note, granularity: note?.granularity ?? null, date: note?.date ?? null };
     },
   });
 
@@ -40,12 +39,10 @@ export default class NavigationManager {
     const app = PluginService.getPlugin()?.app;
     if (!app) return;
 
-    const { breadcrumbs, miniCalendar } = get(settingsStore);
-    const crumbs = showsOn(breadcrumbs, Platform.isPhone);
-    const mini = showsOn(miniCalendar, Platform.isPhone);
+    const any = ({ crumbs, mini }: { crumbs: boolean; mini: boolean }) => crumbs || mini;
     const show = {
-      periodic: crumbs || mini,
-      other: (crumbs && breadcrumbs.onOtherNotes) || (mini && miniCalendar.onOtherNotes),
+      periodic: any(barShows(get(settingsStore), Platform.isPhone, true)),
+      other: any(barShows(get(settingsStore), Platform.isPhone, false)),
     };
 
     const tabs = app.workspace.getLeavesOfType("markdown").map((leaf) => ({

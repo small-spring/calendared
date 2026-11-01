@@ -104,6 +104,23 @@ export function rangeOfPeriod(period: PeriodName, rules: PeriodRules): { start: 
   return { start, end };
 }
 
+/** The first day of the period that contains the date (a week: the first day of its calendar row) */
+export function periodStart(granularity: IGranularity, date: moment.Moment, rules: PeriodRules): moment.Moment {
+  // Calendared: quarters and years start in their own month (docs/adr/0039)
+  return rangeOfPeriod(periodOf(granularity, date, rules), rules)!.start;
+}
+
+/** Whether the two dates are in the same period (a quarter or year by its own start month) */
+export function samePeriod(granularity: IGranularity, a: moment.Moment, b: moment.Moment, rules: PeriodRules): boolean {
+  return periodStart(granularity, a, rules).isSame(periodStart(granularity, b, rules), "day");
+}
+
+/** The 12 months of the year that contains the date, from the year's start month (the month view and the month picker) */
+export function monthsOfYear(date: moment.Moment, rules: PeriodRules): moment.Moment[] {
+  const start = periodStart("year", date, rules);
+  return Array.from({ length: 12 }, (_, i) => start.clone().add(i, "months"));
+}
+
 /** The period `amount` periods before (negative) or after (positive). Steps through dates, never through the numbers in the name */
 export function shiftPeriod(period: PeriodName, amount: number, rules: PeriodRules): PeriodName {
   if (period.granularity === 'week') {

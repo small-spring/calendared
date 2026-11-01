@@ -2,11 +2,10 @@
     import { YEARS_RANGE_SIZE } from "@/constants";
     import { displayedDateStore, todayStore, yearsRanges } from "@/stores";
     import { Header } from "./core";
-    import { periodRulesFor } from "@/periods";
-    import { settingsStore } from "@/settings";
+    import { periodRulesStore } from "@/settings";
 
     // Calendared: ranges of year names, like the cells below (docs/adr/0039)
-    let rules = $derived(periodRulesFor($settingsStore));
+    let rules = $derived($periodRulesStore);
 
     let showingCurrentRange: boolean = $derived(
         $yearsRanges.todayRange ===

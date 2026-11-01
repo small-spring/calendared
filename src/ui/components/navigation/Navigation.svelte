@@ -1,6 +1,6 @@
 <script lang="ts">
   // Calendared: the breadcrumbs and the mini calendar above a note (docs/adr/0031, 0032). Replaces upstream's timeline
-  import { Platform, setIcon } from "obsidian";
+  import { Platform } from "obsidian";
   import { onDestroy } from "svelte";
 
   import { inLocale } from "@/calendar-locale";
@@ -11,15 +11,15 @@
     crumbText,
     finestEnabled,
     monthDayText,
-    periodStart,
-    showsOn,
+    barShows,
     stripDates,
   } from "@/navigation";
-  import { settingsStore } from "@/settings";
+  import { periodStart } from "@/periods";
+  import { periodRulesStore, settingsStore } from "@/settings";
+  import { enabledPeriods } from "@/settings/period-switch";
   import { todayStore } from "@/stores";
   import { Arrow } from "@/ui";
-  import { cn, eventHandlers, isControlPressed } from "@/ui/utils";
-  import { periodRulesFor } from "@/periods";
+  import { cn, eventHandlers, isControlPressed, noteButtonEvents, useIcon } from "@/ui/utils";
   import DateBttn from "../core/DateBttn.svelte";
 
   interface Props {
@@ -33,21 +33,12 @@
   const { isPeriodic, granularity, date, isSide = false }: Props = $props();
 
   let locale = $derived($settingsStore.localeSettings.localeOverride);
-  let rules = $derived(periodRulesFor($settingsStore));
-  let enabled = $derived(
-    Object.fromEntries(
-      Object.entries($settingsStore.periods).map(([g, period]) => [g, period.enabled]),
-    ) as Record<IGranularity, boolean>,
-  );
+  let rules = $derived($periodRulesStore);
+  let enabled = $derived(enabledPeriods($settingsStore.periods));
 
-  let showCrumbs = $derived(
-    showsOn($settingsStore.breadcrumbs, Platform.isPhone) &&
-      (isPeriodic || $settingsStore.breadcrumbs.onOtherNotes),
-  );
-  let showMini = $derived(
-    showsOn($settingsStore.miniCalendar, Platform.isPhone) &&
-      (isPeriodic || $settingsStore.miniCalendar.onOtherNotes),
-  );
+  let shows = $derived(barShows($settingsStore, Platform.isPhone, isPeriodic));
+  let showCrumbs = $derived(shows.crumbs);
+  let showMini = $derived(shows.mini);
 
   /** the note's period, or for another note where now is in the finest period in use (today, if days are used) */
   let center = $derived.by(() => {
@@ -109,10 +100,6 @@
   });
   onDestroy(() => leafEl?.style.removeProperty("--calendared-nav-height"));
 
-  let backIconEl: HTMLSpanElement | null = $state(null);
-  $effect(() => {
-    if (backIconEl) setIcon(backIconEl, "rotate-ccw");
-  });
 </script>
 
 {#if showCrumbs || showMini}
@@ -147,7 +134,7 @@
               direction="left"
               tooltip={`Open previous ${getPeriodicityFromGranularity(center.granularity)} note`}
               onClick={(event) => open(event, center.granularity, centerStart.clone().subtract(1, center.granularity))}
-              className="!h-auto !py-0.5"
+              size="bar"
             />
           {/if}
           <nav
@@ -172,7 +159,7 @@
                   onclick={() => (offset = 0)}>{text}</button
                 >
               {:else if crumb.canOpen}
-                {@const fileData = noteAt(crumb.granularity, crumb.date, $settingsStore)}
+                {@const events = noteButtonEvents(crumb.granularity, crumb.date, noteAt(crumb.granularity, crumb.date, $settingsStore))}
                 <button
                   class={cn(
                     "calendared-crumb !h-auto !px-1 !py-0 !shadow-none !bg-transparent text-[var(--text-muted)] hover:!text-[var(--text-normal)] hover:!bg-[var(--background-modifier-hover)]",
@@ -182,17 +169,10 @@
                   onclick={(event) => {
                     // another note: its rightmost crumb (now) first brings a moved mini calendar back, then opens
                     if (isLast && offset !== 0) offset = 0;
-                    else open(event, crumb.granularity, crumb.date);
+                    else events.open(event);
                   }}
-                  oncontextmenu={(event) =>
-                    eventHandlers.onContextMenu({
-                      event,
-                      fileData,
-                      date: crumb.date,
-                      granularity: crumb.granularity,
-                    })}
-                  onpointerenter={(event) =>
-                    eventHandlers.onHover({ event, file: fileData.file })}
+                  oncontextmenu={(event) => events.menu(event)}
+                  onpointerenter={(event) => events.hover(event)}
                   >{text}</button
                 >
               {:else}
@@ -205,7 +185,7 @@
               direction="right"
               tooltip={`Open next ${getPeriodicityFromGranularity(center.granularity)} note`}
               onClick={(event) => open(event, center.granularity, centerStart.clone().add(1, center.granularity))}
-              className="!h-auto !py-0.5"
+              size="bar"
             />
           {/if}
         </div>
@@ -220,7 +200,7 @@
               event.stopPropagation();
               offset -= 1;
             }}
-            className="!h-auto !py-0.5"
+            size="bar"
           />
           <!-- equal columns, so a two-digit date doesn't make its column wider than the others -->
           <div
@@ -259,7 +239,7 @@
               event.stopPropagation();
               offset += 1;
             }}
-            className="!h-auto !py-0.5"
+            size="bar"
           />
         </div>
       {/if}
@@ -274,7 +254,7 @@
           aria-label="Move the mini calendar back to this note"
           onclick={() => (offset = 0)}
         >
-          <span bind:this={backIconEl} class="flex [&>svg]:w-3 [&>svg]:h-3"></span>
+          <span use:useIcon={"rotate-ccw"} class="flex [&>svg]:w-3 [&>svg]:h-3"></span>
           {center.granularity === "day"
             ? monthDayText(center.date, locale)
             : crumbText(center.granularity, center.date, locale, rules)}

@@ -1,7 +1,7 @@
 import { inLocale } from "./calendar-locale";
 import { granularities } from "./constants";
 import type { IGranularity } from "./io/types";
-import { cycleYearLabel, periodOf, rangeOfPeriod, type PeriodRules } from "./periods";
+import { cycleYearLabel, periodOf, periodStart, samePeriod, type PeriodRules } from "./periods";
 
 // Calendared: the breadcrumbs and the mini calendar above a note (docs/adr/0031, 0032), apart from Obsidian so they can
 // be tested. They replace upstream's timeline
@@ -78,20 +78,24 @@ export function showsOn(feature: { enabled: boolean; placement: Placement }, isP
     return feature.enabled && (feature.placement === "always" || isPhone);
 }
 
+type BarFeature = { enabled: boolean; placement: Placement; onOtherNotes: boolean };
+
+/**
+ * Calendared: whether a note shows the breadcrumbs and the mini calendar: on where they are placed, and on a note that
+ * isn't a periodic note only with "on other notes". The tabs (manager.ts) and the bar itself read it
+ */
+export function barShows(
+    settings: { breadcrumbs: BarFeature; miniCalendar: BarFeature },
+    isPhone: boolean,
+    isPeriodic: boolean,
+): { crumbs: boolean; mini: boolean } {
+    const shows = (feature: BarFeature) => showsOn(feature, isPhone) && (isPeriodic || feature.onOtherNotes);
+    return { crumbs: shows(settings.breadcrumbs), mini: shows(settings.miniCalendar) };
+}
+
 /** The finest period in use: a note that isn't a periodic note shows where now is in it (today, if days are used) */
 export function finestEnabled(enabled: Record<IGranularity, boolean>): IGranularity {
     return granularities.find((g) => enabled[g]) ?? "day";
-}
-
-/** The first day of the period that contains the date (a week: the first day of its calendar row) */
-export function periodStart(granularity: IGranularity, date: moment.Moment, rules: PeriodRules): moment.Moment {
-    // Calendared: quarters and years start in their own month (docs/adr/0039)
-    return rangeOfPeriod(periodOf(granularity, date, rules), rules)!.start;
-}
-
-/** Whether the two dates are in the same period (a quarter or year by its own start month) */
-export function samePeriod(granularity: IGranularity, a: moment.Moment, b: moment.Moment, rules: PeriodRules): boolean {
-    return periodStart(granularity, a, rules).isSame(periodStart(granularity, b, rules), "day");
 }
 
 /**

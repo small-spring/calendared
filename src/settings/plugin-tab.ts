@@ -5,6 +5,7 @@ import { formatTokenGuide, type TokenGuideItem } from "@/format-tokens";
 import { getPeriodicityFromGranularity, IGranularity } from "@/io";
 import type { DnPluginSettings } from "@/io/settings";
 import { validateFolder, validateFormat, validateTemplate } from "@/io/validation";
+import { templateFilePath } from "@/io/note-path";
 import locales from "@/locales";
 import { defaultWeekdays, obsidianLocaleKey } from "@/localization";
 import { showsOn } from "@/navigation";
@@ -14,12 +15,12 @@ import { openNowIcon } from "@/ui/open-now";
 import { STICKER_BUTTON_ICON } from "@/ui/sticker-actions";
 import { genNoticeFragment } from "@/ui/utils";
 import { isReservedStickerProperty, RESERVED_STICKER_PROPERTIES } from "@/ui/utils/emoji-picker";
-import { capitalize } from "@/utils";
+import { currentNoteName, periodicityTitle } from "@/period-words";
+import { countOf } from "@/utils";
 import { checkWeekFormat, weekSchemeFor } from "@/weeks";
 import {
   App,
   type ButtonComponent,
-  normalizePath,
   Notice,
   PluginSettingTab,
   type Setting,
@@ -51,7 +52,7 @@ import {
 } from "./ui/migrations";
 
 const settings = () => get(settingsStore);
-const periodName = (g: IGranularity) => `${capitalize(getPeriodicityFromGranularity(g))} notes`;
+const periodName = (g: IGranularity) => `${periodicityTitle(g)} notes`;
 
 /** Calendared: a period's settings as a store of their own, for the format field (Format.svelte) */
 function periodStore(granularity: IGranularity): Writable<PeriodSettings> {
@@ -167,14 +168,7 @@ export class SettingsTab extends PluginSettingTab {
     }
 
     const startupOptions: Record<string, string> = { none: "Nothing" };
-    const startupNames: Record<IGranularity, string> = {
-      day: "Today's note",
-      week: "This week's note",
-      month: "This month's note",
-      quarter: "This quarter's note",
-      year: "This year's note",
-    };
-    for (const g of granularities) if (s.periods[g].enabled) startupOptions[g] = startupNames[g];
+    for (const g of granularities) if (s.periods[g].enabled) startupOptions[g] = currentNoteName(g);
 
     return [
       {
@@ -333,7 +327,7 @@ export class SettingsTab extends PluginSettingTab {
 
   private renderTemplate(setting: Setting, granularity: IGranularity) {
     const templateFile = () => {
-      const path = settings().periods[granularity].templatePath;
+      const path = templateFilePath(settings().periods[granularity].templatePath);
       return path ? this.app.vault.getFileByPath(path) : null;
     };
     let suggest: FileSuggest | undefined;
@@ -342,7 +336,7 @@ export class SettingsTab extends PluginSettingTab {
         .setPlaceholder(`templates/${getPeriodicityFromGranularity(granularity)}`)
         .setValue(settings().periods[granularity].templatePath)
         .onChange((value) => {
-          const path = value.trim() ? normalizePath(value.trim().endsWith(".md") ? value.trim() : `${value.trim()}.md`) : "";
+          const path = templateFilePath(value);
           const error = path ? validateTemplate(path) : "";
           setting.setErrorMessage(error || null);
           if (error) return;
@@ -618,7 +612,7 @@ export class SettingsTab extends PluginSettingTab {
         });
       }
       setting.setDesc(desc);
-      button?.setButtonText(plan.length === 0 || moving === 0 ? "Review…" : `Move ${moving === 1 ? "1 sticker" : `${moving} stickers`}…`).setDisabled(plan.length === 0);
+      button?.setButtonText(plan.length === 0 || moving === 0 ? "Review…" : `Move ${countOf(moving, "sticker")}…`).setDisabled(plan.length === 0);
     };
     setting.addText((text) =>
       text
@@ -647,7 +641,7 @@ export class SettingsTab extends PluginSettingTab {
     // Calendared: a period has one format (docs/adr/0019). An empty or invalid one is replaced with the default, so
     // creating a note always has a valid format. Turned-off periods keep theirs, which finds the notes you already have
     for (const g of formatsToReset(settings().periods)) this.resetFormat(g);
-    const errors = formatsToReset(settings().periods).map((g) => capitalize(getPeriodicityFromGranularity(g)));
+    const errors = formatsToReset(settings().periods).map(periodicityTitle);
 
     if (errors.length > 0) {
       new Notice(genNoticeFragment([
@@ -667,7 +661,7 @@ export class SettingsTab extends PluginSettingTab {
     });
     if (!invalidValue.trim()) return;
 
-    const periodicity = capitalize(getPeriodicityFromGranularity(granularity));
+    const periodicity = periodicityTitle(granularity);
     new Notice(genNoticeFragment([
       [periodicity, 'u-pop'],
       [' format '],
@@ -680,7 +674,7 @@ export class SettingsTab extends PluginSettingTab {
   }
 }
 
-const noteCount = (n: number) => `${n} ${n === 1 ? "note" : "notes"}`;
+const noteCount = (n: number) => countOf(n, "note");
 
 /** Calendared: notes still use a format or sticker property from before a change (docs/adr/0035) */
 // Calendared: only the notices whose rows the page shows; a period turned off kept its warning with no row to act on

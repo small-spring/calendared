@@ -8,6 +8,7 @@ import { Menu, Platform, type TFile } from "obsidian";
 import { get } from "svelte/store";
 import { eventHandlers, isControlPressed } from "./utils";
 import { openStickerPicker } from "./sticker-picker";
+import { MANAGE_STICKER, STICKER_BUTTON_ICON } from "./sticker-actions";
 
 export type NoteMenuParams = {
   event: MouseEvent,
@@ -108,8 +109,8 @@ function addNoteItems(menu: Menu, file: TFile) {
   if (get(settingsStore).stickersEnabled) {
     menu.addItem((item) =>
       item.setSection("action")
-        .setTitle("Manage sticker")
-        .setIcon("lucide-smile-plus")
+        .setTitle(MANAGE_STICKER)
+        .setIcon(STICKER_BUTTON_ICON)
         .onClick((evt) => {
           evt.preventDefault()
           evt.stopPropagation()

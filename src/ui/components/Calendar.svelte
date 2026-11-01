@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { type IGranularity } from "@/io";
     import { displayedDateStore, yearsRanges } from "@/stores";
     import { onMount } from "svelte";
     import {
@@ -12,11 +11,11 @@
     import YearHeader from "./YearHeader.svelte";
     import YearsHeader from "./YearsHeader.svelte";
     import DateBttn from "./core/DateBttn.svelte";
-    import { settingsStore } from "@/settings";
-    import { calendarView } from "@/settings/period-switch";
+    import { periodRulesStore, settingsStore } from "@/settings";
+    import { calendarView, enabledPeriods } from "@/settings/period-switch";
     import { weekSchemeFor } from "@/weeks";
-    import { periodRulesFor, rangeOfPeriod } from "@/periods";
-    import { crumbText, periodStart } from "@/navigation";
+    import { monthsOfYear, periodStart, rangeOfPeriod } from "@/periods";
+    import { crumbText } from "@/navigation";
     import { inLocale, monthGrid, weekdayHeader } from "@/calendar-locale";
     import { noteAt, vaultSource } from "@/io";
 
@@ -28,18 +27,16 @@
     let locale = $derived($settingsStore.localeSettings.localeOverride);
     // Calendared: the weekday header from the grid's first row, so it follows the same week start (calendar-locale.ts)
     let weekdaysShort = $derived(weekdayHeader(month[0].days, locale));
-    let rules = $derived(periodRulesFor($settingsStore));
+    let rules = $derived($periodRulesStore);
     // Calendared: the month view's 12 months, from the start of the displayed month's year (docs/adr/0039)
     let monthRows = $derived.by(() => {
-        const start = periodStart("year", $displayedDateStore, rules);
-        return [0, 1, 2, 3].map((row) => [0, 1, 2].map((i) => start.clone().add(row * 3 + i, "months")));
+        const months = monthsOfYear($displayedDateStore, rules);
+        return [0, 1, 2, 3].map((row) => months.slice(row * 3, row * 3 + 3));
     });
 
-    let enabledPeriods = $derived(
-        Object.fromEntries(Object.entries($settingsStore.periods).map(([g, s]) => [g, s.enabled])) as Record<IGranularity, boolean>,
-    );
+    let enabled = $derived(enabledPeriods($settingsStore.periods));
     // Calendared: the view follows the periods on (calendarView); upstream kept the Day/Month/Year tab picked
-    let view = $derived(calendarView(enabledPeriods));
+    let view = $derived(calendarView(enabled));
     let containerEl: HTMLDivElement | null = $state(null);
 
     // Calendared: the row whose weekly note is the open note, read from Obsidian like the date buttons
@@ -66,7 +63,7 @@
         <MonthHeader />
         <table class="pnc-calendar">
             <colgroup>
-                {#if enabledPeriods.week}
+                {#if enabled.week}
                     <col />
                 {/if}
                 {#each month[1].days as date}
@@ -75,7 +72,7 @@
             </colgroup>
             <thead>
                 <tr>
-                    {#if enabledPeriods.week}
+                    {#if enabled.week}
                         <th>W</th>
                     {/if}
                     {#each weekdaysShort as dayOfWeek}
@@ -86,11 +83,11 @@
             <tbody>
                 {#each month as week (week.days[0].format("YYYY-MM-DD"))}
                     <tr
-                        class:pnc-week-row={enabledPeriods.week}
-                        class:is-open-week={enabledPeriods.week &&
+                        class:pnc-week-row={enabled.week}
+                        class:is-open-week={enabled.week &&
                             isOpenWeek(week.days)}
                     >
-                        {#if enabledPeriods.week}
+                        {#if enabled.week}
                             <td
                                 class="[border-right:1px_solid_var(--background-modifier-border)] pr-1"
                             >
@@ -113,7 +110,7 @@
                         {#each week.days as day (day.format())}
                             <td
                                 class={cn(
-                                    enabledPeriods.week &&
+                                    enabled.week &&
                                         "[&:nth-child(2)]:pl-1",
                                 )}
                             >
@@ -148,7 +145,7 @@
                 {#each monthRows as row}
                     {@const quarterStart = row.find((m) => periodStart("quarter", m, rules).isSame(m, "day"))!}
                     <tr>
-                        {#if enabledPeriods.quarter}
+                        {#if enabled.quarter}
                             <td>
                                 <DateBttn
                                     compactDot

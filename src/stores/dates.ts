@@ -1,6 +1,7 @@
 import { YEARS_RANGE_SIZE, YEARS_RANGES_START } from '@/constants';
 import { periodOf, rangeOfPeriod, type PeriodRules } from '@/periods';
 import { get, writable } from 'svelte/store';
+import { nextToday } from '@/today';
 
 type IRange = `${string}-${string}`
 function createYearsRangesStore() {
@@ -176,4 +177,21 @@ const todayStore = writable<moment.Moment>(window.moment());
 const displayedDateStore = writable<moment.Moment>(window.moment());
 const yearsRanges = createYearsRangesStore();
 
-export { displayedDateStore, todayStore, yearsRanges };
+/**
+ * Calendared: read today from the clock: set today, and the calendar's month when it showed today's (src/today.ts).
+ * Run every minute, and before opening now's note, so a command, startup and Open now all take the same today as
+ * the calendar, without the minute's lag after midnight (docs/adr/0030)
+ */
+function refreshToday(): moment.Moment {
+  const next = nextToday(get(todayStore), get(displayedDateStore), window.moment());
+  if (next.today) todayStore.set(next.today);
+  if (next.displayed) displayedDateStore.set(next.displayed);
+  return get(todayStore);
+}
+
+/** Calendared: move the calendar by months or years (the headers' ‹ ›) */
+function moveDisplayed(amount: number, unit: "month" | "year") {
+  displayedDateStore.update((date) => date.clone().add(amount, unit));
+}
+
+export { displayedDateStore, moveDisplayed, refreshToday, todayStore, yearsRanges };

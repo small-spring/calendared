@@ -5,10 +5,7 @@ import StickerPickerComponent from "@/ui/components/StickerPicker.svelte";
 import { autoUpdate, computePosition, flip } from "@floating-ui/dom";
 import { Platform, type TFile } from "obsidian";
 import { mount, unmount } from "svelte";
-import { PluginService } from "@/app-service";
-import { settingsStore } from "@/settings";
-import { stickerFrom } from "@/stickers";
-import { get } from "svelte/store";
+import { getNoteSticker } from "@/ui/utils/emoji-picker";
 
 class StickerPicker {
   private component: Record<string, unknown> | null;
@@ -118,8 +115,7 @@ let picker: StickerPicker | null = null;
 
 /** Open the emoji picker for `file`, anchored to `anchorEl` */
 export function openStickerPicker(file: TFile, anchorEl: Element) {
-  const cache = PluginService.getPlugin()?.app.metadataCache.getFileCache(file);
-  stickerPickerNoteStore.set({ file, sticker: stickerFrom(cache, get(settingsStore)) });
+  stickerPickerNoteStore.set({ file, sticker: getNoteSticker(file) });
   // Calendared: open in the window of what it was opened from (a note in a pop-out window), not always the main one.
   // One picker at a time: opening in another window takes it out of the previous one
   if (picker && picker.doc !== anchorEl.ownerDocument) destroyStickerPicker();

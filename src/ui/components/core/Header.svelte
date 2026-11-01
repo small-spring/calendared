@@ -1,9 +1,8 @@
 <script lang="ts">
-  import { cn } from "@/ui/utils";
+  import { cn, useIcon } from "@/ui/utils";
   import Arrow from "./Arrow.svelte";
   import PeriodTitle, { type TTitle } from "./PeriodTitle.svelte";
   import { type Snippet } from "svelte";
-  import { setIcon } from "obsidian";
   import { vaultSource } from "@/io";
   import { settingsStore } from "@/settings";
   import { todayStore } from "@/stores";
@@ -40,16 +39,8 @@
   }: Props = $props();
 
   let headerEl: HTMLDivElement | null = $state(null);
-  let pickerToggleEl: HTMLButtonElement | null = $state(null);
-  let resetEl: HTMLButtonElement | null = $state(null);
   let pickerOpen = $state(false);
   const closePicker = () => (pickerOpen = false);
-
-  $effect(() => {
-    if (pickerToggleEl) {
-      setIcon(pickerToggleEl, pickerOpen ? "chevron-up" : "chevron-down");
-    }
-  });
 
   // close on click outside the header (the popover lives inside it) or on Esc
   $effect(() => {
@@ -85,11 +76,6 @@
       activeDocument.removeEventListener("keydown", onKeyDown);
     };
   });
-  $effect(() => {
-    if (resetEl) {
-      setIcon(resetEl, openNowIcon());
-    }
-  });
   // Calendared: Open now replaces upstream's ⌖ (docs/adr/0030). Dimmed only when now's note is open and the calendar
   // shows today, so you can still come back after looking around the calendar with now's note open
   let isNowOpen = $derived(isNowNoteFile(vaultSource().activeFile(), $settingsStore, $todayStore));
@@ -117,13 +103,13 @@
       direction="left"
       onClick={nav.decrement}
       tooltip={`Previous ${nav.type}`}
-      className="!h-auto !py-0.5 !px-1 [&>svg]:w-1.5"
+      size="header"
     />
     <Arrow
       direction="right"
       onClick={nav.increment}
       tooltip={`Next ${nav.type}`}
-      className="!h-auto !py-0.5 !px-1 [&>svg]:w-1.5"
+      size="header"
     />
   </div>
 
@@ -144,7 +130,7 @@
       aria-label="Pick a month"
       aria-expanded={pickerOpen}
       onclick={() => (pickerOpen = !pickerOpen)}
-      bind:this={pickerToggleEl}
+      use:useIcon={pickerOpen ? "chevron-up" : "chevron-down"}
     ></button>
   {/if}
 
@@ -161,7 +147,7 @@
       id="reset-button"
       aria-label="Open now"
       onclick={openNow}
-      bind:this={resetEl}
+      use:useIcon={openNowIcon()}
     ></button>
   </div>
 

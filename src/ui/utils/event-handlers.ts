@@ -1,6 +1,6 @@
-import type { IGranularity } from '@/io';
-import { createOrOpenNote } from "@/io";
-import { TFile } from 'obsidian';
+import type { IGranularity, TFileData } from '@/io';
+import { createOrOpenNote, vaultSource } from "@/io";
+import { Platform, TFile } from 'obsidian';
 import { PluginService } from '@/app-service';
 import { openNoteMenu, type NoteMenuParams } from '../note-menu';
 
@@ -57,4 +57,28 @@ export const eventHandlers = {
   onClick,
   onHover,
   onContextMenu
+}
+
+export function isControlPressed(e: MouseEvent | KeyboardEvent): boolean {
+  return Platform.isMacOS ? e.metaKey : e.ctrlKey;
+}
+
+/**
+ * Calendared: what a button for a period's note does on a click (Ctrl/Cmd: in a new tab), a right-click (the note's
+ * menu) and a hover (Page preview). The date buttons, the calendar's titles and the breadcrumbs wire them alike
+ */
+export function noteButtonEvents(granularity: IGranularity, date: moment.Moment, fileData: TFileData) {
+  return {
+    open: (event: MouseEvent) => onClick({ date, granularity, inNewTab: isControlPressed(event) }),
+    menu: (event: MouseEvent) => onContextMenu({ event, fileData, date, granularity }),
+    hover: (event: PointerEvent) => onHover({ event, file: fileData.file }),
+  };
+}
+
+/**
+ * Calendared: whether the file is the open note, as Obsidian knows it (docs/adr/0015). Read while rendering, it
+ * changes when another note is opened
+ */
+export function isOpenNote(file: TFile | null): boolean {
+  return !!file && vaultSource().activeFile()?.path === file.path;
 }

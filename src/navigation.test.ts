@@ -12,6 +12,7 @@ import {
     monthDayText,
     migratePlacementSettings,
     migrateTimelineSettings,
+    barShows,
     showsOn,
     stripDates,
     type Placement,
@@ -344,5 +345,25 @@ describe("isNowNote: 開いているノートが、一番細かい使ってい�
 
     it("周期ノートでないノート（null）は、今のノートではない", () => {
         expect(isNowNote(null, ALL, today, mondayWeeks)).toBe(false);
+    });
+});
+
+describe("barShows: ノートの上に、パンくずとミニカレンダーを出すか", () => {
+    const feature = (enabled: boolean, placement: Placement, onOtherNotes: boolean) => ({ enabled, placement, onOtherNotes });
+
+    it("周期ノートなら、出す場所の設定どおり", () => {
+        const settings = { breadcrumbs: feature(true, "always", false), miniCalendar: feature(true, "phone", false) };
+        expect(barShows(settings, false, true)).toEqual({ crumbs: true, mini: false });
+        expect(barShows(settings, true, true)).toEqual({ crumbs: true, mini: true });
+    });
+
+    it("周期ノートでなければ、「ほかのノートにも出す」がオンのものだけ", () => {
+        const settings = { breadcrumbs: feature(true, "always", true), miniCalendar: feature(true, "always", false) };
+        expect(barShows(settings, false, false)).toEqual({ crumbs: true, mini: false });
+    });
+
+    it("オフなら、ほかのノートにも出さない", () => {
+        const settings = { breadcrumbs: feature(false, "always", true), miniCalendar: feature(true, "phone", true) };
+        expect(barShows(settings, false, false)).toEqual({ crumbs: false, mini: false });
     });
 });

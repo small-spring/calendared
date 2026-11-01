@@ -1,8 +1,8 @@
 <script lang="ts">
     import { STICKER_PICKER_ID } from "@/constants";
-    import { cn, initializePicker, removeSticker } from "../utils";
+    import { cn, initializePicker, removeSticker, useIcon } from "../utils";
     import { themeStore, stickerPickerNoteStore } from "@/stores";
-    import { Platform, setIcon } from "obsidian";
+    import { Platform } from "obsidian";
 
     let { close }: { close: () => void } = $props();
 
@@ -25,10 +25,6 @@
         event.preventDefault();
         pickerContainerEl?.querySelector("em-emoji-picker")?.shadowRoot?.querySelector("input")?.focus();
     };
-    let removeEl: HTMLButtonElement | null = $state(null);
-    $effect(() => {
-        if (removeEl) setIcon(removeEl, "trash-2");
-    });
 </script>
 
 <div
@@ -61,7 +57,7 @@
                     aria-label="Remove sticker"
                     onclick={handleRemove}
                     onkeydown={handleRemoveKeydown}
-                    bind:this={removeEl}
+                    use:useIcon={"trash-2"}
                 ></button>
             </div>
         {/if}
