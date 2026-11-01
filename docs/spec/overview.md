@@ -53,7 +53,7 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 | （周期の行のトグル）・Use daily notes など | `enabled` | オン | オン | オフ | オフ | オフ | その周期を使うか |
 | Format | `format` | `YYYY-MM-DD` | `GGGG-[W]WW` | `YYYY-MM` | `YYYY-[Q]Q` | `YYYY` | ノートの名前の書式（1 つ） |
 | Folder | `folder` | `/` | `/` | `/` | `/` | `/` | ノートを置くフォルダ |
-| Template | `templatePath` | 空 | 空 | 空 | 空 | 空 | テンプレートのファイル（`.md` は省いてよい）。ファイルがあれば、説明の文の「Open ファイル名」のリンクで開ける |
+| Template | `templatePath` | 空 | 空 | 空 | 空 | 空 | テンプレートのファイルのパス（`.md` も含めてそのまま。補わない。[ADR-0049](../adr/0049-template-path-as-is.md)）。ファイルがあれば、説明の文の「Open ファイル名」のリンクで開ける |
 | Starts in | `startMonth` | ― | ― | ― | 1 月 | 1 月 | 四半期・年の 12 か月が始まる月（[spec/fiscal-year.md](fiscal-year.md)） |
 | Year in names | `yearInName` | ― | ― | ― | 始まりの年 | 始まりの年 | 名前に使う年（始まりの年 / 終わりの年）。1 月以外から始まるときだけ出す |
 | ―（全体の Open on startup） | `openAtStartup` | オフ | オフ | オフ | オフ | オフ | 起動時にこの周期の今のノートを開く（5 つのうち 1 つだけ） |

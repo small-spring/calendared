@@ -46,13 +46,13 @@ describe("notePath: 周期・日付・フォルダ・書式・週の決め方か
 });
 
 describe("templateFilePath: 設定のテンプレートの欄から、テンプレートのファイルのパスを作る", () => {
-    it(".md がなければ足し、あればそのまま", () => {
-        expect(templateFilePath("テンプレート/日")).toBe("テンプレート/日.md");
+    it(".md は補わない。書かれたファイルのパスそのもの", () => {
+        expect(templateFilePath("テンプレート/日")).toBe("テンプレート/日");
         expect(templateFilePath("テンプレート/日.md")).toBe("テンプレート/日.md");
     });
 
     it("前後の空白を除き、パスの形をそろえる", () => {
-        expect(templateFilePath("  テンプレート//日 ")).toBe("テンプレート/日.md");
+        expect(templateFilePath("  テンプレート//日.md ")).toBe("テンプレート/日.md");
         expect(templateFilePath("/テンプレート/日.md")).toBe("テンプレート/日.md");
     });
 

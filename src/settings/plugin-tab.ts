@@ -333,7 +333,8 @@ export class SettingsTab extends PluginSettingTab {
     let suggest: FileSuggest | undefined;
     setting.addText((text) => {
       text
-        .setPlaceholder(`templates/${getPeriodicityFromGranularity(granularity)}`)
+        // Calendared: the file's path as it is, ".md" included; nothing is added to it (docs/adr/0049)
+        .setPlaceholder(`templates/${getPeriodicityFromGranularity(granularity)}.md`)
         .setValue(settings().periods[granularity].templatePath)
         .onChange((value) => {
           const path = templateFilePath(value);
