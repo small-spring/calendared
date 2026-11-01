@@ -385,6 +385,9 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
 
   private onFileRenamed(renamedFile: TAbstractFile) {
     if (!(renamedFile instanceof TFile)) return;
+    // Calendared: like a created file, only notes, and not while the vault is still loading
+    if (!this.app.workspace.layoutReady) return;
+    if (renamedFile.extension !== 'md') return;
 
     this.noticeIfInvalidFormat(renamedFile);
   }
