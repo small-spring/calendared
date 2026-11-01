@@ -1,6 +1,6 @@
 <script lang="ts">
   // Calendared: the breadcrumbs and the mini calendar above a note (docs/adr/0031, 0032). Replaces upstream's timeline
-  import { Platform, setIcon } from "obsidian";
+  import { Platform } from "obsidian";
   import { onDestroy } from "svelte";
 
   import { inLocale } from "@/calendar-locale";
@@ -19,7 +19,7 @@
   import { enabledPeriods } from "@/settings/period-switch";
   import { todayStore } from "@/stores";
   import { Arrow } from "@/ui";
-  import { cn, eventHandlers, isControlPressed, noteButtonEvents } from "@/ui/utils";
+  import { cn, eventHandlers, isControlPressed, noteButtonEvents, useIcon } from "@/ui/utils";
   import DateBttn from "../core/DateBttn.svelte";
 
   interface Props {
@@ -105,10 +105,6 @@
   });
   onDestroy(() => leafEl?.style.removeProperty("--calendared-nav-height"));
 
-  let backIconEl: HTMLSpanElement | null = $state(null);
-  $effect(() => {
-    if (backIconEl) setIcon(backIconEl, "rotate-ccw");
-  });
 </script>
 
 {#if showCrumbs || showMini}
@@ -263,7 +259,7 @@
           aria-label="Move the mini calendar back to this note"
           onclick={() => (offset = 0)}
         >
-          <span bind:this={backIconEl} class="flex [&>svg]:w-3 [&>svg]:h-3"></span>
+          <span use:useIcon={"rotate-ccw"} class="flex [&>svg]:w-3 [&>svg]:h-3"></span>
           {center.granularity === "day"
             ? monthDayText(center.date, locale)
             : crumbText(center.granularity, center.date, locale, rules)}

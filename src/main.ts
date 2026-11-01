@@ -25,7 +25,7 @@ import { HOVER_LINK_SOURCE } from './ui/utils/event-handlers';
 import { trackSettingChanges } from './settings/migration-notice';
 import { openAtStartupOf } from './settings/period-switch';
 import { currentNoteName } from './period-words';
-import { getNoteSticker, isPeriodicNote, openStickerPicker, removeSticker, StickerActions } from './ui/sticker-actions';
+import { getNoteSticker, isPeriodicNote, MANAGE_STICKER, openStickerPicker, removeSticker, StickerActions } from './ui/sticker-actions';
 
 export default class PeriodicNotesCalendarPlugin extends Plugin {
   /** Calendared: sticker button in the header of periodic notes */
@@ -143,7 +143,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     // Calendared: sticker commands for the open periodic note (hidden from the palette otherwise)
     this.addCommand({
       id: 'manage-sticker',
-      name: 'Manage sticker',
+      name: MANAGE_STICKER,
       checkCallback: (checking) => {
         const view = this.app.workspace.getActiveViewOfType(MarkdownView);
         if (!get(settingsStore).stickersEnabled || !isPeriodicNote(view?.file)) return false;
