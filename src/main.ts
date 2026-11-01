@@ -196,7 +196,9 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
       if (startupNoteGranularity) {
         await createOrOpenNote({
           leaf: this.app.workspace.getLeaf(),
-          date: window.moment(),
+          // Calendared: the period's first day, as the commands and Open now pass. Upstream passed now, so a template's
+          // {{date}} differed from a note made by a command (docs/adr/0039)
+          date: periodStart(startupNoteGranularity, window.moment(), periodRulesFor(get(settingsStore))),
           granularity: startupNoteGranularity,
           confirmBeforeCreateOverride: false,
         });
