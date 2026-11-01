@@ -1,6 +1,6 @@
 import { DEFAULT_FORMATS_PER_GRANULARITY, granularities } from "@/constants";
 import { type IGranularity } from "@/io";
-import { sysLocaleKey, sysWeekStartId } from "../localization";
+import { obsidianLocaleKey, obsidianWeekStartId } from "../localization";
 import { toSupportedWeekStart } from "../weeks";
 import { NO_MIGRATION_NOTICES, type MigrationNotices } from "./migration-notice";
 import {
@@ -138,7 +138,7 @@ export const DEFAULT_SETTINGS: ISettings = Object.freeze({
   migrationNotices: NO_MIGRATION_NOTICES,
 
   localeSettings: {
-    localeOverride: sysLocaleKey,
-    weekStartId: toSupportedWeekStart(sysWeekStartId),
+    localeOverride: obsidianLocaleKey,
+    weekStartId: toSupportedWeekStart(obsidianWeekStartId),
   },
 });

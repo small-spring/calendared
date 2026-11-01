@@ -17,3 +17,6 @@ export class Notice {
         Notice.shown.push(message);
     }
 }
+
+/** Obsidian's app language; Obsidian defaults to English */
+export const getLanguage = () => "en";

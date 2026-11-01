@@ -1,7 +1,7 @@
 import moment from "moment";
 import "moment/locale/en-gb";
 import { describe, expect, it } from "vitest";
-import { inLocale, localeWeekStart, monthGrid, weekdayHeader, weekdayNames } from "./calendar-locale";
+import { inLocale, localeWeekStart, monthGrid, obsidianMomentLocale, weekdayHeader, weekdayNames } from "./calendar-locale";
 import { createIsoWeekScheme } from "./weeks";
 
 // loading a locale switches moment to it; go back to English like test-setup.ts does
@@ -69,6 +69,32 @@ describe("weekdayHeader: カレンダーの曜日の見出しは、表の列と�
         weekdayHeader(grid[0].days, "ja");
         expect(moment.locale()).toBe("en");
         expect(grid[0].days[0].locale()).toBe("en");
+    });
+});
+
+describe("obsidianMomentLocale: Obsidian の言語を、moment の言語の名前にする（カレンダーの言語の既定）", () => {
+    // Obsidian 1.14.5 と同じ読み替え: 小文字にし、zh・cz・no だけ名前を変える。moment にない言語は英語
+    const known = ["en", "ja", "zh-cn", "zh-tw", "pt-br", "cs", "nb", "de"];
+
+    it("そのまま moment にある言語", () => {
+        expect(obsidianMomentLocale("ja", known)).toBe("ja");
+        expect(obsidianMomentLocale("de", known)).toBe("de");
+        expect(obsidianMomentLocale("en", known)).toBe("en");
+    });
+
+    it("地域付きは小文字にする", () => {
+        expect(obsidianMomentLocale("zh-TW", known)).toBe("zh-tw");
+        expect(obsidianMomentLocale("pt-BR", known)).toBe("pt-br");
+    });
+
+    it("Obsidian が名前を読み替える言語", () => {
+        expect(obsidianMomentLocale("zh", known)).toBe("zh-cn");
+        expect(obsidianMomentLocale("cz", known)).toBe("cs");
+        expect(obsidianMomentLocale("no", known)).toBe("nb");
+    });
+
+    it("moment にない言語は英語", () => {
+        expect(obsidianMomentLocale("xx", known)).toBe("en");
     });
 });
 

@@ -27,6 +27,20 @@ export function weekdayHeader(days: moment.Moment[], locale: string): string[] {
   return days.map((day) => inLocale(day, locale).format("dd"));
 }
 
+/** Obsidian's language codes that moment knows by another name (as Obsidian 1.14.5 maps them) */
+const OBSIDIAN_TO_MOMENT: Record<string, string> = { zh: "zh-cn", cz: "cs", no: "nb" };
+
+/**
+ * The moment language Obsidian writes its dates in, from its app language (`getLanguage()`): lower-cased, a few codes
+ * renamed, and English when moment doesn't know it, the way Obsidian sets its own moment at startup.
+ * Calendared: the calendar's default language (docs/adr/0046). Upstream took the OS language (`navigator.languages`)
+ */
+export function obsidianMomentLocale(language: string, known: string[]): string {
+  const lower = language.toLowerCase();
+  const key = OBSIDIAN_TO_MOMENT[lower] ?? lower;
+  return known.includes(key) ? key : "en";
+}
+
 /** The day weeks usually start on in the language (0 = Sunday) */
 export function localeWeekStart(locale: string): number {
   return window.moment.localeData(locale).firstDayOfWeek();
