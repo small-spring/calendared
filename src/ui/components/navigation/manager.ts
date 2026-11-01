@@ -3,7 +3,7 @@ import { mount, unmount } from "svelte";
 import { get } from "svelte/store";
 
 import { PluginService } from "@/app-service";
-import { isValidPeriodicNote } from "@/io/validation";
+import { periodicNoteOf } from "@/io/validation";
 import { showsOn } from "@/navigation";
 import { settingsStore } from "@/settings";
 import Navigation from "./Navigation.svelte";
@@ -26,9 +26,8 @@ export default class NavigationManager {
       }),
     unmount: (component) => void unmount(component),
     read: (file) => {
-      const { isValid, granularity, date } = isValidPeriodicNote(file);
-      const isPeriodic = typeof isValid === "boolean" && !!date && !!granularity;
-      return { isPeriodic, granularity: isPeriodic ? granularity : null, date: isPeriodic ? date : null };
+      const note = periodicNoteOf(file);
+      return { isPeriodic: !!note, granularity: note?.granularity ?? null, date: note?.date ?? null };
     },
   });
 

@@ -17,7 +17,7 @@ vi.mock("@/settings", () => ({
     }),
 }));
 
-const { isValidPeriodicNote } = await import("./index");
+const { isValidPeriodicNote, periodicNoteOf } = await import("./index");
 const { settingsStore } = await import("@/settings");
 
 // a note named fileName at the vault's top
@@ -122,5 +122,30 @@ describe("isValidPeriodicNote: 周期ノートは、その周期のフォルダ�
 
     it("Markdown でないファイルは周期ノートではない", () => {
         expect(isValidPeriodicNote(at("2026-10-29.pdf")).isValid).toBeNull();
+    });
+});
+
+describe("periodicNoteOf: 周期ノートなら周期と日付、でなければ null", () => {
+    it("周期ノートなら、isValidPeriodicNote と同じ周期・日付・期間・書式", () => {
+        const note_ = periodicNoteOf(note("2026-10-29"));
+        expect(note_?.granularity).toBe("day");
+        expect(note_?.date.format("YYYY-MM-DD")).toBe("2026-10-29");
+        expect(note_?.period).toEqual(isValidPeriodicNote(note("2026-10-29")).period);
+        expect(note_?.format).toBe("YYYY-MM-DD");
+    });
+
+    it("書式に誤りがあっても、名前が読めれば周期ノート（isValid が false）", () => {
+        const saved = get(settingsStore);
+        settingsStore.set({ ...saved, periods: { ...saved.periods, month: { ...saved.periods.month, format: "YY-MM-DD" } } });
+        try {
+            expect(periodicNoteOf(note("26-10-01"))?.isValid).toBe(false);
+        } finally {
+            settingsStore.set(saved);
+        }
+    });
+
+    it("周期ノートでなければ null", () => {
+        expect(periodicNoteOf(note("メモ"))).toBeNull();
+        expect(periodicNoteOf(at("2026-10-29.pdf"))).toBeNull();
     });
 });

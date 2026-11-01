@@ -3,10 +3,10 @@ import { settingsStore } from '@/settings';
 import { get } from 'svelte/store';
 import { type IGranularity } from '../types';
 import { normalizePath } from 'obsidian';
-import { parsePeriod, periodRulesFor, rangeOfPeriod, type PeriodName } from '@/periods';
+import { periodRulesFor, rangeOfPeriod, type PeriodName } from '@/periods';
 import { PluginService } from '@/app-service';
 import { vaultSource } from '../vault-source';
-import { isInFolder } from '../notes-by-format';
+import { periodOfNote } from '../notes-by-format';
 import { validateFormat } from './format';
 import { templateFilePath } from '../note-path';
 
@@ -18,8 +18,6 @@ import { templateFilePath } from '../note-path';
 export function isValidPeriodicNote(file: { path: string; basename: string; extension: string })
     : { isValid: boolean, granularity: IGranularity, date: moment.Moment, period: PeriodName, format: string } | { isValid: null, granularity: null, date: null, period: null, format: null } {
     const notPeriodic = { isValid: null, granularity: null, date: null, period: null, format: null } as const;
-    if (file.extension !== "md") return notPeriodic;
-    const fileName = file.basename;
     // Calendared: every granularity is read as a period name through the period rules (docs/spec/periods.md, docs/adr/0039).
     // Upstream built a weekly note's date from today, so it fell on today's weekday instead of the week's first day
     const rules = periodRulesFor(get(settingsStore));
@@ -27,9 +25,8 @@ export function isValidPeriodicNote(file: { path: string; basename: string; exte
     for (const granularity of granularities) {
         // Calendared: a period has one format (docs/adr/0019)
         const { format, folder } = get(settingsStore).periods[granularity];
-        if (!format.trim() || !isInFolder(file.path, folder)) continue;
-        // the name must be exactly what this format writes for that period (parsePeriod checks it)
-        const period = parsePeriod(fileName, granularity, format, rules);
+        if (!format.trim()) continue;
+        const period = periodOfNote(file, granularity, { folder, format }, rules);
         if (!period) continue;
 
         const date = rangeOfPeriod(period, rules)!.start;
@@ -37,6 +34,15 @@ export function isValidPeriodicNote(file: { path: string; basename: string; exte
     }
 
     return notPeriodic;
+}
+
+/**
+ * Calendared: the periodic note `file` is (its period, first day and format), or null when it is not one. For the
+ * callers that only ask which note it is; `isValid` still tells a format with an error
+ */
+export function periodicNoteOf(file: { path: string; basename: string; extension: string }) {
+    const note = isValidPeriodicNote(file);
+    return note.granularity === null ? null : note;
 }
 
 export function validateFolder(folder: string): string {

@@ -7,7 +7,7 @@ import { CALENDAR_LUCIDE_ICON, granularities, LEAF_TYPE } from './constants';
 import { createOrOpenNote, getFileData, getStartupNoteGranularity, initVaultSource } from './io';
 import { getPeriodicityFromGranularity } from './io/parse';
 import type { IGranularity } from './io/types';
-import { isValidPeriodicNote, validateFormat } from './io/validation';
+import { isValidPeriodicNote, periodicNoteOf, validateFormat } from './io/validation';
 import { overlapsMonth, periodRulesFor, rangeOfPeriod, shiftPeriod } from './periods';
 import { periodStart } from './navigation';
 import {
@@ -130,8 +130,9 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
         checkCallback: (checking) => {
           const file = this.app.workspace.getActiveFile();
           if (!file) return false;
-          const { granularity, period } = isValidPeriodicNote(file);
-          if (!granularity || !period) return false;
+          const note = periodicNoteOf(file);
+          if (!note) return false;
+          const { granularity, period } = note;
           if (checking) return true;
 
           const rules = periodRulesFor(get(settingsStore));
@@ -324,8 +325,9 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
    */
   private onFileOpen(file: TFile | null) {
     if (!file) return;
-    const { isValid, date, period } = isValidPeriodicNote(file);
-    if (typeof isValid !== "boolean" || !date || !period) return;
+    const note = periodicNoteOf(file);
+    if (!note) return;
+    const { date, period } = note;
 
     // Calendared: always follow the open note, but only when no day of it is on the displayed month already.
     // Otherwise clicking a year title would jump to January, or a week number to the month the week starts in.

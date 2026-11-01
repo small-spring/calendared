@@ -6,7 +6,7 @@ import { get } from "svelte/store";
 
 import { PluginService } from "@/app-service";
 import { createOrOpenNote, type IGranularity } from "@/io";
-import { isValidPeriodicNote } from "@/io/validation";
+import { periodicNoteOf } from "@/io/validation";
 import { finestEnabled, isNowNote, periodStart } from "@/navigation";
 import { settingsStore, type ISettings } from "@/settings";
 import { displayedDateStore, todayStore, yearsRanges } from "@/stores";
@@ -31,8 +31,7 @@ export function isNowNoteFile(
   today: moment.Moment = get(todayStore),
 ): boolean {
   if (!file) return false;
-  const { isValid, granularity, date } = isValidPeriodicNote(file);
-  const note = typeof isValid === "boolean" && granularity && date ? { granularity, date } : null;
+  const note = periodicNoteOf(file);
   return isNowNote(note, enabledPeriods(settings.periods), today, periodRulesFor(settings));
 }
 

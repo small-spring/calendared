@@ -1,5 +1,5 @@
 import { normalizePath } from "obsidian";
-import { parsePeriod, type PeriodRules } from "@/periods";
+import { parsePeriod, type PeriodName, type PeriodRules } from "@/periods";
 import type { IGranularity } from "./types";
 
 /**
@@ -13,10 +13,22 @@ export function notesWithFormat(
   { folder, format }: { folder: string; format: string },
   rules: PeriodRules,
 ): string[] {
-  return files
-    .filter((file) => file.extension === "md" && isInFolder(file.path, folder))
-    .filter((file) => !!parsePeriod(file.basename, granularity, format, rules))
-    .map((file) => file.path);
+  return files.filter((file) => !!periodOfNote(file, granularity, { folder, format }, rules)).map((file) => file.path);
+}
+
+/**
+ * Calendared: the period a file is the note of, by the rule the counts, the migrations and the periodic note check
+ * share (docs/adr/0044): a Markdown file in the period's folder (or a folder under it), named exactly what the format
+ * writes for that period. null when it is not
+ */
+export function periodOfNote(
+  file: { path: string; basename: string; extension: string },
+  granularity: IGranularity,
+  { folder, format }: { folder: string; format: string },
+  rules: PeriodRules,
+): PeriodName | null {
+  if (file.extension !== "md" || !isInFolder(file.path, folder)) return null;
+  return parsePeriod(file.basename, granularity, format, rules);
 }
 
 /** Calendared: whether the path is in the folder or a folder under it. Every path is in "/" */

@@ -2,7 +2,7 @@
 // (Obsidian's `view.addAction`), plus the helpers shared with the commands and the right-click menu.
 // See docs/spec/stickers.md.
 import { PluginService } from "@/app-service";
-import { isValidPeriodicNote } from "@/io/validation";
+import { periodicNoteOf } from "@/io/validation";
 import { openStickerPicker } from "@/ui/sticker-picker";
 import { getSticker, removeSticker } from "@/ui/utils/emoji-picker";
 import { settingsStore } from "@/settings";
@@ -13,9 +13,7 @@ import { get } from "svelte/store";
 export const STICKER_BUTTON_ICON = "smile-plus";
 
 export function isPeriodicNote(file: TFile | null | undefined): file is TFile {
-  if (!file) return false;
-  const { isValid, date, granularity } = isValidPeriodicNote(file);
-  return typeof isValid === "boolean" && !!date && !!granularity;
+  return !!file && !!periodicNoteOf(file);
 }
 
 export function getNoteSticker(file: TFile) {

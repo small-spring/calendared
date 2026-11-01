@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { periodRules } from "@/periods";
 import { weekSchemeFor } from "@/weeks";
-import { notesWithFormat } from "./notes-by-format";
+import { notesWithFormat, periodOfNote } from "./notes-by-format";
 
 const weeks = periodRules(weekSchemeFor({ weekStartId: 1 }));
 const md = (path: string) => {
@@ -60,5 +60,20 @@ describe("notesWithFormat: その周期のフォルダで、書式に名前が�
 
     it("ほかの周期の名前は選ばない", () => {
         expect(notesWithFormat([md("日記/2026-10.md")], "day", daily, weeks)).toEqual([]);
+    });
+});
+
+describe("periodOfNote: その周期のフォルダにあり、書式どおりの名前のノートなら、その期間", () => {
+    it("フォルダの中（下のフォルダも）で書式どおりの名前なら、その期間", () => {
+        expect(periodOfNote(md("日記/2026-10-30.md"), "day", daily, weeks)).toEqual(
+            periodOfNote(md("日記/2026/2026-10-30.md"), "day", daily, weeks),
+        );
+        expect(periodOfNote(md("日記/2026-10-30.md"), "day", daily, weeks)).not.toBeNull();
+    });
+
+    it("フォルダの外、Markdown でない、書式どおりでない名前なら null", () => {
+        expect(periodOfNote(md("メモ/2026-10-30.md"), "day", daily, weeks)).toBeNull();
+        expect(periodOfNote(md("日記/2026-10-30.pdf"), "day", daily, weeks)).toBeNull();
+        expect(periodOfNote(md("日記/2026-10-3.md"), "day", daily, weeks)).toBeNull();
     });
 });
