@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { writable } from "svelte/store";
 
-// The check reads the other periods' formats from the settings store (for duplicates); give it a stand-in
+// The check reads the week start from the settings store; give it a stand-in
 vi.mock("@/app-service", () => ({ PluginService: { getPlugin: () => null } }));
 vi.mock("@/settings", () => ({
     settingsStore: writable({
@@ -17,6 +17,7 @@ vi.mock("@/settings", () => ({
 }));
 
 const { validateFormat } = await import("./format");
+const { settingsStore } = await import("@/settings");
 
 describe("validateFormat: 書式の誤り（設定画面に出す文）", () => {
     it("周期を 1 つに決められる書式は、誤りなし（空文字）", () => {
@@ -81,5 +82,32 @@ describe("validateFormat: 書式の誤り（設定画面に出す文）", () => 
 
     it("その周期の今の書式と同じ値は誤りにしない（周期の書式は 1 つ）", () => {
         expect(validateFormat("YYYY-MM", "month")).toBe("");
+    });
+
+    it("正しい書式は、ほかの周期では誤りになる（だから周期どうしで書式を比べなくてよい。docs/adr/0040）", () => {
+        const valid = {
+            day: ["YYYY-MM-DD", "DD.MM.YYYY", "LL", "GGGG-[W]WW-E", "YYYY-MM-DD ddd"],
+            week: ["GGGG-[W]WW", "gggg-[W]ww"],
+            month: ["YYYY-MM", "MMMM YYYY"],
+            quarter: ["YYYY-[Q]Q", "YY[Q]Q"],
+            year: ["YYYY", "[FY]YY"],
+        } as const;
+        for (const [g, formats] of Object.entries(valid)) {
+            for (const format of formats) {
+                expect(validateFormat(format, g as keyof typeof valid), `${g} ${format}`).toBe("");
+                for (const other of Object.keys(valid)) {
+                    if (other !== g) expect(validateFormat(format, other as keyof typeof valid), `${other} ${format}`).not.toBe("");
+                }
+            }
+        }
+    });
+
+    it("ほかの周期にまちがった同じ書式があっても、正しい書式は誤りにしない（正しい書式どうしはぶつからない）", () => {
+        settingsStore.update((s) => ({ ...s, periods: { ...s.periods, month: { ...s.periods.month, format: "DD.MM.YYYY" } } }));
+        try {
+            expect(validateFormat("DD.MM.YYYY", "day")).toBe("");
+        } finally {
+            settingsStore.update((s) => ({ ...s, periods: { ...s.periods, month: { ...s.periods.month, format: "YYYY-MM" } } }));
+        }
     });
 });

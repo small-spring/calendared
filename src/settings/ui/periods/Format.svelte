@@ -33,7 +33,7 @@
     value = saved;
   });
 
-  // read again when any period's format or the week start changes (another period's format can't be the same)
+  // read again when the week start changes (a weekly format is read with it)
   let error = $derived.by(() => {
     void $settingsStore;
     return validateFormat(value, granularity);

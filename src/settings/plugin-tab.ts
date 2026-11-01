@@ -564,7 +564,7 @@ export class SettingsTab extends PluginSettingTab {
     let button: ButtonComponent | undefined;
     const refresh = () => {
       const current = settings().periods[granularity].format;
-      // a format that can't name this period's notes (or is another period's) would read the wrong notes
+      // a format that can't name this period's notes would read the wrong notes
       const error = previous.trim() ? validateFormat(previous.trim(), granularity) : "";
       setting.setErrorMessage(error || null);
       const plan = previous.trim() && !error ? formatRenamePlan(granularity, previous.trim()) : [];

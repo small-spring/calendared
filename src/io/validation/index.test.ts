@@ -71,11 +71,11 @@ describe("isValidPeriodicNote: 周期の書式は 1 つ（ADR-0019）", () => {
         expect(isValidPeriodicNote("2026-10-29").format).toBe("YYYY-MM-DD");
     });
 
-    it("書式に誤りがあれば（ほかの周期と同じ書式など）、名前は読めても isValid が false", () => {
+    it("書式に誤りがあれば（その周期で使えない記号があるなど）、名前は読めても isValid が false", () => {
         const saved = get(settingsStore);
-        settingsStore.set({ ...saved, periods: { ...saved.periods, year: { ...saved.periods.year, format: "YYYY-MM" } } });
+        settingsStore.set({ ...saved, periods: { ...saved.periods, month: { ...saved.periods.month, format: "YY-MM-DD" } } });
         try {
-            expect(parse("2026-10")).toEqual({ isValid: false, granularity: "month", date: "2026-10-01" });
+            expect(parse("26-10-01")).toEqual({ isValid: false, granularity: "month", date: "2026-10-01" });
         } finally {
             settingsStore.set(saved);
         }

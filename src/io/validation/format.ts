@@ -1,9 +1,7 @@
 import { settingsStore } from "@/settings";
-import { capitalize } from "@/utils";
 import { get } from "svelte/store";
 import { getPeriodicityFromGranularity } from "../parse";
 import { type IGranularity } from "../types";
-import { DUP_ERROR_PREFIX } from "./constants";
 import { weekSchemeFor } from "@/weeks";
 import { disallowedTokens, missingTokens } from "@/format-tokens";
 
@@ -91,24 +89,6 @@ function isAmbiguousFormat(
   return null;
 }
 
-// Calendared: a period has one format (docs/adr/0019), so a duplicate is another period's format
-function checkIfDuplicateFormat(
-  value: string,
-  granularity: IGranularity,
-) {
-  const periods = get(settingsStore).periods
-  for (const [g, periodSettings] of Object.entries(periods)) {
-    if (g !== granularity && periodSettings.format === value) {
-      return {
-        duplicate: true,
-        errorMsg: `${DUP_ERROR_PREFIX} from ${capitalize(getPeriodicityFromGranularity(g as IGranularity))} Notes settings`,
-      };
-    }
-  }
-
-  return { duplicte: false, errorMsg: "" };
-}
-
 /** What a period's names may contain, shown with the error (docs/adr/0040) */
 const ALLOWED_HINT: Record<IGranularity, string> = {
   day: "Use the year, month and day (or the ISO week-based year, week and weekday together).",
@@ -167,12 +147,8 @@ export function validateFormat(
     return error;
   }
 
-  // check for duplicated valid formats
-  const { duplicate, errorMsg } = checkIfDuplicateFormat(value, granularity);
-  if (duplicate) {
-    error = errorMsg;
-    return error;
-  }
+  // Calendared: no check against other periods' formats. A valid format can't be valid for another period, as each
+  // period's names need tokens the others can't use (docs/adr/0040)
 
   return error;
 }
