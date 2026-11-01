@@ -379,10 +379,6 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
   }
 }
 
-/**
- * Calendared: keeps `migrationNotices` up to date as the format or sticker property changes. Compares copies of the
- * values: some settings are changed in place (e.g. a period's format), so the previous settings object has the new value
- */
 /** Calendared: set today, and the calendar's month when it showed today's (src/today.ts) */
 function updateToday() {
   const next = nextToday(get(todayStore), get(displayedDateStore), window.moment());
@@ -390,6 +386,10 @@ function updateToday() {
   if (next.displayed) displayedDateStore.set(next.displayed);
 }
 
+/**
+ * Calendared: keeps `migrationNotices` up to date as the format or sticker property changes. Compares copies of the
+ * values: some settings are changed in place (e.g. a period's format), so the previous settings object has the new value
+ */
 function trackMigrationNotices(): () => void {
   const tracked = (s: ISettings) => ({
     periods: Object.fromEntries(granularities.map((g) => [g, { format: s.periods[g].format }])) as Record<IGranularity, { format: string }>,

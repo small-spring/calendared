@@ -16,13 +16,6 @@ export type TFileData = {
   sticker: TSticker | null
 }
 
-export function basename(fullPath: string): string {
-  let base = fullPath.substring(fullPath.lastIndexOf("/") + 1);
-  if (base.lastIndexOf(".") != -1)
-    base = base.substring(0, base.lastIndexOf("."));
-  return base;
-}
-
 export async function ensureFolderExists(path: string): Promise<void> {
   const dirs = path.replace(/\\/g, "/").split("/");
   dirs.pop(); // remove basename
