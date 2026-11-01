@@ -31,6 +31,7 @@ import { mount, unmount } from "svelte";
 import { get, type Writable } from "svelte/store";
 import writableDerived from "svelte-writable-derived";
 import type { ISettings, PeriodSettings } from "./constants";
+import { formatsToReset } from "./format-on-close";
 import { openAtStartupOf, setOpenAtStartup, setPeriodEnabled } from "./period-switch";
 import { settingsStore } from "./store";
 import Format from "./ui/periods/Format.svelte";
@@ -640,14 +641,9 @@ export class SettingsTab extends PluginSettingTab {
     forgetFinishedNotices();
 
     // Calendared: a period has one format (docs/adr/0019). An empty or invalid one is replaced with the default, so
-    // creating a note always has a valid format
-    const errors = [];
-    for (const g of granularities) {
-      this.replaceFormatIfNeeded(g);
-      if (validateFormat(settings().periods[g].format, g)) {
-        errors.push(capitalize(getPeriodicityFromGranularity(g)));
-      }
-    }
+    // creating a note always has a valid format. Turned-off periods keep theirs, which finds the notes you already have
+    for (const g of formatsToReset(settings().periods)) this.resetFormat(g);
+    const errors = formatsToReset(settings().periods).map((g) => capitalize(getPeriodicityFromGranularity(g)));
 
     if (errors.length > 0) {
       new Notice(genNoticeFragment([
@@ -658,10 +654,8 @@ export class SettingsTab extends PluginSettingTab {
     }
   }
 
-  private replaceFormatIfNeeded(granularity: IGranularity) {
+  private resetFormat(granularity: IGranularity) {
     const invalidValue = settings().periods[granularity].format;
-    if (invalidValue.trim() && !validateFormat(invalidValue, granularity)) return;
-
     const correctedValue = DEFAULT_FORMATS_PER_GRANULARITY[granularity];
     settingsStore.update((s) => {
       s.periods[granularity].format = correctedValue;
