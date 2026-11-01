@@ -55,6 +55,7 @@
 | [0045](0045-startup-off-with-period.md) | 起動時に開く周期をオフにしたら、起動時に開く設定も「Nothing」にする | 設定 | 採用 | 2026-11-01 | 済 |
 | [0046](0046-calendar-language-from-obsidian.md) | カレンダーの言語の既定は、OS の言語ではなく Obsidian の言語から取る | カレンダー | 採用 | 2026-11-01 | 済 |
 | [0047](0047-week-start-stays-on-language-change.md) | カレンダーの言語を変えても、週の始まりは戻さない | 周期ノート | 採用 | 2026-11-01 | 済 |
+| [0048](0048-ctrl-click-opens-new-tab.md) | Ctrl/Cmd を押しながら日付を押すと、新しいタブで開く（横に分けない） | カレンダー | 採用 | 2026-11-01 | 済 |
 <!-- adr-index:end -->
 
 ## 書き方

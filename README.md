@@ -47,7 +47,7 @@ Works on desktop and mobile. Needs Obsidian 1.13.1 or later.
 ## Calendar
 
 - Click a date, a week number, the month name, or the year to open its note. If there is none, it is created
-  (you are asked first, unless you turn off **Confirm before creating notes**). Hold Ctrl/Cmd to open it in a new split.
+  (you are asked first, unless you turn off **Confirm before creating notes**). Hold Ctrl/Cmd to open it in a new tab.
 - Right-click a date for more: open in a new tab or to the right, duplicate, sticker, delete, or create.
 - Hover a date with Ctrl/Cmd held to preview the note. Whether Ctrl/Cmd is needed is set in the settings of the core plugin
   **Page preview** (source "Calendared").

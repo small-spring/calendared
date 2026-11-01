@@ -85,7 +85,7 @@
       onclick={(event) => {
         eventHandlers.onClick({
           date,
-          createNewSplitLeaf: isControlPressed(event),
+          inNewTab: isControlPressed(event),
           granularity: title.granularity,
         });
         onOpen?.();

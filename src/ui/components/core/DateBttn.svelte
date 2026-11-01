@@ -91,7 +91,7 @@
     }
     eventHandlers.onClick({
       date,
-      createNewSplitLeaf: isControlPressed(event),
+      inNewTab: isControlPressed(event),
       granularity,
     });
   }}

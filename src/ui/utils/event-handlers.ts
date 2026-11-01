@@ -6,7 +6,8 @@ import { openNoteMenu, type NoteMenuParams } from '../note-menu';
 
 type TOnClickParams = {
   date: moment.Moment;
-  createNewSplitLeaf: boolean;
+  /** Calendared: Ctrl/Cmd held opens the note in a new tab (docs/adr/0048); upstream's name said "split" */
+  inNewTab: boolean;
   granularity: IGranularity;
 };
 type TOnHoverParams = {
@@ -20,10 +21,10 @@ export const HOVER_LINK_SOURCE = "calendared";
 // Component event handlers
 const onClick = async ({
   date,
-  createNewSplitLeaf,
+  inNewTab,
   granularity,
 }: TOnClickParams): Promise<void> => {
-  const leaf = PluginService.getPlugin()?.app.workspace.getLeaf(createNewSplitLeaf) ?? null;
+  const leaf = PluginService.getPlugin()?.app.workspace.getLeaf(inNewTab ? "tab" : false) ?? null;
   createOrOpenNote({
     leaf,
     date,

@@ -35,7 +35,7 @@ export function openNoteMenu({ event, fileData, date, granularity }: NoteMenuPar
           eventHandlers.onClick({
             date,
             granularity,
-            createNewSplitLeaf: isControlPressed(event)
+            inNewTab: isControlPressed(event)
           }).catch(console.error);
         });
     });

@@ -66,7 +66,7 @@
   let crumbs = $derived(breadcrumbs(center.granularity, center.date, enabled, rules));
 
   function open(event: MouseEvent, g: IGranularity, d: moment.Moment) {
-    eventHandlers.onClick({ date: d, createNewSplitLeaf: isControlPressed(event), granularity: g });
+    eventHandlers.onClick({ date: d, inNewTab: isControlPressed(event), granularity: g });
   }
   function cellText(g: IGranularity, d: moment.Moment) {
     return g === "day" ? inLocale(d, locale).format("D") : crumbText(g, d, locale, rules);
