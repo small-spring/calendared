@@ -18,8 +18,6 @@
 
 2026-11-01 に、古いコードと想定と違いそうな動きをもう一度洗い出したもの。「たぶん」は、コードを読んだだけで、起きるかをまだ確かめていない — どれも Claude
 
-- 不具合: カレンダーの言語に `x-pseudo`・`oc-lnc` を選ぶと、パンくずの月・日の表記（`Intl.DateTimeFormat`）がエラーになる（`src/navigation.ts`、`Navigation.svelte`）。
-  月・日の表記を moment にそろえるか、Intl が知らない言語を一覧から外す
 - 不具合（たぶん）: テンプレートの候補を出したまま設定画面を閉じると、矢印キー・Enter の割り当てが残る（`src/settings/ui/suggest.ts` の `destroy` が `close` を呼ばない）
 - 不具合（たぶん）: ステッカーのピッカーを別ウィンドウのノートから開くと、メインのウィンドウに出る（`src/ui/sticker-picker.ts` が `document`・`window` を使う）
 - 整理: 使われていないものを消す: `src/ui/components/navigation/index.ts`、`openState`、`localeDataStore.weekdays`、

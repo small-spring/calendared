@@ -1,3 +1,4 @@
+import { inLocale } from "./calendar-locale";
 import { granularities } from "./constants";
 import type { IGranularity } from "./io/types";
 import { cycleYearLabel, periodOf, rangeOfPeriod, type PeriodRules } from "./periods";
@@ -155,7 +156,7 @@ export function breadcrumbs(
         }));
 }
 
-/** A crumb's text in the calendar's language: "2026", "Q4", "10月" / "Oct", "W44", "30日" / "30" */
+/** A crumb's text in the calendar's language: "2026", "Q4", "10月" / "Oct", "W44", "30日" / "30th" */
 export function crumbText(granularity: IGranularity, date: moment.Moment, locale: string, rules: PeriodRules): string {
     const period = periodOf(granularity, date, rules);
     switch (period.granularity) {
@@ -164,13 +165,20 @@ export function crumbText(granularity: IGranularity, date: moment.Moment, locale
             return cycleYearLabel(period, rules.year);
         case "quarter":
             return `Q${period.quarter}`;
+        // Calendared: months and days in moment's language data, like the calendar. Intl threw on languages it doesn't
+        // know (x-pseudo, oc-lnc), fell back to another language for others (tlh) and wrote Persian in the Persian calendar
         case "month":
-            return new Intl.DateTimeFormat(locale, { month: "short" }).format(date.toDate());
+            return inLocale(date, locale).format("MMM");
         case "week":
             return `W${String(period.week).padStart(2, "0")}`;
         case "day":
-            return new Intl.DateTimeFormat(locale, { day: "numeric" }).format(date.toDate());
+            return inLocale(date, locale).format("Do");
     }
+}
+
+/** A day with its month, in the calendar's language: "10月 30日" / "Oct 30th" (the mini calendar's "back" button) */
+export function monthDayText(date: moment.Moment, locale: string): string {
+    return inLocale(date, locale).format("MMM Do");
 }
 
 /**
