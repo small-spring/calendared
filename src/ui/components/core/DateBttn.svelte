@@ -71,7 +71,6 @@
 </script>
 
 <Button
-  id={`${granularity}-bttn`}
   class={cn(
     "date-bttn",
     "relative !h-auto w-full flex flex-col font-medium rounded-[--radius-s] tabular-nums transition-colors text-center",
@@ -119,7 +118,7 @@
     });
   }}
 >
-  <span id="date-text" class="relative">
+  <span class="relative">
     {#if displaySticker}
       <Sticker sticker={sticker?.emoji} />
     {/if}

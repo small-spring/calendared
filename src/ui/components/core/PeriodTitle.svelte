@@ -79,7 +79,6 @@
         isActive &&
           "!text-[--text-on-accent] !bg-[--interactive-accent] !shadow-[0px_0px_0_5px_var(--interactive-accent)] hover:!bg-[--interactive-accent-hover] hover:!shadow-[0px_0px_0_5px_var(--interactive-accent-hover)]",
       )}
-      id={title.granularity}
       aria-label={canOpen
         ? `Open ${periodicity} note`
         : `${capitalize(periodicity)} notes are turned off in settings`}

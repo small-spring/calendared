@@ -16,7 +16,6 @@
 
 {#if isVisible}
     <svg
-        id="dot"
         class={cn(
             "inline-block h-[6px] w-[6px] mx-0 my-[1px]",
             "stroke-[--color-dot] fill-[--color-dot]",
