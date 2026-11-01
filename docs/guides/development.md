@@ -76,6 +76,11 @@ obsidian plugin:reload id=calendared
 
 `npm test`（1 回動かす）/ `npm run test:watch`（ファイルを保存するたびに動かす）。道具は Vitest。設定は `vitest.config.ts`。
 
+- `npm run test:dst`: 夏時間のある時間帯（`TZ=America/Santiago`）でテストを動かす。日付の計算を変えたら、`npm test` と一緒に動かす。
+  チリは夏時間の始まりに 0 時を飛ばす（2026-09-06 は 1 時から始まる）ので、日付を「その日の 0 時」として扱うまちがいがあると、日がずれて落ちることがある。
+  ブラジル（`America/Sao_Paulo`）は 2019 年から夏時間がなく、テストの日付では何も変わらないので、確かめには使えない
+  （2026-11-01 に、`America/Santiago`・`America/Sao_Paulo`・`America/Havana`・`Asia/Beirut` で全部通ることを確かめた）
+
 - 対象は画面や Obsidian に関係しない処理（日付の計算、テンプレートの置き換え、ファイル名の読み取りなど）。
   テストは対象のファイルの隣に `<名前>.test.ts` で置く
 - 進め方は t-wada（和田卓人さん）の考え方に沿う

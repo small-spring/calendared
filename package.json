@@ -13,6 +13,7 @@
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --threshold error --watch",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:dst": "TZ=America/Santiago vitest run",
     "format": "biome format --write ./src",
     "biome-lint": "npm run check && biome lint --apply-unsafe ./src",
     "lint": "eslint ./src",
