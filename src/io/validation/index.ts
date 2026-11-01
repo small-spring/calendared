@@ -1,9 +1,9 @@
 import { granularities } from '@/constants';
-import { settingsStore } from '@/settings';
+import { periodRulesStore, settingsStore } from '@/settings';
 import { get } from 'svelte/store';
 import { type IGranularity } from '../types';
 import { normalizePath } from 'obsidian';
-import { periodRulesFor, rangeOfPeriod, type PeriodName } from '@/periods';
+import { rangeOfPeriod, type PeriodName } from '@/periods';
 import { PluginService } from '@/app-service';
 import { vaultSource } from '../vault-source';
 import { periodOfNote } from '../notes-by-format';
@@ -20,7 +20,7 @@ export function isValidPeriodicNote(file: { path: string; basename: string; exte
     const notPeriodic = { isValid: null, granularity: null, date: null, period: null, format: null } as const;
     // Calendared: every granularity is read as a period name through the period rules (docs/spec/periods.md, docs/adr/0039).
     // Upstream built a weekly note's date from today, so it fell on today's weekday instead of the week's first day
-    const rules = periodRulesFor(get(settingsStore));
+    const rules = get(periodRulesStore);
 
     for (const granularity of granularities) {
         // Calendared: a period has one format (docs/adr/0019)

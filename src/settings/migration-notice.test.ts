@@ -1,14 +1,15 @@
 import { describe, expect, it } from "vitest";
+import { FORMATS } from "@/test-fixtures";
 import { NO_MIGRATION_NOTICES, noticesOnPage, trackSettingChanges } from "./migration-notice";
 
-type Formats = Partial<Record<"day" | "week" | "month" | "quarter" | "year", string>>;
+type Formats = Partial<Record<keyof typeof FORMATS, string>>;
 const at = (formats: Formats, stickerProperty = "sticker") => ({
     periods: {
-        day: { format: formats.day ?? "YYYY-MM-DD" },
-        week: { format: formats.week ?? "GGGG-[W]WW" },
-        month: { format: formats.month ?? "YYYY-MM" },
-        quarter: { format: formats.quarter ?? "YYYY-[Q]Q" },
-        year: { format: formats.year ?? "YYYY" },
+        day: { format: formats.day ?? FORMATS.day },
+        week: { format: formats.week ?? FORMATS.week },
+        month: { format: formats.month ?? FORMATS.month },
+        quarter: { format: formats.quarter ?? FORMATS.quarter },
+        year: { format: formats.year ?? FORMATS.year },
     },
     stickerProperty,
 });

@@ -1,12 +1,11 @@
 import moment from "moment";
 import { describe, expect, it } from "vitest";
 import { checkWeekFormat, createIsoWeekScheme, dayRangeText, isoWeekFormatFor, readsBack, toSupportedWeekStart, weekSchemeFor, type WeekName, type WeekScheme } from "./weeks";
+import { d, ymd } from "@/test-fixtures";
 
 // The week scheme decides what a "week" is (docs/adr/0011, 0012, 0014).
 // Week starts use moment's day numbers: 6 = Saturday, 0 = Sunday, 1 = Monday
 
-const d = (s: string) => moment(s, "YYYY-MM-DD");
-const ymd = (m: moment.Moment) => m.format("YYYY-MM-DD");
 const week = (weekYear: number, weekNumber: number): WeekName => ({ weekYear, week: weekNumber });
 
 const monday = createIsoWeekScheme(1);
@@ -214,7 +213,7 @@ describe("readsBack: 週の名前が、同じ週として読み戻せるか", ()
 });
 
 describe("dayRangeText: 週の日付の範囲（設定の例に出す）", () => {
-    it("M/D – M/D", () => {
+    it("「月/日 – 月/日」で書く（年はまたいでも書かない）", () => {
         expect(dayRangeText({ start: d("2026-12-28"), end: d("2027-01-03") })).toBe("12/28 – 1/3");
     });
 });

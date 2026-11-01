@@ -76,6 +76,11 @@ obsidian plugin:reload id=calendared
 
 `npm test`（1 回動かす）/ `npm run test:watch`（ファイルを保存するたびに動かす）。道具は Vitest。設定は `vitest.config.ts`。
 
+- `npm run test:dst`: 夏時間のある時間帯（`TZ=America/Santiago`）でテストを動かす。日付の計算を変えたら、`npm test` と一緒に動かす。
+  チリは夏時間の始まりに 0 時を飛ばす（2026-09-06 は 1 時から始まる）ので、日付を「その日の 0 時」として扱うまちがいがあると、日がずれて落ちることがある。
+  ブラジル（`America/Sao_Paulo`）は 2019 年から夏時間がなく、テストの日付では何も変わらないので、確かめには使えない
+  （2026-11-01 に、`America/Santiago`・`America/Sao_Paulo`・`America/Havana`・`Asia/Beirut` で全部通ることを確かめた）
+
 - 対象は画面や Obsidian に関係しない処理（日付の計算、テンプレートの置き換え、ファイル名の読み取りなど）。
   テストは対象のファイルの隣に `<名前>.test.ts` で置く
 - 進め方は t-wada（和田卓人さん）の考え方に沿う
@@ -91,6 +96,11 @@ obsidian plugin:reload id=calendared
   - `src/test-obsidian.ts`: `obsidian` の代わり（npm の `obsidian` は型定義だけで中身がない）。テストする処理が読み込み時に使うものだけ置く
   - 設定のストアなど、Obsidian につながる部品は、テストの中で `vi.mock` で置き換える（例: `src/io/validation/index.test.ts`）。
     置き換えるのは外側だけにして、テストしたい処理そのものは置き換えない
+  - `src/test-fixtures.ts`: 多くのテストで使う道具（日付の `d`・`ymd`、月曜始まり・日曜始まりの決まり `mondayWeeks`・`sundayWeeks`、
+    既定の書式 `FORMATS`、ファイルの `md`・`fileAt`、設定の `testSettings`・`settingsModule`）。同じものをテストに書き写さず、ここから読む。
+    設定を置き換えるときは `vi.mock("@/settings", async () => (await import("@/test-fixtures")).settingsModule())`
+    （`vi.mock` の中身はファイルの頭に移されて先に動くので、道具は中で読み込む）。`settingsModule` は `settingsStore` と
+    `periodRulesStore` を返す
   - ESLint の「moment を直接読み込まない」決まりは、テストのファイルでは外している（`eslint.config.js`）
 
 ## 依存パッケージと安全対策

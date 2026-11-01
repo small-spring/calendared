@@ -19,14 +19,12 @@ import {
 } from "./navigation";
 import { periodRules } from "./periods";
 import { createIsoWeekScheme } from "./weeks";
+import { d, mondayWeeks, sundayWeeks, ymd } from "@/test-fixtures";
 
 // loading a locale switches moment to it; go back to English like test-setup.ts does
 moment.locale("en");
 
-const d = (s: string) => moment(s, "YYYY-MM-DD");
-const ymd = (dates: moment.Moment[]) => dates.map((x) => x.format("YYYY-MM-DD"));
-const mondayWeeks = periodRules(createIsoWeekScheme(1));
-const sundayWeeks = periodRules(createIsoWeekScheme(0));
+const ymds = (dates: moment.Moment[]) => dates.map(ymd);
 const ALL = { day: true, week: true, month: true, quarter: true, year: true };
 
 // ---- 設定の読み替え（docs/adr/0031） ----
@@ -148,44 +146,44 @@ describe("finestEnabled: 使っている周期のうち一番細かいもの（�
 
 describe("stripDates: ミニカレンダーに並べる期間（それぞれの始まりの日）", () => {
     it("日・週ごと: カレンダーと同じ週の 7 日（週の始まりは週の決め方から）", () => {
-        expect(ymd(stripDates("day", d("2026-10-30"), 0, "week", mondayWeeks))).toEqual([
+        expect(ymds(stripDates("day", d("2026-10-30"), 0, "week", mondayWeeks))).toEqual([
             "2026-10-26", "2026-10-27", "2026-10-28", "2026-10-29", "2026-10-30", "2026-10-31", "2026-11-01",
         ]);
         expect(stripDates("day", d("2026-10-30"), 0, "week", sundayWeeks)[0].format("YYYY-MM-DD")).toBe("2026-10-25");
     });
 
     it("日・ノートを真ん中に: 前後 3 日ずつ", () => {
-        expect(ymd(stripDates("day", d("2026-10-30"), 0, "centered", mondayWeeks))).toEqual([
+        expect(ymds(stripDates("day", d("2026-10-30"), 0, "centered", mondayWeeks))).toEqual([
             "2026-10-27", "2026-10-28", "2026-10-29", "2026-10-30", "2026-10-31", "2026-11-01", "2026-11-02",
         ]);
     });
 
     it("日: ‹ › は 7 日ずつ動く", () => {
-        expect(ymd(stripDates("day", d("2026-10-30"), -1, "week", mondayWeeks))[0]).toBe("2026-10-19");
-        expect(ymd(stripDates("day", d("2026-10-30"), 1, "centered", mondayWeeks))[3]).toBe("2026-11-06");
+        expect(ymds(stripDates("day", d("2026-10-30"), -1, "week", mondayWeeks))[0]).toBe("2026-10-19");
+        expect(ymds(stripDates("day", d("2026-10-30"), 1, "centered", mondayWeeks))[3]).toBe("2026-11-06");
     });
 
     it("週: ノートを真ん中に前後 2 つずつ。始まりは週の決め方の行の最初の日", () => {
-        expect(ymd(stripDates("week", d("2026-10-26"), 0, "week", mondayWeeks))).toEqual([
+        expect(ymds(stripDates("week", d("2026-10-26"), 0, "week", mondayWeeks))).toEqual([
             "2026-10-12", "2026-10-19", "2026-10-26", "2026-11-02", "2026-11-09",
         ]);
-        expect(ymd(stripDates("week", d("2026-10-28"), 0, "week", sundayWeeks))[2]).toBe("2026-10-25");
+        expect(ymds(stripDates("week", d("2026-10-28"), 0, "week", sundayWeeks))[2]).toBe("2026-10-25");
     });
 
     it("月・四半期・年: ノートを真ん中に前後 2 つずつ。‹ › は 5 つずつ動く（日の並べ方は効かない）", () => {
-        expect(ymd(stripDates("month", d("2026-10-01"), 0, "week", mondayWeeks))).toEqual([
+        expect(ymds(stripDates("month", d("2026-10-01"), 0, "week", mondayWeeks))).toEqual([
             "2026-08-01", "2026-09-01", "2026-10-01", "2026-11-01", "2026-12-01",
         ]);
-        expect(ymd(stripDates("quarter", d("2026-10-01"), 0, "centered", mondayWeeks))).toEqual([
+        expect(ymds(stripDates("quarter", d("2026-10-01"), 0, "centered", mondayWeeks))).toEqual([
             "2026-04-01", "2026-07-01", "2026-10-01", "2027-01-01", "2027-04-01",
         ]);
-        expect(ymd(stripDates("year", d("2026-01-01"), 1, "week", mondayWeeks))).toEqual([
+        expect(ymds(stripDates("year", d("2026-01-01"), 1, "week", mondayWeeks))).toEqual([
             "2029-01-01", "2030-01-01", "2031-01-01", "2032-01-01", "2033-01-01",
         ]);
     });
 
     it("期間の途中の日を渡しても、期間の始まりに揃える", () => {
-        expect(ymd(stripDates("month", d("2026-10-30"), 0, "week", mondayWeeks))[2]).toBe("2026-10-01");
+        expect(ymds(stripDates("month", d("2026-10-30"), 0, "week", mondayWeeks))[2]).toBe("2026-10-01");
     });
 });
 
@@ -317,7 +315,7 @@ describe("四半期・年が 1 月以外から始まるとき（docs/adr/0039）
     });
 
     it("ミニカレンダー: 四半期・年は、その周期の始まりの日で並ぶ", () => {
-        expect(ymd(stripDates("quarter", d("2027-03-10"), 0, "centered", mayRules))).toEqual([
+        expect(ymds(stripDates("quarter", d("2027-03-10"), 0, "centered", mayRules))).toEqual([
             "2026-08-01", "2026-11-01", "2027-02-01", "2027-05-01", "2027-08-01",
         ]);
     });

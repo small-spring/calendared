@@ -1,4 +1,4 @@
-import { settingsStore } from "@/settings";
+import { periodRulesStore, settingsStore } from "@/settings";
 import { createConfirmationDialog } from "@/ui/modals/confirmation";
 import { Notice, TFile, WorkspaceLeaf } from "obsidian";
 import { get } from "svelte/store";
@@ -9,7 +9,7 @@ import { ensureFolderExists, getNotePath, getTemplateInfo } from "./vault";
 import { noteNameOf } from "./note-path";
 import { PluginService } from "@/app-service";
 import { turnedOffMessage } from "@/period-words";
-import { periodRulesFor, periodStart } from "@/periods";
+import { periodStart } from "@/periods";
 import { refreshToday } from "@/stores/dates";
 
 export async function createOrOpenNote({
@@ -87,7 +87,7 @@ export function openCurrentNote(
   granularity: IGranularity,
   { leaf, confirmBeforeCreateOverride }: { leaf: WorkspaceLeaf | null; confirmBeforeCreateOverride?: boolean },
 ) {
-  const date = periodStart(granularity, refreshToday(), periodRulesFor(get(settingsStore)));
+  const date = periodStart(granularity, refreshToday(), get(periodRulesStore));
   return createOrOpenNote({ leaf, date, granularity, confirmBeforeCreateOverride });
 }
 
@@ -101,7 +101,7 @@ export async function createNote(granularity: IGranularity, date: moment.Moment)
   try {
     const file = await PluginService.getPlugin()?.app.vault.create(
       normalizedPath,
-      replaceTemplateContents(granularity, date, format, templateContents, periodRulesFor(get(settingsStore)))
+      replaceTemplateContents(granularity, date, format, templateContents, get(periodRulesStore))
     );
     if (!file || !(file instanceof TFile)) return;
 

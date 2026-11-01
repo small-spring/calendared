@@ -120,18 +120,30 @@ describe("missingTokens: その周期の名前を 1 つに決めるのに足り�
         expect(missingTokens("MM-DD", "day")).toBe("year (Y, or GG with W)");
     });
 
-    it("周期ごとに要る記号", () => {
+    it("周期ごとに要る記号（年の何日目 DDDD だけでは、日に月が足りない）", () => {
         expect(missingTokens("YYYY", "quarter")).toBe("quarter (Q)");
         expect(missingTokens("YYYY", "month")).toBe("month (M)");
         expect(missingTokens("GGGG", "week")).toBe("week (w or W)");
         expect(missingTokens("YYYY-DD", "day")).toBe("month (M)");
+        expect(missingTokens("YYYY-DDDD", "day")).toBe("month (M)");
         expect(missingTokens("YYYY-MM", "day")).toBe("day (D)");
     });
 
-    it("[ ] の中の文字は数えない", () => {
-        expect(missingTokens("YYYY-[Q]", "quarter")).toBe("quarter (Q)");
-        expect(missingTokens("[YYYY]-MM", "month")).toBe("year (Y)");
-        expect(missingTokens("YYYY-MM-[DD]", "day")).toBe("day (D)");
+    it.each([
+        ["YYYY-[MM]-DD", "day", "month (M)"],
+        ["YYYY-MM-[DD]", "day", "day (D)"],
+        ["[YYYY]-MM", "month", "year (Y)"],
+        ["YYYY-[Q]", "quarter", "quarter (Q)"],
+        ["[Q]YYYY", "quarter", "quarter (Q)"],
+        ["[W]WW", "week", "year (GG or gg)"],
+        ["GGGG-[W]", "week", "week (w or W)"],
+        ["[Y]", "year", "year (Y)"],
+    ] as const)("[ ] の中の文字は数えない: %s（%s）は %s が足りない", (format, granularity, missing) => {
+        expect(missingTokens(format, granularity)).toBe(missing);
+    });
+
+    it("[ ] の中に記号と同じ文字があっても、外の記号で足りていればよい", () => {
+        expect(missingTokens("[Year] YYYY [Month] MM", "month")).toBeNull();
     });
 
     it("同じ種類の別の記号でもよい", () => {

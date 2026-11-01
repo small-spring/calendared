@@ -1,32 +1,20 @@
 import { describe, expect, it, vi } from "vitest";
-import { get, writable } from "svelte/store";
+import { get } from "svelte/store";
+import { md } from "@/test-fixtures";
 
 // The parser reads the formats from the settings store; give it a stand-in with the formats used in the vault
 // (and for the plugin service it imports, which needs a running Obsidian)
 vi.mock("@/app-service", () => ({ PluginService: { getPlugin: () => null } }));
-vi.mock("@/settings", () => ({
-    settingsStore: writable({
-        periods: {
-            day: { format: "YYYY-MM-DD", folder: "/" },
-            week: { format: "YYYY-[W]ww", folder: "/" },
-            month: { format: "YYYY-MM", folder: "/" },
-            quarter: { format: "YYYY-[Q]Q", folder: "/" },
-            year: { format: "YYYY", folder: "/" },
-        },
-        localeSettings: { weekStartId: 1 },
-    }),
-}));
+vi.mock("@/settings", async () => {
+    const { settingsModule, testSettings } = await import("@/test-fixtures");
+    return settingsModule(testSettings({ week: { format: "YYYY-[W]ww" } }));
+});
 
 const { isValidPeriodicNote, periodicNoteOf } = await import("./index");
 const { settingsStore } = await import("@/settings");
 
 // a note named fileName at the vault's top
-const note = (fileName: string) => ({ path: `${fileName}.md`, basename: fileName, extension: "md" });
-const at = (path: string) => {
-    const name = path.slice(path.lastIndexOf("/") + 1);
-    const dot = name.lastIndexOf(".");
-    return { path, basename: name.slice(0, dot), extension: name.slice(dot + 1) };
-};
+const note = (fileName: string) => md(`${fileName}.md`);
 const parse = (fileName: string) => {
     const { isValid, granularity, date } = isValidPeriodicNote(note(fileName));
     return { isValid, granularity, date: date?.format("YYYY-MM-DD") ?? null };
@@ -90,38 +78,19 @@ describe("isValidPeriodicNote: 周期の書式は 1 つ（ADR-0019）", () => {
 });
 
 describe("isValidPeriodicNote: 周期ノートは、その周期のフォルダ（とその下）の Markdown だけ（件数・移行と同じ決まり）", () => {
-    const withDailyFolder = (folder: string, run: () => void) => {
+    // the rule itself (folders under it, a folder of /, Markdown only) is tested in notes-by-format.test.ts
+
+    it("設定のフォルダとその下のノートを読み、外のノートは名前が合っても周期ノートではない", () => {
         const saved = get(settingsStore);
-        settingsStore.set({ ...saved, periods: { ...saved.periods, day: { ...saved.periods.day, folder } } });
+        settingsStore.set({ ...saved, periods: { ...saved.periods, day: { ...saved.periods.day, folder: "日記" } } });
         try {
-            run();
+            expect(isValidPeriodicNote(md("日記/2026-10-29.md")).granularity).toBe("day");
+            expect(isValidPeriodicNote(md("日記/2026/2026-10-29.md")).granularity).toBe("day");
+            expect(isValidPeriodicNote(md("2026-10-29.md")).isValid).toBeNull();
+            expect(isValidPeriodicNote(md("メモ/2026-10-29.md")).isValid).toBeNull();
         } finally {
             settingsStore.set(saved);
         }
-    };
-
-    it("周期のフォルダとその下のフォルダのノートを読む", () => {
-        withDailyFolder("日記", () => {
-            expect(isValidPeriodicNote(at("日記/2026-10-29.md")).granularity).toBe("day");
-            expect(isValidPeriodicNote(at("日記/2026/2026-10-29.md")).granularity).toBe("day");
-        });
-    });
-
-    it("周期のフォルダの外のノートは、名前が合っても周期ノートではない", () => {
-        withDailyFolder("日記", () => {
-            expect(isValidPeriodicNote(at("2026-10-29.md")).isValid).toBeNull();
-            expect(isValidPeriodicNote(at("メモ/2026-10-29.md")).isValid).toBeNull();
-            // a folder whose name only starts with the period's
-            expect(isValidPeriodicNote(at("日記帳/2026-10-29.md")).isValid).toBeNull();
-        });
-    });
-
-    it("フォルダが / なら、どこにあっても読む", () => {
-        expect(isValidPeriodicNote(at("どこか/深く/2026-10-29.md")).granularity).toBe("day");
-    });
-
-    it("Markdown でないファイルは周期ノートではない", () => {
-        expect(isValidPeriodicNote(at("2026-10-29.pdf")).isValid).toBeNull();
     });
 });
 
@@ -146,6 +115,6 @@ describe("periodicNoteOf: 周期ノートなら周期と日付、でなければ
 
     it("周期ノートでなければ null", () => {
         expect(periodicNoteOf(note("メモ"))).toBeNull();
-        expect(periodicNoteOf(at("2026-10-29.pdf"))).toBeNull();
+        expect(periodicNoteOf(md("2026-10-29.pdf"))).toBeNull();
     });
 });

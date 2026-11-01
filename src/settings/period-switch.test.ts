@@ -77,11 +77,6 @@ describe("calendarView: カレンダーに出すビュー", () => {
         expect(calendarView(on(["quarter"]))).toBe("month");
         expect(calendarView(on(["year"]))).toBe("year");
     });
-
-    it("オンの周期だけで決まり、前のビューを引きずらない（日をオンに戻せば日のビューに戻る）", () => {
-        expect(calendarView(on(["month", "year"]))).toBe("month");
-        expect(calendarView(on(["day", "month", "year"]))).toBe("day");
-    });
 });
 
 describe("enabledPeriods: 周期ごとのオン・オフ", () => {

@@ -1,30 +1,15 @@
 import { describe, expect, it, vi } from "vitest";
-import { writable } from "svelte/store";
 
 // The check reads the week start from the settings store; give it a stand-in
 vi.mock("@/app-service", () => ({ PluginService: { getPlugin: () => null } }));
-vi.mock("@/settings", () => ({
-    settingsStore: writable({
-        periods: {
-            day: { format: "YYYY-MM-DD" },
-            week: { format: "GGGG-[W]WW" },
-            month: { format: "YYYY-MM" },
-            quarter: { format: "YYYY-[Q]Q" },
-            year: { format: "YYYY" },
-        },
-        localeSettings: { weekStartId: 1 },
-    }),
-}));
+vi.mock("@/settings", async () => (await import("@/test-fixtures")).settingsModule());
 
 const { validateFormat } = await import("./format");
 const { settingsStore } = await import("@/settings");
 
 describe("validateFormat: 書式の誤り（設定画面に出す文）", () => {
-    it("周期を 1 つに決められる書式は、誤りなし（空文字）", () => {
-        expect(validateFormat("YYYYMMDD", "day")).toBe("");
-        expect(validateFormat("GGGG-[W]WW", "week")).toBe("");
-        expect(validateFormat("YYYY年M月", "month")).toBe("");
-    });
+    // which tokens a period may use and which it needs are tested in src/format-tokens.test.ts; here, the messages and
+    // that the format reads back
 
     it("空の書式は誤りにしない", () => {
         expect(validateFormat("", "day")).toBe("");
@@ -34,74 +19,28 @@ describe("validateFormat: 書式の誤り（設定画面に出す文）", () => 
         expect(validateFormat("YYYY:MM:DD", "day")).toBe("Format contains illegal characters");
     });
 
-    it("周期に要る文字がなければ誤り", () => {
-        expect(validateFormat("YYYY-MM", "day")).toMatch(/^Ambiguous format\. Missing day \(D\) info/);
-        expect(validateFormat("MM", "month")).toMatch(/^Ambiguous format\. Missing year/);
-    });
-
-    it("ほかの周期の書式は、記号の決まりで誤りになる（同じ名前のノートを 2 つの周期が取り合わない）", () => {
-        expect(validateFormat("YYYY-MM", "year")).toMatch(/^MM can't be used in yearly note names/);
-    });
-
-    it("その周期をまるごと含む周期の記号しか使えない（docs/adr/0040）", () => {
-        expect(validateFormat("GGGG-[W]WW-DD", "week")).toBe("DD can't be used in weekly note names. Use the week-based year (GGGG) and week (WW).");
-        expect(validateFormat("YYYY-[W]WW", "week")).toMatch(/^YYYY can't be used in weekly note names/);
-        expect(validateFormat("YYYY-[Q]Q MMM", "quarter")).toMatch(/^MMM can't be used in quarterly note names/);
-        expect(validateFormat("YYYY[年度]", "year")).toBe("");
-    });
-
-    it("[ ] の中の文字は、要る記号に数えない", () => {
-        expect(validateFormat("YYYY-[MM]-DD", "day")).toMatch(/^Ambiguous format\. Missing month \(M\) info/);
-        expect(validateFormat("YYYY-MM-[DD]", "day")).toMatch(/^Ambiguous format\. Missing day \(D\) info/);
+    it("周期に要る記号がなければ、足りないものを挙げる（[ ] の中の文字は数えない）", () => {
+        expect(validateFormat("YYYY-MM", "day")).toBe("Ambiguous format. Missing day (D) info. Can't uniquely identify day.");
         expect(validateFormat("[YYYY]-MM", "month")).toMatch(/^Ambiguous format\. Missing year/);
-        expect(validateFormat("YYYY-[Q]", "quarter")).toMatch(/^Ambiguous format\. Missing quarter \(Q\) info/);
-        expect(validateFormat("[Q]YYYY", "quarter")).toMatch(/^Ambiguous format\. Missing quarter \(Q\) info/);
-        expect(validateFormat("[W]WW", "week")).toMatch(/^Ambiguous format\. Missing year/);
-        expect(validateFormat("GGGG-[W]", "week")).toMatch(/^Ambiguous format\. Missing week \(w or W\) info/);
-        expect(validateFormat("[Y]", "year")).toMatch(/^Ambiguous format\. Missing year/);
-        expect(validateFormat("[Year] YYYY [Month] MM", "month")).toBe("");
     });
 
-    it("同じ種類の別の記号でもよい（短い年、月の名前、序数、言語の週、まとめた日付）", () => {
-        expect(validateFormat("YY-MM", "month")).toBe("");
-        expect(validateFormat("MMMM YYYY", "month")).toBe("");
-        expect(validateFormat("YYYY-MM-Do", "day")).toBe("");
-        expect(validateFormat("gggg-[W]ww", "week")).toBe("");
-        expect(validateFormat("LL", "day")).toBe("");
-    });
-
-    it("年は YYYY・YY・Y でだけ書ける（docs/adr/0040）", () => {
-        expect(validateFormat("y", "year")).toBe("y can't be used in yearly note names. Use the year.");
-        expect(validateFormat("yyyy-[Q]Q", "quarter")).toMatch(/^yyyy can't be used in quarterly note names/);
-    });
-
-    it("moment が読み返せない序数は、使えない記号として誤りにする（docs/adr/0040）", () => {
-        expect(validateFormat("YYYY-Qo", "quarter")).toBe("Qo can't be used in quarterly note names. Use the year and quarter (Q).");
-        expect(validateFormat("YYYY-Mo", "month")).toMatch(/^Mo can't be used in monthly note names/);
-        expect(validateFormat("GGGG-[W]Wo", "week")).toMatch(/^Wo can't be used in weekly note names/);
-        expect(validateFormat("gggg-[W]wo", "week")).toMatch(/^wo can't be used in weekly note names/);
-    });
-
-    it("年の何日目（DDDD）だけでは、日に月が足りない", () => {
-        expect(validateFormat("YYYY-DDDD", "day")).toMatch(/^Ambiguous format\. Missing month \(M\) info/);
-    });
-
-    it("日の書式は ISO の週の日付（週の年・週・曜日）でも書ける（docs/adr/0040）", () => {
-        expect(validateFormat("GGGG-[W]WW-E", "day")).toBe("");
-        expect(validateFormat("GGGG-[W]WW", "day")).toMatch(/^Ambiguous format\. Missing weekday \(E\) info/);
-    });
-
-    it("その周期の今の書式と同じ値は誤りにしない（周期の書式は 1 つ）", () => {
-        expect(validateFormat("YYYY-MM", "month")).toBe("");
+    it.each([
+        ["day", "GGGG-MM-DD", "GGGG can't be used in daily note names. Use the year, month and day (or the ISO week-based year, week and weekday together)."],
+        ["week", "GGGG-[W]WW-DD", "DD can't be used in weekly note names. Use the week-based year (GGGG) and week (WW)."],
+        ["month", "YYYY-Mo", "Mo can't be used in monthly note names. Use the year and month."],
+        ["quarter", "YYYY-Qo", "Qo can't be used in quarterly note names. Use the year and quarter (Q)."],
+        ["year", "y", "y can't be used in yearly note names. Use the year."],
+    ] as const)("%s: 使えない記号があれば、その記号と、その周期で使える記号を出す（docs/adr/0040）", (granularity, format, message) => {
+        expect(validateFormat(format, granularity)).toBe(message);
     });
 
     it("正しい書式は、ほかの周期では誤りになる（だから周期どうしで書式を比べなくてよい。docs/adr/0040）", () => {
         const valid = {
-            day: ["YYYY-MM-DD", "DD.MM.YYYY", "LL", "GGGG-[W]WW-E", "YYYY-MM-DD ddd"],
+            day: ["YYYY-MM-DD", "YYYYMMDD", "DD.MM.YYYY", "YYYY-MM-Do", "LL", "GGGG-[W]WW-E", "YYYY-MM-DD ddd"],
             week: ["GGGG-[W]WW", "gggg-[W]ww"],
-            month: ["YYYY-MM", "MMMM YYYY"],
+            month: ["YYYY-MM", "YY-MM", "YYYY年M月", "MMMM YYYY", "[Year] YYYY [Month] MM"],
             quarter: ["YYYY-[Q]Q", "YY[Q]Q"],
-            year: ["YYYY", "[FY]YY"],
+            year: ["YYYY", "[FY]YY", "YYYY[年度]"],
         } as const;
         for (const [g, formats] of Object.entries(valid)) {
             for (const format of formats) {
