@@ -4,13 +4,14 @@ import { MarkdownView, Notice, Plugin, TAbstractFile, TFile, WorkspaceLeaf, Work
 import { get } from 'svelte/store';
 import { PluginService } from './app-service';
 import { CALENDAR_LUCIDE_ICON, granularities, LEAF_TYPE } from './constants';
-import { createOrOpenNote, getFileData, initVaultSource } from './io';
+import { getFileData, initVaultSource, openCurrentNote } from './io';
 import { getPeriodicityFromGranularity } from './io/parse';
 import type { IGranularity } from './io/types';
 import { isValidPeriodicNote, periodicNoteOf, validateFormat } from './io/validation';
-import { overlapsMonth, periodRulesFor, periodStart, rangeOfPeriod, shiftPeriod } from './periods';
+import { overlapsMonth, periodRulesFor, rangeOfPeriod, shiftPeriod } from './periods';
 import {
   displayedDateStore,
+  refreshToday,
   themeStore,
   todayStore,
 } from './stores';
@@ -23,7 +24,6 @@ import { initEmojiSearch } from './ui/utils/emoji-locale';
 import { HOVER_LINK_SOURCE } from './ui/utils/event-handlers';
 import { trackSettingChanges } from './settings/migration-notice';
 import { openAtStartupOf } from './settings/period-switch';
-import { nextToday } from './today';
 import { getNoteSticker, isPeriodicNote, openStickerPicker, removeSticker, StickerActions } from './ui/sticker-actions';
 
 export default class PeriodicNotesCalendarPlugin extends Plugin {
@@ -67,7 +67,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     this.register(settingsStore.subscribe(() => this.openNowActions.refresh()));
     // Calendared: upstream's calendar view kept today current with its own timer, so with the pane closed
     // the date went stale. The plugin does it now; the header's Open now button is re-dimmed on a new day
-    this.registerInterval(window.setInterval(updateToday, 1000 * 60));
+    this.registerInterval(window.setInterval(refreshToday, 1000 * 60));
     this.register(todayStore.subscribe(() => this.openNowActions.refresh()));
     // Calendared: add or remove the breadcrumbs and mini calendar when the settings change which notes show them
     this.register(settingsStore.subscribe(() => NavigationManager.instance?.syncAll()));
@@ -111,10 +111,8 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
           if (!get(settingsStore).periods[granularity].enabled) return false;
           if (checking) return true;
 
-          const leaf = this.app.workspace.getLeaf(false);
-          // Calendared: the period's first day by the period rules (a quarter or year may not start in January, docs/adr/0039)
-          const date = periodStart(granularity, window.moment(), periodRulesFor(get(settingsStore)));
-          createOrOpenNote({ leaf, date, granularity, confirmBeforeCreateOverride: false }).catch(console.error);
+          openCurrentNote(granularity, { leaf: this.app.workspace.getLeaf(false), confirmBeforeCreateOverride: false })
+            .catch(console.error);
           return true;
         }
       });
@@ -191,12 +189,10 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
       // open note at startup
       const startupNoteGranularity = openAtStartupOf(get(settingsStore).periods);
       if (startupNoteGranularity !== "none") {
-        await createOrOpenNote({
+        // Calendared: the period's first day, as the commands and Open now pass. Upstream passed now, so a template's
+        // {{date}} differed from a note made by a command (docs/adr/0039)
+        await openCurrentNote(startupNoteGranularity, {
           leaf: this.app.workspace.getLeaf(),
-          // Calendared: the period's first day, as the commands and Open now pass. Upstream passed now, so a template's
-          // {{date}} differed from a note made by a command (docs/adr/0039)
-          date: periodStart(startupNoteGranularity, window.moment(), periodRulesFor(get(settingsStore))),
-          granularity: startupNoteGranularity,
           confirmBeforeCreateOverride: false,
         });
       }
@@ -370,13 +366,6 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
       error: validateFormat(format, granularity),
     }), 10000)
   }
-}
-
-/** Calendared: set today, and the calendar's month when it showed today's (src/today.ts) */
-function updateToday() {
-  const next = nextToday(get(todayStore), get(displayedDateStore), window.moment());
-  if (next.today) todayStore.set(next.today);
-  if (next.displayed) displayedDateStore.set(next.displayed);
 }
 
 /**

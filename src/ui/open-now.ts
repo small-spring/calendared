@@ -5,13 +5,13 @@ import { MarkdownView, getIcon, type TFile } from "obsidian";
 import { get } from "svelte/store";
 
 import { PluginService } from "@/app-service";
-import { createOrOpenNote } from "@/io";
+import { openCurrentNote } from "@/io";
 import { periodicNoteOf } from "@/io/validation";
 import { finestEnabled, isNowNote } from "@/navigation";
 import { settingsStore, type ISettings } from "@/settings";
 import { enabledPeriods } from "@/settings/period-switch";
-import { displayedDateStore, todayStore, yearsRanges } from "@/stores";
-import { periodRulesFor, periodStart } from "@/periods";
+import { displayedDateStore, refreshToday, todayStore, yearsRanges } from "@/stores";
+import { periodRulesFor } from "@/periods";
 
 /** calendar-clock ("now", not "today"); an older Obsidian without it in its Lucide set gets the plain clock */
 export function openNowIcon(): string {
@@ -35,9 +35,8 @@ export function openNow() {
   const app = PluginService.getPlugin()?.app;
   if (!app) return;
 
-  const today = get(todayStore);
+  const today = refreshToday();
   const granularity = finestEnabled(enabledPeriods(get(settingsStore).periods));
-  const date = periodStart(granularity, today, periodRulesFor(get(settingsStore)));
   // the calendar moves to today's month itself: a week or quarter note would only bring it to the period's first month
   yearsRanges.update((values) => ({
     ...values,
@@ -45,7 +44,7 @@ export function openNow() {
   }));
   displayedDateStore.set(today.clone());
   if (isNowNoteFile(app.workspace.getActiveFile())) return;
-  createOrOpenNote({ leaf: app.workspace.getLeaf(false), date, granularity }).catch(console.error);
+  openCurrentNote(granularity, { leaf: app.workspace.getLeaf(false) }).catch(console.error);
 }
 
 export class OpenNowActions {

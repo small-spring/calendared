@@ -86,3 +86,28 @@ describe("年のビューの 12 年の区切り（yearsRanges）", () => {
     });
   });
 });
+
+describe("refreshToday: 時計から「今日」を読み直す（1 分ごとと、今のノートを開く前）", () => {
+  beforeEach(() => {
+    vi.resetModules();
+  });
+
+  it("日付が変わっていれば今日を新しくして返す。今日の月を見ていたら、表示も新しい月へ", async () => {
+    const { refreshToday, todayStore, displayedDateStore } = await import("./dates");
+    todayStore.set(moment("2026-10-31"));
+    displayedDateStore.set(moment("2026-10-31"));
+    vi.useFakeTimers({ now: new Date(2026, 10, 1, 0, 0, 30) });
+    expect(refreshToday().format("YYYY-MM-DD")).toBe("2026-11-01");
+    expect(get(todayStore).format("YYYY-MM-DD")).toBe("2026-11-01");
+    expect(get(displayedDateStore).format("YYYY-MM-DD")).toBe("2026-11-01");
+  });
+
+  it("同じ日のうちは、今日のストアを変えない", async () => {
+    const { refreshToday, todayStore } = await import("./dates");
+    vi.useFakeTimers({ now: new Date(2026, 10, 1, 9, 0) });
+    const today = moment("2026-11-01");
+    todayStore.set(today);
+    vi.setSystemTime(new Date(2026, 10, 1, 18, 0));
+    expect(refreshToday()).toBe(today);
+  });
+});

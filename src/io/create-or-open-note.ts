@@ -8,7 +8,8 @@ import { type IGranularity } from "./types";
 import { ensureFolderExists, getNotePath, getTemplateInfo } from "./vault";
 import { PluginService } from "@/app-service";
 import { capitalize } from "@/utils";
-import { periodRulesFor } from "@/periods";
+import { periodRulesFor, periodStart } from "@/periods";
+import { refreshToday } from "@/stores/dates";
 
 export async function createOrOpenNote({
   leaf,
@@ -74,6 +75,19 @@ export async function createOrOpenNote({
       await openFile(newFile);
     }
   }
+}
+
+/**
+ * Calendared: open (or create) the note of the period that contains today, for the commands, startup and Open now.
+ * Today is read from the clock first, so all of them and the calendar agree on it (docs/adr/0030). The date passed on is
+ * the period's first day, so a template's {{date}} is the same however the note is made (docs/adr/0039)
+ */
+export function openCurrentNote(
+  granularity: IGranularity,
+  { leaf, confirmBeforeCreateOverride }: { leaf: WorkspaceLeaf | null; confirmBeforeCreateOverride?: boolean },
+) {
+  const date = periodStart(granularity, refreshToday(), periodRulesFor(get(settingsStore)));
+  return createOrOpenNote({ leaf, date, granularity, confirmBeforeCreateOverride });
 }
 
 export async function createNote(granularity: IGranularity, date: moment.Moment) {
