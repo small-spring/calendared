@@ -21,7 +21,8 @@ Works on desktop and mobile. Needs Obsidian 1.13.1 or later.
 ## Features
 
 - **Periodic notes**: Turn each period (day, week, month, quarter, year) on or off on its own. Each period has
-  one file name format, a folder, and a template.
+  one file name format, a folder, and a template. Only notes in the period's folder (or a folder inside it) count as
+  its notes; a note with the same name elsewhere is an ordinary note.
 - **Calendar**: A month calendar in the sidebar. Click a date, a week number, the month, or the year to open its note
   (or create it). Dots show which notes exist, and stickers show on top.
 - **Breadcrumbs and mini calendar**: A strip above every note. The breadcrumbs (`2026 › Q4 › Oct › W44 › 30`) open the

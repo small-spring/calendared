@@ -18,23 +18,14 @@
 
 2026-11-01 に、古いコードと想定と違いそうな動きをもう一度洗い出したもの。「たぶん」は、コードを読んだだけで、起きるかをまだ確かめていない — どれも Claude
 
-- 不具合: 大文字・小文字だけ違う名前への書式の変換（`2026-w44` → `2026-W44`）が、ノート自身とぶつかったことになる（`src/migrations.ts` の `planFormatRenames`）。
-  [spec/migrations.md](spec/migrations.md) では、ぶつかるのはほかのファイル
 - 不具合: カレンダーの言語に `x-pseudo`・`oc-lnc` を選ぶと、パンくずの月・日の表記（`Intl.DateTimeFormat`）がエラーになる（`src/navigation.ts`、`Navigation.svelte`）。
   月・日の表記を moment にそろえるか、Intl が知らない言語を一覧から外す
 - 不具合: 設定を変えても、開いているノートのパンくず・ミニカレンダーが古いまま（`src/ui/components/navigation/sync.ts` は、同じノートなら作り直さない）。
   書式・週の始まり・四半期と年の始まりの月を変えたとき。ノートの読み取り結果も比べる
-- 不具合: 起動時に開くノートだけ、日付に「今」を渡す（`src/main.ts`）。週・月・四半期・年のテンプレートの `{{date}}` が、コマンドや Open now で作ったとき
-  （その期間の最初の日）と違う
-- 不具合: 周期をオフにすると、その周期の移行の知らせが Migrate notes の警告に残るのに、押せる行が出ない（`src/settings/plugin-tab.ts` の `anyMigrationNotice`）
-- 不具合（たぶん）: カレンダーがエディタの場所にあって選ばれているとき、カレンダーを開く・閉じるコマンドで、中身のないビューが残る（`src/main.ts` の `leaf.view.unload()`。元の版のコード）
 - 不具合（たぶん）: テンプレートの候補を出したまま設定画面を閉じると、矢印キー・Enter の割り当てが残る（`src/settings/ui/suggest.ts` の `destroy` が `close` を呼ばない）
 - 不具合（たぶん）: ステッカーのピッカーを別ウィンドウのノートから開くと、メインのウィンドウに出る（`src/ui/sticker-picker.ts` が `document`・`window` を使う）
-- 不具合（たぶん）: Markdown でないファイルの名前を変えても、書式がまちがっているという知らせが出うる（`main.ts` の `onFileRenamed` に `.md` の確かめがない）
-- 整理: 元の版の、使われない設定を読み込むときに捨てる（`REMOVED_SETTINGS` に `stickerPrefix`・`lastUsedStickerPrefixes`・`shouldConfirmBeforeStickerMigrate`、
-  1.2 より前の `viewLeafPosition`・`leafViewEnabled`・`validFormats` など）。設定を読み込むときの重ね方が 1 段だけなので、入れ子の設定に足した項目の既定値が入らないのも直す
-- 整理: 使われていないものを消す: `src/ui/components/navigation/index.ts`、`trim()`・`basename()`、`WorkspaceLeaf.height`、`openState`、`localeDataStore.weekdays`、
-  `IMonth`/`IWeek` の再エクスポート、`#emoji-modal` の CSS、点の白抜きの表示、`suggestionsContainerCreated`。最初の起動の余分な保存と、`main.ts` のずれたコメントも
+- 整理: 使われていないものを消す: `src/ui/components/navigation/index.ts`、`openState`、`localeDataStore.weekdays`、
+  `IMonth`/`IWeek` の再エクスポート、`#emoji-modal` の CSS、点の白抜きの表示、`suggestionsContainerCreated`
 - 整理: カレンダーのマスに何百も付いている同じ `id`（`id="dot"`、`id="date-text"` など。どこからも使われていない）を消す
 - 整理: 週の計算を、週の決め方の部品（[ADR-0014](adr/0014-swappable-week-scheme.md)）に聞く形にそろえる（`navigation.ts` の `isoThursday`、
   `calendar-locale.ts` の `monthGrid`、`weeks.ts` の `isoWeekFormatFor` は書式を記号に分ける部品も使う）
@@ -51,9 +42,6 @@
 - カレンダーの言語を変えても、週の始まりは戻さない（`src/stores/locale.ts` の `switchLocale`）。週の始まりが変わると、
   今ある週のノートが指す 7 日が変わる（[ADR-0011](adr/0011-week-follows-calendar.md)）— Claude
 - Ctrl/Cmd を押しながら日付を押すと新しいタブで開く、今の動きのままにする。仕様の「横に開く」を直し、`createNewSplitLeaf` の名前も合わせる — Claude
-- 周期ノートとして扱うのは、その周期のフォルダ（とその下）のノートだけにする（`src/io/validation/index.ts` の `isValidPeriodicNote`）。
-  件数・移行・カレンダーと同じ決まりにそろえる — Claude
-- 起動時に開く周期をオフにしたら、起動時に開く設定も「Nothing」にする。オンに戻しても起動時には開かない — Claude
 - カレンダーの言語の既定を、OS の言語（`navigator.languages`）ではなく Obsidian の言語から取る（仕様に合わせる）— Claude
 
 ### 確かめる
