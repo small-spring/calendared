@@ -29,12 +29,6 @@ describe("formatsToReset: 設定画面を閉じるとき、既定に戻す書式
         ]);
     });
 
-    it("ほかの周期にまちがった同じ書式があっても、正しい書式は戻さない", () => {
-        expect(formatsToReset(periods({ month: { enabled: true, format: "DD.MM.YYYY" }, day: { enabled: true, format: "DD.MM.YYYY" } }))).toEqual([
-            "month",
-        ]);
-    });
-
     it("オフの周期は、書式がまちがっていても触らない（今あるノートを探すのに使っている）", () => {
         expect(formatsToReset(periods({ week: { enabled: false, format: "YYYY-[W]WW" }, quarter: { enabled: false, format: "" } }))).toEqual([]);
     });

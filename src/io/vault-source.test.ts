@@ -137,22 +137,12 @@ describe("createVaultSource: Obsidian にそのまま聞く", () => {
         source = createVaultSource(fake.app);
     });
 
-    it("fileAt: パスにあるファイルを返す", () => {
-        const file = fileAt("日記/2026-10-30.md");
-        fake.files.set(file.path, file);
-        expect(source.fileAt("日記/2026-10-30.md")).toBe(file);
-    });
-
-    it("fileAt: パスに何もなければ null", () => {
-        expect(source.fileAt("日記/2026-10-30.md")).toBeNull();
-    });
-
     it("fileAt: パスにあるのがフォルダなら null", () => {
         fake.files.set("日記", Object.assign(new TFolder(), { path: "日記" }));
         expect(source.fileAt("日記")).toBeNull();
     });
 
-    it("fileAt: 写しを持たないので、Obsidian の今を返す", () => {
+    it("fileAt: パスにあるファイルを返す（なければ null）。写しを持たないので、Obsidian の今を返す", () => {
         const file = fileAt("a.md");
         expect(source.fileAt("a.md")).toBeNull();
         fake.files.set("a.md", file);

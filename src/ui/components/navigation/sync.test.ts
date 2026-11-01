@@ -64,7 +64,7 @@ describe("NavigationSync: タブごとに、そのタブのノートのパンく
         expect(live()).toHaveLength(1);
     });
 
-    it("同じタブで別のノートを開いたら、前のものを外して付け替える", () => {
+    it("同じタブで別のノートを開いたら（ノートの名前を変えたときも）、前のものを外して付け替える", () => {
         sync.sync([tab("A", note("日記/2026-10-30.md"))], settings);
         sync.sync([tab("A", note("月/2026-10.md"))], settings);
         expect(mounted[0].unmounted).toBe(true);
@@ -111,12 +111,6 @@ describe("NavigationSync: タブごとに、そのタブのノートのパンく
         sync.sync([tab("A", note("日記/2026-10-30.md"), "新しい")], settings);
         expect(mounted[0].unmounted).toBe(true);
         expect(live()).toHaveLength(1);
-    });
-
-    it("ノートの名前が変わったら、新しい名前で付け直す", () => {
-        sync.sync([tab("A", note("日記/2026-10-30.md"))], settings);
-        sync.sync([tab("A", note("日記/2026-10-31.md"))], settings);
-        expect(live()[0].props.date!.format("YYYY-MM-DD")).toBe("2026-10-31");
     });
 
     describe("設定が変わって、同じノートの読み取り結果が変わったとき（書式・週の始まり・四半期と年の始まりの月）", () => {

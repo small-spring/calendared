@@ -78,38 +78,19 @@ describe("isValidPeriodicNote: 周期の書式は 1 つ（ADR-0019）", () => {
 });
 
 describe("isValidPeriodicNote: 周期ノートは、その周期のフォルダ（とその下）の Markdown だけ（件数・移行と同じ決まり）", () => {
-    const withDailyFolder = (folder: string, run: () => void) => {
+    // the rule itself (folders under it, a folder of /, Markdown only) is tested in notes-by-format.test.ts
+
+    it("設定のフォルダとその下のノートを読み、外のノートは名前が合っても周期ノートではない", () => {
         const saved = get(settingsStore);
-        settingsStore.set({ ...saved, periods: { ...saved.periods, day: { ...saved.periods.day, folder } } });
+        settingsStore.set({ ...saved, periods: { ...saved.periods, day: { ...saved.periods.day, folder: "日記" } } });
         try {
-            run();
+            expect(isValidPeriodicNote(md("日記/2026-10-29.md")).granularity).toBe("day");
+            expect(isValidPeriodicNote(md("日記/2026/2026-10-29.md")).granularity).toBe("day");
+            expect(isValidPeriodicNote(md("2026-10-29.md")).isValid).toBeNull();
+            expect(isValidPeriodicNote(md("メモ/2026-10-29.md")).isValid).toBeNull();
         } finally {
             settingsStore.set(saved);
         }
-    };
-
-    it("周期のフォルダとその下のフォルダのノートを読む", () => {
-        withDailyFolder("日記", () => {
-            expect(isValidPeriodicNote(md("日記/2026-10-29.md")).granularity).toBe("day");
-            expect(isValidPeriodicNote(md("日記/2026/2026-10-29.md")).granularity).toBe("day");
-        });
-    });
-
-    it("周期のフォルダの外のノートは、名前が合っても周期ノートではない", () => {
-        withDailyFolder("日記", () => {
-            expect(isValidPeriodicNote(md("2026-10-29.md")).isValid).toBeNull();
-            expect(isValidPeriodicNote(md("メモ/2026-10-29.md")).isValid).toBeNull();
-            // a folder whose name only starts with the period's
-            expect(isValidPeriodicNote(md("日記帳/2026-10-29.md")).isValid).toBeNull();
-        });
-    });
-
-    it("フォルダが / なら、どこにあっても読む", () => {
-        expect(isValidPeriodicNote(md("どこか/深く/2026-10-29.md")).granularity).toBe("day");
-    });
-
-    it("Markdown でないファイルは周期ノートではない", () => {
-        expect(isValidPeriodicNote(md("2026-10-29.pdf")).isValid).toBeNull();
     });
 });
 

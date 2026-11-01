@@ -213,7 +213,7 @@ describe("readsBack: 週の名前が、同じ週として読み戻せるか", ()
 });
 
 describe("dayRangeText: 週の日付の範囲（設定の例に出す）", () => {
-    it("M/D – M/D", () => {
+    it("「月/日 – 月/日」で書く（年はまたいでも書かない）", () => {
         expect(dayRangeText({ start: d("2026-12-28"), end: d("2027-01-03") })).toBe("12/28 – 1/3");
     });
 });

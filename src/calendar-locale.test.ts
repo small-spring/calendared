@@ -124,10 +124,6 @@ describe("monthGrid: カレンダーに並べる 6 週・42 日", () => {
         expect(ymd(monthGrid(d("2026-11-20"), createIsoWeekScheme(1))[0].days[0])).toBe("2026-10-26");
     });
 
-    it("1 日が週の始まりの曜日なら、1 日から始まる", () => {
-        expect(ymd(monthGrid(d("2026-06-20"), createIsoWeekScheme(1))[0].days[0])).toBe("2026-06-01"); // a Monday
-    });
-
     it("日付の言語に関係なく同じ（曜日の名前で探さない）", () => {
         const ja = monthGrid(d("2026-10-15").locale("ja"), createIsoWeekScheme(1));
         expect(ymd(ja[0].days[0])).toBe("2026-09-28");

@@ -21,7 +21,7 @@ describe("stickerProperty: ステッカーを入れるプロパティの名前",
     });
 });
 
-describe("isReservedStickerProperty", () => {
+describe("isReservedStickerProperty: Obsidian が意味を持たせているプロパティか", () => {
     it("大文字・小文字と前後の空白を区別しない", () => {
         expect(isReservedStickerProperty(" CSSClasses ")).toBe(true);
         expect(isReservedStickerProperty("mood")).toBe(false);

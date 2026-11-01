@@ -68,38 +68,16 @@ beforeEach(() => {
 });
 
 describe("getNotePath: 周期と日付から、そのノートのパスを決める", () => {
+    // how a path is made from the folder and the format is tested in note-path.test.ts; here, that the settings are read
+
     it("その周期の設定のフォルダと、選んでいる書式で名前を作る", () => {
         expect(getNotePath("day", d("2026-10-30"))).toBe("日記/2026-10-30.md");
         expect(getNotePath("year", d("2026-10-30"))).toBe("年/2026.md");
     });
 
-    it("フォルダが / （Vault の一番上）なら、フォルダなしのパスになる", () => {
-        expect(getNotePath("month", d("2026-10-30"))).toBe("2026-10.md");
-    });
-
-    it("フォルダの最後の / はあってもなくても同じ", () => {
-        expect(getNotePath("week", d("2026-10-30"))).toBe("週/2026-W44.md");
-    });
-
     it("週次ノートは、日付を含む週（週の始まりの設定に従う）の名前になる", () => {
         // 2026-11-01 is a Sunday: with Monday-first weeks it belongs to the week of 10-26 (ISO week 44)
         expect(getNotePath("week", d("2026-11-01"))).toBe("週/2026-W44.md");
-    });
-
-    it("書式に .md が含まれていれば、もう一度は足さない", () => {
-        settingsStore.update((s) => {
-            s.periods.day.format = "YYYY-MM-DD[.md]";
-            return s;
-        });
-        expect(getNotePath("day", d("2026-10-30"))).toBe("日記/2026-10-30.md");
-    });
-
-    it("書式に / があれば、フォルダの下のフォルダになる", () => {
-        settingsStore.update((s) => {
-            s.periods.day.format = "YYYY/MM/YYYY-MM-DD";
-            return s;
-        });
-        expect(getNotePath("day", d("2026-10-30"))).toBe("日記/2026/10/2026-10-30.md");
     });
 
     it("無効にした周期も、その周期の設定の書式とフォルダで探す（既定の書式には戻さない）", () => {
