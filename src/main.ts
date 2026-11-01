@@ -1,7 +1,6 @@
 import { DEFAULT_SETTINGS, settingsFromSaved, settingsStore, SettingsTab, type ISettings } from '@/settings';
-import { InvalidFormat, ViewManager } from '@/ui';
+import { invalidFormatNotice, ViewManager } from '@/ui';
 import { MarkdownView, Notice, Plugin, TAbstractFile, TFile, WorkspaceLeaf, WorkspaceRoot } from 'obsidian';
-import { mount } from 'svelte';
 import { get } from 'svelte/store';
 import { PluginService } from './app-service';
 import { CALENDAR_LUCIDE_ICON, granularities, LEAF_TYPE } from './constants';
@@ -364,18 +363,12 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     const { isValid, granularity, format } = isValidPeriodicNote(file);
     if (isValid !== false) return;
 
-    const fragment = document.createDocumentFragment();
-    mount(InvalidFormat, {
-      // @ts-ignore
-      target: fragment,
-      props: {
-        granularity,
-        filepath: file.path,
-        formatValue: format,
-        error: validateFormat(format, granularity)
-      }
-    })
-    new Notice(fragment, 10000)
+    new Notice(invalidFormatNotice({
+      granularity,
+      filepath: file.path,
+      formatValue: format,
+      error: validateFormat(format, granularity),
+    }), 10000)
   }
 }
 
