@@ -1,4 +1,4 @@
-import { DEFAULT_SETTINGS, REMOVED_PERIOD_SETTINGS, REMOVED_SETTINGS, migrateFormatSettings, settingsStore, SettingsTab, type ISettings } from '@/settings';
+import { DEFAULT_SETTINGS, settingsFromSaved, settingsStore, SettingsTab, type ISettings } from '@/settings';
 import { InvalidFormat, ViewManager } from '@/ui';
 import { MarkdownView, Notice, Plugin, TAbstractFile, TFile, WorkspaceLeaf, WorkspaceRoot } from 'obsidian';
 import { mount } from 'svelte';
@@ -10,8 +10,7 @@ import { getPeriodicityFromGranularity } from './io/parse';
 import type { IGranularity } from './io/types';
 import { isValidPeriodicNote, validateFormat } from './io/validation';
 import { overlapsMonth, periodRulesFor, rangeOfPeriod, shiftPeriod } from './periods';
-import { toSupportedWeekStart } from './weeks';
-import { migratePlacementSettings, migrateTimelineSettings, periodStart } from './navigation';
+import { periodStart } from './navigation';
 import {
   displayedDateStore,
   setupLocale,
@@ -207,41 +206,10 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
   }
 
   async loadSettings() {
-    const loadedSettings = (await this.loadData()) as ISettings;
-    if (!loadedSettings) {
-      await this.saveData(DEFAULT_SETTINGS)
-    }
-
-    settingsStore.update((old) => {
-      // Calendared: upstream's timeline settings become the breadcrumbs' and mini calendar's (docs/adr/0031), and their
-      // "Never" a toggle (docs/adr/0033)
-      // Calendared: and a period's list of formats becomes its one format (docs/adr/0019)
-      const saved = migrateFormatSettings(migratePlacementSettings(
-        migrateTimelineSettings((loadedSettings || {}) as unknown as Record<string, unknown>),
-      ));
-      const newSettings = { ...old, ...saved } as ISettings;
-      // Calendared: drop the saved settings of removed features
-      for (const key of REMOVED_SETTINGS) {
-        delete (newSettings as unknown as Record<string, unknown>)[key];
-      }
-      // Calendared: weeks start on Saturday, Sunday or Monday only (docs/spec/periods.md)
-      newSettings.localeSettings = {
-        ...newSettings.localeSettings,
-        weekStartId: toSupportedWeekStart(newSettings.localeSettings.weekStartId),
-      };
-      // Calendared: weeks are always numbered the ISO way; drop the field that was kept for other ways (docs/adr/0014)
-      delete (newSettings.localeSettings as Record<string, unknown>).weekNumbering;
-      const periods = newSettings.periods
-      Object.values(periods).forEach((periodSettings) => {
-        for (const key of REMOVED_PERIOD_SETTINGS) {
-          delete (periodSettings as unknown as Record<string, unknown>)[key];
-        }
-      })
-      return {
-        ...newSettings,
-        periods
-      }
-    });
+    // Calendared: nothing is saved here on the first start; the settings store's subscription saves the defaults.
+    // Upstream merged the saved settings over the defaults at the top level only; see settingsFromSaved
+    const saved: unknown = await this.loadData();
+    settingsStore.set(settingsFromSaved(saved, DEFAULT_SETTINGS));
   }
 
   /**

@@ -104,7 +104,22 @@ export const REMOVED_SETTINGS = [
   "shouldConfirmBeforeDeleteAllFiles",
   // Calendared: saved but never read; the year view's ranges start from YEARS_RANGES_START
   "yearsRangesStart",
+  // Calendared: upstream 1.2's sticker tags (stickers are a property now, docs/adr/0001), never read since
+  "stickerPrefix",
+  "lastUsedStickerPrefixes",
+  "shouldConfirmBeforeStickerMigrate",
+  // Calendared: from upstream's versions before 1.2 (1.0.0's and its development versions'), which 1.2 no longer read
+  "viewLeafPosition",
+  "leafViewEnabled",
+  "validFormats",
+  "allowLocalesSwitchFromCommandPalette",
+  "lastPreviewFilepath",
 ] as const;
+/**
+ * Calendared: `localeSettings.<key>` no longer read: the calendar's week and quarter number toggles (before upstream 1.0),
+ * and the way weeks were numbered, now always ISO (docs/adr/0014)
+ */
+export const REMOVED_LOCALE_SETTINGS = ["showWeekNums", "showQuarterNums", "weekNumbering"] as const;
 /** Calendared: per-period settings of removed features (`periods.<granularity>.preview`: TODO / preview sections) */
 export const REMOVED_PERIOD_SETTINGS = ["preview"] as const;
 
