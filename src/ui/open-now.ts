@@ -31,7 +31,7 @@ export function isNowNoteFile(
   today: moment.Moment = get(todayStore),
 ): boolean {
   if (!file) return false;
-  const { isValid, granularity, date } = isValidPeriodicNote(file.basename);
+  const { isValid, granularity, date } = isValidPeriodicNote(file);
   const note = typeof isValid === "boolean" && granularity && date ? { granularity, date } : null;
   return isNowNote(note, enabledPeriods(settings.periods), today, periodRulesFor(settings));
 }

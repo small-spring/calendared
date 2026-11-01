@@ -26,7 +26,7 @@ export default class NavigationManager {
       }),
     unmount: (component) => void unmount(component),
     read: (file) => {
-      const { isValid, granularity, date } = isValidPeriodicNote(file.basename);
+      const { isValid, granularity, date } = isValidPeriodicNote(file);
       const isPeriodic = typeof isValid === "boolean" && !!date && !!granularity;
       return { isPeriodic, granularity: isPeriodic ? granularity : null, date: isPeriodic ? date : null };
     },

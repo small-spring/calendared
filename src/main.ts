@@ -134,7 +134,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
         checkCallback: (checking) => {
           const file = this.app.workspace.getActiveFile();
           if (!file) return false;
-          const { granularity, period } = isValidPeriodicNote(file.basename);
+          const { granularity, period } = isValidPeriodicNote(file);
           if (!granularity || !period) return false;
           if (checking) return true;
 
@@ -359,7 +359,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
    */
   private onFileOpen(file: TFile | null) {
     if (!file) return;
-    const { isValid, date, period } = isValidPeriodicNote(file.basename);
+    const { isValid, date, period } = isValidPeriodicNote(file);
     if (typeof isValid !== "boolean" || !date || !period) return;
 
     // Calendared: always follow the open note, but only when no day of it is on the displayed month already.
@@ -393,7 +393,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
   }
 
   private noticeIfInvalidFormat(file: TFile) {
-    const { isValid, granularity, format } = isValidPeriodicNote(file.basename);
+    const { isValid, granularity, format } = isValidPeriodicNote(file);
     if (isValid !== false) return;
 
     const fragment = document.createDocumentFragment();

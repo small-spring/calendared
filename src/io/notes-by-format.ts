@@ -13,14 +13,17 @@ export function notesWithFormat(
   { folder, format }: { folder: string; format: string },
   rules: PeriodRules,
 ): string[] {
-  const root = normalizePath(folder);
-  const inFolder = (path: string) => root === "/" || path.startsWith(`${root}/`);
-
   return files
-    .filter((file) => file.extension === "md" && inFolder(file.path))
+    .filter((file) => file.extension === "md" && isInFolder(file.path, folder))
     .filter((file) => {
       const period = parsePeriod(file.basename, granularity, format, rules);
       return !!period && formatPeriod(period, format, rules) === file.basename;
     })
     .map((file) => file.path);
+}
+
+/** Calendared: whether the path is in the folder or a folder under it. Every path is in "/" */
+export function isInFolder(path: string, folder: string): boolean {
+  const root = normalizePath(folder);
+  return root === "/" || path.startsWith(`${root}/`);
 }

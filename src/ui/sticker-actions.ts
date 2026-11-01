@@ -13,8 +13,8 @@ import { get } from "svelte/store";
 export const STICKER_BUTTON_ICON = "smile-plus";
 
 export function isPeriodicNote(file: TFile | null | undefined): file is TFile {
-  if (!file || file.extension !== "md") return false;
-  const { isValid, date, granularity } = isValidPeriodicNote(file.basename);
+  if (!file) return false;
+  const { isValid, date, granularity } = isValidPeriodicNote(file);
   return typeof isValid === "boolean" && !!date && !!granularity;
 }
 

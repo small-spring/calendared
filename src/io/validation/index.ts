@@ -6,18 +6,27 @@ import { normalizePath } from 'obsidian';
 import { formatPeriod, parsePeriod, periodRulesFor, rangeOfPeriod, type PeriodName } from '@/periods';
 import { PluginService } from '@/app-service';
 import { vaultSource } from '../vault-source';
+import { isInFolder } from '../notes-by-format';
 import { validateFormat } from './format';
 
-export function isValidPeriodicNote(fileName: string, customGranularities = granularities as unknown as IGranularity[])
+/**
+ * Calendared: a periodic note is a Markdown file in its period's folder (or a folder under it), named exactly what the
+ * period's format writes, the same rule as the settings' counts and the migrations (docs/adr/0044). Upstream read the
+ * name alone, so a note named like a date anywhere in the vault had a sticker button, breadcrumbs and so on
+ */
+export function isValidPeriodicNote(file: { path: string; basename: string; extension: string })
     : { isValid: boolean, granularity: IGranularity, date: moment.Moment, period: PeriodName, format: string } | { isValid: null, granularity: null, date: null, period: null, format: null } {
+    const notPeriodic = { isValid: null, granularity: null, date: null, period: null, format: null } as const;
+    if (file.extension !== "md") return notPeriodic;
+    const fileName = file.basename;
     // Calendared: every granularity is read as a period name through the period rules (docs/spec/periods.md, docs/adr/0039).
     // Upstream built a weekly note's date from today, so it fell on today's weekday instead of the week's first day
     const rules = periodRulesFor(get(settingsStore));
 
-    for (const granularity of customGranularities) {
+    for (const granularity of granularities) {
         // Calendared: a period has one format (docs/adr/0019)
-        const format = get(settingsStore).periods[granularity].format;
-        if (!format.trim()) continue;
+        const { format, folder } = get(settingsStore).periods[granularity];
+        if (!format.trim() || !isInFolder(file.path, folder)) continue;
         const period = parsePeriod(fileName, granularity, format, rules);
         // the name must be exactly what this format writes for that period
         if (!period || formatPeriod(period, format, rules) !== fileName) continue;
@@ -26,7 +35,7 @@ export function isValidPeriodicNote(fileName: string, customGranularities = gran
         return { isValid: !validateFormat(format, granularity), granularity, date, period, format };
     }
 
-    return { isValid: null, granularity: null, date: null, period: null, format: null };
+    return notPeriodic;
 }
 
 export function validateFolder(folder: string): string {
