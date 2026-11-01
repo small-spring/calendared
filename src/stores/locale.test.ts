@@ -1,8 +1,6 @@
-import { writable } from "svelte/store";
 import { describe, expect, it, vi } from "vitest";
-import { DEFAULT_SETTINGS } from "@/settings/constants";
 
-vi.mock("@/settings", () => ({ settingsStore: writable(structuredClone(DEFAULT_SETTINGS)) }));
+vi.mock("@/settings", async () => (await import("@/test-fixtures")).settingsModule());
 
 const { get } = await import("svelte/store");
 const { settingsStore } = await import("@/settings");

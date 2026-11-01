@@ -1,5 +1,6 @@
 import { TFile, TFolder } from "obsidian";
 import { beforeEach, describe, expect, it } from "vitest";
+import { fileAt } from "@/test-fixtures";
 import { createVaultSource, watchVault } from "./vault-source";
 
 // The vault source reads Obsidian as it is (no copies) and tells its readers to read again when Obsidian reports a
@@ -45,8 +46,6 @@ function fakeApp() {
         listenerCount: () => vault.count() + metadataCache.count() + workspace.count(),
     };
 }
-
-const fileAt = (path: string) => Object.assign(new TFile(), { path });
 
 describe("watchVault: Obsidian の出来事を、読み直しの合図にする", () => {
     let fake: ReturnType<typeof fakeApp>;

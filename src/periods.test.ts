@@ -16,14 +16,10 @@ import {
     type PeriodName,
 } from "./periods";
 import { createIsoWeekScheme } from "./weeks";
-
-const d = (s: string) => moment(s, "YYYY-MM-DD");
+import { d, FORMATS, mondayWeeks, sundayWeeks } from "@/test-fixtures";
 
 // ---- Period names and operations (docs/adr/0009, 0010) ----
 
-const mondayWeeks = periodRules(createIsoWeekScheme(1));
-const sundayWeeks = periodRules(createIsoWeekScheme(0));
-const FORMATS = { day: "YYYY-MM-DD", week: "GGGG-[W]WW", month: "YYYY-MM", quarter: "YYYY-[Q]Q", year: "YYYY" } as const;
 const range = (p: PeriodName, weeks = mondayWeeks) => {
     const r = rangeOfPeriod(p, weeks);
     return r && [r.start.format("YYYY-MM-DD"), r.end.format("YYYY-MM-DD")];

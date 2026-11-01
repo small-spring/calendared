@@ -1,12 +1,11 @@
 import moment from "moment";
 import { describe, expect, it } from "vitest";
 import { checkWeekFormat, createIsoWeekScheme, dayRangeText, isoWeekFormatFor, readsBack, toSupportedWeekStart, weekSchemeFor, type WeekName, type WeekScheme } from "./weeks";
+import { d, ymd } from "@/test-fixtures";
 
 // The week scheme decides what a "week" is (docs/adr/0011, 0012, 0014).
 // Week starts use moment's day numbers: 6 = Saturday, 0 = Sunday, 1 = Monday
 
-const d = (s: string) => moment(s, "YYYY-MM-DD");
-const ymd = (m: moment.Moment) => m.format("YYYY-MM-DD");
 const week = (weekYear: number, weekNumber: number): WeekName => ({ weekYear, week: weekNumber });
 
 const monday = createIsoWeekScheme(1);

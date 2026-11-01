@@ -1,9 +1,9 @@
 import moment from "moment";
 import { describe, expect, it } from "vitest";
 import { nextToday } from "./today";
+import { ymd } from "@/test-fixtures";
 
 const at = (s: string) => moment(s, "YYYY-MM-DD HH:mm");
-const ymd = (m: moment.Moment | null) => m?.format("YYYY-MM-DD") ?? null;
 
 describe("nextToday: 1 分ごとに、今日と、カレンダーに出す月を決め直す", () => {
     it("日付が変わっていなければ、どちらも変えない（店を書き換えて、画面を作り直させない）", () => {

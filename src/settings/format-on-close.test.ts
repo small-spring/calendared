@@ -1,19 +1,19 @@
 import { describe, expect, it, vi } from "vitest";
-import { writable } from "svelte/store";
+import { FORMATS } from "@/test-fixtures";
 
 // The format check reads the week start from the settings store; give it a stand-in
 vi.mock("@/app-service", () => ({ PluginService: { getPlugin: () => null } }));
-vi.mock("@/settings", () => ({ settingsStore: writable({ localeSettings: { weekStartId: 1 } }) }));
+vi.mock("@/settings", async () => (await import("@/test-fixtures")).settingsModule());
 
 const { formatsToReset, savePendingEdits, trackPendingEdit } = await import("./format-on-close");
 
 type Period = { enabled: boolean; format: string };
 const periods = (overrides: Partial<Record<"day" | "week" | "month" | "quarter" | "year", Period>> = {}) => ({
-    day: { enabled: true, format: "YYYY-MM-DD" },
-    week: { enabled: true, format: "GGGG-[W]WW" },
-    month: { enabled: true, format: "YYYY-MM" },
-    quarter: { enabled: true, format: "YYYY-[Q]Q" },
-    year: { enabled: true, format: "YYYY" },
+    day: { enabled: true, format: FORMATS.day },
+    week: { enabled: true, format: FORMATS.week },
+    month: { enabled: true, format: FORMATS.month },
+    quarter: { enabled: true, format: FORMATS.quarter },
+    year: { enabled: true, format: FORMATS.year },
     ...overrides,
 });
 

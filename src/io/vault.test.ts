@@ -1,7 +1,6 @@
-import moment from "moment";
 import { TFile, TFolder } from "obsidian";
 import { Notice } from "@/test-obsidian"; // the stand-in that "obsidian" points to in tests, with the messages shown
-import { writable } from "svelte/store";
+import { d, fileAt, testSettings } from "@/test-fixtures";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Characterization tests: they pin down which file a calendar cell looks for today, so the lookup can be reworked
@@ -38,26 +37,17 @@ vi.mock("@/app-service", () => ({
     },
 }));
 
-const settings = vi.hoisted(() => {
-    const period = (enabled: boolean, format: string, folder: string) => {
-        return { enabled, openAtStartup: false, format, folder, templatePath: "" };
-    };
-    const initial = () => ({
-        periods: {
-            day: period(true, "YYYY-MM-DD", "日記"),
-            week: period(true, "GGGG-[W]WW", "週/"),
-            month: period(true, "YYYY-MM", "/"),
-            quarter: period(false, "YYYY-[Q]Q", "四半期"),
-            year: period(true, "YYYY", "年"),
-        },
-        localeSettings: { localeOverride: "en", weekStartId: 1 },
-        stickersEnabled: true,
-        stickerProperty: "sticker",
+// the settings in these tests: each period's folder written a different way, quarterly notes off
+const settings = () =>
+    testSettings({
+        day: { folder: "日記" },
+        week: { folder: "週/" },
+        month: { folder: "/" },
+        quarter: { enabled: false, folder: "四半期" },
+        year: { folder: "年" },
     });
-    return { period, initial };
-});
 
-vi.mock("@/settings", () => ({ settingsStore: writable(settings.initial()) }));
+vi.mock("@/settings", async () => (await import("@/test-fixtures")).settingsModule());
 
 const { settingsStore } = await import("@/settings");
 const { getNotePath, getFileData, noteAt, notesWithFormatIn, getTemplateInfo } = await import("./vault");
@@ -68,35 +58,32 @@ const { PluginService } = await import("@/app-service");
 // @ts-expect-error the stand-in has only what the lookups use
 initVaultSource(PluginService.getPlugin().app);
 
-const date = (d: string) => moment(d, "YYYY-MM-DD");
-const fileAt = (path: string) => Object.assign(new TFile(), { path });
-
 beforeEach(() => {
     fake.files.clear();
     fake.contents.clear();
     fake.created = [];
     fake.caches.clear();
     fake.dailyNotes = null;
-    (settingsStore as ReturnType<typeof writable>).set(settings.initial());
+    settingsStore.set(settings());
 });
 
 describe("getNotePath: 周期と日付から、そのノートのパスを決める", () => {
     it("その周期の設定のフォルダと、選んでいる書式で名前を作る", () => {
-        expect(getNotePath("day", date("2026-10-30"))).toBe("日記/2026-10-30.md");
-        expect(getNotePath("year", date("2026-10-30"))).toBe("年/2026.md");
+        expect(getNotePath("day", d("2026-10-30"))).toBe("日記/2026-10-30.md");
+        expect(getNotePath("year", d("2026-10-30"))).toBe("年/2026.md");
     });
 
     it("フォルダが / （Vault の一番上）なら、フォルダなしのパスになる", () => {
-        expect(getNotePath("month", date("2026-10-30"))).toBe("2026-10.md");
+        expect(getNotePath("month", d("2026-10-30"))).toBe("2026-10.md");
     });
 
     it("フォルダの最後の / はあってもなくても同じ", () => {
-        expect(getNotePath("week", date("2026-10-30"))).toBe("週/2026-W44.md");
+        expect(getNotePath("week", d("2026-10-30"))).toBe("週/2026-W44.md");
     });
 
     it("週次ノートは、日付を含む週（週の始まりの設定に従う）の名前になる", () => {
         // 2026-11-01 is a Sunday: with Monday-first weeks it belongs to the week of 10-26 (ISO week 44)
-        expect(getNotePath("week", date("2026-11-01"))).toBe("週/2026-W44.md");
+        expect(getNotePath("week", d("2026-11-01"))).toBe("週/2026-W44.md");
     });
 
     it("書式に .md が含まれていれば、もう一度は足さない", () => {
@@ -104,7 +91,7 @@ describe("getNotePath: 周期と日付から、そのノートのパスを決め
             s.periods.day.format = "YYYY-MM-DD[.md]";
             return s;
         });
-        expect(getNotePath("day", date("2026-10-30"))).toBe("日記/2026-10-30.md");
+        expect(getNotePath("day", d("2026-10-30"))).toBe("日記/2026-10-30.md");
     });
 
     it("書式に / があれば、フォルダの下のフォルダになる", () => {
@@ -112,16 +99,16 @@ describe("getNotePath: 周期と日付から、そのノートのパスを決め
             s.periods.day.format = "YYYY/MM/YYYY-MM-DD";
             return s;
         });
-        expect(getNotePath("day", date("2026-10-30"))).toBe("日記/2026/10/2026-10-30.md");
+        expect(getNotePath("day", d("2026-10-30"))).toBe("日記/2026/10/2026-10-30.md");
     });
 
     it("無効にした周期も、その周期の設定の書式とフォルダで探す（既定の書式には戻さない）", () => {
-        expect(getNotePath("quarter", date("2026-10-30"))).toBe("四半期/2026-Q4.md");
+        expect(getNotePath("quarter", d("2026-10-30"))).toBe("四半期/2026-Q4.md");
         settingsStore.update((s) => {
             s.periods.quarter.format = "YYYY年Q四半期";
             return s;
         });
-        expect(getNotePath("quarter", date("2026-10-30"))).toBe("四半期/2026年4四半期.md");
+        expect(getNotePath("quarter", d("2026-10-30"))).toBe("四半期/2026年4四半期.md");
     });
 
     describe("日次ノートを無効にしているとき", () => {
@@ -134,12 +121,12 @@ describe("getNotePath: 周期と日付から、そのノートのパスを決め
 
         it("Obsidian のコアプラグイン「デイリーノート」がオンでも、その設定は使わず、日の設定の書式とフォルダで探す", () => {
             fake.dailyNotes = { enabled: true, instance: { options: { format: "YYYYMMDD", folder: "Daily" } } };
-            expect(getNotePath("day", date("2026-10-30"))).toBe("日記/2026-10-30.md");
+            expect(getNotePath("day", d("2026-10-30"))).toBe("日記/2026-10-30.md");
         });
 
         it("デイリーノートもオフでも、日の設定の書式とフォルダで探す", () => {
             fake.dailyNotes = { enabled: false };
-            expect(getNotePath("day", date("2026-10-30"))).toBe("日記/2026-10-30.md");
+            expect(getNotePath("day", d("2026-10-30"))).toBe("日記/2026-10-30.md");
         });
     });
 });
@@ -149,26 +136,26 @@ describe("getFileData: その日付の周期ノートと、そのステッカー
         const file = fileAt("日記/2026-10-30.md");
         fake.files.set(file.path, file);
         fake.caches.set(file.path, { frontmatter: { sticker: "🍙" } });
-        expect(getFileData("day", date("2026-10-30"))).toEqual({ file, sticker: { emoji: "🍙" } });
+        expect(getFileData("day", d("2026-10-30"))).toEqual({ file, sticker: { emoji: "🍙" } });
     });
 
     it("ファイルがあってもステッカーがなければ、ステッカーは null", () => {
         const file = fileAt("日記/2026-10-30.md");
         fake.files.set(file.path, file);
-        expect(getFileData("day", date("2026-10-30"))).toEqual({ file, sticker: null });
+        expect(getFileData("day", d("2026-10-30"))).toEqual({ file, sticker: null });
     });
 
     it("パスにファイルがなければ、どちらも null", () => {
-        expect(getFileData("day", date("2026-10-30"))).toEqual({ file: null, sticker: null });
+        expect(getFileData("day", d("2026-10-30"))).toEqual({ file: null, sticker: null });
     });
 
     it("パスにあるのがフォルダなら、ないのと同じ", () => {
         fake.files.set("日記/2026-10-30.md", Object.assign(new TFolder(), { path: "日記/2026-10-30.md" }));
-        expect(getFileData("day", date("2026-10-30"))).toEqual({ file: null, sticker: null });
+        expect(getFileData("day", d("2026-10-30"))).toEqual({ file: null, sticker: null });
     });
 
     it("周期か日付がなければ、どちらも null", () => {
-        expect(getFileData(null, date("2026-10-30"))).toEqual({ file: null, sticker: null });
+        expect(getFileData(null, d("2026-10-30"))).toEqual({ file: null, sticker: null });
         expect(getFileData("day", null)).toEqual({ file: null, sticker: null });
     });
 });
@@ -177,16 +164,16 @@ describe("noteAt: 渡した設定で、その日付の周期ノートとステ�
     it("ストアではなく、渡した設定のフォルダと書式で探す", () => {
         const file = fileAt("別/2026-10-30.md");
         fake.files.set(file.path, file);
-        const passed = settings.initial();
+        const passed = settings();
         passed.periods.day.folder = "別";
-        expect(noteAt("day", date("2026-10-30"), passed)).toEqual({ file, sticker: null });
+        expect(noteAt("day", d("2026-10-30"), passed)).toEqual({ file, sticker: null });
     });
 
     it("ストアではなく、渡した設定のステッカーのプロパティで読む", () => {
         const file = fileAt("日記/2026-10-30.md");
         fake.files.set(file.path, file);
         fake.caches.set(file.path, { frontmatter: { sticker: "🍙", mood: "😀" } });
-        expect(noteAt("day", date("2026-10-30"), { ...settings.initial(), stickerProperty: "mood" })).toEqual({
+        expect(noteAt("day", d("2026-10-30"), { ...settings(), stickerProperty: "mood" })).toEqual({
             file,
             sticker: { emoji: "😀" },
         });
@@ -195,19 +182,19 @@ describe("noteAt: 渡した設定で、その日付の周期ノートとステ�
     it("日次ノートを無効にしていても、日の設定のフォルダと書式で探す（書式を変えてからオフにしても見つかる）", () => {
         const file = fileAt("日記/20261030.md");
         fake.files.set(file.path, file);
-        const passed = settings.initial();
+        const passed = settings();
         passed.periods.day.format = "YYYYMMDD";
         passed.periods.day.enabled = false;
-        expect(noteAt("day", date("2026-10-30"), passed)).toEqual({ file, sticker: null });
+        expect(noteAt("day", d("2026-10-30"), passed)).toEqual({ file, sticker: null });
     });
 
     it("日次ノートを無効にしていても、コアプラグイン「デイリーノート」の設定では探さない", () => {
         const file = fileAt("Daily/20261030.md");
         fake.files.set(file.path, file);
         fake.dailyNotes = { enabled: true, instance: { options: { format: "YYYYMMDD", folder: "Daily" } } };
-        const passed = settings.initial();
+        const passed = settings();
         passed.periods.day.enabled = false;
-        expect(noteAt("day", date("2026-10-30"), passed)).toEqual({ file: null, sticker: null });
+        expect(noteAt("day", d("2026-10-30"), passed)).toEqual({ file: null, sticker: null });
     });
 });
 
@@ -217,18 +204,18 @@ describe("notesWithFormatIn: 設定画面の「書式ごとのファイル数」
 
     it("周期の設定のフォルダから、窓口の今のファイルを数える", () => {
         for (const path of ["日記/2026-10-30.md", "日記/メモ.md", "2026-10-31.md"]) fake.files.set(path, note(path));
-        expect(notesWithFormatIn("day", "YYYY-MM-DD", settings.initial())).toEqual(["日記/2026-10-30.md"]);
+        expect(notesWithFormatIn("day", "YYYY-MM-DD", settings())).toEqual(["日記/2026-10-30.md"]);
     });
 
     it("選んでいない書式でも、その書式で数える", () => {
         fake.files.set("日記/20261030.md", note("日記/20261030.md"));
-        expect(notesWithFormatIn("day", "YYYYMMDD", settings.initial())).toEqual(["日記/20261030.md"]);
+        expect(notesWithFormatIn("day", "YYYYMMDD", settings())).toEqual(["日記/20261030.md"]);
     });
 
     it("日次ノートを無効にしていても、コアプラグイン「デイリーノート」のフォルダではなく、日の設定のフォルダで数える", () => {
         for (const path of ["日記/2026-10-30.md", "Daily/2026-10-31.md", "2026-11-01.md"]) fake.files.set(path, note(path));
         fake.dailyNotes = { enabled: true, instance: { options: { format: "YYYY-MM-DD", folder: "Daily" } } };
-        const passed = settings.initial();
+        const passed = settings();
         passed.periods.day.enabled = false;
         expect(notesWithFormatIn("day", "YYYY-MM-DD", passed)).toEqual(["日記/2026-10-30.md"]);
     });

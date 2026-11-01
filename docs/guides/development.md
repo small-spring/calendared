@@ -91,6 +91,11 @@ obsidian plugin:reload id=calendared
   - `src/test-obsidian.ts`: `obsidian` の代わり（npm の `obsidian` は型定義だけで中身がない）。テストする処理が読み込み時に使うものだけ置く
   - 設定のストアなど、Obsidian につながる部品は、テストの中で `vi.mock` で置き換える（例: `src/io/validation/index.test.ts`）。
     置き換えるのは外側だけにして、テストしたい処理そのものは置き換えない
+  - `src/test-fixtures.ts`: 多くのテストで使う道具（日付の `d`・`ymd`、月曜始まり・日曜始まりの決まり `mondayWeeks`・`sundayWeeks`、
+    既定の書式 `FORMATS`、ファイルの `md`・`fileAt`、設定の `testSettings`・`settingsModule`）。同じものをテストに書き写さず、ここから読む。
+    設定を置き換えるときは `vi.mock("@/settings", async () => (await import("@/test-fixtures")).settingsModule())`
+    （`vi.mock` の中身はファイルの頭に移されて先に動くので、道具は中で読み込む）。`settingsModule` は `settingsStore` と
+    `periodRulesStore` を返す
   - ESLint の「moment を直接読み込まない」決まりは、テストのファイルでは外している（`eslint.config.js`）
 
 ## 依存パッケージと安全対策

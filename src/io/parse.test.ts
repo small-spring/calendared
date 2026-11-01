@@ -1,7 +1,8 @@
 import moment from "moment";
 import { describe, expect, it, vi } from "vitest";
-import { createIsoWeekScheme, type WeekScheme } from "@/weeks";
-import { periodRules } from "@/periods";
+import { createIsoWeekScheme } from "@/weeks";
+import { periodRules, type PeriodRules } from "@/periods";
+import { mondayWeeks, sundayWeeks } from "@/test-fixtures";
 import { replaceTemplateContents } from "./parse";
 
 // Characterization tests: they pin down how template placeholders behave today, so the code can be reworked safely.
@@ -10,10 +11,8 @@ import { replaceTemplateContents } from "./parse";
 const DEFAULT_FORMAT = "YYYY-MM-DD";
 /** a Thursday */
 const noteDate = () => moment("2026-10-29", DEFAULT_FORMAT);
-const sundayWeeks = createIsoWeekScheme(0);
-const mondayWeeks = createIsoWeekScheme(1);
-const replace = (template: string, date = noteDate(), weeks: WeekScheme = sundayWeeks) =>
-    replaceTemplateContents("day", date, DEFAULT_FORMAT, template, periodRules(weeks));
+const replace = (template: string, date = noteDate(), rules: PeriodRules = sundayWeeks) =>
+    replaceTemplateContents("day", date, DEFAULT_FORMAT, template, rules);
 
 describe("replaceTemplateContents: ノートの日付", () => {
     it("{{date}} と {{title}} はノートの日付を既定の書式で書く", () => {
@@ -112,7 +111,7 @@ describe("replaceTemplateContents: 置き換えないもの", () => {
 });
 
 describe("replaceTemplateContents: 書式を書かないときは、ノートの名前と同じ決まりで書く（docs/adr/0039）", () => {
-    const fiscal = periodRules(sundayWeeks, {
+    const fiscal = periodRules(createIsoWeekScheme(0), {
         quarter: { startMonth: 5, yearInName: "start" },
         year: { startMonth: 5, yearInName: "end" },
     });

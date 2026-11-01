@@ -1,20 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import { writable } from "svelte/store";
 
 // The check reads the week start from the settings store; give it a stand-in
 vi.mock("@/app-service", () => ({ PluginService: { getPlugin: () => null } }));
-vi.mock("@/settings", () => ({
-    settingsStore: writable({
-        periods: {
-            day: { format: "YYYY-MM-DD" },
-            week: { format: "GGGG-[W]WW" },
-            month: { format: "YYYY-MM" },
-            quarter: { format: "YYYY-[Q]Q" },
-            year: { format: "YYYY" },
-        },
-        localeSettings: { weekStartId: 1 },
-    }),
-}));
+vi.mock("@/settings", async () => (await import("@/test-fixtures")).settingsModule());
 
 const { validateFormat } = await import("./format");
 const { settingsStore } = await import("@/settings");
