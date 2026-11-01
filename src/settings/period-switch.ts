@@ -6,13 +6,17 @@ type PeriodSwitches<T> = Record<IGranularity, T & { enabled: boolean; openAtStar
 /**
  * Calendared: turns a period on or off. Periods don't turn each other on or off: weeks can be used without days and
  * quarters without months (upstream linked them, since the calendar showed weeks and quarters only beside days and
- * months). The last period on stays on, so the calendar has something to show. Moved out of the settings' Svelte component
+ * months). The last period on stays on, so the calendar has something to show. Moved out of the settings' Svelte component.
+ * A period turned off no longer opens at startup
  */
 export function setPeriodEnabled<T>(periods: PeriodSwitches<T>, granularity: IGranularity, enabled: boolean): PeriodSwitches<T> {
     const next = Object.fromEntries(granularities.map((g) => [g, { ...periods[g] }])) as PeriodSwitches<T>;
     if (!enabled && granularities.every((g) => g === granularity || !next[g].enabled)) return next;
 
     next[granularity].enabled = enabled;
+    // turning off the period that opens at startup sets startup to "Nothing", so turning it on again doesn't bring the
+    // startup note back unasked (docs/adr/0045)
+    if (!enabled) next[granularity].openAtStartup = false;
     return next;
 }
 

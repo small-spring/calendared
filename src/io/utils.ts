@@ -11,11 +11,3 @@ export function getStartupNoteGranularity() {
   }
 }
 
-export function trim(s: string) {
-  return s
-    .trim()
-    .split(" ")
-    .filter((s) => s.trim())
-    .join(" ");
-}
-

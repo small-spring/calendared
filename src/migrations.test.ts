@@ -36,6 +36,20 @@ describe("planFormatRenames: 書式の変換で、どのノートをどの名前
         ]);
     });
 
+    it("大文字・小文字だけ違う名前に変えるとき、ノート自身とはぶつからない", () => {
+        const weekly = { folder: "/", fromFormat: "GGGG-[w]WW", toFormat: "GGGG-[W]WW" };
+        expect(planFormatRenames([md("2026-w44.md")], "week", weekly, weeks)).toEqual([
+            { from: "2026-w44.md", to: "2026-W44.md", conflict: false },
+        ]);
+    });
+
+    it("大文字・小文字だけ違う名前に変えるとき、その名前のファイルがほかにあればぶつかる（大文字・小文字を区別する Linux など）", () => {
+        const weekly = { folder: "/", fromFormat: "GGGG-[w]WW", toFormat: "GGGG-[W]WW" };
+        expect(planFormatRenames([md("2026-w44.md"), md("2026-W44.md")], "week", weekly, weeks)).toEqual([
+            { from: "2026-w44.md", to: "2026-W44.md", conflict: true },
+        ]);
+    });
+
     it("変えた先の名前が、ほかに変えるノートの今の名前と同じなら、ぶつかったとみなす（変える順で結果が変わらないように）", () => {
         const swapped = { folder: "/", fromFormat: "YYYY-MM-DD", toFormat: "YYYY-DD-MM" };
         expect(planFormatRenames([md("2026-10-03.md"), md("2026-03-10.md")], "day", swapped, weeks)).toEqual([

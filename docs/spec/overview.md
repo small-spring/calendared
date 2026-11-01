@@ -24,6 +24,9 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 
 - 周期は 5 つ（日・週・月・四半期・年）。周期ごとにオン・オフできる
   - 無効にした周期のノートは作らない（すでにあるノートは開く）
+- 周期ノートとして扱うのは、その周期のフォルダ（とその下のフォルダ）にある Markdown で、名前が書式の書く名前とぴったり同じもの
+  （[ADR-0044](../adr/0044-periodic-notes-in-period-folder.md)）。件数・移行・パンくず・ステッカーのボタン・前後のノートのコマンド・Open now の
+  どれも同じ決まり。フォルダの外の同じ名前のノートは、ふつうのノートとして扱う
 - 書式: 周期ごとに 1 つ。新しいノートの名前に使い、既存のノートもこの書式で読む（[ADR-0019](../adr/0019-one-format-per-period.md)）。
   書式を変えると、前の書式の名前のノートは読めなくなる。書式の欄のすぐ下に警告が出て、移行で今の書式の名前に変換できる（「7. 移行」）
   - 書式のチェック、週次のおすすめの書式（`GGGG-[W]WW`）への 1 クリックの切り替え、その書式で読めるノートの件数
@@ -31,7 +34,7 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
     ほかの記号はエラーになる
   - 件数（「N files」）を押すと、見るだけの一覧が開く（検索と、ノートを開くことだけ。[ADR-0022](../adr/0022-read-only-note-list.md)）
   - 欄を空にして離れると既定の書式に戻る。設定画面を閉じるとき、オンの周期の誤りのある書式は既定の書式に置き換える（オフの周期は、今あるノートを探すのに使うので触らない）
-- テンプレート: `{{title}}`・`{{date}}`（ノートの日付）、`{{time}}`・`{{currentDate}}`（今）、`{{monday}}` などの曜日を置き換える。
+- テンプレート: `{{title}}`・`{{date}}`（ノートの日付。期間の最初の日で、カレンダー・コマンド・Open now・起動時のどこから作っても同じ）、`{{time}}`・`{{currentDate}}`（今）、`{{monday}}` などの曜日を置き換える。
   `{{date+1d}}` のようにずらす、`{{date:YYYY-MM-DD}}` のように書式を付けることもできる
 - 週の決め方: Google カレンダーと同じ。週の始まりは土・日・月から選び、週番号は ISO 8601（[periods.md](periods.md)）。
   ファイル名、週番号の列、パンくずとミニカレンダー、テンプレートの曜日のすべてに効く
@@ -69,7 +72,7 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 | 表示名 | 場所 | キー | 既定 | 内容 |
 | --- | --- | --- | --- | --- |
 | Week starts on | （一番上） | `localeSettings.weekStartId` | Obsidian の言語の既定（土・日・月に寄せる） | 週の始まり |
-| Open on startup | （一番上） | `periods.<周期>.openAtStartup` | Nothing | 起動時に開くノート（Nothing / Today's note / This week's note …。オンの周期だけ出る） |
+| Open on startup | （一番上） | `periods.<周期>.openAtStartup` | Nothing | 起動時に開くノート（Nothing / Today's note / This week's note …。オンの周期だけ出る）。選んだ周期をオフにすると Nothing に戻り、オンに戻しても起動時には開かない（[ADR-0045](../adr/0045-startup-off-with-period.md)） |
 
 確認を出すかどうかの設定は「6. 確認」にまとめた。コアのデイリーノートがオンのときは、「Periodic notes」の見出しの下に、
 同じ日のノートが 2 つできうることを説明の文で知らせる（[ADR-0034](../adr/0034-no-settings-import.md)）。
@@ -80,7 +83,7 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 | --- | --- |
 | Open today's note / this week's / this month's / this quarter's / this year's note | 今の期間のノートを開く（なければ作る）。無効な周期のものは出ない |
 | Open previous / next periodic note | 開いている周期ノートの前・後を開く。ないときは作らず通知する |
-| Toggle calendar interface | カレンダーのペインを開閉する（リボンのアイコンも同じ） |
+| Toggle calendar interface | カレンダーのペインを開閉する（リボンのアイコンも同じ）。エディタの場所のタブで選ばれているときは、タブを閉じて右のサイドバーに戻す |
 | Manage sticker / Remove sticker | 開いているノートのステッカーを付ける・外す |
 
 既定のホットキーは付けない。

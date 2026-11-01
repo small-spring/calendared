@@ -32,6 +32,7 @@ import { get, type Writable } from "svelte/store";
 import writableDerived from "svelte-writable-derived";
 import type { ISettings, PeriodSettings } from "./constants";
 import { formatsToReset, savePendingEdits } from "./format-on-close";
+import { noticesOnPage } from "./migration-notice";
 import { openAtStartupOf, setOpenAtStartup, setPeriodEnabled } from "./period-switch";
 import { settingsStore } from "./store";
 import Format from "./ui/periods/Format.svelte";
@@ -681,9 +682,14 @@ export class SettingsTab extends PluginSettingTab {
 const noteCount = (n: number) => `${n} ${n === 1 ? "note" : "notes"}`;
 
 /** Calendared: notes still use a format or sticker property from before a change (docs/adr/0035) */
+// Calendared: only the notices whose rows the page shows; a period turned off kept its warning with no row to act on
 function anyMigrationNotice(): boolean {
   const s = settings();
-  return granularities.some((g) => formatNoticeCount(g, s) > 0) || stickerNoticeCount(s) > 0;
+  const shown = noticesOnPage(s);
+  return (
+    granularities.some((g) => shown.formats[g] !== undefined && formatNoticeCount(g, s) > 0) ||
+    (shown.stickerProperty !== null && stickerNoticeCount(s) > 0)
+  );
 }
 
 function coreDailyNotesOn(): boolean {

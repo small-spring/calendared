@@ -7,11 +7,11 @@ vi.mock("@/app-service", () => ({ PluginService: { getPlugin: () => null } }));
 vi.mock("@/settings", () => ({
     settingsStore: writable({
         periods: {
-            day: { format: "YYYY-MM-DD" },
-            week: { format: "YYYY-[W]ww" },
-            month: { format: "YYYY-MM" },
-            quarter: { format: "YYYY-[Q]Q" },
-            year: { format: "YYYY" },
+            day: { format: "YYYY-MM-DD", folder: "/" },
+            week: { format: "YYYY-[W]ww", folder: "/" },
+            month: { format: "YYYY-MM", folder: "/" },
+            quarter: { format: "YYYY-[Q]Q", folder: "/" },
+            year: { format: "YYYY", folder: "/" },
         },
         localeSettings: { weekStartId: 1 },
     }),
@@ -20,8 +20,15 @@ vi.mock("@/settings", () => ({
 const { isValidPeriodicNote } = await import("./index");
 const { settingsStore } = await import("@/settings");
 
+// a note named fileName at the vault's top
+const note = (fileName: string) => ({ path: `${fileName}.md`, basename: fileName, extension: "md" });
+const at = (path: string) => {
+    const name = path.slice(path.lastIndexOf("/") + 1);
+    const dot = name.lastIndexOf(".");
+    return { path, basename: name.slice(0, dot), extension: name.slice(dot + 1) };
+};
 const parse = (fileName: string) => {
-    const { isValid, granularity, date } = isValidPeriodicNote(fileName);
+    const { isValid, granularity, date } = isValidPeriodicNote(note(fileName));
     return { isValid, granularity, date: date?.format("YYYY-MM-DD") ?? null };
 };
 
@@ -59,16 +66,16 @@ describe("isValidPeriodicNote: ファイル名から周期と日付を読む", (
     });
 
     it("周期の名前（period）も返す", () => {
-        expect(isValidPeriodicNote("2026-W44").period).toEqual({ granularity: "week", weekYear: 2026, week: 44 });
-        expect(isValidPeriodicNote("2026-10").period).toEqual({ granularity: "month", year: 2026, month: 10 });
-        expect(isValidPeriodicNote("メモ").period).toBeNull();
+        expect(isValidPeriodicNote(note("2026-W44")).period).toEqual({ granularity: "week", weekYear: 2026, week: 44 });
+        expect(isValidPeriodicNote(note("2026-10")).period).toEqual({ granularity: "month", year: 2026, month: 10 });
+        expect(isValidPeriodicNote(note("メモ")).period).toBeNull();
     });
 });
 
 describe("isValidPeriodicNote: 周期の書式は 1 つ（ADR-0019）", () => {
     it("周期の書式に合う名前だけを読む。前の書式の名前は読まない", () => {
         expect(parse("20261029")).toEqual({ isValid: null, granularity: null, date: null });
-        expect(isValidPeriodicNote("2026-10-29").format).toBe("YYYY-MM-DD");
+        expect(isValidPeriodicNote(note("2026-10-29")).format).toBe("YYYY-MM-DD");
     });
 
     it("書式に誤りがあれば（その周期で使えない記号があるなど）、名前は読めても isValid が false", () => {
@@ -79,5 +86,41 @@ describe("isValidPeriodicNote: 周期の書式は 1 つ（ADR-0019）", () => {
         } finally {
             settingsStore.set(saved);
         }
+    });
+});
+
+describe("isValidPeriodicNote: 周期ノートは、その周期のフォルダ（とその下）の Markdown だけ（件数・移行と同じ決まり）", () => {
+    const withDailyFolder = (folder: string, run: () => void) => {
+        const saved = get(settingsStore);
+        settingsStore.set({ ...saved, periods: { ...saved.periods, day: { ...saved.periods.day, folder } } });
+        try {
+            run();
+        } finally {
+            settingsStore.set(saved);
+        }
+    };
+
+    it("周期のフォルダとその下のフォルダのノートを読む", () => {
+        withDailyFolder("日記", () => {
+            expect(isValidPeriodicNote(at("日記/2026-10-29.md")).granularity).toBe("day");
+            expect(isValidPeriodicNote(at("日記/2026/2026-10-29.md")).granularity).toBe("day");
+        });
+    });
+
+    it("周期のフォルダの外のノートは、名前が合っても周期ノートではない", () => {
+        withDailyFolder("日記", () => {
+            expect(isValidPeriodicNote(at("2026-10-29.md")).isValid).toBeNull();
+            expect(isValidPeriodicNote(at("メモ/2026-10-29.md")).isValid).toBeNull();
+            // a folder whose name only starts with the period's
+            expect(isValidPeriodicNote(at("日記帳/2026-10-29.md")).isValid).toBeNull();
+        });
+    });
+
+    it("フォルダが / なら、どこにあっても読む", () => {
+        expect(isValidPeriodicNote(at("どこか/深く/2026-10-29.md")).granularity).toBe("day");
+    });
+
+    it("Markdown でないファイルは周期ノートではない", () => {
+        expect(isValidPeriodicNote(at("2026-10-29.pdf")).isValid).toBeNull();
     });
 });

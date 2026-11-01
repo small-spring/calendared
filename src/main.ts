@@ -1,4 +1,4 @@
-import { DEFAULT_SETTINGS, REMOVED_PERIOD_SETTINGS, REMOVED_SETTINGS, migrateFormatSettings, settingsStore, SettingsTab, type ISettings } from '@/settings';
+import { DEFAULT_SETTINGS, settingsFromSaved, settingsStore, SettingsTab, type ISettings } from '@/settings';
 import { InvalidFormat, ViewManager } from '@/ui';
 import { MarkdownView, Notice, Plugin, TAbstractFile, TFile, WorkspaceLeaf, WorkspaceRoot } from 'obsidian';
 import { mount } from 'svelte';
@@ -10,8 +10,7 @@ import { getPeriodicityFromGranularity } from './io/parse';
 import type { IGranularity } from './io/types';
 import { isValidPeriodicNote, validateFormat } from './io/validation';
 import { overlapsMonth, periodRulesFor, rangeOfPeriod, shiftPeriod } from './periods';
-import { toSupportedWeekStart } from './weeks';
-import { migratePlacementSettings, migrateTimelineSettings, periodStart } from './navigation';
+import { periodStart } from './navigation';
 import {
   displayedDateStore,
   setupLocale,
@@ -134,7 +133,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
         checkCallback: (checking) => {
           const file = this.app.workspace.getActiveFile();
           if (!file) return false;
-          const { granularity, period } = isValidPeriodicNote(file.basename);
+          const { granularity, period } = isValidPeriodicNote(file);
           if (!granularity || !period) return false;
           if (checking) return true;
 
@@ -196,7 +195,9 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
       if (startupNoteGranularity) {
         await createOrOpenNote({
           leaf: this.app.workspace.getLeaf(),
-          date: window.moment(),
+          // Calendared: the period's first day, as the commands and Open now pass. Upstream passed now, so a template's
+          // {{date}} differed from a note made by a command (docs/adr/0039)
+          date: periodStart(startupNoteGranularity, window.moment(), periodRulesFor(get(settingsStore))),
           granularity: startupNoteGranularity,
           confirmBeforeCreateOverride: false,
         });
@@ -205,41 +206,10 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
   }
 
   async loadSettings() {
-    const loadedSettings = (await this.loadData()) as ISettings;
-    if (!loadedSettings) {
-      await this.saveData(DEFAULT_SETTINGS)
-    }
-
-    settingsStore.update((old) => {
-      // Calendared: upstream's timeline settings become the breadcrumbs' and mini calendar's (docs/adr/0031), and their
-      // "Never" a toggle (docs/adr/0033)
-      // Calendared: and a period's list of formats becomes its one format (docs/adr/0019)
-      const saved = migrateFormatSettings(migratePlacementSettings(
-        migrateTimelineSettings((loadedSettings || {}) as unknown as Record<string, unknown>),
-      ));
-      const newSettings = { ...old, ...saved } as ISettings;
-      // Calendared: drop the saved settings of removed features
-      for (const key of REMOVED_SETTINGS) {
-        delete (newSettings as unknown as Record<string, unknown>)[key];
-      }
-      // Calendared: weeks start on Saturday, Sunday or Monday only (docs/spec/periods.md)
-      newSettings.localeSettings = {
-        ...newSettings.localeSettings,
-        weekStartId: toSupportedWeekStart(newSettings.localeSettings.weekStartId),
-      };
-      // Calendared: weeks are always numbered the ISO way; drop the field that was kept for other ways (docs/adr/0014)
-      delete (newSettings.localeSettings as Record<string, unknown>).weekNumbering;
-      const periods = newSettings.periods
-      Object.values(periods).forEach((periodSettings) => {
-        for (const key of REMOVED_PERIOD_SETTINGS) {
-          delete (periodSettings as unknown as Record<string, unknown>)[key];
-        }
-      })
-      return {
-        ...newSettings,
-        periods
-      }
-    });
+    // Calendared: nothing is saved here on the first start; the settings store's subscription saves the defaults.
+    // Upstream merged the saved settings over the defaults at the top level only; see settingsFromSaved
+    const saved: unknown = await this.loadData();
+    settingsStore.set(settingsFromSaved(saved, DEFAULT_SETTINGS));
   }
 
   /**
@@ -269,6 +239,8 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
 
     if (!leaf) {
       leaf = ViewManager.initView() as WorkspaceLeaf & { containerEl: HTMLElement; tabHeaderEl: HTMLElement };
+      // Calendared: no leaf could be made (no right sidebar); upstream read `tabHeaderEl` of null
+      if (!leaf) return;
       const leafActive = leaf.tabHeaderEl.className.includes('is-active');
       if ((crrSplit && 'collapsed' in crrSplit && crrSplit.collapsed) || !leafActive) {
         ViewManager.revealView().catch(console.error);
@@ -284,7 +256,9 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     if (crrSplit instanceof WorkspaceRoot) {
       if (leafActive) {
         // a. root split && leaf active
-        leaf.view.unload();
+        // Calendared: close the tab and put the calendar back in the right sidebar. Upstream unloaded the view only,
+        // which left the tab open with nothing in it (initView found the same leaf and kept it)
+        leaf.detach();
         ViewManager.initView({ active: false });
       } else {
         // b. root split && leaf NOT active
@@ -353,7 +327,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
    */
   private onFileOpen(file: TFile | null) {
     if (!file) return;
-    const { isValid, date, period } = isValidPeriodicNote(file.basename);
+    const { isValid, date, period } = isValidPeriodicNote(file);
     if (typeof isValid !== "boolean" || !date || !period) return;
 
     // Calendared: always follow the open note, but only when no day of it is on the displayed month already.
@@ -379,12 +353,15 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
 
   private onFileRenamed(renamedFile: TAbstractFile) {
     if (!(renamedFile instanceof TFile)) return;
+    // Calendared: like a created file, only notes, and not while the vault is still loading
+    if (!this.app.workspace.layoutReady) return;
+    if (renamedFile.extension !== 'md') return;
 
     this.noticeIfInvalidFormat(renamedFile);
   }
 
   private noticeIfInvalidFormat(file: TFile) {
-    const { isValid, granularity, format } = isValidPeriodicNote(file.basename);
+    const { isValid, granularity, format } = isValidPeriodicNote(file);
     if (isValid !== false) return;
 
     const fragment = document.createDocumentFragment();
@@ -402,10 +379,6 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
   }
 }
 
-/**
- * Calendared: keeps `migrationNotices` up to date as the format or sticker property changes. Compares copies of the
- * values: some settings are changed in place (e.g. a period's format), so the previous settings object has the new value
- */
 /** Calendared: set today, and the calendar's month when it showed today's (src/today.ts) */
 function updateToday() {
   const next = nextToday(get(todayStore), get(displayedDateStore), window.moment());
@@ -413,6 +386,10 @@ function updateToday() {
   if (next.displayed) displayedDateStore.set(next.displayed);
 }
 
+/**
+ * Calendared: keeps `migrationNotices` up to date as the format or sticker property changes. Compares copies of the
+ * values: some settings are changed in place (e.g. a period's format), so the previous settings object has the new value
+ */
 function trackMigrationNotices(): () => void {
   const tracked = (s: ISettings) => ({
     periods: Object.fromEntries(granularities.map((g) => [g, { format: s.periods[g].format }])) as Record<IGranularity, { format: string }>,
