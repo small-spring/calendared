@@ -71,6 +71,16 @@ describe("disallowedTokens: その周期の書式に使えない記号", () => {
         expect(disallowedTokens("LL", "month")).toEqual(["LL"]);
     });
 
+    it("年の記号は YYYY・YY・Y だけ（y・yyyy・yo・YYYYY は、四半期・年を 1 月以外から始めると暦の年で書かれる）", () => {
+        expect(disallowedTokens("y", "year")).toEqual(["y"]);
+        expect(disallowedTokens("yyyy-[Q]Q", "quarter")).toEqual(["yyyy"]);
+        expect(disallowedTokens("yo", "year")).toEqual(["yo"]);
+        expect(disallowedTokens("YYYYY", "year")).toEqual(["YYYYY"]);
+        expect(disallowedTokens("YYYYYY-MM", "month")).toEqual(["YYYYYY"]);
+        expect(disallowedTokens("yy-MM-DD", "day")).toEqual(["yy"]);
+        expect(disallowedTokens("Y-YY-YYYY", "year")).toEqual([]);
+    });
+
     it("同じ記号は 1 回だけ挙げる", () => {
         expect(disallowedTokens("YYYY-DD-DD", "month")).toEqual(["DD"]);
     });
@@ -85,9 +95,12 @@ describe("missingTokens: その周期の名前を 1 つに決めるのに足り�
         expect(missingTokens("YYYY", "year")).toBeNull();
     });
 
-    it("年がなければ、まず年を挙げる", () => {
-        expect(missingTokens("MM", "month")).toBe("year (Y, y, gg or GG)");
-        expect(missingTokens("[W]WW", "week")).toBe("year (Y, y, gg or GG)");
+    it("年がなければ、まず年を、その周期で使える記号で挙げる", () => {
+        expect(missingTokens("MM", "month")).toBe("year (Y)");
+        expect(missingTokens("Q", "quarter")).toBe("year (Y)");
+        expect(missingTokens("[FY]", "year")).toBe("year (Y)");
+        expect(missingTokens("[W]WW", "week")).toBe("year (GG or gg)");
+        expect(missingTokens("MM-DD", "day")).toBe("year (Y, or GG with W)");
     });
 
     it("周期ごとに要る記号", () => {
@@ -100,7 +113,7 @@ describe("missingTokens: その周期の名前を 1 つに決めるのに足り�
 
     it("[ ] の中の文字は数えない", () => {
         expect(missingTokens("YYYY-[Q]", "quarter")).toBe("quarter (Q)");
-        expect(missingTokens("[YYYY]-MM", "month")).toBe("year (Y, y, gg or GG)");
+        expect(missingTokens("[YYYY]-MM", "month")).toBe("year (Y)");
         expect(missingTokens("YYYY-MM-[DD]", "day")).toBe("day (D)");
     });
 

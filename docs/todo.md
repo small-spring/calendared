@@ -18,9 +18,6 @@
 
 2026-11-01 に、古いコードと想定と違いそうな動きをもう一度洗い出したもの。「たぶん」は、コードを読んだだけで、起きるかをまだ確かめていない — どれも Claude
 
-- 不具合: 四半期・年を 1 月以外から始めたとき、書式の `y`・`yyyy`・`yo`・`YYYYY` が暦の年で書かれる（`src/periods.ts` の `withNameNumbers`）。
-  作ったノートがカレンダーに出ず、作り直される。ADR-0040 の表では年の記号は `YYYY YY Y` だけなので、`src/format-tokens.ts` で許すものを表に合わせる。
-  年が足りないときの文言「year (Y, y, gg or GG)」も、その周期で使える記号だけにする
 - 不具合: 大文字・小文字だけ違う名前への書式の変換（`2026-w44` → `2026-W44`）が、ノート自身とぶつかったことになる（`src/migrations.ts` の `planFormatRenames`）。
   [spec/migrations.md](spec/migrations.md) では、ぶつかるのはほかのファイル
 - 不具合: カレンダーの言語に `x-pseudo`・`oc-lnc` を選ぶと、パンくずの月・日の表記（`Intl.DateTimeFormat`）がエラーになる（`src/navigation.ts`、`Navigation.svelte`）。

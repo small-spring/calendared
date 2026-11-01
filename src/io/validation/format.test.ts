@@ -68,7 +68,11 @@ describe("validateFormat: 書式の誤り（設定画面に出す文）", () => 
         expect(validateFormat("YYYY-MM-Do", "day")).toBe("");
         expect(validateFormat("gggg-[W]ww", "week")).toBe("");
         expect(validateFormat("LL", "day")).toBe("");
-        expect(validateFormat("y", "year")).toBe("");
+    });
+
+    it("年は YYYY・YY・Y でだけ書ける（docs/adr/0040）", () => {
+        expect(validateFormat("y", "year")).toBe("y can't be used in yearly note names. Use the year.");
+        expect(validateFormat("yyyy-[Q]Q", "quarter")).toMatch(/^yyyy can't be used in quarterly note names/);
     });
 
     it("年の何日目（DDDD）だけでは、日に月が足りない", () => {
