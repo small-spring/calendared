@@ -40,3 +40,18 @@ export function trackSettingChanges(notices: MigrationNotices, before: Tracked, 
 
   return formats === notices.formats && stickerProperty === notices.stickerProperty ? notices : { formats, stickerProperty };
 }
+
+/**
+ * The notices whose rows the Migrate notes page shows: those of periods that are on, and the property's while stickers
+ * are on. The others are kept, and come back when the period or stickers are turned on again
+ */
+export function noticesOnPage(s: {
+  periods: Record<IGranularity, { enabled: boolean }>;
+  stickersEnabled: boolean;
+  migrationNotices: MigrationNotices;
+}): MigrationNotices {
+  const formats = Object.fromEntries(
+    Object.entries(s.migrationNotices.formats).filter(([g]) => s.periods[g as IGranularity].enabled),
+  ) as MigrationNotices["formats"];
+  return { formats, stickerProperty: s.stickersEnabled ? s.migrationNotices.stickerProperty : null };
+}

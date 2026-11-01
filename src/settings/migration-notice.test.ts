@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { NO_MIGRATION_NOTICES, trackSettingChanges } from "./migration-notice";
+import { NO_MIGRATION_NOTICES, noticesOnPage, trackSettingChanges } from "./migration-notice";
 
 type Formats = Partial<Record<"day" | "week" | "month" | "quarter" | "year", string>>;
 const at = (formats: Formats, stickerProperty = "sticker") => ({
@@ -51,5 +51,22 @@ describe("trackSettingChanges: 移行の案内のために、変える前の書�
     it("何も変わらなければ、同じものを返す（設定の保存を繰り返さないように）", () => {
         const notices = { formats: { day: "YYYYMMDD" }, stickerProperty: null };
         expect(trackSettingChanges(notices, at({}), at({}))).toBe(notices);
+    });
+});
+
+describe("noticesOnPage: Migrate notes のページに行が出ている案内だけを選ぶ", () => {
+    const notices = { formats: { day: "YYYYMMDD", month: "YYYYMM" }, stickerProperty: "mood" };
+    const enabled = (on: boolean) => ({ enabled: on });
+    const periods = { day: enabled(true), week: enabled(true), month: enabled(false), quarter: enabled(false), year: enabled(true) };
+
+    it("オフの周期の案内は選ばない（その周期の行が出ないので）", () => {
+        expect(noticesOnPage({ periods, stickersEnabled: true, migrationNotices: notices })).toEqual({
+            formats: { day: "YYYYMMDD" },
+            stickerProperty: "mood",
+        });
+    });
+
+    it("ステッカーがオフなら、プロパティの案内は選ばない", () => {
+        expect(noticesOnPage({ periods, stickersEnabled: false, migrationNotices: notices }).stickerProperty).toBeNull();
     });
 });
