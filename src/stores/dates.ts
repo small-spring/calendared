@@ -189,4 +189,9 @@ function refreshToday(): moment.Moment {
   return get(todayStore);
 }
 
-export { displayedDateStore, refreshToday, todayStore, yearsRanges };
+/** Calendared: move the calendar by months or years (the headers' ‹ ›) */
+function moveDisplayed(amount: number, unit: "month" | "year") {
+  displayedDateStore.update((date) => date.clone().add(amount, unit));
+}
+
+export { displayedDateStore, moveDisplayed, refreshToday, todayStore, yearsRanges };

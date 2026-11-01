@@ -1,13 +1,10 @@
 <script lang="ts">
-    import { noteAt } from "@/io";
     import { periodRulesStore, settingsStore } from "@/settings";
-    import { displayedDateStore } from "@/stores";
+    import { displayedDateStore, moveDisplayed } from "@/stores";
     import { todayStore } from "@/stores/dates";
     import { Header } from "./core";
-    import { crumbText } from "@/navigation";
+    import { yearTitle } from "./core/year-title";
     import { samePeriod } from "@/periods";
-    // Calendared: read through the vault source with the settings read reactively (docs/adr/0016)
-    let fileData = $derived(noteAt("year", $displayedDateStore, $settingsStore));
     // Calendared: the year by its own start month, written "2026–27" if it isn't January (docs/adr/0039)
     let rules = $derived($periodRulesStore);
     let isToday = $derived(samePeriod("year", $displayedDateStore, $todayStore, rules));
@@ -15,25 +12,11 @@
 
 <Header
     leftDate={$displayedDateStore}
-    leftTitle={{
-        granularity: "year",
-        fileData,
-        // Calendared: upstream used "YY" (e.g. "26")
-        formatValue: "YYYY",
-        text: crumbText("year", $displayedDateStore, $settingsStore.localeSettings.localeOverride, rules),
-    }}
+    leftTitle={yearTitle($displayedDateStore, $settingsStore, rules)}
     nav={{
         type: "year",
         showingCrrDate: isToday,
-        decrement: () => {
-            displayedDateStore.update((date) =>
-                date.clone().subtract(1, "year"),
-            );
-        },
-        increment: () => {
-            displayedDateStore.update((date) =>
-                date.clone().add(1, "year"),
-            );
-        },
+        decrement: () => moveDisplayed(-1, "year"),
+        increment: () => moveDisplayed(1, "year"),
     }}
 />

@@ -115,6 +115,12 @@ export function samePeriod(granularity: IGranularity, a: moment.Moment, b: momen
   return periodStart(granularity, a, rules).isSame(periodStart(granularity, b, rules), "day");
 }
 
+/** The 12 months of the year that contains the date, from the year's start month (the month view and the month picker) */
+export function monthsOfYear(date: moment.Moment, rules: PeriodRules): moment.Moment[] {
+  const start = periodStart("year", date, rules);
+  return Array.from({ length: 12 }, (_, i) => start.clone().add(i, "months"));
+}
+
 /** The period `amount` periods before (negative) or after (positive). Steps through dates, never through the numbers in the name */
 export function shiftPeriod(period: PeriodName, amount: number, rules: PeriodRules): PeriodName {
   if (period.granularity === 'week') {

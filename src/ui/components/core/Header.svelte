@@ -117,13 +117,13 @@
       direction="left"
       onClick={nav.decrement}
       tooltip={`Previous ${nav.type}`}
-      className="!h-auto !py-0.5 !px-1 [&>svg]:w-1.5"
+      size="header"
     />
     <Arrow
       direction="right"
       onClick={nav.increment}
       tooltip={`Next ${nav.type}`}
-      className="!h-auto !py-0.5 !px-1 [&>svg]:w-1.5"
+      size="header"
     />
   </div>
 

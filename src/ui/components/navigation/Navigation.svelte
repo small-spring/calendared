@@ -143,7 +143,7 @@
               direction="left"
               tooltip={`Open previous ${getPeriodicityFromGranularity(center.granularity)} note`}
               onClick={(event) => open(event, center.granularity, centerStart.clone().subtract(1, center.granularity))}
-              className="!h-auto !py-0.5"
+              size="bar"
             />
           {/if}
           <nav
@@ -194,7 +194,7 @@
               direction="right"
               tooltip={`Open next ${getPeriodicityFromGranularity(center.granularity)} note`}
               onClick={(event) => open(event, center.granularity, centerStart.clone().add(1, center.granularity))}
-              className="!h-auto !py-0.5"
+              size="bar"
             />
           {/if}
         </div>
@@ -209,7 +209,7 @@
               event.stopPropagation();
               offset -= 1;
             }}
-            className="!h-auto !py-0.5"
+            size="bar"
           />
           <!-- equal columns, so a two-digit date doesn't make its column wider than the others -->
           <div
@@ -248,7 +248,7 @@
               event.stopPropagation();
               offset += 1;
             }}
-            className="!h-auto !py-0.5"
+            size="bar"
           />
         </div>
       {/if}

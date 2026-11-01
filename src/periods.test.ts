@@ -2,6 +2,7 @@ import moment from "moment";
 import { describe, expect, it } from "vitest";
 import {
     formatPeriod,
+    monthsOfYear,
     overlapsMonth,
     periodStart,
     samePeriod,
@@ -236,5 +237,18 @@ describe("periodStart・samePeriod: 日付を含む期間の最初の日、2 つ
         expect(samePeriod("week", d("2026-10-25"), d("2026-10-26"), mondayWeeks)).toBe(false);
         expect(samePeriod("year", d("2026-04-01"), d("2027-03-31"), aprilYears)).toBe(true);
         expect(samePeriod("year", d("2026-03-31"), d("2026-04-01"), aprilYears)).toBe(false);
+    });
+});
+
+describe("monthsOfYear: 日付を含む年の 12 か月（年の始まりの月から）", () => {
+    it("1 月始まりなら 1 月から 12 月、4 月始まりなら 4 月から翌年の 3 月", () => {
+        const aprilYears = periodRules(createIsoWeekScheme(1), { year: { startMonth: 4, yearInName: "start" } });
+        expect(monthsOfYear(d("2026-10-30"), mondayWeeks).map((m) => m.format("YYYY-MM-DD"))).toEqual(
+            Array.from({ length: 12 }, (_, i) => `2026-${String(i + 1).padStart(2, "0")}-01`),
+        );
+        const april = monthsOfYear(d("2027-02-01"), aprilYears).map((m) => m.format("YYYY-MM"));
+        expect(april[0]).toBe("2026-04");
+        expect(april[11]).toBe("2027-03");
+        expect(april).toHaveLength(12);
     });
 });

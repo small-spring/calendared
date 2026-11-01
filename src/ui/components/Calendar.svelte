@@ -14,7 +14,7 @@
     import { periodRulesStore, settingsStore } from "@/settings";
     import { calendarView, enabledPeriods } from "@/settings/period-switch";
     import { weekSchemeFor } from "@/weeks";
-    import { periodStart, rangeOfPeriod } from "@/periods";
+    import { monthsOfYear, periodStart, rangeOfPeriod } from "@/periods";
     import { crumbText } from "@/navigation";
     import { inLocale, monthGrid, weekdayHeader } from "@/calendar-locale";
     import { noteAt, vaultSource } from "@/io";
@@ -30,8 +30,8 @@
     let rules = $derived($periodRulesStore);
     // Calendared: the month view's 12 months, from the start of the displayed month's year (docs/adr/0039)
     let monthRows = $derived.by(() => {
-        const start = periodStart("year", $displayedDateStore, rules);
-        return [0, 1, 2, 3].map((row) => [0, 1, 2].map((i) => start.clone().add(row * 3 + i, "months")));
+        const months = monthsOfYear($displayedDateStore, rules);
+        return [0, 1, 2, 3].map((row) => months.slice(row * 3, row * 3 + 3));
     });
 
     let enabled = $derived(enabledPeriods($settingsStore.periods));
