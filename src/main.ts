@@ -1,4 +1,4 @@
-import { DEFAULT_SETTINGS, settingsFromSaved, settingsStore, SettingsTab, type ISettings } from '@/settings';
+import { DEFAULT_SETTINGS, periodRulesStore, settingsFromSaved, settingsStore, SettingsTab, type ISettings } from '@/settings';
 import { invalidFormatNotice, ViewManager } from '@/ui';
 import { MarkdownView, Notice, Plugin, TAbstractFile, TFile, WorkspaceLeaf, WorkspaceRoot } from 'obsidian';
 import { get } from 'svelte/store';
@@ -8,7 +8,7 @@ import { getFileData, initVaultSource, openCurrentNote } from './io';
 import { getPeriodicityFromGranularity } from './io/parse';
 import type { IGranularity } from './io/types';
 import { isValidPeriodicNote, periodicNoteOf, validateFormat } from './io/validation';
-import { overlapsMonth, periodRulesFor, rangeOfPeriod, shiftPeriod } from './periods';
+import { overlapsMonth, rangeOfPeriod, shiftPeriod } from './periods';
 import {
   displayedDateStore,
   refreshToday,
@@ -127,7 +127,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
           const { granularity, period } = note;
           if (checking) return true;
 
-          const rules = periodRulesFor(get(settingsStore));
+          const rules = get(periodRulesStore);
           const targetPeriod = shiftPeriod(period, pos === 'next' ? 1 : -1, rules);
           const { file: target } = getFileData(granularity, rangeOfPeriod(targetPeriod, rules)!.start);
           if (target) {
@@ -322,7 +322,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     // Calendared: always follow the open note, but only when no day of it is on the displayed month already.
     // Otherwise clicking a year title would jump to January, or a week number to the month the week starts in.
     // `date` is the period's first day (docs/spec/periods.md)
-    if (!overlapsMonth(period, get(displayedDateStore), periodRulesFor(get(settingsStore)))) {
+    if (!overlapsMonth(period, get(displayedDateStore), get(periodRulesStore))) {
       displayedDateStore.set(date);
     }
   }

@@ -5,10 +5,9 @@ import { type IGranularity, notesWithFormatIn, vaultSource } from "@/io";
 import { moveSticker, planFormatRenames, planStickerMoves, type PlannedRename, type PlannedStickerMove } from "@/migrations";
 import { stickerProperty } from "@/stickers";
 import { getStickerProperty } from "@/ui/utils/emoji-picker";
-import { periodRulesFor } from "@/periods";
 import { get } from "svelte/store";
 import type { ISettings } from "../../constants";
-import { settingsStore } from "../../store";
+import { periodRulesStore, settingsStore } from "../../store";
 
 export type MigrationResult = { changed: number; skipped: number };
 
@@ -16,7 +15,7 @@ export type MigrationResult = { changed: number; skipped: number };
 export function formatRenamePlan(granularity: IGranularity, fromFormat: string): PlannedRename[] {
   const s = get(settingsStore);
   const { folder, format } = s.periods[granularity];
-  return planFormatRenames(vaultSource().markdownFiles(), granularity, { folder, fromFormat, toFormat: format }, periodRulesFor(s));
+  return planFormatRenames(vaultSource().markdownFiles(), granularity, { folder, fromFormat, toFormat: format }, get(periodRulesStore));
 }
 
 /** Periodic notes (of any period, by its current format and folder) that have the previous property */
