@@ -5,6 +5,7 @@ import { formatTokenGuide, type TokenGuideItem } from "@/format-tokens";
 import { getPeriodicityFromGranularity, IGranularity } from "@/io";
 import type { DnPluginSettings } from "@/io/settings";
 import { validateFolder, validateFormat, validateTemplate } from "@/io/validation";
+import { templateFilePath } from "@/io/note-path";
 import locales from "@/locales";
 import { defaultWeekdays, obsidianLocaleKey } from "@/localization";
 import { showsOn } from "@/navigation";
@@ -19,7 +20,6 @@ import { checkWeekFormat, weekSchemeFor } from "@/weeks";
 import {
   App,
   type ButtonComponent,
-  normalizePath,
   Notice,
   PluginSettingTab,
   type Setting,
@@ -333,7 +333,7 @@ export class SettingsTab extends PluginSettingTab {
 
   private renderTemplate(setting: Setting, granularity: IGranularity) {
     const templateFile = () => {
-      const path = settings().periods[granularity].templatePath;
+      const path = templateFilePath(settings().periods[granularity].templatePath);
       return path ? this.app.vault.getFileByPath(path) : null;
     };
     let suggest: FileSuggest | undefined;
@@ -342,7 +342,7 @@ export class SettingsTab extends PluginSettingTab {
         .setPlaceholder(`templates/${getPeriodicityFromGranularity(granularity)}`)
         .setValue(settings().periods[granularity].templatePath)
         .onChange((value) => {
-          const path = value.trim() ? normalizePath(value.trim().endsWith(".md") ? value.trim() : `${value.trim()}.md`) : "";
+          const path = templateFilePath(value);
           const error = path ? validateTemplate(path) : "";
           setting.setErrorMessage(error || null);
           if (error) return;

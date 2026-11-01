@@ -8,6 +8,7 @@ import { PluginService } from '@/app-service';
 import { vaultSource } from '../vault-source';
 import { isInFolder } from '../notes-by-format';
 import { validateFormat } from './format';
+import { templateFilePath } from '../note-path';
 
 /**
  * Calendared: a periodic note is a Markdown file in its period's folder (or a folder under it), named exactly what the
@@ -56,9 +57,11 @@ export function validateTemplate(template: string): string {
         return "";
     }
 
-    const normalizedTemplate = normalizePath(
-        !template.trim().endsWith(".md") ? `${template}.md` : template
-    )
+    // Calendared: the same path as creating a note reads
+    const normalizedTemplate = templateFilePath(template);
+    if (!normalizedTemplate) {
+        return "";
+    }
     if (!PluginService.getPlugin()?.app.vault.getAbstractFileByPath(normalizedTemplate)) {
         return "Template file not found";
     }

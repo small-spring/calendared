@@ -1,4 +1,4 @@
-import { normalizePath, Notice, TFile } from "obsidian";
+import { Notice, TFile } from "obsidian";
 import { IGranularity } from "./types";
 import { stickerFrom, type TSticker } from "@/stickers";
 import { vaultSource } from "./vault-source";
@@ -6,7 +6,7 @@ import { notesWithFormat } from "./notes-by-format";
 import { type ISettings, settingsStore } from "@/settings";
 import { get } from "svelte/store";
 import { PluginService } from "@/app-service";
-import { join, notePath } from './note-path';
+import { join, notePath, templateFilePath } from './note-path';
 import { periodRulesFor } from '@/periods';
 import { getPeriodicityFromGranularity } from "./parse";
 
@@ -95,8 +95,9 @@ export async function getTemplateInfo(
 ): Promise<string> {
   const app = PluginService.getPlugin()?.app;
 
-  const normalizedPath = normalizePath(template);
-  if (normalizedPath === "/") {
+  // Calendared: ".md" is added as in the settings, also to a path saved without it (docs/spec/overview.md)
+  const normalizedPath = templateFilePath(template);
+  if (!normalizedPath) {
     return "";
   }
 

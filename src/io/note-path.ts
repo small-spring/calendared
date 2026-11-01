@@ -42,3 +42,14 @@ export function notePath(
   }
   return normalizePath(join(folder, filename));
 }
+
+/**
+ * Calendared: the template file a period's template setting names, with ".md" added when it is left out ("" for no
+ * template). The settings, their check and creating a note all read it through this; creating a note used to read the
+ * setting as it was, so a template saved without ".md" was read as empty
+ */
+export function templateFilePath(template: string): string {
+  const path = normalizePath(template.trim());
+  if (!template.trim() || path === "/") return "";
+  return path.endsWith(".md") ? path : `${path}.md`;
+}
