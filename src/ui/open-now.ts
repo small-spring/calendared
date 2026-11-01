@@ -7,11 +7,11 @@ import { get } from "svelte/store";
 import { PluginService } from "@/app-service";
 import { createOrOpenNote } from "@/io";
 import { periodicNoteOf } from "@/io/validation";
-import { finestEnabled, isNowNote, periodStart } from "@/navigation";
+import { finestEnabled, isNowNote } from "@/navigation";
 import { settingsStore, type ISettings } from "@/settings";
 import { enabledPeriods } from "@/settings/period-switch";
 import { displayedDateStore, todayStore, yearsRanges } from "@/stores";
-import { periodRulesFor } from "@/periods";
+import { periodRulesFor, periodStart } from "@/periods";
 
 /** calendar-clock ("now", not "today"); an older Obsidian without it in its Lucide set gets the plain clock */
 export function openNowIcon(): string {

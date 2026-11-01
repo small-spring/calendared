@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
     formatPeriod,
     overlapsMonth,
+    periodStart,
+    samePeriod,
     parsePeriod,
     periodOf,
     periodRules,
@@ -215,5 +217,24 @@ describe("renameForFormat: 書式を変えたときのファイル名", () => {
 
     it("古い書式で読めない名前は null", () => {
         expect(renameForFormat("メモ", "day", "YYYY-MM-DD", "YYYYMMDD", mondayWeeks)).toBeNull();
+    });
+});
+
+describe("periodStart・samePeriod: 日付を含む期間の最初の日、2 つの日付が同じ期間か", () => {
+    const aprilYears = periodRules(createIsoWeekScheme(1), { year: { startMonth: 4, yearInName: "start" } });
+
+    it("期間の最初の日（週はカレンダーの行の最初の日、年は年の始まりの月から）", () => {
+        expect(periodStart("day", d("2026-10-30"), mondayWeeks).format("YYYY-MM-DD")).toBe("2026-10-30");
+        expect(periodStart("week", d("2026-10-30"), mondayWeeks).format("YYYY-MM-DD")).toBe("2026-10-26");
+        expect(periodStart("week", d("2026-10-30"), sundayWeeks).format("YYYY-MM-DD")).toBe("2026-10-25");
+        expect(periodStart("quarter", d("2026-11-15"), mondayWeeks).format("YYYY-MM-DD")).toBe("2026-10-01");
+        expect(periodStart("year", d("2027-02-01"), aprilYears).format("YYYY-MM-DD")).toBe("2026-04-01");
+    });
+
+    it("同じ期間なら true（年は年の始まりの月で区切る）", () => {
+        expect(samePeriod("week", d("2026-10-26"), d("2026-11-01"), mondayWeeks)).toBe(true);
+        expect(samePeriod("week", d("2026-10-25"), d("2026-10-26"), mondayWeeks)).toBe(false);
+        expect(samePeriod("year", d("2026-04-01"), d("2027-03-31"), aprilYears)).toBe(true);
+        expect(samePeriod("year", d("2026-03-31"), d("2026-04-01"), aprilYears)).toBe(false);
     });
 });

@@ -6,7 +6,8 @@
     import { todayStore } from "@/stores/dates";
     import { Header } from "./core";
     import MonthPicker from "./MonthPicker.svelte";
-    import { crumbText, periodStart } from "@/navigation";
+    import { crumbText } from "@/navigation";
+    import { periodStart } from "@/periods";
     // Calendared: read through the vault source with the settings read reactively (docs/adr/0016)
     let monthFileData = $derived(noteAt("month", $displayedDateStore, $settingsStore));
     // Calendared: the year containing the month, by its own start month (docs/adr/0039)

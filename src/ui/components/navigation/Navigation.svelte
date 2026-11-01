@@ -11,10 +11,10 @@
     crumbText,
     finestEnabled,
     monthDayText,
-    periodStart,
     showsOn,
     stripDates,
   } from "@/navigation";
+  import { periodStart } from "@/periods";
   import { periodRulesStore, settingsStore } from "@/settings";
   import { enabledPeriods } from "@/settings/period-switch";
   import { todayStore } from "@/stores";

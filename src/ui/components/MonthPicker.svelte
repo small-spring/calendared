@@ -1,7 +1,8 @@
 <script lang="ts">
     // Calendared: month picker shown as a popover from the header's year chevron.
     // Replaces upstream's "Month" tab (YearHeader + months table in Calendar.svelte).
-    import { crumbText, periodStart } from "@/navigation";
+    import { crumbText } from "@/navigation";
+    import { periodStart } from "@/periods";
     import { noteAt } from "@/io";
     import { periodRulesStore, settingsStore } from "@/settings";
     import { displayedDateStore, todayStore } from "@/stores";

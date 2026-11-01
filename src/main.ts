@@ -8,8 +8,7 @@ import { createOrOpenNote, getFileData, initVaultSource } from './io';
 import { getPeriodicityFromGranularity } from './io/parse';
 import type { IGranularity } from './io/types';
 import { isValidPeriodicNote, periodicNoteOf, validateFormat } from './io/validation';
-import { overlapsMonth, periodRulesFor, rangeOfPeriod, shiftPeriod } from './periods';
-import { periodStart } from './navigation';
+import { overlapsMonth, periodRulesFor, periodStart, rangeOfPeriod, shiftPeriod } from './periods';
 import {
   displayedDateStore,
   themeStore,

@@ -4,7 +4,8 @@
     import { displayedDateStore } from "@/stores";
     import { todayStore } from "@/stores/dates";
     import { Header } from "./core";
-    import { crumbText, samePeriod } from "@/navigation";
+    import { crumbText } from "@/navigation";
+    import { samePeriod } from "@/periods";
     // Calendared: read through the vault source with the settings read reactively (docs/adr/0016)
     let fileData = $derived(noteAt("year", $displayedDateStore, $settingsStore));
     // Calendared: the year by its own start month, written "2026–27" if it isn't January (docs/adr/0039)

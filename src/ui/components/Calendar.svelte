@@ -14,8 +14,8 @@
     import { periodRulesStore, settingsStore } from "@/settings";
     import { calendarView, enabledPeriods } from "@/settings/period-switch";
     import { weekSchemeFor } from "@/weeks";
-    import { rangeOfPeriod } from "@/periods";
-    import { crumbText, periodStart } from "@/navigation";
+    import { periodStart, rangeOfPeriod } from "@/periods";
+    import { crumbText } from "@/navigation";
     import { inLocale, monthGrid, weekdayHeader } from "@/calendar-locale";
     import { noteAt, vaultSource } from "@/io";
 

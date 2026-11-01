@@ -13,7 +13,7 @@
   import type { Snippet } from "svelte";
   import { Sticker } from "..";
   import { Platform } from "obsidian";
-  import { samePeriod } from "@/navigation";
+  import { samePeriod } from "@/periods";
   interface Props {
     // Properties
     date: moment.Moment;
