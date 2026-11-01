@@ -18,6 +18,15 @@ export function weekdayNames(locale: string, weekStartId: number): { weekdays: s
   return { weekdays: fromWeekStart(data.weekdays()), weekdaysShort: fromWeekStart(data.weekdaysMin()) };
 }
 
+/**
+ * The calendar's weekday header: the short names of the days in a row of the month grid.
+ * Calendared: written from the grid's own days, so the header always matches the columns. Upstream kept the names in
+ * a store that had to be refreshed by hand whenever the language or the week start changed
+ */
+export function weekdayHeader(days: moment.Moment[], locale: string): string[] {
+  return days.map((day) => inLocale(day, locale).format("dd"));
+}
+
 /** The day weeks usually start on in the language (0 = Sunday) */
 export function localeWeekStart(locale: string): number {
   return window.moment.localeData(locale).firstDayOfWeek();

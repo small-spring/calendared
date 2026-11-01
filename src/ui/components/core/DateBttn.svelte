@@ -59,15 +59,9 @@
 
   // Calendared: a quarter or year by its own start month (docs/adr/0039)
   let isToday = $derived(samePeriod(granularity, date, $todayStore, periodRulesFor($settingsStore)));
-  let isAdjacentMonth = $state(false);
-
-  $effect.pre(() => {
-    if (ignoreAdjacentMonth) return;
-
-    if (granularity === "day" && date && $displayedDateStore) {
-      isAdjacentMonth = !date.isSame($displayedDateStore, "month");
-    }
-  });
+  let isAdjacentMonth = $derived(
+    !ignoreAdjacentMonth && granularity === "day" && !date.isSame($displayedDateStore, "month"),
+  );
 </script>
 
 <Button

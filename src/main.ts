@@ -12,7 +12,6 @@ import { overlapsMonth, periodRulesFor, rangeOfPeriod, shiftPeriod } from './per
 import { periodStart } from './navigation';
 import {
   displayedDateStore,
-  setupLocale,
   themeStore,
   todayStore,
 } from './stores';
@@ -77,7 +76,6 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     // Calendared: a row in the Page preview settings, where Ctrl/Cmd on hover is switched (docs/adr/0026)
     this.registerHoverLinkSource(HOVER_LINK_SOURCE, { display: "Calendared", defaultMod: true });
 
-    setupLocale()
     // Calendared: the picker's search in Obsidian's language, from keywords downloaded on request (emoji-search.ts)
     initEmojiSearch(this.app, this.manifest.dir ?? `${this.app.vault.configDir}/plugins/${this.manifest.id}`).catch(console.error);
     this.handleRibbon();

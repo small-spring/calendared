@@ -10,7 +10,6 @@ export const defaultWeekdays = [
 	'Friday',
 	'Saturday'
 ];
-export const defaultWeekdaysShort = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
 export const sysLocaleKey =
 	navigator.languages.find((locale) => locales.has(locale.toLocaleLowerCase())) ||

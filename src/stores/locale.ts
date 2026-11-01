@@ -1,21 +1,7 @@
-import { defaultWeekdays, defaultWeekdaysShort } from '@/localization';
-import { get, writable } from 'svelte/store';
+import { get } from 'svelte/store';
 import { settingsStore } from '@/settings';
 import { toSupportedWeekStart } from "@/weeks";
-import { localeWeekStart, weekdayNames } from "@/calendar-locale";
-
-type TLocaleData = {
-    weekdays: string[];
-    weekdaysShort: string[];
-};
-
-/**
-    * used in <Calendar />'s header
-*/
-export const localeDataStore = writable<TLocaleData>({
-    weekdays: defaultWeekdays,
-    weekdaysShort: defaultWeekdaysShort
-});
+import { localeWeekStart } from "@/calendar-locale";
 
 function calendarLocale(): string {
     return get(settingsStore).localeSettings.localeOverride;
@@ -39,13 +25,6 @@ export function updateWeekStartSetting(weekStartId: number = localeWeekStart(cal
             weekStartId: toSupportedWeekStart(weekStartId)
         }
     }))
-
-    updateWeekdays()
-}
-
-/** Calendared: the weekday header in the calendar's language, from the week's first day */
-export function updateWeekdays() {
-    localeDataStore.set(weekdayNames(calendarLocale(), get(settingsStore).localeSettings.weekStartId));
 }
 
 /**
@@ -55,8 +34,4 @@ export function updateWeekdays() {
 export function switchLocale(localeKey: string) {
     updateLocaleKeySetting(localeKey);
     updateWeekStartSetting();
-}
-
-export function setupLocale() {
-    updateWeekdays();
 }

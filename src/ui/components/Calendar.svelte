@@ -1,6 +1,6 @@
 <script lang="ts">
     import { type IGranularity } from "@/io";
-    import { displayedDateStore, localeDataStore, yearsRanges } from "@/stores";
+    import { displayedDateStore, yearsRanges } from "@/stores";
     import { onMount } from "svelte";
     import {
         cn,
@@ -17,16 +17,17 @@
     import { weekSchemeFor } from "@/weeks";
     import { periodRulesFor, rangeOfPeriod } from "@/periods";
     import { crumbText, periodStart } from "@/navigation";
-    import { inLocale, monthGrid } from "@/calendar-locale";
+    import { inLocale, monthGrid, weekdayHeader } from "@/calendar-locale";
     import { noteAt, vaultSource } from "@/io";
 
-    let { weekdaysShort } = $derived($localeDataStore);
     // Calendared: also rebuild when the week start changes (upstream only did on month changes, so the dates
     // stayed in the old order under the new weekday header)
     let weeks = $derived(weekSchemeFor($settingsStore.localeSettings));
     let month = $derived(monthGrid($displayedDateStore, weeks));
     // Calendared: names and numbers in the calendar's language, without switching Obsidian's moment (calendar-locale.ts)
     let locale = $derived($settingsStore.localeSettings.localeOverride);
+    // Calendared: the weekday header from the grid's first row, so it follows the same week start (calendar-locale.ts)
+    let weekdaysShort = $derived(weekdayHeader(month[0].days, locale));
     let rules = $derived(periodRulesFor($settingsStore));
     // Calendared: the month view's 12 months, from the start of the displayed month's year (docs/adr/0039)
     let monthRows = $derived.by(() => {

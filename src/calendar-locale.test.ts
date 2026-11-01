@@ -1,7 +1,7 @@
 import moment from "moment";
 import "moment/locale/en-gb";
 import { describe, expect, it } from "vitest";
-import { inLocale, localeWeekStart, monthGrid, weekdayNames } from "./calendar-locale";
+import { inLocale, localeWeekStart, monthGrid, weekdayHeader, weekdayNames } from "./calendar-locale";
 import { createIsoWeekScheme } from "./weeks";
 
 // loading a locale switches moment to it; go back to English like test-setup.ts does
@@ -50,6 +50,25 @@ describe("weekdayNames: 週の始まりから並べた、その言語の曜日�
 
     it("moment が知らない言語なら、英語の名前", () => {
         expect(weekdayNames("xx-unknown", 0).weekdaysShort[0]).toBe("Su");
+    });
+});
+
+describe("weekdayHeader: カレンダーの曜日の見出しは、表の列と同じ日から書く", () => {
+    it("月曜始まりの表なら、月曜から並ぶ", () => {
+        const grid = monthGrid(date("2026-10-15"), createIsoWeekScheme(1));
+        expect(weekdayHeader(grid[0].days, "ja")).toEqual(["月", "火", "水", "木", "金", "土", "日"]);
+    });
+
+    it("土曜始まりの表なら、土曜から並ぶ", () => {
+        const grid = monthGrid(date("2026-10-15"), createIsoWeekScheme(6));
+        expect(weekdayHeader(grid[0].days, "en")).toEqual(["Sa", "Su", "Mo", "Tu", "We", "Th", "Fr"]);
+    });
+
+    it("Obsidian 全体の moment の言語も、表の日付の言語も変えない", () => {
+        const grid = monthGrid(date("2026-10-15"), createIsoWeekScheme(0));
+        weekdayHeader(grid[0].days, "ja");
+        expect(moment.locale()).toBe("en");
+        expect(grid[0].days[0].locale()).toBe("en");
     });
 });
 
