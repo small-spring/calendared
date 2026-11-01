@@ -1,6 +1,6 @@
 import moment from "moment";
 import { describe, expect, it } from "vitest";
-import { checkWeekFormat, createIsoWeekScheme, isoWeekFormatFor, toSupportedWeekStart, weekSchemeFor, type WeekName, type WeekScheme } from "./weeks";
+import { checkWeekFormat, createIsoWeekScheme, dayRangeText, isoWeekFormatFor, readsBack, toSupportedWeekStart, weekSchemeFor, type WeekName, type WeekScheme } from "./weeks";
 
 // The week scheme decides what a "week" is (docs/adr/0011, 0012, 0014).
 // Week starts use moment's day numbers: 6 = Saturday, 0 = Sunday, 1 = Monday
@@ -200,5 +200,21 @@ describe.each([
             const w = scheme.weekOf(day);
             expect(scheme.parse(scheme.format(w, "GGGG-[W]WW"), "GGGG-[W]WW")).toEqual(w);
         }
+    });
+});
+
+describe("readsBack: 週の名前が、同じ週として読み戻せるか", () => {
+    it("読み戻せれば true", () => {
+        expect(readsBack(monday, week(2026, 44), "GGGG-[W]WW")).toBe(true);
+    });
+
+    it("年の変わり目で別の週に読める書式なら false（YYYY と ww）", () => {
+        expect(readsBack(monday, week(2025, 1), "YYYY-[W]ww")).toBe(false);
+    });
+});
+
+describe("dayRangeText: 週の日付の範囲（設定の例に出す）", () => {
+    it("M/D – M/D", () => {
+        expect(dayRangeText({ start: d("2026-12-28"), end: d("2027-01-03") })).toBe("12/28 – 1/3");
     });
 });

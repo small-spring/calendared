@@ -91,6 +91,17 @@ export function isoWeekFormatFor(format: string): string {
     );
 }
 
+/** Calendared: whether the week's name in the format reads back as the same week */
+export function readsBack(scheme: WeekScheme, week: WeekName, format: string): boolean {
+    const readBack = scheme.parse(scheme.format(week, format), format);
+    return !!readBack && readBack.weekYear === week.weekYear && readBack.week === week.week;
+}
+
+/** Calendared: a week's days as the settings show them ("12/28 – 1/3") */
+export function dayRangeText(range: { start: moment.Moment; end: moment.Moment }): string {
+    return `${range.start.format("M/D")} – ${range.end.format("M/D")}`;
+}
+
 /** The years checked by `checkWeekFormat`: every weekday January 1 can fall on, in leap and common years */
 const CHECKED_YEARS = { from: 2024, to: 2035 };
 
@@ -113,8 +124,7 @@ export function checkWeekFormat(format: string, scheme: WeekScheme): {
     let week = scheme.weekOf(window.moment({ year: CHECKED_YEARS.from, month: 0, day: 1 }));
     for (let i = 0; i < maxWeeks; i++, week = scheme.shift(week, 1)) {
         const name = scheme.format(week, format);
-        const readBack = scheme.parse(name, format);
-        if (!unreadable && (!readBack || readBack.weekYear !== week.weekYear || readBack.week !== week.week)) {
+        if (!unreadable && !readsBack(scheme, week, format)) {
             unreadable = { week, name };
         }
         const expected = scheme.format(week, iso);

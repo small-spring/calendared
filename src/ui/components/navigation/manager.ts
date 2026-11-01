@@ -4,7 +4,7 @@ import { get } from "svelte/store";
 
 import { PluginService } from "@/app-service";
 import { periodicNoteOf } from "@/io/validation";
-import { showsOn } from "@/navigation";
+import { barShows } from "@/navigation";
 import { settingsStore } from "@/settings";
 import Navigation from "./Navigation.svelte";
 import { NavigationSync } from "./sync";
@@ -39,12 +39,10 @@ export default class NavigationManager {
     const app = PluginService.getPlugin()?.app;
     if (!app) return;
 
-    const { breadcrumbs, miniCalendar } = get(settingsStore);
-    const crumbs = showsOn(breadcrumbs, Platform.isPhone);
-    const mini = showsOn(miniCalendar, Platform.isPhone);
+    const any = ({ crumbs, mini }: { crumbs: boolean; mini: boolean }) => crumbs || mini;
     const show = {
-      periodic: crumbs || mini,
-      other: (crumbs && breadcrumbs.onOtherNotes) || (mini && miniCalendar.onOtherNotes),
+      periodic: any(barShows(get(settingsStore), Platform.isPhone, true)),
+      other: any(barShows(get(settingsStore), Platform.isPhone, false)),
     };
 
     const tabs = app.workspace.getLeavesOfType("markdown").map((leaf) => ({

@@ -2,7 +2,7 @@ import { settingsStore } from "@/settings";
 import { get } from "svelte/store";
 import { getPeriodicityFromGranularity } from "../parse";
 import { type IGranularity } from "../types";
-import { weekSchemeFor } from "@/weeks";
+import { readsBack, weekSchemeFor } from "@/weeks";
 import { disallowedTokens, missingTokens } from "@/format-tokens";
 
 // https://github.com/liamcain/obsidian-periodic-notes/blob/a8aa7e4e368ac344282b17e381b9101af12af0d1/src/settings/validation.ts#L20
@@ -71,9 +71,8 @@ function isAmbiguousFormat(
       // back as this week. Formats that only break around New Year are warned about in the settings, not rejected here
       const weeks = weekSchemeFor(get(settingsStore).localeSettings);
       const week = weeks.weekOf(currentDate);
-      const name = weeks.format(week, value);
-      const readBack = weeks.parse(name, value);
-      if (!readBack || readBack.weekYear !== week.weekYear || readBack.week !== week.week) {
+      if (!readsBack(weeks, week, value)) {
+        const name = weeks.format(week, value);
         return `${errorMessage} It doesn't uniquely identify a week. This week is written "${name}", which doesn't read back as it.`;
       }
       break;

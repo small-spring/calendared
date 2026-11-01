@@ -1,7 +1,7 @@
 <script lang="ts">
     import { validateFormat } from "@/io/validation";
     import { settingsStore, type PeriodSettings } from "@/settings";
-    import { checkWeekFormat, isoWeekFormatFor, weekSchemeFor, type WeekName } from "@/weeks";
+    import { checkWeekFormat, dayRangeText, isoWeekFormatFor, weekSchemeFor, type WeekName } from "@/weeks";
     import { type Writable } from "svelte/store";
 
     interface Props {
@@ -24,7 +24,7 @@
     let showWhy = $state(false);
     const describeWeek = (week: WeekName) => {
         const range = weeks.rangeOf(week);
-        return `week ${week.week} of ${week.weekYear}${range ? ` (${range.start.format("M/D")} – ${range.end.format("M/D")})` : ""}`;
+        return `week ${week.week} of ${week.weekYear}${range ? ` (${dayRangeText(range)})` : ""}`;
     };
 
     /**

@@ -8,7 +8,7 @@
   import { debounce } from "obsidian";
   import { formatPeriod, periodOf } from "@/periods";
   import { trackPendingEdit } from "@/settings/format-on-close";
-  import { weekSchemeFor } from "@/weeks";
+  import { dayRangeText, weekSchemeFor } from "@/weeks";
   import { type Writable } from "svelte/store";
   import FilepathsCount from "./FilepathsCount.svelte";
   import WeekFormatCheck from "./WeekFormatCheck.svelte";
@@ -51,7 +51,7 @@
     // the week around New Year, where week-based and calendar years differ: calendar on purpose
     const week = weeks.weekOf(window.moment().endOf("year"));
     const range = weeks.rangeOf(week);
-    return { name: weeks.format(week, formatValue), range: range ? `${range.start.format("M/D")} – ${range.end.format("M/D")}` : "" };
+    return { name: weeks.format(week, formatValue), range: range ? dayRangeText(range) : "" };
   };
 
   // an empty format can't name new notes (it would write a timestamp as the file name), so it isn't saved

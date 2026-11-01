@@ -11,7 +11,7 @@
     crumbText,
     finestEnabled,
     monthDayText,
-    showsOn,
+    barShows,
     stripDates,
   } from "@/navigation";
   import { periodStart } from "@/periods";
@@ -36,14 +36,9 @@
   let rules = $derived($periodRulesStore);
   let enabled = $derived(enabledPeriods($settingsStore.periods));
 
-  let showCrumbs = $derived(
-    showsOn($settingsStore.breadcrumbs, Platform.isPhone) &&
-      (isPeriodic || $settingsStore.breadcrumbs.onOtherNotes),
-  );
-  let showMini = $derived(
-    showsOn($settingsStore.miniCalendar, Platform.isPhone) &&
-      (isPeriodic || $settingsStore.miniCalendar.onOtherNotes),
-  );
+  let shows = $derived(barShows($settingsStore, Platform.isPhone, isPeriodic));
+  let showCrumbs = $derived(shows.crumbs);
+  let showMini = $derived(shows.mini);
 
   /** the note's period, or for another note where now is in the finest period in use (today, if days are used) */
   let center = $derived.by(() => {

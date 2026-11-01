@@ -78,6 +78,21 @@ export function showsOn(feature: { enabled: boolean; placement: Placement }, isP
     return feature.enabled && (feature.placement === "always" || isPhone);
 }
 
+type BarFeature = { enabled: boolean; placement: Placement; onOtherNotes: boolean };
+
+/**
+ * Calendared: whether a note shows the breadcrumbs and the mini calendar: on where they are placed, and on a note that
+ * isn't a periodic note only with "on other notes". The tabs (manager.ts) and the bar itself read it
+ */
+export function barShows(
+    settings: { breadcrumbs: BarFeature; miniCalendar: BarFeature },
+    isPhone: boolean,
+    isPeriodic: boolean,
+): { crumbs: boolean; mini: boolean } {
+    const shows = (feature: BarFeature) => showsOn(feature, isPhone) && (isPeriodic || feature.onOtherNotes);
+    return { crumbs: shows(settings.breadcrumbs), mini: shows(settings.miniCalendar) };
+}
+
 /** The finest period in use: a note that isn't a periodic note shows where now is in it (today, if days are used) */
 export function finestEnabled(enabled: Record<IGranularity, boolean>): IGranularity {
     return granularities.find((g) => enabled[g]) ?? "day";
