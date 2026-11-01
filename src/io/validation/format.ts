@@ -39,26 +39,27 @@ function isAmbiguousFormat(
     return `${errorMessage} Missing ${missingInfo} info. Can't uniquely identify ${granularity}.`;
   }
 
+  // Calendared: checks the format can be read back, with moment's own quarters and years: calendar on purpose
+  const [parsedYear, currentYear] = [parsedDate.year(), currentDate.year()]; // calendar on purpose
   switch (granularity) {
     case "year":
-      if (parsedDate.year() !== currentDate.year()) {
+      if (parsedYear !== currentYear) {
         return `${errorMessage} It doesn't uniquely identify a year.
-                    Current year: ${currentDate.year()}, Parsed year: ${parsedDate.year()}`;
+                    Current year: ${currentYear}, Parsed year: ${parsedYear}`;
       }
       break;
     case "quarter": {
-      // Calendared: checks the format can be read back, with moment's own quarters: calendar on purpose
       const [parsedQ, currentQ] = [parsedDate.quarter(), currentDate.quarter()]; // calendar on purpose
-      if (parsedQ !== currentQ || parsedDate.year() !== currentDate.year()) {
+      if (parsedQ !== currentQ || parsedYear !== currentYear) {
         return `${errorMessage} It doesn't uniquely identify a quarter.
-                    Current: Q${currentQ} ${currentDate.year()}, Parsed: Q${parsedQ} ${parsedDate.year()}`;
+                    Current: Q${currentQ} ${currentYear}, Parsed: Q${parsedQ} ${parsedYear}`;
       }
       break;
     }
     case "month":
       if (
         parsedDate.month() !== currentDate.month() ||
-        parsedDate.year() !== currentDate.year()
+        parsedYear !== currentYear
       ) {
         return `${errorMessage} It doesn't uniquely identify a month. 
                     Current: ${currentDate.format("MMMM YYYY")}, Parsed: ${parsedDate.format("MMMM YYYY")

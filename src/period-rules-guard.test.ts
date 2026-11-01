@@ -6,11 +6,15 @@ import { describe, expect, it } from "vitest";
 // year are the calendar's, so asking it directly elsewhere would ignore a start month other than January.
 // ESLint doesn't read the .svelte files, so this test looks through every source file instead.
 // A line that means the calendar's year on purpose (not a quarterly or yearly note) says so with "calendar on purpose",
-// on the line or in a comment just above it
+// on the line or in a comment just above it.
+// Moving a date by whole quarters or years (`.add(1, "year")`) is allowed: it moves every 3- or 12-month cycle by
+// exactly one period, whatever month the cycle starts in
 
 const ALLOWED_FILES = ["src/periods.ts"];
 const FORBIDDEN: { pattern: RegExp; use: string }[] = [
     { pattern: /\.quarter\(/, use: "periodOf(\"quarter\", …)" },
+    // Calendared: the calendar year, read or set (2026-11-01)
+    { pattern: /\.years?\(/, use: "periodOf(\"year\", …) / rangeOfPeriod" },
     { pattern: /(startOf|endOf)\(\s*["'](quarter|year)["']/, use: "periodStart / rangeOfPeriod" },
     { pattern: /(startOf|endOf)\(\s*granularity\s*\)/, use: "periodStart / rangeOfPeriod" },
     { pattern: /isSame\([^)]*["'](quarter|year)["']\s*\)/, use: "samePeriod" },

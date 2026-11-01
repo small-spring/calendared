@@ -2,6 +2,11 @@
     import { YEARS_RANGE_SIZE } from "@/constants";
     import { displayedDateStore, todayStore, yearsRanges } from "@/stores";
     import { Header } from "./core";
+    import { periodRulesFor } from "@/periods";
+    import { settingsStore } from "@/settings";
+
+    // Calendared: ranges of year names, like the cells below (docs/adr/0039)
+    let rules = $derived(periodRulesFor($settingsStore));
 
     let showingCurrentRange: boolean = $derived(
         $yearsRanges.todayRange ===
@@ -14,7 +19,7 @@
     $effect.pre(() => {
         if ($displayedDateStore) {
             // add new ranges or update existing ones every time displayed date changes
-            yearsRanges.selectOrCreateRanges();
+            yearsRanges.selectOrCreateRanges(rules);
         }
     });
 </script>
@@ -27,10 +32,11 @@
             yearsRanges.updateRanges({
                 action: "decrement",
                 displayedDateModifier: -YEARS_RANGE_SIZE,
+                rules,
             });
         },
         increment: () => {
-            yearsRanges.updateRanges({ action: "increment" });
+            yearsRanges.updateRanges({ action: "increment", rules });
         },
     }}
 >

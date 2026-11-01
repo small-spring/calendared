@@ -1,4 +1,5 @@
 import { YEARS_RANGE_SIZE, YEARS_RANGES_START } from '@/constants';
+import { periodOf, rangeOfPeriod, type PeriodRules } from '@/periods';
 import { get, writable } from 'svelte/store';
 
 type IRange = `${string}-${string}`
@@ -34,12 +35,17 @@ function createYearsRangesStore() {
       };
     });
   };
+  // Calendared: the ranges count years by name, like the year view's cells: a year that doesn't start in January is
+  // named by its start or end year (docs/adr/0039). Upstream counted calendar years
+  const startOfYearNamed = (year: number, rules: PeriodRules) => rangeOfPeriod({ granularity: 'year', year }, rules)!.start;
   const updateRanges = ({
     action,
-    displayedDateModifier
+    displayedDateModifier,
+    rules
   }: {
     action: 'decrement' | 'increment';
     displayedDateModifier?: number;
+    rules: PeriodRules;
   }) => {
     const { ranges, crrRangeIndex } = get(store);
     const crrRange = ranges[crrRangeIndex];
@@ -48,10 +54,7 @@ function createYearsRangesStore() {
     if (action === 'decrement') {
       const prevRange = ranges[crrRangeIndex - 1];
 
-      displayedDateStore.set(
-        // the displayed month, not a yearly note: calendar on purpose
-        get(todayStore).clone().year(+crrRangeStartYear + (displayedDateModifier || -1)).startOf('year')
-      );
+      displayedDateStore.set(startOfYearNamed(+crrRangeStartYear + (displayedDateModifier || -1), rules));
 
       if (!prevRange) {
         addNewRange({
@@ -68,8 +71,7 @@ function createYearsRangesStore() {
     if (action === 'increment') {
       const nextRange = ranges[crrRangeIndex + 1];
 
-      // the displayed month, not a yearly note: calendar on purpose
-      displayedDateStore.set(get(todayStore).clone().year(+crrRangeEndYear + 1).startOf('year'));
+      displayedDateStore.set(startOfYearNamed(+crrRangeEndYear + 1, rules));
 
       if (!nextRange) {
         addNewRange({ startYear: +crrRangeEndYear + 1, action: 'increment' });
@@ -83,10 +85,10 @@ function createYearsRangesStore() {
       crrRangeIndex: values.crrRangeIndex + modifier
     }));
   };
-  const selectOrCreateRanges = () => {
+  const selectOrCreateRanges = (rules: PeriodRules) => {
     const { ranges, crrRangeIndex, todayRange } = get(store);
-    const crrDisplayedYear = get(displayedDateStore).year();
-    const todayYear = window.moment().clone().year();
+    const crrDisplayedYear = (periodOf('year', get(displayedDateStore), rules) as { year: number }).year;
+    const todayYear = (periodOf('year', window.moment(), rules) as { year: number }).year;
 
     const firstRange = ranges[0];
     const lastRange = ranges[ranges.length - 1];

@@ -710,6 +710,7 @@ function cycleSettings(granularity: "quarter" | "year"): SettingGroupItem[] {
     const rules = periodRules(weekSchemeFor(s.localeSettings), {
       [granularity]: { ...yearCycleOf(s.periods[granularity]), yearInName },
     });
+    // the cycle that starts in this calendar year, so both namings show the same months: calendar on purpose
     const thisYear = window.moment().year() + (yearInName === "end" ? 1 : 0);
     const period: PeriodName = granularity === "quarter"
       ? { granularity, year: thisYear, quarter: 4 }
