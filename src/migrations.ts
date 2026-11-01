@@ -14,7 +14,8 @@ export type PlannedRename = { from: string; to: string; conflict: boolean };
 /**
  * The notes a previous format reads in a period's folder, and the name each gets in the current format (in the same
  * folder). Nothing is overwritten: a new name that a file already has, or that another note being renamed has now (the
- * result would depend on the order), is a conflict. Names differing only in case count as the same
+ * result would depend on the order), is a conflict. Names differing only in case count as the same, except the note's
+ * own name: Obsidian renames a note to the same name in other case even where the file system ignores case
  */
 export function planFormatRenames(
   files: { path: string; basename: string; extension: string }[],
@@ -23,14 +24,18 @@ export function planFormatRenames(
   rules: PeriodRules,
 ): PlannedRename[] {
   if (fromFormat.trim() === toFormat.trim()) return [];
-  const taken = new Set(files.map((file) => file.path.toLowerCase()));
+  // How many files have each name, case aside. The note itself is left out of its own count, so a rename
+  // that only changes case (2026-w44 → 2026-W44) isn't a conflict with itself
+  const taken = new Map<string, number>();
+  for (const file of files) taken.set(file.path.toLowerCase(), (taken.get(file.path.toLowerCase()) ?? 0) + 1);
   const basenames = new Map(files.map((file) => [file.path, file.basename]));
 
   return notesWithFormat(files, granularity, { folder, format: fromFormat }, rules).flatMap((from) => {
     const name = renameForFormat(basenames.get(from)!, granularity, fromFormat, toFormat, rules);
     if (!name || name === basenames.get(from)) return [];
     const to = `${from.slice(0, from.lastIndexOf("/") + 1)}${name}.md`;
-    return [{ from, to, conflict: taken.has(to.toLowerCase()) }];
+    const others = (taken.get(to.toLowerCase()) ?? 0) - (to.toLowerCase() === from.toLowerCase() ? 1 : 0);
+    return [{ from, to, conflict: others > 0 }];
   });
 }
 
