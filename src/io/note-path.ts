@@ -53,3 +53,8 @@ export function templateFilePath(template: string): string {
   if (!template.trim() || path === "/") return "";
   return path.endsWith(".md") ? path : `${path}.md`;
 }
+
+/** Calendared: a note's name from its path: no folder, no ".md" */
+export function noteNameOf(path: string): string {
+  return path.slice(path.lastIndexOf("/") + 1).replace(/\.md$/, "");
+}

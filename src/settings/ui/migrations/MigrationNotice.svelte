@@ -2,6 +2,7 @@
     // Calendared: under a changed format or sticker property, while notes still use the previous one (docs/adr/0035).
     // Stays until no note uses it or "Keep as is" is confirmed. The wording and look are provisional
     import { type IGranularity } from "@/io";
+    import { countOf } from "@/utils";
     import { settingsStore } from "@/settings/store";
     import { confirmKeepAsIs, formatNoticeCount, openFormatRename, openStickerMove, stickerNoticeCount } from ".";
 
@@ -16,7 +17,7 @@
     );
     // read from the vault while shown, so it follows renames and changed properties
     let count = $derived(previous ? (which === "sticker" ? stickerNoticeCount($settingsStore) : formatNoticeCount(which, $settingsStore)) : 0);
-    const notes = (n: number) => `${n} ${n === 1 ? "note" : "notes"}`;
+    const notes = (n: number) => countOf(n, "note");
 
     function migrate() {
         if (!previous) return;

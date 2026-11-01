@@ -16,6 +16,7 @@ import { STICKER_BUTTON_ICON } from "@/ui/sticker-actions";
 import { genNoticeFragment } from "@/ui/utils";
 import { isReservedStickerProperty, RESERVED_STICKER_PROPERTIES } from "@/ui/utils/emoji-picker";
 import { currentNoteName, periodicityTitle } from "@/period-words";
+import { countOf } from "@/utils";
 import { checkWeekFormat, weekSchemeFor } from "@/weeks";
 import {
   App,
@@ -611,7 +612,7 @@ export class SettingsTab extends PluginSettingTab {
         });
       }
       setting.setDesc(desc);
-      button?.setButtonText(plan.length === 0 || moving === 0 ? "Review…" : `Move ${moving === 1 ? "1 sticker" : `${moving} stickers`}…`).setDisabled(plan.length === 0);
+      button?.setButtonText(plan.length === 0 || moving === 0 ? "Review…" : `Move ${countOf(moving, "sticker")}…`).setDisabled(plan.length === 0);
     };
     setting.addText((text) =>
       text
@@ -673,7 +674,7 @@ export class SettingsTab extends PluginSettingTab {
   }
 }
 
-const noteCount = (n: number) => `${n} ${n === 1 ? "note" : "notes"}`;
+const noteCount = (n: number) => countOf(n, "note");
 
 /** Calendared: notes still use a format or sticker property from before a change (docs/adr/0035) */
 // Calendared: only the notices whose rows the page shows; a period turned off kept its warning with no row to act on

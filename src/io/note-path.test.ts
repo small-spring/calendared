@@ -2,7 +2,7 @@ import moment from "moment";
 import { describe, expect, it } from "vitest";
 import { periodRules } from "@/periods";
 import { createIsoWeekScheme } from "@/weeks";
-import { notePath, templateFilePath } from "./note-path";
+import { noteNameOf, notePath, templateFilePath } from "./note-path";
 
 // notePath gets everything it depends on as arguments (no settings store, no Obsidian), so a caller that reads the
 // settings reactively recomputes the path whenever they change (docs/adr/0016)
@@ -60,5 +60,16 @@ describe("templateFilePath: 設定のテンプレートの欄から、テンプ�
         expect(templateFilePath("")).toBe("");
         expect(templateFilePath("  ")).toBe("");
         expect(templateFilePath("/")).toBe("");
+    });
+});
+
+describe("noteNameOf: パスからノートの名前（フォルダと .md を除く）", () => {
+    it("フォルダと .md を除く", () => {
+        expect(noteNameOf("日記/2026/2026-10-30.md")).toBe("2026-10-30");
+        expect(noteNameOf("2026-10.md")).toBe("2026-10");
+    });
+
+    it(".md でなければ拡張子はそのまま", () => {
+        expect(noteNameOf("添付/絵.png")).toBe("絵.png");
     });
 });

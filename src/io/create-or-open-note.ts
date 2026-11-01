@@ -6,6 +6,7 @@ import CreateNote from "./CreateNote.svelte";
 import { getPeriodicityFromGranularity, replaceTemplateContents } from "./parse";
 import { type IGranularity } from "./types";
 import { ensureFolderExists, getNotePath, getTemplateInfo } from "./vault";
+import { noteNameOf } from "./note-path";
 import { PluginService } from "@/app-service";
 import { turnedOffMessage } from "@/period-words";
 import { periodRulesFor, periodStart } from "@/periods";
@@ -24,7 +25,7 @@ export async function createOrOpenNote({
 }) {
   const normalizedPath = getNotePath(granularity, date);
   // Calendared: the name the note gets, not moment's (moment writes calendar quarters and years; docs/adr/0039)
-  const filename = normalizedPath.slice(normalizedPath.lastIndexOf("/") + 1).replace(/\.md$/, "");
+  const filename = noteNameOf(normalizedPath);
 
   async function openFile(file: TFile | undefined | null) {
     if (file) {
