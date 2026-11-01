@@ -7,6 +7,7 @@
   import { cn } from "@/ui/utils";
   import { debounce } from "obsidian";
   import { formatPeriod, periodOf, periodRulesFor } from "@/periods";
+  import { trackPendingEdit } from "@/settings/format-on-close";
   import { weekSchemeFor } from "@/weeks";
   import { type Writable } from "svelte/store";
   import FilepathsCount from "./FilepathsCount.svelte";
@@ -33,7 +34,7 @@
     value = saved;
   });
 
-  // read again when any period's format or the week start changes (another period's format can't be the same)
+  // read again when the week start changes (a weekly format is read with it)
   let error = $derived.by(() => {
     void $settingsStore;
     return validateFormat(value, granularity);
@@ -61,6 +62,15 @@
       return s;
     });
   }, 500, true);
+  // Calendared: closing the settings saves the last edit before checking the formats, so one typed just before closing
+  // isn't saved after the check. The field going away saves it too
+  $effect(() => {
+    const untrack = trackPendingEdit(() => save.run());
+    return () => {
+      untrack();
+      save.run();
+    };
+  });
 
   function handleBlur() {
     if (value.trim()) return;

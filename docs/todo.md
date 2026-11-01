@@ -18,12 +18,6 @@
 
 2026-11-01 に、古いコードと想定と違いそうな動きをもう一度洗い出したもの。「たぶん」は、コードを読んだだけで、起きるかをまだ確かめていない — どれも Claude
 
-- 不具合: 書式の重複チェック（`src/io/validation/format.ts` の `checkIfDuplicateFormat`）が、ほかの周期のまちがった書式とも比べる。
-  月の書式に日と同じ `DD.MM.YYYY` を入れて設定画面を閉じると、日の正しい書式まで既定に戻る。書式は周期ごとに使える記号が違う
-  （[ADR-0040](adr/0040-format-tokens-per-period.md)）ので、正しい書式どうしはぶつからない。チェックごと消せるか考える
-- 不具合: 四半期・年を 1 月以外から始めたとき、書式の `y`・`yyyy`・`yo`・`YYYYY` が暦の年で書かれる（`src/periods.ts` の `withNameNumbers`）。
-  作ったノートがカレンダーに出ず、作り直される。ADR-0040 の表では年の記号は `YYYY YY Y` だけなので、`src/format-tokens.ts` で許すものを表に合わせる。
-  年が足りないときの文言「year (Y, y, gg or GG)」も、その周期で使える記号だけにする
 - 不具合: 大文字・小文字だけ違う名前への書式の変換（`2026-w44` → `2026-W44`）が、ノート自身とぶつかったことになる（`src/migrations.ts` の `planFormatRenames`）。
   [spec/migrations.md](spec/migrations.md) では、ぶつかるのはほかのファイル
 - 不具合: カレンダーの言語に `x-pseudo`・`oc-lnc` を選ぶと、パンくずの月・日の表記（`Intl.DateTimeFormat`）がエラーになる（`src/navigation.ts`、`Navigation.svelte`）。
@@ -33,8 +27,6 @@
 - 不具合: 起動時に開くノートだけ、日付に「今」を渡す（`src/main.ts`）。週・月・四半期・年のテンプレートの `{{date}}` が、コマンドや Open now で作ったとき
   （その期間の最初の日）と違う
 - 不具合: 周期をオフにすると、その周期の移行の知らせが Migrate notes の警告に残るのに、押せる行が出ない（`src/settings/plugin-tab.ts` の `anyMigrationNotice`）
-- 不具合（たぶん）: 書式を入力して 0.5 秒以内に設定画面を閉じると、閉じるときの確かめのあとで、まちがった書式が保存される（`Format.svelte` の `debounce`）
-- 不具合（たぶん）: 設定画面を閉じるとき、オフの周期の書式も確かめて黙って既定に戻す（`plugin-tab.ts` の `hide`）。オフの周期の書式は、今あるノートを開くのに使っている
 - 不具合（たぶん）: カレンダーがエディタの場所にあって選ばれているとき、カレンダーを開く・閉じるコマンドで、中身のないビューが残る（`src/main.ts` の `leaf.view.unload()`。元の版のコード）
 - 不具合（たぶん）: テンプレートの候補を出したまま設定画面を閉じると、矢印キー・Enter の割り当てが残る（`src/settings/ui/suggest.ts` の `destroy` が `close` を呼ばない）
 - 不具合（たぶん）: ステッカーのピッカーを別ウィンドウのノートから開くと、メインのウィンドウに出る（`src/ui/sticker-picker.ts` が `document`・`window` を使う）
@@ -50,7 +42,6 @@
   曜日の見出しを、週の並びと同じ設定から作る（`localeDataStore` をなくす）
 - 整理: 小さな文言など: 矢印のツールチップ「Previous Month」を文の書き方に（「Range」もわかりにくい）、「Create note」のアイコン `document` を確かめる、
   `src/locales.ts` の言語名（先頭の空白、Lybia、Malay が 2 つ、システムの言語が大文字・小文字の違いで 2 回出る）、`emoji-search.ts` の先頭の説明
-- 整理: 書式の `Qo`・`Mo`・`Wo`・`wo` は moment が読み返せない。今の確かめで弾かれているかを見て、ADR-0040 の表と合わせる
 - 整理: ADR-0039 を守るテスト（`period-rules-guard.test.ts`）が、`.year()` や `.add(n, 'quarter')` を見ていない。`parsePeriod` が 1 月始まりのときだけ書き戻して確かめないのもそろえる
 - 整理: テストを見直す。多すぎるテスト（同じことを何度も確かめている、作りの細部に頼っている）を消し、まとめるべきテストをまとめる。
   消す前に、そのテストだけが守っている振る舞いがないかを見る。夏時間のある時間帯（`TZ=America/Sao_Paulo` など）でも通るかも確かめる

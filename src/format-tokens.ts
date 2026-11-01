@@ -21,15 +21,21 @@ export function tokenize(format: string): FormatPart[] {
     return parts;
 }
 
-type TokenKind = "year" | "weekYear" | "quarter" | "month" | "week" | "day" | "time";
+type TokenKind = "year" | "weekYear" | "quarter" | "month" | "week" | "day" | "time" | "unusable";
 
 function kindOf(token: string): TokenKind {
-    if (/^(Y+|y+|yo)$/.test(token)) return "year";
+    if (/^(YYYY|YY|Y)$/.test(token)) return "year";
+    // Calendared: other ways to write the year (y, yyyy, yo, YYYYY) are written as the calendar year even when quarters
+    // and years start in another month, so no period may use them (docs/adr/0040)
+    if (/^(Y+|y+|yo)$/.test(token)) return "unusable";
+    // Calendared: ordinals moment can't read back (Qo, Mo, Wo, wo, do, DDDo), so a name written with them is never
+    // found again. Do can be read (docs/adr/0040)
+    if (/^(Qo|Mo|Wo|wo|do|DDDo)$/.test(token)) return "unusable";
     if (/^(g+|G+)$/.test(token)) return "weekYear";
-    if (/^Qo?$/.test(token)) return "quarter";
-    if (/^M+$|^Mo$/.test(token)) return "month";
-    if (/^[wW][oWw]?$/.test(token)) return "week";
-    if (/^(D+|DDDo|Do|d+|do|e|E)$/.test(token)) return "day";
+    if (token === "Q") return "quarter";
+    if (/^M+$/.test(token)) return "month";
+    if (/^[wW][Ww]?$/.test(token)) return "week";
+    if (/^(D+|Do|d+|e|E)$/.test(token)) return "day";
     // dates without a time (L, LL, l, ll) name a day; LLL and the rest include a time
     if (/^(LL?|ll?)$/.test(token)) return "day";
     return "time";
@@ -66,7 +72,12 @@ export function missingTokens(format: string, granularity: IGranularity): string
     const tokens = tokenize(format).flatMap((p) => (p.kind === "token" ? [p.token] : []));
     const has = (kind: TokenKind) => tokens.some((t) => kindOf(t) === kind);
     if (granularity === "day" && tokens.some((t) => /^(LL?|ll?)$/.test(t))) return null;
-    if (!has("year") && !has("weekYear")) return "year (Y, y, gg or GG)";
+    // Calendared: name only the year tokens the period may use
+    if (granularity === "week") {
+        if (!has("weekYear")) return "year (GG or gg)";
+    } else if (granularity === "day") {
+        if (!has("year") && !has("weekYear")) return "year (Y, or GG with W)";
+    } else if (!has("year")) return "year (Y)";
     switch (granularity) {
         case "quarter":
             return has("quarter") ? null : "quarter (Q)";
@@ -78,7 +89,7 @@ export function missingTokens(format: string, granularity: IGranularity): string
             // an ISO week date (GGGG-[W]WW-E) names the day by its weekday
             if (has("week")) return tokens.some((t) => /^(d+|do|e|E)$/.test(t)) ? null : "weekday (E)";
             if (!has("month")) return "month (M)";
-            return tokens.some((t) => /^D+$|^D+o$/.test(t)) ? null : "day (D)";
+            return tokens.some((t) => /^(D+|Do)$/.test(t)) ? null : "day (D)";
         case "year":
             return null;
     }
