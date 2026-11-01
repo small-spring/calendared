@@ -42,6 +42,18 @@ describe("ISO の週の決め方: ある日を含む週", () => {
     });
 });
 
+describe("ISO の週の決め方: 週の年を取る日（パンくずの年・四半期・月もこの日のもの）", () => {
+    it("行の月曜日の 3 日後の木曜日（ISO 8601 の決まり）", () => {
+        expect(ymd(monday.yearDayOf(week(2026, 1))!)).toBe("2026-01-01");
+        expect(ymd(sunday.yearDayOf(week(2024, 5))!)).toBe("2024-02-01");
+        expect(ymd(saturday.yearDayOf(week(2024, 5))!)).toBe("2024-02-01");
+    });
+
+    it("存在しない週にはない", () => {
+        expect(monday.yearDayOf(week(2027, 53))).toBeNull();
+    });
+});
+
 describe("ISO の週の決め方: 週の期間（カレンダーの 1 行）", () => {
     it("週の始まりの設定に合わせた 7 日間", () => {
         const range = (scheme: WeekScheme) => {
@@ -128,6 +140,17 @@ describe("週次ノートの書式の確かめ（設定画面の注意に使う�
         expect(isoWeekFormatFor("[www] gg-w")).toBe("[www] GG-W");
         expect(isoWeekFormatFor("GGGG-[W]WW")).toBe("GGGG-[W]WW");
     });
+
+    it("おすすめの書式: 長い記号の一部は替えない（YYYYY・ggggg は年の ISO の記号にならない）", () => {
+        expect(isoWeekFormatFor("YYYYY-ww")).toBe("YYYYY-WW");
+        expect(isoWeekFormatFor("ggggg-ww")).toBe("ggggg-WW");
+    });
+
+    it("おすすめの書式: \\ で文字にした w は替えない。年の Y 1 文字も GGGG にする", () => {
+        // moment reads \ww as the letters ww (\ makes the whole token text), then w as the week
+        expect(isoWeekFormatFor("gggg-\\www")).toBe("GGGG-[ww]W");
+        expect(isoWeekFormatFor("Y-[W]ww")).toBe("GGGG-[W]WW");
+    });
 });
 
 // Promises every week scheme must keep (docs/adr/0014). A new scheme only needs to be added to this list
@@ -159,6 +182,16 @@ describe.each([
             const w = scheme.weekOf(day);
             expect(scheme.shift(w, 1)).toEqual(scheme.weekOf(scheme.rangeOf(w)!.end.clone().add(1, "day")));
             expect(scheme.shift(scheme.shift(w, -1), 1)).toEqual(w);
+        }
+    });
+
+    it("週の年を取る日は、その週の期間の中にあり、その日の暦の年が週の年", () => {
+        for (const day of days) {
+            const w = scheme.weekOf(day);
+            const yearDay = scheme.yearDayOf(w)!;
+            const range = scheme.rangeOf(w)!;
+            expect(yearDay.isBetween(range.start, range.end, "day", "[]")).toBe(true);
+            expect(yearDay.year()).toBe(w.weekYear);
         }
     });
 

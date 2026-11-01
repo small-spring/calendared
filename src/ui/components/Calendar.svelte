@@ -23,10 +23,10 @@
     let { weekdaysShort } = $derived($localeDataStore);
     // Calendared: also rebuild when the week start changes (upstream only did on month changes, so the dates
     // stayed in the old order under the new weekday header)
-    let month = $derived(monthGrid($displayedDateStore, $settingsStore.localeSettings.weekStartId));
+    let weeks = $derived(weekSchemeFor($settingsStore.localeSettings));
+    let month = $derived(monthGrid($displayedDateStore, weeks));
     // Calendared: names and numbers in the calendar's language, without switching Obsidian's moment (calendar-locale.ts)
     let locale = $derived($settingsStore.localeSettings.localeOverride);
-    let weeks = $derived(weekSchemeFor($settingsStore.localeSettings));
     let rules = $derived(periodRulesFor($settingsStore));
     // Calendared: the month view's 12 months, from the start of the displayed month's year (docs/adr/0039)
     let monthRows = $derived.by(() => {

@@ -218,6 +218,13 @@ describe("breadcrumbs: 開いているノートの位置を、上の周期から
         expect(crumbs("week", d("2025-12-28"), ALL, sundayWeeks)[3]).toBe("week:2025-12-28");
     });
 
+    it("週: 日・土曜始まりで、行の真ん中と木曜日の月が違っても、木曜日の月になる", () => {
+        // 2024-02-01 は木曜日。日曜始まりの行 1/28〜2/3 の真ん中（水曜日）は 1/31、土曜始まりの行 1/27〜2/2 の真ん中は 1/30
+        const saturdayWeeks = periodRules(createIsoWeekScheme(6));
+        expect(crumbs("week", d("2024-01-28"), ALL, sundayWeeks)[2]).toBe("month:2024-02-01");
+        expect(crumbs("week", d("2024-01-27"), ALL, saturdayWeeks)[2]).toBe("month:2024-02-01");
+    });
+
     it("日: 週のパンくずは、日を含む行（週の始まりは週の決め方から）", () => {
         expect(crumbs("day", d("2026-11-01"), ALL, sundayWeeks)[3]).toBe("week:2026-11-01");
         expect(crumbs("day", d("2026-11-01"), ALL, mondayWeeks)[3]).toBe("week:2026-10-26");

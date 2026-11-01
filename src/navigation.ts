@@ -125,8 +125,8 @@ export type Crumb = {
 
 /**
  * Where the note is, from the year down to the note itself ("2026 › Q4 › 10月 › W44 › 30日"). The periods above are
- * the ones containing the middle of the note's period (docs/adr/0039): a week's year, quarter and month are its
- * Thursday's, the day ISO 8601 takes the week's year from, so they agree with its week number; a quarter's year is its
+ * the ones containing the middle of the note's period (docs/adr/0039): a week's year, quarter and month are those of
+ * the day the week scheme takes its year from (ISO 8601: its Thursday), so they agree with its week number; a quarter's year is its
  * second month's.
  * Disabled weeks and quarters are left out (you know where you are without them); disabled months and years stay,
  * but can't be opened. The last crumb, the note itself, always shows
@@ -140,7 +140,7 @@ export function breadcrumbs(
     const own = granularities.indexOf(granularity);
     const middle =
         granularity === "week"
-            ? isoThursday(date, rules)
+            ? rules.weeks.yearDayOf(rules.weeks.weekOf(date))!
             : granularity === "quarter"
               ? periodStart("quarter", date, rules).add(1, "month")
               : date;
@@ -153,12 +153,6 @@ export function breadcrumbs(
             date: periodStart(g, g === granularity ? date : middle, rules),
             canOpen: g === granularity || enabled[g],
         }));
-}
-
-/** The Thursday of the ISO week a calendar row is named after (the row's Monday + 3 days) */
-function isoThursday(date: moment.Moment, rules: PeriodRules): moment.Moment {
-    const { weekYear, week } = rules.weeks.weekOf(date);
-    return window.moment(`${weekYear}-W${String(week).padStart(2, "0")}-4`, "GGGG-[W]WW-E", true);
 }
 
 /** A crumb's text in the calendar's language: "2026", "Q4", "10月" / "Oct", "W44", "30日" / "30" */

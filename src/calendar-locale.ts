@@ -23,17 +23,19 @@ export function localeWeekStart(locale: string): number {
   return window.moment.localeData(locale).firstDayOfWeek();
 }
 
+import type { WeekScheme } from "./weeks";
+
 export type IWeek = { days: moment.Moment[] };
 export type IMonth = IWeek[];
 
 /**
  * The 6 weeks (42 days) the calendar shows for a month: from the first day of the week that contains the 1st.
  * Calendared: upstream found the 1st's place by looking its weekday name up in a list of names, so the names and the
- * date had to be in the same language
+ * date had to be in the same language. Where a week starts comes from the week scheme (docs/adr/0014)
  */
-export function monthGrid(displayedDate: moment.Moment, weekStartId: number): IMonth {
+export function monthGrid(displayedDate: moment.Moment, weeks: WeekScheme): IMonth {
   const startOfMonth = displayedDate.clone().date(1);
-  let date = startOfMonth.clone().subtract((startOfMonth.day() - weekStartId + 7) % 7, "days");
+  let date = weeks.rangeOf(weeks.weekOf(startOfMonth))!.start;
 
   const month: IMonth = [];
   for (let i = 0; i < 6; i++) {
