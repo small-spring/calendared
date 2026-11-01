@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { granularities } from "@/constants";
 import type { IGranularity } from "@/io";
-import { calendarView, openAtStartupOf, setOpenAtStartup, setPeriodEnabled } from "./period-switch";
+import { calendarView, enabledPeriods, openAtStartupOf, setOpenAtStartup, setPeriodEnabled } from "./period-switch";
 
 type Periods = Record<IGranularity, { enabled: boolean; openAtStartup: boolean }>;
 const periods = (on: IGranularity[], startup?: IGranularity): Periods =>
@@ -81,5 +81,17 @@ describe("calendarView: カレンダーに出すビュー", () => {
     it("オンの周期だけで決まり、前のビューを引きずらない（日をオンに戻せば日のビューに戻る）", () => {
         expect(calendarView(on(["month", "year"]))).toBe("month");
         expect(calendarView(on(["day", "month", "year"]))).toBe("day");
+    });
+});
+
+describe("enabledPeriods: 周期ごとのオン・オフ", () => {
+    it("周期の設定から、オンかどうかだけを取り出す", () => {
+        expect(enabledPeriods(periods(["day", "quarter"]))).toEqual({
+            day: true,
+            week: false,
+            month: false,
+            quarter: true,
+            year: false,
+        });
     });
 });

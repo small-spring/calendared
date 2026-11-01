@@ -12,6 +12,5 @@ export * from './parse';
 export * from './types';
 export * from './note-path';
 export * from './vault';
-export * from './utils';
 export * from './vault-source';
 export * from './notes-by-format';

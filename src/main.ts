@@ -4,7 +4,7 @@ import { MarkdownView, Notice, Plugin, TAbstractFile, TFile, WorkspaceLeaf, Work
 import { get } from 'svelte/store';
 import { PluginService } from './app-service';
 import { CALENDAR_LUCIDE_ICON, granularities, LEAF_TYPE } from './constants';
-import { createOrOpenNote, getFileData, getStartupNoteGranularity, initVaultSource } from './io';
+import { createOrOpenNote, getFileData, initVaultSource } from './io';
 import { getPeriodicityFromGranularity } from './io/parse';
 import type { IGranularity } from './io/types';
 import { isValidPeriodicNote, periodicNoteOf, validateFormat } from './io/validation';
@@ -23,6 +23,7 @@ import { CalendarView } from './view';
 import { initEmojiSearch } from './ui/utils/emoji-locale';
 import { HOVER_LINK_SOURCE } from './ui/utils/event-handlers';
 import { trackSettingChanges } from './settings/migration-notice';
+import { openAtStartupOf } from './settings/period-switch';
 import { nextToday } from './today';
 import { getNoteSticker, isPeriodicNote, openStickerPicker, removeSticker, StickerActions } from './ui/sticker-actions';
 
@@ -189,8 +190,8 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
       this.openNowActions.refresh();
 
       // open note at startup
-      const startupNoteGranularity = getStartupNoteGranularity();
-      if (startupNoteGranularity) {
+      const startupNoteGranularity = openAtStartupOf(get(settingsStore).periods);
+      if (startupNoteGranularity !== "none") {
         await createOrOpenNote({
           leaf: this.app.workspace.getLeaf(),
           // Calendared: the period's first day, as the commands and Open now pass. Upstream passed now, so a template's

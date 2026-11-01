@@ -5,10 +5,11 @@ import { MarkdownView, getIcon, type TFile } from "obsidian";
 import { get } from "svelte/store";
 
 import { PluginService } from "@/app-service";
-import { createOrOpenNote, type IGranularity } from "@/io";
+import { createOrOpenNote } from "@/io";
 import { periodicNoteOf } from "@/io/validation";
 import { finestEnabled, isNowNote, periodStart } from "@/navigation";
 import { settingsStore, type ISettings } from "@/settings";
+import { enabledPeriods } from "@/settings/period-switch";
 import { displayedDateStore, todayStore, yearsRanges } from "@/stores";
 import { periodRulesFor } from "@/periods";
 
@@ -17,12 +18,6 @@ export function openNowIcon(): string {
   return getIcon("calendar-clock") ? "calendar-clock" : "clock";
 }
 
-function enabledPeriods(periods = get(settingsStore).periods): Record<IGranularity, boolean> {
-  return Object.fromEntries(Object.entries(periods).map(([g, period]) => [g, period.enabled])) as Record<
-    IGranularity,
-    boolean
-  >;
-}
 
 /** Whether `file` (the open note) is the note Open now opens. Svelte components pass the stores' values to react to them */
 export function isNowNoteFile(
@@ -41,7 +36,7 @@ export function openNow() {
   if (!app) return;
 
   const today = get(todayStore);
-  const granularity = finestEnabled(enabledPeriods());
+  const granularity = finestEnabled(enabledPeriods(get(settingsStore).periods));
   const date = periodStart(granularity, today, periodRulesFor(get(settingsStore)));
   // the calendar moves to today's month itself: a week or quarter note would only bring it to the period's first month
   yearsRanges.update((values) => ({

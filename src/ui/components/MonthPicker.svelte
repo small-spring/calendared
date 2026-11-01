@@ -2,9 +2,8 @@
     // Calendared: month picker shown as a popover from the header's year chevron.
     // Replaces upstream's "Month" tab (YearHeader + months table in Calendar.svelte).
     import { crumbText, periodStart } from "@/navigation";
-    import { periodRulesFor } from "@/periods";
     import { noteAt } from "@/io";
-    import { settingsStore } from "@/settings";
+    import { periodRulesStore, settingsStore } from "@/settings";
     import { displayedDateStore, todayStore } from "@/stores";
     import { cn } from "@/ui/utils";
     import { inLocale } from "@/calendar-locale";
@@ -19,8 +18,8 @@
     let { onPick }: Props = $props();
 
     // Calendared: the year by its own start month, its 12 months from there (docs/adr/0039)
-    let rules = $derived(periodRulesFor($settingsStore));
-    let pickerYear = $state(periodStart("year", $displayedDateStore, periodRulesFor($settingsStore)));
+    let rules = $derived($periodRulesStore);
+    let pickerYear = $state(periodStart("year", $displayedDateStore, $periodRulesStore));
     let months = $derived(Array.from({ length: 12 }, (_, i) => pickerYear.clone().add(i, "months")));
     // Calendared: read through the vault source with the settings read reactively (docs/adr/0016)
     let yearFileData = $derived(noteAt("year", pickerYear, $settingsStore));

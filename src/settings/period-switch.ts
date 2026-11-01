@@ -20,6 +20,11 @@ export function setPeriodEnabled<T>(periods: PeriodSwitches<T>, granularity: IGr
     return next;
 }
 
+/** Calendared: which periods are on, for the calendar, the breadcrumbs and Open now */
+export function enabledPeriods(periods: Record<IGranularity, { enabled: boolean }>): Record<IGranularity, boolean> {
+    return Object.fromEntries(granularities.map((g) => [g, periods[g].enabled])) as Record<IGranularity, boolean>;
+}
+
 /** Calendared: the period whose note opens at startup, or "none". Kept per period in the settings */
 export function openAtStartupOf<T>(periods: PeriodSwitches<T>): IGranularity | "none" {
     return granularities.find((g) => periods[g].enabled && periods[g].openAtStartup) ?? "none";

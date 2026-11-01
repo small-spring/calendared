@@ -2,7 +2,7 @@
   import { type IGranularity } from "@/io";
 
   import { noteAt, vaultSource } from "@/io";
-  import { settingsStore } from "@/settings";
+  import { periodRulesStore, settingsStore } from "@/settings";
   import {
     displayedDateStore,
     todayStore,
@@ -14,8 +14,6 @@
   import { Sticker } from "..";
   import { Platform } from "obsidian";
   import { samePeriod } from "@/navigation";
-  import { periodRulesFor } from "@/periods";
-
   interface Props {
     // Properties
     date: moment.Moment;
@@ -58,7 +56,7 @@
   });
 
   // Calendared: a quarter or year by its own start month (docs/adr/0039)
-  let isToday = $derived(samePeriod(granularity, date, $todayStore, periodRulesFor($settingsStore)));
+  let isToday = $derived(samePeriod(granularity, date, $todayStore, $periodRulesStore));
   let isAdjacentMonth = $derived(
     !ignoreAdjacentMonth && granularity === "day" && !date.isSame($displayedDateStore, "month"),
   );

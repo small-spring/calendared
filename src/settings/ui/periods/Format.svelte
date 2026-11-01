@@ -3,10 +3,10 @@
   import { DEFAULT_FORMATS_PER_GRANULARITY } from "@/constants";
   import { type IGranularity } from "@/io";
   import { validateFormat } from "@/io/validation";
-  import { settingsStore, type PeriodSettings } from "@/settings";
+  import { periodRulesStore, settingsStore, type PeriodSettings } from "@/settings";
   import { cn } from "@/ui/utils";
   import { debounce } from "obsidian";
-  import { formatPeriod, periodOf, periodRulesFor } from "@/periods";
+  import { formatPeriod, periodOf } from "@/periods";
   import { trackPendingEdit } from "@/settings/format-on-close";
   import { weekSchemeFor } from "@/weeks";
   import { type Writable } from "svelte/store";
@@ -42,7 +42,7 @@
 
   // Calendared: today's period named as its note would be (weeks by the row's Monday, fiscal quarters and years)
   const previewName = (formatValue: string) => {
-    const rules = periodRulesFor($settingsStore);
+    const rules = $periodRulesStore;
     return formatPeriod(periodOf(granularity, window.moment(), rules), formatValue, rules);
   };
   // Calendared: a weekly format also shows the week at New Year, where names break most often

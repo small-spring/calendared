@@ -15,11 +15,11 @@
     showsOn,
     stripDates,
   } from "@/navigation";
-  import { settingsStore } from "@/settings";
+  import { periodRulesStore, settingsStore } from "@/settings";
+  import { enabledPeriods } from "@/settings/period-switch";
   import { todayStore } from "@/stores";
   import { Arrow } from "@/ui";
   import { cn, eventHandlers, isControlPressed } from "@/ui/utils";
-  import { periodRulesFor } from "@/periods";
   import DateBttn from "../core/DateBttn.svelte";
 
   interface Props {
@@ -33,12 +33,8 @@
   const { isPeriodic, granularity, date, isSide = false }: Props = $props();
 
   let locale = $derived($settingsStore.localeSettings.localeOverride);
-  let rules = $derived(periodRulesFor($settingsStore));
-  let enabled = $derived(
-    Object.fromEntries(
-      Object.entries($settingsStore.periods).map(([g, period]) => [g, period.enabled]),
-    ) as Record<IGranularity, boolean>,
-  );
+  let rules = $derived($periodRulesStore);
+  let enabled = $derived(enabledPeriods($settingsStore.periods));
 
   let showCrumbs = $derived(
     showsOn($settingsStore.breadcrumbs, Platform.isPhone) &&
