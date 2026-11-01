@@ -15,3 +15,20 @@ export function formatsToReset(periods: Record<IGranularity, Pick<PeriodSettings
     return enabled && (!format.trim() || !!validateFormat(format, g));
   });
 }
+
+/** The format fields' saves still waiting for typing to stop */
+const pendingEdits = new Set<() => void>();
+
+/**
+ * Lets the settings save a format field's last edit before they check the formats on close; the field saves 0.5 s after
+ * typing stops, which could come after the check and keep an invalid format. Returns the untrack, for when the field goes
+ */
+export function trackPendingEdit(save: () => void): () => void {
+  pendingEdits.add(save);
+  return () => pendingEdits.delete(save);
+}
+
+/** Saves the edits the format fields haven't saved yet */
+export function savePendingEdits() {
+  for (const save of [...pendingEdits]) save();
+}

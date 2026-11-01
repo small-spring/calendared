@@ -31,7 +31,7 @@ import { mount, unmount } from "svelte";
 import { get, type Writable } from "svelte/store";
 import writableDerived from "svelte-writable-derived";
 import type { ISettings, PeriodSettings } from "./constants";
-import { formatsToReset } from "./format-on-close";
+import { formatsToReset, savePendingEdits } from "./format-on-close";
 import { openAtStartupOf, setOpenAtStartup, setPeriodEnabled } from "./period-switch";
 import { settingsStore } from "./store";
 import Format from "./ui/periods/Format.svelte";
@@ -640,6 +640,8 @@ export class SettingsTab extends PluginSettingTab {
     // Calendared: a notice whose notes were all renamed or moved elsewhere is done (docs/adr/0035)
     forgetFinishedNotices();
 
+    // Calendared: the formats being typed are saved first, so the check below sees them
+    savePendingEdits();
     // Calendared: a period has one format (docs/adr/0019). An empty or invalid one is replaced with the default, so
     // creating a note always has a valid format. Turned-off periods keep theirs, which finds the notes you already have
     for (const g of formatsToReset(settings().periods)) this.resetFormat(g);
