@@ -153,6 +153,7 @@ export class SettingsTab extends PluginSettingTab {
       this.periodsGroup(),
       ...this.navigationGroups(),
       ...this.stickerGroups(),
+      this.languageGroup(),
       this.migrationPage(),
     ];
   }
@@ -166,38 +167,14 @@ export class SettingsTab extends PluginSettingTab {
     // Calendared: Saturday, Sunday or Monday only, like Google Calendar (docs/adr/0011), named in the calendar's language
     for (const i of [6, 0, 1]) weekStartOptions[defaultWeekdays[i]] = names[i];
 
-    const languageOptions: Record<string, string> = {
-      // Calendared: Obsidian's language rather than the OS's (docs/adr/0046)
-      [obsidianLocaleKey]: `Same as Obsidian (${locales.get(obsidianLocaleKey) || obsidianLocaleKey})`,
-    };
-    for (const key of window.moment.locales()) {
-      if (key !== obsidianLocaleKey) languageOptions[key] = locales.get(key) || key;
-    }
-
     const startupOptions: Record<string, string> = { none: "Nothing" };
     for (const g of granularities) if (s.periods[g].enabled) startupOptions[g] = currentNoteName(g);
 
     return [
       {
-        name: "Week starts on",
-        // the week start also decides a weekly note's days (docs/adr/0011), which the name doesn't tell
-        desc: "Also sets which 7 days a weekly note covers.",
-        control: { type: "dropdown", key: "weekStart", options: weekStartOptions },
-      },
-      {
         name: "Open on startup",
         aliases: ["startup", "daily note"],
         control: { type: "dropdown", key: "openAtStartup", options: startupOptions },
-      },
-      {
-        name: "Calendar language",
-        desc: "Month and weekday names in the calendar, period breadcrumbs and mini calendar. File names use Obsidian's language.",
-        control: { type: "dropdown", key: "calendarLanguage", options: languageOptions },
-      },
-      {
-        name: "Confirm before creating notes",
-        desc: "From the calendar, period breadcrumbs, mini calendar or Open now. Commands never ask.",
-        control: { type: "toggle", key: "shouldConfirmBeforeCreate" },
       },
       {
         name: "Open now button",
@@ -208,6 +185,17 @@ export class SettingsTab extends PluginSettingTab {
             toggle.setValue(settings().openNowHeaderButton).onChange((on) => this.setControlValue("openNowHeaderButton", on)),
           );
         },
+      },
+      {
+        name: "Confirm before creating notes",
+        desc: "From the calendar, period breadcrumbs, mini calendar or Open now. Commands never ask.",
+        control: { type: "toggle", key: "shouldConfirmBeforeCreate" },
+      },
+      {
+        name: "Week starts on",
+        // the week start also decides a weekly note's days (docs/adr/0011), which the name doesn't tell
+        desc: "Also sets which 7 days a weekly note covers.",
+        control: { type: "dropdown", key: "weekStart", options: weekStartOptions },
       },
     ];
   }
@@ -530,6 +518,27 @@ export class SettingsTab extends PluginSettingTab {
         ],
       },
     ];
+  }
+
+  // the calendar's language is rarely changed, so it sits at the bottom rather than at the top (docs/adr/0054)
+  private languageGroup(): SettingDefinitionItem {
+    const languageOptions: Record<string, string> = {
+      // Calendared: Obsidian's language rather than the OS's (docs/adr/0046)
+      [obsidianLocaleKey]: `Same as Obsidian (${locales.get(obsidianLocaleKey) || obsidianLocaleKey})`,
+    };
+    for (const key of window.moment.locales()) {
+      if (key !== obsidianLocaleKey) languageOptions[key] = locales.get(key) || key;
+    }
+    return {
+      type: "group",
+      items: [
+        {
+          name: "Calendar language",
+          desc: "Month and weekday names in the calendar, period breadcrumbs and mini calendar. File names use Obsidian's language.",
+          control: { type: "dropdown", key: "calendarLanguage", options: languageOptions },
+        },
+      ],
+    };
   }
 
   // Calendared: the migrations live on a page of its own at the bottom (docs/adr/0023, 0024, docs/features/migrations.md).
