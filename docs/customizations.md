@@ -261,3 +261,4 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 - テストを見直した（427 件 → 417 件。守っている振る舞いは減らしていない）: ほかのテストと同じことを確かめていたテストを消し、似たテストを `it.each` にまとめた。テストの道具（日付、週の始まり、既定の書式、ファイル、設定の置き換え）を `src/test-fixtures.ts` に、TS のモジュールの期間の決まりを `periodRulesStore` にそろえた。夏時間のある時間帯で動かす `npm run test:dst` を足した〔2026-11-01〕
 - `npm run deploy` の読み込みの確かめが落ちていたのを直した。確かめ用の偽の Obsidian が何でも「呼べないクラス」で返していて、読み込むときに `getLanguage()` を呼ぶようになってから落ちていた。偽物を、呼んでも `new` してもよいもの（`fake()`）にした〔2026-11-01〕
 - README の冒頭の注記の箱をなくした。元のプラグインのことは紹介文の後に 1 行で書き（不具合はこちらへ知らせてほしいと添える）、日本語の使い方などへのリンクは「Documentation」の節に移した〔2026-11-02〕
+- README の Credits に、コードの多くは Claude（Claude Code）が書き、small-spring が方針を決めて確かめていると書いた〔2026-11-02〕

@@ -250,6 +250,7 @@ While this repository is private, the download fails. Run `npm run emoji-languag
   Luis Cadillo ([luiisca](https://github.com/luiisca)). Thank you.
 - Modified by [small-spring](https://github.com/small-spring) since 2026-10-28. The changes and their dates are listed in
   [docs/customizations.md](docs/customizations.md), and changed code is marked with `Calendared:` comments.
+- Most of the code is written by Claude (Anthropic's AI) using Claude Code, directed and reviewed by small-spring.
 - Licensed under the [GNU General Public License v3.0](LICENSE), same as the original.
 - Third-party components bundled in `main.js`: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The emoji search keywords
   are made from [Unicode CLDR](https://cldr.unicode.org/) data ([data/emoji-keywords/](data/emoji-keywords/)).
