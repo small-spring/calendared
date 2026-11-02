@@ -116,7 +116,7 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 | 表示名 | 場所 | キー | 既定 | 内容 |
 | --- | --- | --- | --- | --- |
 | Open now button | （一番上） | `openNowHeaderButton` | オン | ノートの見出しバーに Open now を出す |
-| Calendar language | （一番下、Migrate notes の上） | `localeSettings.localeOverride` | Obsidian の言語 | カレンダーの中の言語 |
+| Calendar language | Language | `localeSettings.localeOverride` | Obsidian の言語 | カレンダーの中の言語 |
 
 週の始まり（`Week starts on`）もカレンダーの並びに効くが、周期ノート全体の設定として 1. に置いた。
 
@@ -158,7 +158,7 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 | Also on non-periodic notes | Mini calendar | `miniCalendar.onOtherNotes` | オン | 周期ノートでないノートにも出すか |
 | Days for daily notes | Mini calendar | `miniCalendar.dayLayout` | Calendar week | 日のノートでの日の並べ方（Calendar week / 3 days each side）。欄の下に今日ならどう並ぶかを出す |
 | Stickers | Mini calendar | `miniCalendar.displayStickers` | オン | ステッカーを出すか（ステッカーがオフのときは隠す） |
-| Compact on desktop | Mini calendar の下の、見出しのない段（どちらかが PC に出るときだけ） | `compactOnDesktop` | オフ | PC で右上の小さな箱にする（パンくずにも効く） |
+| Compact on desktop | Desktop layout（Mini calendar の下。どちらかが PC に出るときだけ） | `compactOnDesktop` | オフ | PC で右上の小さな箱にする（パンくずにも効く） |
 
 前の `timeline.*` の設定は、起動したときに読み替えて消す（オフにしていれば両方オフ。ほかのノートにも出すか・ステッカーは引き継ぐ）。出す場所を 3 択で持っていたときの Never はオフに読み替える（[ADR-0033](../adr/0033-heading-toggles.md)）。
 
@@ -216,9 +216,9 @@ Obsidian 1.13 の宣言で書く設定で描く（[ADR-0020](../adr/0020-setting
 | Periodic notes | 周期ごとの行（オン・オフ、要約、›）。サブページにオン・オフ、書式、フォルダ、テンプレート | 1. 周期ノート |
 | Period breadcrumbs（見出しのトグル） | 出す場所、周期ノート以外 | 4. パンくずとミニカレンダー |
 | Mini calendar（見出しのトグル） | 出す場所、周期ノート以外、日の並べ方、ステッカー | 4. パンくずとミニカレンダー |
-| （見出しのない段） | Compact on desktop | 4. パンくずとミニカレンダー |
+| Desktop layout | Compact on desktop | 4. パンくずとミニカレンダー |
 | Stickers（見出しのトグル） | 見出しバーのボタン、プロパティ、検索の言語 | 5. ステッカー |
-| （見出しのない段） | カレンダーの言語 | 3. カレンダー |
+| Language | カレンダーの言語 | 3. カレンダー |
 | （一番下） | Migrate notes ›。サブページに書式の変換（周期ごと）とステッカーのプロパティの付け替え | 7. 移行 |
 
 サブページは周期と移行だけで、段はメインのページとサブページの 2 つまで。移行のボタンには何が起きるかを書く（「Rename 12 notes…」）。

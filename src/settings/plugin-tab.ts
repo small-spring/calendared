@@ -440,9 +440,10 @@ export class SettingsTab extends PluginSettingTab {
           },
         ],
       },
-      // applies to both, so it sits apart from both headings, and shows while either of them shows on desktop
+      // applies to both, so it has a heading of its own (docs/adr/0054), and shows while either of them shows on desktop
       {
         type: "group",
+        heading: "Desktop layout",
         visible: () => showsOn(settings().breadcrumbs, false) || showsOn(settings().miniCalendar, false),
         items: [
           {
@@ -531,6 +532,7 @@ export class SettingsTab extends PluginSettingTab {
     }
     return {
       type: "group",
+      heading: "Language",
       items: [
         {
           name: "Calendar language",
