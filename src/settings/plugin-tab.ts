@@ -602,7 +602,7 @@ export class SettingsTab extends PluginSettingTab {
       cls: "calendared-danger-zone",
       extraButtons: [
         headingExtras({
-          description: "Changes notes already in your vault: renames them or edits their properties. Each shows the notes first.",
+          description: "Changes notes already in your vault: renames them or edits their properties. Back up your vault first.",
         }),
       ],
       items: [this.migrationPage()],

@@ -40,7 +40,7 @@ export class MigrationReviewModal extends Modal {
     contentEl.createEl("p", { text: params.description });
     contentEl.createEl("p", {
       cls: "calendared-migration-backup",
-      text: "Before a large change, make sure you have a backup of your vault (Obsidian Sync's version history, Git, or your computer's backup).",
+      text: "Back up your vault before you run this (Obsidian Sync's version history, Git, or your computer's backup).",
     });
 
     const selected = new Set(params.rows.filter((row) => !row.conflict).map((row) => row.key));
