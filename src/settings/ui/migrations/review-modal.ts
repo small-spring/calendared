@@ -16,6 +16,8 @@ export type ReviewParams = {
   separator: string;
   /** Said above the list, in the warning color */
   warning?: string;
+  /** What must be true before it can run (else said above the list, in the warning color, with a button that fixes it) */
+  requirement?: { met: () => boolean; message: string; fixLabel: string; fix: () => void };
   /** The button's label for `count` notes, and while running */
   actionLabel: (count: number) => string;
   runningLabel: (done: number, total: number) => string;
@@ -47,6 +49,15 @@ export class MigrationReviewModal extends Modal {
     const checkboxes: HTMLInputElement[] = [];
 
     if (params.warning) contentEl.createEl("p", { cls: "calendared-migration-warning", text: params.warning });
+    const requirementMet = () => !params.requirement || params.requirement.met();
+    if (params.requirement && !requirementMet()) {
+      const { message, fixLabel, fix } = params.requirement;
+      contentEl.createEl("p", { cls: "calendared-migration-warning", text: message });
+      new ButtonComponent(contentEl.createDiv()).setButtonText(fixLabel).onClick(() => {
+        this.close();
+        fix();
+      });
+    }
     if (changing.length > 0) {
       const list = contentEl.createDiv("calendared-migration-list");
       for (const row of changing) {
@@ -81,12 +92,12 @@ export class MigrationReviewModal extends Modal {
     const buttons = contentEl.createDiv("modal-button-container");
     const cancel = new ButtonComponent(buttons).setButtonText("Cancel").onClick(() => this.close());
     const action = new ButtonComponent(buttons).setCta();
-    const updateButton = () => action.setButtonText(params.actionLabel(selected.size)).setDisabled(selected.size === 0);
+    const updateButton = () => action.setButtonText(params.actionLabel(selected.size)).setDisabled(selected.size === 0 || !requirementMet());
     updateButton();
 
     const runSelected = async () => {
       const keys = params.rows.filter((row) => selected.has(row.key)).map((row) => row.key);
-      if (this.running || keys.length === 0) return;
+      if (this.running || keys.length === 0 || !requirementMet()) return;
       // nothing can be pressed while it runs, and the list can't be closed
       this.running = true;
       action.setDisabled(true).setButtonText(params.runningLabel(0, keys.length));

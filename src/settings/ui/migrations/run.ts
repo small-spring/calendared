@@ -31,8 +31,8 @@ export function stickerMovePlan(fromProperty: string): PlannedStickerMove[] {
 }
 
 /**
- * Renames the notes one after another with Obsidian's rename, which also updates links to them (when "Automatically
- * update internal links" is on). A note that got a conflict since the list was made is skipped too
+ * Renames the notes one after another with Obsidian's rename, which also updates links to them ("Automatically update
+ * internal links" is on: the list doesn't run otherwise). A note that got a conflict since the list was made is skipped too
  */
 export async function renameNotes(renames: PlannedRename[], onProgress: (done: number) => void): Promise<MigrationResult> {
   const app = PluginService.getPlugin()!.app;

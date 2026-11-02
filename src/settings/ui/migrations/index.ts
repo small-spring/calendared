@@ -22,6 +22,26 @@ export * from "./run";
 const notes = (n: number) => countOf(n, "note");
 const withoutExtension = (path: string) => path.replace(/\.md$/, "");
 
+/**
+ * Renaming needs Obsidian's "Automatically update internal links" on: when it's off, Obsidian asks about the links for each
+ * note, and the renaming waits on every question (docs/adr/0055)
+ */
+const linksUpdatedAutomatically = {
+  // when Obsidian can't tell (getConfig isn't public), it isn't held back
+  met: () => {
+    const { vault } = PluginService.getPlugin()!.app;
+    return vault.getConfig ? vault.getConfig("alwaysUpdateLinks") === true : true;
+  },
+  message:
+    'Turn on "Automatically update internal links" (Settings › Files and links) first. When it\'s off, Obsidian asks about the links for each note.',
+  fixLabel: "Open Files and links",
+  fix: () => {
+    const { setting } = PluginService.getPlugin()!.app;
+    setting?.open?.();
+    setting?.openTabById?.("file");
+  },
+};
+
 function showValue(value: unknown): string {
   if (value === null || value === undefined || value === "") return "(empty)";
   if (typeof value === "string") return value;
@@ -41,7 +61,8 @@ export function openFormatRename(granularity: IGranularity, fromFormat: string, 
   const periodicity = getPeriodicityFromGranularity(granularity);
   new MigrationReviewModal({
     title: `Rename ${periodicity} notes`,
-    description: `Notes named in ${fromFormat} get names in ${toFormat}, the current format. Links to them are updated when "Automatically update internal links" is on (Settings › Files and links).`,
+    description: `Notes named in ${fromFormat} get names in ${toFormat}, the current format. Links to them are updated too.`,
+    requirement: linksUpdatedAutomatically,
     rows: plan.map((row) => ({ key: row.from, from: withoutExtension(row.from), to: noteNameOf(row.to), conflict: row.conflict })),
     separator: " → ",
     conflictHeading: "Skipped: a note with the new name already exists",
