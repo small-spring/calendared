@@ -60,6 +60,10 @@ obsidian plugin:reload id=calendared
 
 - ふだんの Vault（private）をそのまま触る。設定のトグルを動かしたりノートを作ったりすると、本物のデータが変わる。
   確かめるだけなら、読む・撮る・開くにとどめる
+- ノートを作る・設定を変える確かめは、試しの Vault `~/Documents/Obsidian/calendared-test` で行う（2026-11-02 に作った）。
+  入れるのは `npm run deploy -- ~/Documents/Obsidian/calendared-test`、操作は `obsidian vault=calendared-test …`。
+  起動時の動きは、`data.json` を書き換えてから `osascript -e 'quit app "Obsidian"'` → `open "obsidian://open?vault=calendared-test"` で開き直して見る。
+  ノートを消すのは `app.vault.trash(file, true)`（シェルからゴミ箱へは移せない）
 - 文字で確かめられるものは、`dev:dom` か `eval` で読む。Obsidian が裏にあっても読める
 - `dev:screenshot` は、Obsidian が前にないと描き直しが止まっていて、古い画面が写る。撮る直前に `open -a Obsidian` で前に出す
 - `dev:screenshot` と `dev:dom` は、メインのウィンドウしか見ない。設定画面は別のウィンドウ（題が「設定 - …」）で開くので、
