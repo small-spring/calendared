@@ -17,13 +17,14 @@
 4. `npm run deploy` の行き先を決める。既定の行き先はないので、次のどれかで指定する（上ほど優先）
    - 引数: `npm run deploy -- ~/path/to/vault`
    - 環境変数: `OBSIDIAN_VAULT=~/path/to/vault npm run deploy`
-   - 手元の設定ファイル: リポジトリ直下の `.deploy-vault` に Vault のパスを 1 行書く（git に入らない）。以後は `npm run deploy` だけでよい
+   - 手元の設定ファイル: リポジトリ直下の `.deploy-vault` に Vault のパスを 1 行に 1 つ書く（git に入らない）。以後は `npm run deploy` だけでよい。
+     複数書くと、1 回ビルドして全部にコピーする（どれか 1 つでも Vault でなければ、ビルドの前に止まる）
 
    ```bash
    echo ~/path/to/vault > .deploy-vault
    ```
 
-   どれもないと、案内を出して止まる。持ち主は `.deploy-vault` で private の Vault を指している
+   どれもないと、案内を出して止まる。持ち主の `.deploy-vault` は、試しの Vault と private の 2 行
 5. `npm run deploy` を実行する（テスト → ビルド → 読み込み確認 → Vault の `.obsidian/plugins/calendared/` へコピー）
 6. Obsidian で、設定 → コミュニティプラグイン → 制限モードをオフにし、Calendared をオンにする（初めの 1 回だけ）
 7. コードを変えたら、もう一度 `npm run deploy` して、Obsidian で読み直す（`obsidian plugin:reload id=calendared`。
@@ -75,7 +76,7 @@
   - `DEPLOY_MODE=development npm run deploy` で開発用の版を入れる。窓口の読み直しの時間などを Console に出す（`import.meta.env.DEV`）。
     Svelte の確認処理も入るので、本番の版より遅い。試し終わったら `npm run deploy` で本番の版に戻す
 - Windows・iPhone で試すときは [device-testing.md](device-testing.md)（Remotely Save で Calendared のフォルダだけを同期する）
-- `npm run emoji-language -- <言語> [Vault のパス]`（`scripts/add-emoji-language.mjs`。Vault は deploy と同じ決め方）: 絵文字の検索の言葉を、ダウンロードせずに
+- `npm run emoji-language -- <言語> [Vault のパス]`（`scripts/add-emoji-language.mjs`。Vault は deploy と同じ決め方だが、`.deploy-vault` からは 1 行目だけ）: 絵文字の検索の言葉を、ダウンロードせずに
   Vault のプラグインのフォルダに置く（下の「絵文字の検索の言葉」）。リポジトリが非公開の間は、設定からの追加はダウンロードに失敗するので、こちらを使う
 
 ### Release

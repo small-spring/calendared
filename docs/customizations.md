@@ -35,6 +35,7 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 - Release のワークフローを作り直した。release-please をやめ、`version` と同じタグを push すると、テストとビルドをして Release の下書きを作る。リポジトリが非公開の間のために、絵文字の検索の言葉を Vault に直接置く `npm run emoji-language` を足した〔2026-10-31〕
 - `npm run build` で型チェック（svelte-check）も動かすようにし、残っていたエラー（設定画面の `super`）と警告を直した。整形の道具 biome を外し、`package.json` に `engines` を足した〔2026-11-02〕
 - `npm run deploy`・`npm run emoji-language` の既定の行き先（持ち主の Vault）をなくした。引数・`OBSIDIAN_VAULT`・手元の `.deploy-vault` で決め、ないときは案内を出して止まる〔2026-11-02〕
+- `.deploy-vault` に複数の Vault を書くと、`npm run deploy` は 1 回ビルドして全部にコピーする（持ち主は試しの Vault と private）〔2026-11-02〕
 - 開発向けの文書を見直した。コードの地図（`docs/spec/architecture.md`）、初日の手順、変更を入れるときの手順と、どこに何を書くかの目安を足した。この文書は、節を機能ごとに分け直し、「変更の記録」とした〔2026-11-02〕
 
 ## 不具合修正

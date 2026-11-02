@@ -6,7 +6,7 @@
 // keywords of data/emoji-keywords/ at EMOJI_DATA_REF. Restart Obsidian (or turn the plugin off and on) to use it.
 //
 // Usage: node scripts/add-emoji-language.mjs <language> [vault_path]   (e.g. `ja`)
-// The vault is found like scripts/deploy.sh does: the argument, else OBSIDIAN_VAULT, else the first line of .deploy-vault
+// The vault is found like scripts/deploy.sh does: the argument, else OBSIDIAN_VAULT, else .deploy-vault (its first line only)
 // Needs the git history (a clone, not a downloaded zip).
 import { execFileSync } from "child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
