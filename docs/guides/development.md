@@ -30,31 +30,41 @@
 7. コードを変えたら、もう一度 `npm run deploy` して、Obsidian で読み直す（`obsidian plugin:reload id=calendared`。
    下の「Obsidian で確かめる」。CLI を使わないなら、設定でプラグインをオフ → オン）
 
-- コードを読む前に [コードの地図](../spec/architecture.md) を見る。機能と設定の一覧は [spec/overview.md](../spec/overview.md)
+- コードを読む前に [コードの地図](../code/architecture.md) を見る。機能と設定の一覧は [features/overview.md](../features/overview.md)
 - `npm run dev` は、ファイルを保存するたびに `dist/main.js` を作り直すだけで、Vault には入らない。
   型や書き間違いを早く見たいときに使い、Obsidian で試すときは `npm run deploy` する
 
 ## 変更を入れるときの手順
 
 1. 新しく作る・直すときは、先にテストを書いて失敗を確かめる（下の「テスト」）。作り直す前は、今の振る舞いを固定するテストを書く
-2. 元の版から変えたコードに `Calendared:` で始まるコメントを付ける（下の「書き方の決まり」）
-3. `npm test`（日付の計算を変えたら `npm run test:dst` も）と `npm run build`（ESLint・型チェック・ADR の一覧の古さ）を通す
-4. `npm run deploy` して、動作と見た目を Obsidian で確かめる
-5. 使う人から見える機能を変えたら、[README.md](../../README.md)（英語）と [usage-ja.md](../user/usage-ja.md)（日本語）を両方直す。
-   仕様が変わったら [spec/](../spec/) も直す
-6. [customizations.md](../customizations.md) に 1〜2 行で足し（末尾に〔日付〕）、[todo.md](../todo.md) から消す
-7. 設計判断をしたら [adr/](../adr/) に 1 決定 1 ファイルで書き、`npm run adr` で一覧を作り直す（書き方は [adr/README.md](../adr/README.md)）
-8. コミットする。題は日本語で 1 行、本文に、なぜそうしたか・不具合の原因・どう確かめたかを書く。自分が変えたファイルだけを入れる
+2. `npm test`（日付の計算を変えたら `npm run test:dst` も）と `npm run build`（ESLint・型チェック・ADR の一覧の古さ）を通す
+3. `npm run deploy` して、動作と見た目を Obsidian で確かめる
+4. 振る舞いの決まりを変えたら [features/](../features/) を直す。設計判断をしたら [adr/](../adr/) に 1 決定 1 ファイルで書き、`npm run adr` で一覧を作り直す
+   （書き方は [adr/README.md](../adr/README.md)）
+5. コミットする。題は日本語で 1 行、本文に、なぜそうしたか・不具合の原因・どう確かめたかを書く。自分が変えたファイルだけを入れる。
+   [todo.md](../todo.md) の項目が済んだら消す
+
+### 文書を直すきっかけ
+
+毎回直すのは、コミットメッセージと todo.md だけ。ほかの文書は、決まったきっかけのときだけ直す（[ADR-0053](../adr/0053-when-to-update-docs.md)）。
+
+| きっかけ | 直す文書 |
+| --- | --- |
+| 毎回 | コミットメッセージの本文（理由・原因・確かめ方）、[todo.md](../todo.md)（済んだ項目を消す） |
+| 振る舞いの決まりを変えたとき | [features/](../features/) の、その機能のファイル |
+| 判断したとき | [adr/](../adr/)（下の表の基準で） |
+| 作りが変わったとき（フォルダ・ファイルの役目） | [code/architecture.md](../code/architecture.md)（周期の値の持ち方を変えたら [code/periods.md](../code/periods.md) も） |
+| リリースのとき（パートナーに新しい版を使ってもらうときも） | ルートの [README.md](../../README.md)、Release の説明（使う人から見た変更。下の「Release」） |
 
 ### どこに書くか（目安）
 
 | 書くこと | 書く場所 |
 | --- | --- |
-| そのコードが何をするか、元の版から何をなぜ変えたか | コードのコメント（英語。`Calendared:` で始める） |
+| そのコードが何をするか | コードのコメント（英語） |
 | その変更の理由、不具合の原因、確かめ方 | コミットメッセージの本文（日本語） |
-| 元の版と何が違うか（1〜2 行） | [customizations.md](../customizations.md) |
 | 案を比べて 1 つを選んだこと、あとで「なぜこうしたの」と聞かれそうなこと、これからの変更を縛る決まり | [adr/](../adr/)（1 決定 1 ファイル）。1 つの不具合の直し方や、迷わずに決まったことは、コミットの本文で足りる |
-| 今どう動くか（仕様） | [spec/](../spec/) |
+| 今どう動くか（仕様）。コードやテストを読んでもわからない決まり | [features/](../features/)。どのファイルにあるかは [architecture.md](../code/architecture.md) だけに書く |
+| 使う人から見た変更 | Release の説明（リリースのとき） |
 | これからやること | [todo.md](../todo.md) だけ |
 
 ## ビルドと確認
@@ -88,6 +98,7 @@
 
 `manifest.json` の `version` と同じタグ（`v` を付けない。例: `0.1.0`）を push すると、ワークフロー（`.github/workflows/main.yml`）が
 テストとビルドをして、`main.js`・`manifest.json`・`styles.css` を載せた Release の下書きを作る。GitHub で下書きを確かめ、説明を書いて公開する。
+説明には、前の Release からの使う人から見た変更を英語で書く（`git log <前のタグ>..` から拾う）。
 
 ```bash
 git tag 0.1.0
@@ -95,6 +106,7 @@ git push origin 0.1.0
 ```
 
 - タグと `version` が違うと止まる。先に `manifest.json` と `package.json` の `version` を上げてコミットする
+- タグを付ける前に、ルートの README が今の機能と合っているかを確かめて直す
 
 ## Obsidian で確かめる（Obsidian CLI）
 
@@ -198,7 +210,7 @@ Vitest 3 には critical が 2 件あった（テスト用サーバー経由の�
 
 `data/emoji-keywords/<言語>.json` は `node scripts/build-emoji-keywords.mjs` で、Unicode CLDR の注釈
 （開発用の依存 `cldr-annotations-full` / `cldr-annotations-derived-full`）から生成する。プラグインには同梱せず、
-ユーザーが設定で言語を追加したときに、jsDelivr 経由でこのリポジトリから取る（[stickers.md](../spec/stickers.md) の 10 章）。
+ユーザーが設定で言語を追加したときに、jsDelivr 経由でこのリポジトリから取る（[stickers.md](../features/stickers.md) の 10 章）。
 
 - 作り直したら、`src/emoji-search.ts` の `EMOJI_DATA_SIZES_KB`（言語ごとの大きさ）を直す。ずれているとテストが落ちる
 - 作り直したファイルをコミットして push してから、そのコミットの ID を `EMOJI_DATA_REF` に書く（プラグインはそのコミットから取る）。
@@ -216,17 +228,15 @@ Vitest 3 には critical が 2 件あった（テスト用サーバー経由の�
 
 変更を入れるときの流れは上の「変更を入れるときの手順」。ここは書き方の細かい決まり。
 
-- 元の版から変えたコードには `Calendared:` で始まるコメントを付ける（何をなぜ変えたか）
-  - 元の版のファイルの中では、変えた所ごと（関数・行）に付ける。元はどうだったかも短く書く（例: `Upstream used ...`）
-  - 新しく作ったファイルは、頭に 1 つ付ければよい（ファイルの役目を書く）。中の関数ごとには要らない
-  - `git log -S 'Calendared:'` などで探せるので、言葉は検索しやすく具体的にする
+- コードのコメントは、そのコードが何をするか・なぜそうなっているかを書く。2026-11-02 から、元の版から変えた印の `Calendared:` は付けない
+  （元の版の更新は取り込まないので、変えた所を見分ける要がなくなった。GPL-3.0 の「改変したことと日付」は README の Credits で示す。
+  [ADR-0053](../adr/0053-when-to-update-docs.md)）。今ある `Calendared:` のコメントは、そのまま残してよい
 - 言葉: コードのコメント・画面の文・スクリプトの出力は英語。コミットメッセージ（題 1 行 + 本文）と `docs/` の文書は日本語
 - なぜそうしたか・不具合の原因は、コミットメッセージの本文に書く（どこに何を書くかは上の「どこに書くか（目安）」）
-- 元の版から変えたことは [customizations.md](../customizations.md) に 1〜2 行で足す。末尾に〔日付〕を付ける
 - 元の版の更新は取り込まない（2026-10-29 に決めた。独立した版として育てるため。公開するかは [ADR-0028](../adr/0028-decide-publishing-after-feedback.md)）。
   元の版のファイル（README、`.github/` など）も自由に変えてよい。
   `upstream` の remote は元のコードを見比べる参照用
-- 機能を削ったときは、コードにコメントを残さない（customizations.md に何を削ったかを書く）
+- 機能を削ったときは、コードにコメントを残さない（何を削ったかはコミットの本文に書く）
 
 ### 画面の文（英語）
 
@@ -241,5 +251,5 @@ Vitest 3 には critical が 2 件あった（テスト用サーバー経由の�
 ID はそのコミット自身の中には書けず後から埋める手間がかかるため。必要なときに git で探す:
 
 - `git blame <ファイル>` / `git log -L <開始行>,<終了行>:<ファイル>`: その行を変えたコミット
-- `git log -S '<文字列>'`: その文字列を足した・消したコミット（`Calendared:` のコメントの一部などで探す）
+- `git log -S '<文字列>'`: その文字列を足した・消したコミット（コメントや関数の名前の一部などで探す）
 - `git log --since=<日付> --until=<日付>`: 項目の日付のころのコミット

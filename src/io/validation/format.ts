@@ -67,7 +67,7 @@ function isAmbiguousFormat(
       }
       break;
     case "week": {
-      // Calendared: weeks are the calendar's rows, named by the week scheme (docs/spec/periods.md). This week's name must read
+      // Calendared: weeks are the calendar's rows, named by the week scheme (docs/code/periods.md). This week's name must read
       // back as this week. Formats that only break around New Year are warned about in the settings, not rejected here
       const weeks = weekSchemeFor(get(settingsStore).localeSettings);
       const week = weeks.weekOf(currentDate);

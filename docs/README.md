@@ -2,32 +2,44 @@
 
 Calendared の文書。まず「誰が読むか」で分け、開発向けの中は「何のために読むか」で分ける。必要なものだけ読む。
 
-## 使う人向け
+## 知りたいことから探す
 
-- ルートの [README.md](../README.md): 使う人の入口（英語）
-- [user/](user/): 使う人向けのもの。ここから開発向けの文書へはリンクしない
-  - [user/usage-ja.md](user/usage-ja.md): 日本語の使い方（README の要約。入れ方を含む。パートナーに渡す）
-  - [user/screenshots/](user/screenshots/): ルートの README に載せるスクリーンショット（撮り直し方はその中の README）
+| 知りたいこと | 開く場所 |
+| --- | --- |
+| 何ができるか、どう使うか | ルートの [README.md](../README.md)（使う人向け、英語） |
+| 開発を始めたい（初日の手順） | [guides/development.md](guides/development.md) の「はじめに」 |
+| ある機能がどう動くか（端の場合も） | [features/](features/)。まず [features/overview.md](features/overview.md) |
+| コードのどこに何があるか | [code/architecture.md](code/architecture.md) |
+| なぜそうしたか | [adr/](adr/)。個々の変更の理由はコミットの本文 |
+| 次に何をするか | [todo.md](todo.md) |
 
-ここから下は開発向け（日本語）。
+ここから下は開発向け（日本語）。ルートの README と [screenshots/](screenshots/) だけが使う人向け。
 
-## 今どうなっているか
+## 機能がどう動くか（features/）
 
-- [spec/](spec/): 機能ごとの仕様
-  - [spec/overview.md](spec/overview.md): 機能と設定項目の一覧（まずここ）
-  - [spec/architecture.md](spec/architecture.md): コードの地図（`src/` のどこに何があるかと、主な処理の流れ。コードを読む前にここ）
-  - [spec/periods.md](spec/periods.md): 周期ノートの値の形と、週の定義
-  - [spec/fiscal-year.md](spec/fiscal-year.md): 四半期と年の始まりの月（使う人の例、パンくず、カレンダー）
-  - [spec/stickers.md](spec/stickers.md): ステッカー機能
-  - [spec/migrations.md](spec/migrations.md): 移行（書式の変換、ステッカーのプロパティの付け替え、移行の案内）
-  - [spec/state.md](spec/state.md): 状態管理の作り直しの記録（今のストアの一覧は architecture.md）
-- [customizations.md](customizations.md): 元の版との違い（変更の記録）。変更を終えたら 1〜2 行で足す。GPL-3.0 の「改変したことと日付」の記録も兼ねる
+使う人から見える振る舞いと、その細かい決まり（端の場合、ぶつかったときなど）。見出しは設定画面の言葉にそろえる。
+
+- [features/overview.md](features/overview.md): 機能と設定の一覧（まずここ。ファイルを分けていない機能の決まりもここ）
+- [features/stickers.md](features/stickers.md): ステッカー（Stickers）
+- [features/migrations.md](features/migrations.md): ノートの移行（Migrate notes。書式の変換、ステッカーのプロパティの付け替え、移行の案内）
+- [features/fiscal-year.md](features/fiscal-year.md): 四半期と年の始まりの月（Starts in）
+
+## コードの仕組み（code/）
+
+作る人から見える形。コードを読む前に開く。
+
+- [code/architecture.md](code/architecture.md): コードの地図（`src/` のどこに何があるかと、主な処理の流れ）。どのファイルに何があるかは、ここだけに書く
+- [code/periods.md](code/periods.md): 周期ノートをプラグインの中でどういう値として持つかと、週の定義
+
+## 使う人向けの素材（screenshots/）
+
+- [screenshots/](screenshots/): ルートの README に載せるスクリーンショット（撮り直し方はその中の README）
 
 ## なぜそうしたか
 
 - [adr/](adr/): 設計判断の記録（ADR）。1 つの決定を 1 つのファイルに書く。一覧と書き方は [adr/README.md](adr/README.md)
 - [research/](research/): 決める前に調べたこと（事例など）。調べた日の情報で、あとから更新しない
-- 個々の変更の理由や不具合の原因は、コミットメッセージの本文
+- 個々の変更の理由や不具合の原因、元の版から何を変えたかは、コミットメッセージの本文（git の履歴）
 
 ## これから
 
@@ -46,12 +58,17 @@ Calendared の文書。まず「誰が読むか」で分け、開発向けの中
 - [archive/](archive/): 済んだ手続きや、役目を終えた文書
   - [archive/device-testing-setup.md](archive/device-testing-setup.md): 実機で試すための一度だけの準備
   - [archive/navigation.md](archive/navigation.md): ノートの間の移動の計画（要求の表。決めたことは ADR-0031）
+  - [archive/customizations.md](archive/customizations.md): 元の版との違いの記録（2026-11-02 までの変更。それ以後は git の履歴）
+  - [archive/state.md](archive/state.md): 状態管理の作り直しの記録（今のストアの一覧は architecture.md）
 
 ## 置き場所の決まり
 
-- 使う人が読むものは README（英語）と user/ に置き、それ以外は開発向けとする。使う人向けの文書は操作の言葉で書き、仕様や ADR へリンクしない（開発向けから使う人向けへのリンクはよい）
-- 今の仕様は spec/、決めた理由は adr/、調べたことは research/、これから作るものの設計は plans/、作業は todo.md、やり方は guides/ に分ける。
-  同じことを 2 か所に書かない（ほかの場所からはリンクする）
-- 大きなものを作るときは plans/ に 1 ファイル作る。作り終えたら、その内容を spec/ に移して plans/ のファイルを消し、
+- 使う人が読むものはルートの README（英語）だけで、それ以外は開発向けとする。README は操作の言葉で書き、開発向けの文書へは
+  Documentation の節からだけリンクする（開発向けから README へのリンクはよい）
+- 機能の振る舞いは features/、コードの仕組みは code/、決めた理由は adr/、調べたことは research/、これから作るものの設計は plans/、
+  作業は todo.md、やり方は guides/ に分ける。同じことを 2 か所に書かない（ほかの場所からはリンクする）
+- features/ と code/ の各ファイルは、見出しのすぐ下に「何が書いてあるか」と「ほかの場所にあるもの」を 1〜2 行で書く
+- 大きなものを作るときは plans/ に 1 ファイル作る。作り終えたら、その内容を features/ か code/ に移して plans/ のファイルを消し、
   関係する ADR の `implemented` を `true` にして `npm run adr` を実行する
 - 一度きりの手続きが済んだら、その文書は archive/ に移す
+- どの文書をいつ直すかは [guides/development.md](guides/development.md) の「文書を直すきっかけ」（[ADR-0053](adr/0053-when-to-update-docs.md)）

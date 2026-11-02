@@ -1,6 +1,6 @@
 # 調査: 設定画面の階層の組み方（2026-10-30）
 
-設定画面の整理の計画（作り終えて消した。今の形は [spec/overview.md](../spec/overview.md)）のために調べた。決めたことは [ADR-0020](../adr/0020-settings-page-layout.md)。
+設定画面の整理の計画（作り終えて消した。今の形は [features/overview.md](../features/overview.md)）のために調べた。決めたことは [ADR-0020](../adr/0020-settings-page-layout.md)。
 調べた日の情報で、あとから更新しない。出典で確かめられなかったものは「未確認」と書いた。
 
 ## Obsidian の決まりと仕組み

@@ -11,7 +11,7 @@ aliases:
 # ADR-0046 カレンダーの言語の既定は、OS の言語ではなく Obsidian の言語から取る
 
 - **背景**: 設定「Calendar language」の既定（と、選択肢の一番上の「Same as …」）は、元の版のまま OS の言語（`navigator.languages`）から
-  取っていた。仕様（[spec/overview.md](../spec/overview.md)）では既定は Obsidian の言語。OS が英語で Obsidian を日本語で使う人には、
+  取っていた。仕様（[features/overview.md](../features/overview.md)）では既定は Obsidian の言語。OS が英語で Obsidian を日本語で使う人には、
   ノートの名前（Obsidian の moment で書く）は日本語の月の名前なのに、カレンダーだけ英語になる。
   また、OS の言語は `en-GB` のように大文字を含むが、moment の言語の名前は `en-gb` なので、選択肢に同じ言語が 2 回出ていた
 - **検討した案**

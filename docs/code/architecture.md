@@ -20,12 +20,12 @@
 | --- | --- |
 | `main.ts` | プラグインの本体。設定の読み込み、コマンド、イベント（ノートを開いた・作った・名前を変えた）の受け口 |
 | `view.ts` | カレンダーのペイン（Obsidian の `ItemView`）。中身は `ui/components/view/View.svelte` |
-| `periods.ts` | 周期（日・週・月・四半期・年）の計算。周期の名前（`PeriodName`）、範囲、前後への移動、名前の読み書き（[spec/periods.md](periods.md)） |
+| `periods.ts` | 周期（日・週・月・四半期・年）の計算。周期の名前（`PeriodName`）、範囲、前後への移動、名前の読み書き（[code/periods.md](periods.md)） |
 | `weeks.ts` | 週の決め方（週の始まり、週番号。[ADR-0011](../adr/0011-week-follows-calendar.md)・[0014](../adr/0014-swappable-week-scheme.md)） |
 | `format-tokens.ts` | 名前の書式を記号に分ける・周期ごとに使える記号（[ADR-0040](../adr/0040-format-tokens-per-period.md)・[0041](../adr/0041-own-format-tokenizer.md)） |
 | `navigation.ts` | パンくずとミニカレンダーに何を並べるか（[ADR-0031](../adr/0031-breadcrumbs-and-mini-calendar.md)） |
-| `migrations.ts` | 移行で何を変えるかの計画（実行は `settings/ui/migrations/run.ts`。[spec/migrations.md](migrations.md)） |
-| `stickers.ts` | ノートのステッカーを読む（書くのは `ui/utils/emoji-picker.ts`。[spec/stickers.md](stickers.md)） |
+| `migrations.ts` | 移行で何を変えるかの計画（実行は `settings/ui/migrations/run.ts`。[features/migrations.md](../features/migrations.md)） |
+| `stickers.ts` | ノートのステッカーを読む（書くのは `ui/utils/emoji-picker.ts`。[features/stickers.md](../features/stickers.md)） |
 | `emoji-search.ts` | ステッカーのピッカーを英語以外で検索する（言葉のデータは別にダウンロード） |
 | `calendar-locale.ts`・`localization.ts`・`locales.ts` | カレンダーの言語（月・曜日の名前）、Obsidian の言語の読み取り、言語の一覧 |
 | `period-words.ts` | 周期の言い方（「Today's note」など）。設定・通知・コマンドで共通 |
@@ -60,7 +60,7 @@
 
 ほかに、設定の `settingsStore` と、設定から作る周期の決まり `periodRulesStore`（週の始まり、四半期・年の始まりの月）が
 `settings/store.ts` にある。カレンダーの選択（開いているノート）はストアに持たず、窓口の `activeFile()` から読む
-（[ADR-0015](../adr/0015-selection-from-open-note.md)）。状態の作り直しの記録は [state.md](state.md)。
+（[ADR-0015](../adr/0015-selection-from-open-note.md)）。状態の作り直しの記録は [archive/state.md](../archive/state.md)。
 
 ### ui/（画面）
 
@@ -85,7 +85,7 @@
 | `store.ts` | `settingsStore`・`periodRulesStore` |
 | `migrate.ts` | 保存された設定（`data.json`）を今の形に直して読む（`settingsFromSaved`） |
 | `plugin-tab.ts` | 設定画面（Obsidian 1.13 の宣言で書く設定。[ADR-0020](../adr/0020-settings-page-layout.md)） |
-| `ui/` | 設定画面に足す部品（書式の欄、件数、移行のページ、絵文字の言語） |
+| `ui/` | 設定画面に足す部品。`periods/`（書式の欄、件数）、`migrations/`（移行の実行・一覧の画面・案内。[features/migrations.md](../features/migrations.md)）、`stickers/`（絵文字の検索の言語） |
 | `period-switch.ts`・`format-on-close.ts`・`migration-notice.ts`・`template-rename.ts` | 周期のオン・オフ、書式を閉じるときの扱い、移行の案内、テンプレートの名前変更への追従 |
 
 ## 主な処理の流れ

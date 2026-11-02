@@ -18,7 +18,7 @@ import { templateFilePath } from '../note-path';
 export function isValidPeriodicNote(file: { path: string; basename: string; extension: string })
     : { isValid: boolean, granularity: IGranularity, date: moment.Moment, period: PeriodName, format: string } | { isValid: null, granularity: null, date: null, period: null, format: null } {
     const notPeriodic = { isValid: null, granularity: null, date: null, period: null, format: null } as const;
-    // Calendared: every granularity is read as a period name through the period rules (docs/spec/periods.md, docs/adr/0039).
+    // Calendared: every granularity is read as a period name through the period rules (docs/code/periods.md, docs/adr/0039).
     // Upstream built a weekly note's date from today, so it fell on today's weekday instead of the week's first day
     const rules = get(periodRulesStore);
 

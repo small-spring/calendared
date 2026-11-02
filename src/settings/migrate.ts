@@ -63,7 +63,7 @@ export function settingsFromSaved(saved: unknown, defaults: ISettings): ISetting
 
     without(settings as unknown as Record<string, unknown>, REMOVED_SETTINGS);
     without(settings.localeSettings as unknown as Record<string, unknown>, REMOVED_LOCALE_SETTINGS);
-    // weeks start on Saturday, Sunday or Monday only (docs/spec/periods.md)
+    // weeks start on Saturday, Sunday or Monday only (docs/code/periods.md)
     settings.localeSettings.weekStartId = toSupportedWeekStart(settings.localeSettings.weekStartId);
     for (const period of Object.values(settings.periods)) {
         without(period as unknown as Record<string, unknown>, REMOVED_PERIOD_SETTINGS);

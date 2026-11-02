@@ -1,8 +1,8 @@
-# 移行
+# ノートの移行（Migrate notes）
 
 すでにあるノートを、今の設定に合わせる操作。設定画面の一番下の「Migrate notes ›」（サブページ）にまとめている。
 決めた理由は [ADR-0019](../adr/0019-one-format-per-period.md)・[ADR-0023](../adr/0023-migrations-without-content-changes.md)・
-[ADR-0024](../adr/0024-migration-safety.md)・[ADR-0035](../adr/0035-migration-notice.md)。
+[ADR-0024](../adr/0024-migration-safety.md)・[ADR-0035](../adr/0035-migration-notice.md)。どのファイルにあるかは [code/architecture.md](../code/architecture.md)。
 
 ## 1. 何があるか
 
@@ -83,15 +83,3 @@ Sticker property の名前を変えると、前のプロパティにあるステ
 - 実行中は、ボタンとチェックを押せず、画面も閉じられない。ボタンに「Renaming… 3/12」と進み具合を出す
 - 終わったら、変えた件数と飛ばした件数（一覧で分けておいたぶつかりも含める）を通知で知らせる
 - もう一度押しても、済んだノートは対象にならないので何も変わらない
-
-## 6. コードの場所
-
-| 内容 | 場所 |
-| --- | --- |
-| どのノートをどう変えるか（Obsidian に関係しない。テストあり） | `src/migrations.ts` |
-| 前の書式（プロパティ）を覚える（テストあり） | `src/settings/migration-notice.ts`、見張るのは `src/main.ts` の `trackMigrationNotices` |
-| Vault で実行する、件数を数える、忘れる | `src/settings/ui/migrations/run.ts` |
-| 一覧の画面 | `src/settings/ui/migrations/review-modal.ts` |
-| 一覧を開く、「Keep as is」の確認 | `src/settings/ui/migrations/index.ts` |
-| 警告 | `src/settings/ui/migrations/MigrationNotice.svelte` |
-| 移行のサブページ | `src/settings/plugin-tab.ts` の `migrationPage` |

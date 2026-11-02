@@ -1,13 +1,10 @@
-# ステッカー機能の仕様
+# ステッカー（Stickers）
 
 周期ノート（日・週・月・四半期・年）に絵文字を 1 つ付けて、カレンダーのその日付（や月・年）に表示する機能です。
 「この日は良かった」「旅行」などの印をシールのように貼るイメージです。
 
-この文書は Calendared（元の Periodic Notes Calendar を改造したもの）での仕様です。元の版との違いは
-[customizations.md](../customizations.md) にまとめています。
-
 - **第 1 部 使う人向け**: 何ができて、どう動くか（1〜8 章）
-- **第 2 部 開発する人向け**: コードの場所、データの流れ、設計判断の記録（ADR）、検討中のアイデア（9〜12 章）
+- **第 2 部 開発する人向け**: データの流れ、設計判断の記録（ADR）（9〜10 章）。どのファイルにあるかは [code/architecture.md](../code/architecture.md)
 
 ---
 
@@ -112,21 +109,7 @@ Calendared ではタグ形式を **読まない** ので、元の版で付けた
 
 # 第 2 部 開発する人向け
 
-## 9. コードの場所
-
-| 内容 | 場所 |
-|---|---|
-| 付ける（`setSticker`）・今の設定で読む（`getNoteSticker`。設定を引数で受ける `stickerFrom` は `src/stickers.ts`）・プロパティ名（`getStickerProperty`）・禁止リスト（`RESERVED_STICKER_PROPERTIES`） | `src/ui/utils/emoji-picker.ts` |
-| 絵文字ピッカーの表示言語・検索の言語 | `src/ui/utils/emoji-locale.ts`、`src/emoji-search.ts`、`data/emoji-keywords/`、`scripts/build-emoji-keywords.mjs`、設定は `src/settings/ui/tabs/calendar/EmojiLanguages.svelte`・`AddEmojiLanguages.svelte` |
-| 絵文字ピッカーの表示 | `src/ui/utils/emoji-picker.ts`（`initializePicker`）、`src/ui/components/StickerPicker.svelte`、`src/ui/sticker-picker.ts`（開く・閉じる・位置） |
-| 見出しバーのボタン（`StickerActions`）、ピッカーを開く・外す共通処理（`openStickerPicker`, `removeSticker`） | `src/ui/sticker-actions.ts`、`src/ui/sticker-picker.ts`（`openStickerPicker`）、`src/ui/utils/emoji-picker.ts`（`removeSticker`） |
-| ピッカーの「Remove sticker」ボタン | `src/ui/components/StickerPicker.svelte` |
-| 「Manage sticker」メニュー、コマンド（`manage-sticker`, `remove-sticker`）、ボタンの更新のきっかけ | `src/main.ts`（`onFileMenu`, `onload`, `registerEvents`） |
-| カレンダーでの表示 | `src/ui/components/core/DateBttn.svelte`、`src/ui/components/Sticker.svelte`、`src/io/vault.ts`（`getFileData`） |
-| 設定の型と初期値 | `src/settings/constants.ts`（`stickerProperty`, `stickersEnabled`, `stickerHeaderButton`） |
-| 設定画面（入力チェック・禁止リストの表示） | `src/settings/ui/tabs/calendar/Index.svelte` |
-
-## 10. データの流れ
+## 9. データの流れ
 
 **付けるとき**
 
@@ -187,7 +170,7 @@ Calendared ではタグ形式を **読まない** ので、元の版で付けた
 - 吹き出しは `document.body` に置かれる。プラグインを止めるとき（`onunload`）に片付けないと、次に読み込んだときに古い吹き出しを
   id で拾ってしまう。作るときにも同じ id の残骸を消している（`src/ui/sticker-picker.ts`）
 
-## 11. 設計判断の記録（ADR）
+## 10. 設計判断の記録（ADR）
 
 - [ADR-0001 ステッカーはプロパティ 1 つに保存する](../adr/0001-sticker-in-one-property.md)
 - [ADR-0002 読むのも設定のプロパティだけ（互換の読み取りをしない）](../adr/0002-read-only-configured-property.md)
@@ -197,9 +180,3 @@ Calendared ではタグ形式を **読まない** ので、元の版で付けた
 - [ADR-0006 見出しバーのボタンは「押すとピッカーが開く」だけにする（ホバーで消す形にしない）](../adr/0006-header-button-opens-picker.md)
 - [ADR-0007 右クリックの項目はカレンダーのメニューにだけ出す（「Manage sticker」）](../adr/0007-menu-item-in-calendar-only.md)
 - [ADR-0008 月・年などのタイトルにもステッカーを出す（タイムラインの下の帯には出さない）](../adr/0008-stickers-on-titles.md)
-
-## 12. 検討中のアイデア（未決定）
-
-決めたわけではないが、捨てずに残しておく案。
-
-- **インライン項目の読み取り**: Metadata Menu / Dataview の `sticker:: 👍`（本文に書く形式）も読む

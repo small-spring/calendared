@@ -35,7 +35,7 @@ export interface ISettings {
   compactOnDesktop: boolean;
 
 
-  /** Calendared: property that holds a note's sticker emoji (see docs/spec/stickers.md) */
+  /** Calendared: property that holds a note's sticker emoji (see docs/features/stickers.md) */
   stickerProperty: string;
   /** Calendared: turns the whole sticker feature on/off (display, header button, menu item, commands) */
   stickersEnabled: boolean;

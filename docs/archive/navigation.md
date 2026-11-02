@@ -1,17 +1,17 @@
 # ノートの間の移動（作り終えた計画）
 
 2026-10-30 に作り終えた計画の記録。決めたことは [ADR-0031](../adr/0031-breadcrumbs-and-mini-calendar.md) に、今の形は
-[spec/overview.md](../spec/overview.md) の「4. パンくずとミニカレンダー」にある。そのあと変えたこと（出す場所の選び方など。[ADR-0033](../adr/0033-heading-toggles.md)）は
-ここには入っていないので、今の仕様は spec/ を見る。要求の表を残すために、消さずに置いている。
+[features/overview.md](../features/overview.md) の「4. パンくずとミニカレンダー」にある。そのあと変えたこと（出す場所の選び方など。[ADR-0033](../adr/0033-heading-toggles.md)）は
+ここには入っていないので、今の仕様は features/ を見る。要求の表を残すために、消さずに置いている。
 
 周期ノートの間をどう眺め、どう移るかを、**要求 → 部品の候補 → 組み合わせの案（モック）** の順に整理する。
-タイムライン・Open now・カレンダーをどう作るかは、ここで決めてから ADR に移す（設定画面の整理は作り終え、今の形は [spec/overview.md](../spec/overview.md)）。
+タイムライン・Open now・カレンダーをどう作るかは、ここで決めてから ADR に移す（設定画面の整理は作り終え、今の形は [features/overview.md](../features/overview.md)）。
 
 進め方（2026-10-30 に決めた）
 
 1. 要求だけを並べる。UI（どの部品でやるか）は考えない（2026-10-30 に済んだ）
 2. 部品の候補を並べる。要求のことは考えない（2026-10-30 に済んだ）
-3. 部品を組み合わせた案を 2〜3 個モックにして、要求の表に ◯✕ を付けて見比べる（2026-10-30 に済んだ。決めたことは [ADR-0031](../adr/0031-breadcrumbs-and-mini-calendar.md) と [spec/overview.md](../spec/overview.md) の「4. パンくずとミニカレンダー」）
+3. 部品を組み合わせた案を 2〜3 個モックにして、要求の表に ◯✕ を付けて見比べる（2026-10-30 に済んだ。決めたことは [ADR-0031](../adr/0031-breadcrumbs-and-mini-calendar.md) と [features/overview.md](../features/overview.md) の「4. パンくずとミニカレンダー」）
 
 すでに決めたこと（[ADR-0029](../adr/0029-timeline-purpose-and-navigation.md)・[ADR-0030](../adr/0030-open-now.md)）も、
 この整理の結果で見直してよい。

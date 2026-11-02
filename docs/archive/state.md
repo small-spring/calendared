@@ -1,10 +1,12 @@
-# 状態管理（設計）
+# 状態管理の作り直し（済み）
+
+2026-10-30 に作り直しを終え、2026-11-02 に spec/ から archive/ に移した。
 
 プラグインが覚えている状態（Svelte のストア）を、誰が持ち、誰がいつ書き換えるか。
 2026-10-29 に洗い出した。[ADR-0015](../adr/0015-selection-from-open-note.md)・[ADR-0016](../adr/0016-vault-source.md)・[ADR-0017](../adr/0017-timeline-per-tab.md)・[ADR-0018](../adr/0018-when-displayed-month-changes.md) は採用。前の ADR-S4 は ADR-0016 にまとめた（2026-10-30）。作り直しは 2026-10-30 に「5. 進める順番」をすべて終えた。
 1. の表は作り直す前の状態で、それぞれの行の末尾に、どうなったかを書いている。
 
-**今あるストアの一覧は [architecture.md](architecture.md) の「stores/」にある。** ここは作り直しの記録として残している。
+**今あるストアの一覧は [architecture.md](../code/architecture.md) の「stores/」にある。** ここは作り直しの記録として残している。
 
 ## 0. 大事にすること
 

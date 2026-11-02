@@ -1,7 +1,7 @@
 # ステッカーを複数の種類に（これから作るもの）
 
 [todo.md](../todo.md) の「5. いつか」の「ステッカーを複数の種類に」の設計。設定画面の整理（2026-10-31 に作り終えた。今の形は
-[spec/overview.md](../spec/overview.md)）のときに考えたもので、作るときにモックを作りながら決める。事例は
+[features/overview.md](../features/overview.md)）のときに考えたもので、作るときにモックを作りながら決める。事例は
 [research/2026-10-30-sticker-kinds.md](../research/2026-10-30-sticker-kinds.md)。
 
 ## 決めることの一覧

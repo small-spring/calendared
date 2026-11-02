@@ -10,8 +10,8 @@ Calendared is a fork of [Periodic Notes Calendar](https://github.com/luiisca/obs
 Luis Cadillo, maintained separately. Please report problems here, not to the original project.
 
 <p>
-  <img src="docs/user/screenshots/calendar.png" alt="The calendar with stickers" height="400">
-  <img src="docs/user/screenshots/breadcrumbs.png" alt="Breadcrumbs and the mini calendar above a daily note" height="400">
+  <img src="docs/screenshots/calendar.png" alt="The calendar with stickers" height="400">
+  <img src="docs/screenshots/breadcrumbs.png" alt="Breadcrumbs and the mini calendar above a daily note" height="400">
 </p>
 
 ## Features
@@ -240,16 +240,14 @@ While this repository is private, the download fails. Run `npm run emoji-languag
 
 ## Documentation
 
-- 日本語の使い方: [docs/user/usage-ja.md](docs/user/usage-ja.md)
-- What changed from the original (Japanese): [docs/customizations.md](docs/customizations.md)
 - Documents for development (Japanese): [docs/README.md](docs/README.md)
 
 ## Credits and license
 
 - Based on [Periodic Notes Calendar](https://github.com/luiisca/obsidian-periodic-notes-calendar) v1.2.1 by
   Luis Cadillo ([luiisca](https://github.com/luiisca)). Thank you.
-- Modified by [small-spring](https://github.com/small-spring) since 2026-10-28. The changes and their dates are listed in
-  [docs/customizations.md](docs/customizations.md), and changed code is marked with `Calendared:` comments.
+- Modified by [small-spring](https://github.com/small-spring) since 2026-10-28. Every change and its date is in the git history.
+  The changes up to 2026-11-02 are also listed in [docs/archive/customizations.md](docs/archive/customizations.md) (Japanese).
 - Most of the code is written by Claude (Anthropic's AI) using Claude Code, directed and reviewed by small-spring.
 - Licensed under the [GNU General Public License v3.0](LICENSE), same as the original.
 - Third-party components bundled in `main.js`: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The emoji search keywords

@@ -64,7 +64,7 @@ export function openFormatRename(granularity: IGranularity, fromFormat: string, 
 export function openStickerMove(fromProperty: string, onDone: () => void = () => {}) {
   const plan = stickerMovePlan(fromProperty);
   const toProperty = getStickerProperty();
-  // values that aren't an emoji can still be moved; they just won't show as stickers (docs/spec/stickers.md, "読み方")
+  // values that aren't an emoji can still be moved; they just won't show as stickers (docs/features/stickers.md, "読み方")
   const notEmoji = plan.filter((row) => !row.conflict && !stickerFromValue(row.value)).length;
   const moving = plan.filter((row) => !row.conflict).length;
   new MigrationReviewModal({

@@ -10,7 +10,7 @@
 
     let { settings }: Props = $props();
 
-    // Calendared: weekly formats are checked against the week scheme (docs/spec/periods.md). Formats whose names break around
+    // Calendared: weekly formats are checked against the week scheme (docs/code/periods.md). Formats whose names break around
     // New Year, or don't match the calendar's week numbers, get a warning and a one-click switch to the ISO version.
     // Shown right under the field, above the note count (docs/research/2026-10-31-field-warning-placement.md)
     let weeks = $derived(weekSchemeFor($settingsStore.localeSettings));

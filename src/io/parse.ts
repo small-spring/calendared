@@ -56,7 +56,7 @@ export function replaceTemplateContents(
 ): string {
   const now = window.moment();
   // Calendared: weekdays are taken from the note's week as the calendar shows it (the week scheme's row,
-  // docs/spec/periods.md). Upstream used moment's language week start (Sunday in Japanese)
+  // docs/code/periods.md). Upstream used moment's language week start (Sunday in Japanese)
   const weekdays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
   const rowStart = rules.weeks.rangeOf(rules.weeks.weekOf(date))!.start;
 

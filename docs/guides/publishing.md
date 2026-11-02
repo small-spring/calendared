@@ -11,9 +11,10 @@ Calendared を Obsidian のコミュニティプラグインとして公開す�
 - **元の版の更新は取り込まない**。決まりは [guides/development.md](development.md) と `CLAUDE.md` に書いてある
 - **ライセンスは GPL-3.0**。元の版の LICENSE が GPL-3.0 なので、改変した版も GPL-3.0 でしか公開できない（元の `package.json` だけ MIT と書いてあった）
 - **改変したことと日付を示す**。GPL-3.0 は、改変した版に「改変したこと」と「その日付」をはっきり書くよう求めている（第 5 条 a）。
-  README の告知とクレジット、[customizations.md](../customizations.md)、コードの `Calendared:` のコメントで示す
+  README の Credits（改変した人と、改変を始めた日）と git の履歴で示す（第 5 条 a は、変えた行ごとの印までは求めていない。[ADR-0053](../adr/0053-when-to-update-docs.md)）。
+  2026-11-02 までの変更は [archive/customizations.md](../archive/customizations.md) にもまとめてある
 - **自分が使わない機能は削る**（手入れが大変なため）。2026-10-29 に、プレビュー欄・フローティング表示・minimal mode の切り替え・
-  TODO の引き継ぎ・自然言語の日付を削った（[customizations.md](../customizations.md) の「削った機能」）
+  TODO の引き継ぎ・自然言語の日付を削った（[archive/customizations.md](../archive/customizations.md) の「削った機能」）
 - **公開するかは、機能を詰めてパートナーに使ってもらってから決める**（2026-10-30 に決めた。[ADR-0028](../adr/0028-decide-publishing-after-feedback.md)）。README は、仕様が固まってから書く
 
 ## 元の作者の許可
@@ -134,7 +135,6 @@ Thank you,
 - 通信すること（開発者ポリシーの開示事項）: 絵文字の検索の言語を追加したときだけ、その言語の検索の言葉を jsDelivr（`cdn.jsdelivr.net`）か
   GitHub（`raw.githubusercontent.com`）からダウンロードする。送るのは言語だけ。それ以外は通信しない
 - おすすめのキーの割り当て（既定のホットキーは付けない代わり）
-- 日本語の説明は [usage-ja.md](../user/usage-ja.md)
 
 ## 申請の手順
 

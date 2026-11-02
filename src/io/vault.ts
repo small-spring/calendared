@@ -43,7 +43,7 @@ export function periodNotePath(
   { periods, localeSettings }: Pick<ISettings, "periods" | "localeSettings">,
 ): string {
   // Calendared: a disabled period also uses its own format and folder, so its existing notes still open
-  // (docs/spec/overview.md); upstream fell back to the default format and folder /
+  // (docs/features/overview.md); upstream fell back to the default format and folder /
   const { format, folder } = periods[granularity];
   return notePath(granularity, date, { folder, format }, periodRulesFor({ periods, localeSettings }));
 }

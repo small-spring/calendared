@@ -75,7 +75,7 @@ function withValueAt(value: unknown, path: string[], newValue: unknown): unknown
 
 /**
  * Calendared: the settings are written as definitions (Obsidian 1.13): one page divided by headings, with a page of its
- * own for each period and for migrations (docs/adr/0020, docs/spec/overview.md). Upstream drew two tabs with Svelte
+ * own for each period and for migrations (docs/adr/0020, docs/features/overview.md). Upstream drew two tabs with Svelte
  */
 export class SettingsTab extends PluginSettingTab {
   private periodRowsQueued = false;
@@ -357,7 +357,7 @@ export class SettingsTab extends PluginSettingTab {
       if (error) setting.setErrorMessage(error);
     });
     // Calendared: the template can be opened from here to edit it, by a link in the description naming the file
-    // (docs/spec/overview.md). Not a button beside the field: it shifted the field and looked like editing the path
+    // (docs/features/overview.md). Not a button beside the field: it shifted the field and looked like editing the path
     const description = (setting as unknown as { descEl: HTMLElement }).descEl;
     const openLine = description.createDiv();
     const showOpenLink = () => {
@@ -532,7 +532,7 @@ export class SettingsTab extends PluginSettingTab {
     ];
   }
 
-  // Calendared: the migrations live on a page of its own at the bottom (docs/adr/0023, 0024, docs/spec/migrations.md).
+  // Calendared: the migrations live on a page of its own at the bottom (docs/adr/0023, 0024, docs/features/migrations.md).
   // Each shows the list of notes it changes before it runs (review-modal.ts)
   private migrationPage(): SettingDefinitionItem {
     return {

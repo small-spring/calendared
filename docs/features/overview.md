@@ -1,7 +1,7 @@
-# 機能の一覧
+# 機能と設定の一覧
 
 Calendared に **今ある機能** と、それぞれの **設定項目** をまとめる。今どうなっているかだけを書く。
-元の版との違いは [customizations.md](../customizations.md)、各機能の細かい仕様は [stickers.md](stickers.md)・[periods.md](periods.md)・[migrations.md](migrations.md) にある。
+どのファイルにあるかは [code/architecture.md](../code/architecture.md)、決めた理由は各 ADR。各機能の細かい仕様は [stickers.md](stickers.md)・[periods.md](../code/periods.md)・[migrations.md](migrations.md) にある。
 
 中心は **周期ノート**（日・週・月・四半期・年のノート）を作って行き来すること。カレンダー・パンくずとミニカレンダー・ステッカーは、その入口や飾りにあたる。
 
@@ -37,7 +37,7 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
     閉じるまでの間に書式がまちがったまま（空も含む）なら、ノートは作らずに知らせる。すでにあるノートは開く（[ADR-0051](../adr/0051-invalid-format-stops-creating.md)）
 - テンプレート: `{{title}}`・`{{date}}`（ノートの日付。期間の最初の日で、カレンダー・コマンド・Open now・起動時のどこから作っても同じ）、`{{time}}`・`{{currentDate}}`（今）、`{{monday}}` などの曜日を置き換える。
   `{{date+1d}}` のようにずらす、`{{date:YYYY-MM-DD}}` のように書式を付けることもできる
-- 週の決め方: Google カレンダーと同じ。週の始まりは土・日・月から選び、週番号は ISO 8601（[periods.md](periods.md)）。
+- 週の決め方: Google カレンダーと同じ。週の始まりは土・日・月から選び、週番号は ISO 8601（[periods.md](../code/periods.md)）。
   ファイル名、週番号の列、パンくずとミニカレンダー、テンプレートの曜日のすべてに効く
 - 起動時に周期ノートを 1 つ開ける（全体の設定「Open on startup」で、オンの周期から 1 つ選ぶ）
 - ノートを作る前に確認を出せる
@@ -55,7 +55,7 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 | Format | `format` | `YYYY-MM-DD` | `GGGG-[W]WW` | `YYYY-MM` | `YYYY-[Q]Q` | `YYYY` | ノートの名前の書式（1 つ） |
 | Folder | `folder` | `/` | `/` | `/` | `/` | `/` | ノートを置くフォルダ |
 | Template | `templatePath` | 空 | 空 | 空 | 空 | 空 | テンプレートのファイルのパス（`.md` も含めてそのまま。補わない。見つからないファイルは保存しない。ファイルの名前変更・移動に付いていく。[ADR-0049](../adr/0049-template-path-as-is.md)）。ファイルがあれば、説明の文の「Open ファイル名」のリンクで開ける |
-| Starts in | `startMonth` | ― | ― | ― | 1 月 | 1 月 | 四半期・年の 12 か月が始まる月（[spec/fiscal-year.md](fiscal-year.md)） |
+| Starts in | `startMonth` | ― | ― | ― | 1 月 | 1 月 | 四半期・年の 12 か月が始まる月（[features/fiscal-year.md](fiscal-year.md)） |
 | Year in names | `yearInName` | ― | ― | ― | 始まりの年 | 始まりの年 | 名前に使う年（始まりの年 / 終わりの年）。1 月以外から始まるときだけ出す |
 | ―（全体の Open on startup） | `openAtStartup` | オフ | オフ | オフ | オフ | オフ | 起動時にこの周期の今のノートを開く（5 つのうち 1 つだけ） |
 

@@ -329,7 +329,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
 
     // Calendared: always follow the open note, but only when no day of it is on the displayed month already.
     // Otherwise clicking a year title would jump to January, or a week number to the month the week starts in.
-    // `date` is the period's first day (docs/spec/periods.md)
+    // `date` is the period's first day (docs/code/periods.md)
     if (!overlapsMonth(period, get(displayedDateStore), get(periodRulesStore))) {
       displayedDateStore.set(date);
     }

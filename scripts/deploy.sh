@@ -4,7 +4,7 @@
 #   The vault is the argument, else OBSIDIAN_VAULT, else every line of .deploy-vault (kept out of git; one vault a
 #   line, e.g. a test vault and the vault in daily use, built once and copied into each).
 #   Calendared: there is no default vault, so it never goes into someone's own vault by accident
-#   DEPLOY_MODE=development: a development build (logs timings, e.g. the vault source's re-reads; see docs/spec/state.md)
+#   DEPLOY_MODE=development: a development build (logs timings, e.g. the vault source's re-reads; see docs/archive/state.md)
 set -euo pipefail
 
 cd "$(dirname "$0")/.."

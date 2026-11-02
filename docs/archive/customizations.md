@@ -1,26 +1,29 @@
-# 元の版との違い
+# 元の版との違い（2026-11-02 まで）
+
+**2026-11-02 に書き足すのをやめ、archive/ に移した**（[ADR-0053](../adr/0053-when-to-update-docs.md)）。それ以後の変更は git の履歴にあり、
+使う人向けの変更はリリースノートに書く。
 
 Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/luiisca/obsidian-periodic-notes-calendar)
 （v1.2.1, `fe2e262`）をもとにした個人用の改造版です。ライセンスは元と同じ GPL-3.0。
 
 ここは、元の版から変えたことを、変更が入るたびに 1〜2 行で足していく **変更の記録** です。節は機能ごとで、節の中はおおむね日付順。
-あとの変更で置き換わった項目も消さずに残し、「→ のちに…」と添えます。今の姿は [spec/](spec/) と、ルートの README を見てください。
+あとの変更で置き換わった項目も消さずに残し、「→ のちに…」と添えます。今の姿は [features/](../features/) と、ルートの README を見てください。
 
-- なぜそうしたか・不具合の原因: コミットメッセージの本文。機能の設計判断は [adr/](adr/)（1 決定 1 ファイル）、各機能の仕様は [spec/](spec/)
+- なぜそうしたか・不具合の原因: コミットメッセージの本文。機能の設計判断は [adr/](../adr/)（1 決定 1 ファイル）、各機能の仕様は [features/](../features/)
 - コード中の変更箇所: `Calendared:` というコメント
 - 2026-10-29 までの詳しい経緯（原因の分析、細かい寸法など）: 前のファイル `CUSTOMIZATIONS.md` の履歴にある
   （`git log -p -- CUSTOMIZATIONS.md`）
 
-各項目の末尾の〔日付〕は、その変更が入った日。コミットの探し方は [guides/development.md](guides/development.md)。
+各項目の末尾の〔日付〕は、その変更が入った日。コミットの探し方は [guides/development.md](../guides/development.md)。
 
 ## 名前・ビルド・文書
 
 - プラグイン id / 表示名を `calendared` / `Calendared` に変更（元: `periodic-notes-calendar` / `Periodic notes calendar`）〔2026-10-28〕
-- `npm run deploy` を追加。ビルドし、読み込み確認をしてから Vault にコピーする（[guides/development.md](guides/development.md)）〔2026-10-28〕
-- `.npmrc` に供給網攻撃への対策、依存パッケージの既知の脆弱性を解消（[guides/development.md](guides/development.md)）〔2026-10-28〕
+- `npm run deploy` を追加。ビルドし、読み込み確認をしてから Vault にコピーする（[guides/development.md](../guides/development.md)）〔2026-10-28〕
+- `.npmrc` に供給網攻撃への対策、依存パッケージの既知の脆弱性を解消（[guides/development.md](../guides/development.md)）〔2026-10-28〕
 - `package.json` の `license` を `GPL-3.0-only` に直した（元は LICENSE と食い違って `MIT` だった）〔2026-10-29〕
 - テストの仕組み（Vitest）を入れ、テンプレートの置き換え・ファイル名の読み取り・周期の日付の計算にテストを書いた。
-  `npm run deploy` はテストが通らないとコピーしない（[guides/development.md](guides/development.md) の「テスト」）〔2026-10-29〕
+  `npm run deploy` はテストが通らないとコピーしない（[guides/development.md](../guides/development.md) の「テスト」）〔2026-10-29〕
 - ビルドの道具を更新: Vite 5 → 7、vite-plugin-svelte 4 → 6。`tsconfig.json` の `moduleResolution` を `bundler` に〔2026-10-29〕
 - 使う人向けの文書を見直した。README は入れ方を先頭近くへ移し、公開の予定と英語の入れ方・更新のしかたをそろえた。日本語の使い方に設定の一番上・コマンド・テンプレートの節を足した〔2026-11-02〕
 - 同梱している部品のライセンス表示を `THIRD_PARTY_NOTICES.md` にまとめた〔2026-10-30〕
@@ -28,7 +31,7 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 - 文書を組み直した。目次を `docs/README.md` に置き、機能の仕様を `docs/spec/`、設計判断（ADR）を 1 決定 1 ファイルの `docs/adr/` に分けた。
   ADR の番号は全体で 1 本（0001〜）にし、一覧は各ファイルのプロパティから `npm run adr` で作る（`npm run build` で古くないか確かめる）〔2026-10-30〕
 - 文書をさらに分けた。作業の一覧は `docs/todo.md` だけにし（公開の手続きのチェックリストもここへ）、設計は `docs/plans/`、
-  やり方・参考は `docs/guides/`、調べたことは `docs/research/`、使い終わったものは `docs/archive/` に置いた。機能と設定の一覧は `docs/spec/overview.md`〔2026-10-30〕
+  やり方・参考は `docs/guides/`、調べたことは `docs/research/`、使い終わったものは `docs/archive/` に置いた。機能と設定の一覧は `docs/features/overview.md`〔2026-10-30〕
 - `manifest.json` の `authorUrl` を small-spring の GitHub にし、元の作者の Ko-fi を指していた `fundingUrl` を消した〔2026-10-30〕
 - `manifest.json`・`package.json` の説明（`description`）を自分の版の文にした（仮。機能を詰め終えたら書き直す）〔2026-10-30〕
 - `manifest.json`・`package.json` の説明を「Keep your days, weeks, months, quarters, and years calendared. …」に決めた。ルートの README を英語で今の仕様に合わせて書き直し（おすすめのキーの割り当て、通信すること、クレジットを含む）、日本語の使い方 `docs/guides/usage-ja.md` を作った〔2026-10-31〕
@@ -37,7 +40,7 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 - `npm run deploy`・`npm run emoji-language` の既定の行き先（持ち主の Vault）をなくした。引数・`OBSIDIAN_VAULT`・手元の `.deploy-vault` で決め、ないときは案内を出して止まる〔2026-11-02〕
 - `.deploy-vault` に複数の Vault を書くと、`npm run deploy` は 1 回ビルドして全部にコピーする（持ち主は試しの Vault と private）〔2026-11-02〕
 - ビルドの出力先を、リポジトリのいちばん上から `dist/`（git に入れない）にした。Vite がビルドのたびに「ソースを上書きするかもしれない」と警告していた。deploy・Release・読み込み確認も `dist/` から取る〔2026-11-02〕
-- 開発向けの文書を見直した。コードの地図（`docs/spec/architecture.md`）、初日の手順、変更を入れるときの手順と、どこに何を書くかの目安を足した。この文書は、節を機能ごとに分け直し、「変更の記録」とした〔2026-11-02〕
+- 開発向けの文書を見直した。コードの地図（`docs/code/architecture.md`）、初日の手順、変更を入れるときの手順と、どこに何を書くかの目安を足した。この文書は、節を機能ごとに分け直し、「変更の記録」とした〔2026-11-02〕
 - README にスクリーンショット（カレンダー、パンくずとミニカレンダー）を載せた。試しの Vault に英語の見本ノートを作って撮った〔2026-11-02〕
 - リポジトリのいちばん上を整理した。道具の設定ファイル（Vite・Vitest・ESLint・PostCSS・Tailwind）を `config/` に移し、使っていない release-please の設定と、元の版の履歴だった `CHANGELOG.md` を消した〔2026-11-02〕
 
@@ -103,7 +106,7 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
   （その日・その週のどれかの日が表示中の月にある、表示中の月がその月・期・年に入っている）。
   元は設定（`syncCalendar`）で付いてくるかを選べ、付いてくるときは見えていても動いたので、年の表記を押すと 1 月へ、
   週番号を押すと週の始まりの月へ飛んでいた〔2026-10-29〕
-- 週の決め方を Google カレンダーと同じにした（[periods.md](spec/periods.md)）。週の始まりは土・日・月から選び（ほかの曜日は近いほうへ寄せる）、
+- 週の決め方を Google カレンダーと同じにした（[periods.md](../code/periods.md)）。週の始まりは土・日・月から選び（ほかの曜日は近いほうへ寄せる）、
   週番号は行の月曜日の ISO 8601 の週番号。週次ノートの日付は、今日の曜日ではなくその週（カレンダーの行）の最初の日になった。
   新しく入れたときの週次の書式は `GGGG-[W]WW`（元: `YYYY-[W]ww`）。周期ノートのファイル名の読み書き・ノートを開いたときの月の追従・前後のコマンドは、
   周期の名前と期間の操作（`src/periods.ts`、`src/weeks.ts`）を使う〔2026-10-29〕
@@ -181,7 +184,7 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 
 ## ステッカー
 
-仕様の全体は [stickers.md](spec/stickers.md)。
+仕様の全体は [stickers.md](../features/stickers.md)。
 
 - 保存先を本文のタグから **プロパティ 1 つ**（標準は `sticker`）に変更。元の版のタグ形式は読まない〔2026-10-28〕
 - 周期ノートの見出しバーのボタン、コマンド「Manage sticker」「Remove sticker」を追加〔2026-10-28〕
@@ -241,7 +244,7 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 - 月・年の見出し、月の吹き出し、タイムラインも窓口から読むようにし、乱数で合図するストア（`notesChangedStore`・`localeSwitched`、`internalFileModStore` の合図の役目）を消した〔2026-10-30〕
 - 周期ノートの一覧を設定（`data.json`）に持つのをやめ、設定画面の書式ごとのファイル数は表示している間だけ Vault から数えるようにした。`data.json` が 55 KB から 4 KB に減り、フォルダを変えるとほかの周期のファイル数が再起動まで消える問題もなくなった。起動時の「フォルダが見つからない」通知はなくなった〔2026-10-30〕
 - カレンダーの選択を別の値（`activeFileStore`）として持つのをやめ、Obsidian が開いているとするノートから求めるようにした（ずれようがない）〔2026-10-30〕
-- 状態管理の作り直し（[state.md](spec/state.md)）を終えた。表示中の月の謎（年次ノートを作っても月が移ったり移らなかったりした）は、Obsidian がアクティブでないタブにノートを開いたときに `file-open` を遅らせることが原因と分かった〔2026-10-30〕
+- 状態管理の作り直し（[state.md](state.md)）を終えた。表示中の月の謎（年次ノートを作っても月が移ったり移らなかったりした）は、Obsidian がアクティブでないタブにノートを開いたときに `file-open` を遅らせることが原因と分かった〔2026-10-30〕
 - カレンダーの画面・設定画面・ステッカーのピッカーの部品を外す処理を、2 回目は何もしない形にした（開発用の版で Svelte の警告 `lifecycle_double_unmount` が出ていた）。設定画面を隠さずにもう一度表示したとき、前の部品が残るのも直した〔2026-10-30〕
 - ビルドの警告（型を `type` を付けずに読み込んでいた 23 か所）を消した〔2026-10-30〕（→ 残っていた `build.outDir` の警告は、のちに出力先を `dist/` にして消した〔2026-11-02〕）
 - 吹き出しまわりを作り直した。フローティング表示と共用だった土台のクラスと `Popover` の入れ物をやめ、ステッカーのピッカーを 1 つのクラス
