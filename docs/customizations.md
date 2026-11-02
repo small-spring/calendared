@@ -207,6 +207,7 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 - 設定画面の文言を直した。書式の説明「Must include: …」、テンプレートの説明「New daily notes start with this file's contents.」、出す場所の選択肢「All devices / Phones only」と説明「Tablets don't count as phones.」、Open now のボタンの説明を「In the tab title bar of every note. …」にし、見出し「Interaction behavior」「Localization」をなくした〔2026-10-31〕
 - 書式の欄の下の Moment.js の文書へのリンクをやめ、その周期で使える記号を意味つきで出すようにした。README と日本語の使い方にも周期ごとの記号の表を書いた（ADR-0042）〔2026-11-01〕
 - 設定画面のテンプレートを開く鉛筆のボタンを、説明の文の「Open ファイル名」のリンクに替えた。ファイルがあるときだけ出す。ボタンは入力欄をずらし、パスを編集するボタンに見え、空のときは押しても何も起きなかった〔2026-11-01〕
+- パンくずとミニカレンダーの設定の名前から「Show」を外した（見出しで言っているので）。「Show on」→「Devices」、「Show on non-periodic notes」→「Also on non-periodic notes」、「Days shown」→「Days for daily notes」、「Show stickers」→「Stickers」。古い名前でも設定の検索で見つかる〔2026-11-02〕
 
 ## 移行
 

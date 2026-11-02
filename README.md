@@ -99,8 +99,8 @@ To update, run `git pull` in the repository, run step 3 again, and restart Obsid
   A weekly note belongs to the year, quarter, and month of its Thursday. A quarterly note belongs to the year of its
   second month.
 - **Mini calendar**: The notes of the same period around the open one, with dots and stickers. Use ‹ › to look further.
-  For daily notes it shows the calendar week (or three days on each side). The setting **Days shown** picks which,
-  and shows under it how today's daily note would look.
+  For daily notes it shows the calendar week (or three days on each side). The setting **Days for daily notes** picks
+  which, and shows under it how today's daily note would look.
 - Both can be turned off, shown on phones only, or hidden on notes that aren't periodic notes. On notes that aren't
   periodic notes, they show "now".
 - On desktop, **Compact on desktop** turns the strip into a small box at the top right of the note.
@@ -205,8 +205,8 @@ file is made. With no template set, new notes start empty. These placeholders ar
 | --- | --- |
 | (top) | Week starts on, Open on startup, Calendar language, Confirm before creating notes, Open now button |
 | Periodic notes | Each period: on or off, format, folder, template. Quarters and years: the month they start in, the year in names |
-| Period breadcrumbs | Show on (all devices / phones only), show on non-periodic notes |
-| Mini calendar | Show on, show on non-periodic notes, days shown, show stickers. Compact on desktop |
+| Period breadcrumbs | Devices (all devices / phones only), also on non-periodic notes |
+| Mini calendar | Devices, also on non-periodic notes, days for daily notes, stickers. Compact on desktop |
 | Stickers | Sticker button, sticker property, emoji search languages |
 | Migrate notes | Rename notes from a previous format, move stickers from a previous property |
 

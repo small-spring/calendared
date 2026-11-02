@@ -151,13 +151,13 @@ Calendared に **今ある機能** と、それぞれの **設定項目** をま
 | 表示名 | 場所 | キー | 既定 | 内容 |
 | --- | --- | --- | --- | --- |
 | Period breadcrumbs | Period breadcrumbs（見出しのトグル） | `breadcrumbs.enabled` | オン | パンくずを出すか |
-| Show on | Period breadcrumbs | `breadcrumbs.placement` | All devices | パンくずを出す場所（All devices / Phones only。タブレットはスマホに含めない） |
-| Show on non-periodic notes | Period breadcrumbs | `breadcrumbs.onOtherNotes` | オン | 周期ノートでないノートにも出すか |
+| Devices | Period breadcrumbs | `breadcrumbs.placement` | All devices | パンくずを出す場所（All devices / Phones only。タブレットはスマホに含めない） |
+| Also on non-periodic notes | Period breadcrumbs | `breadcrumbs.onOtherNotes` | オン | 周期ノートでないノートにも出すか |
 | Mini calendar | Mini calendar（見出しのトグル） | `miniCalendar.enabled` | オン | ミニカレンダーを出すか |
-| Show on | Mini calendar | `miniCalendar.placement` | All devices | ミニカレンダーを出す場所 |
-| Show on non-periodic notes | Mini calendar | `miniCalendar.onOtherNotes` | オン | 周期ノートでないノートにも出すか |
-| Days shown | Mini calendar | `miniCalendar.dayLayout` | Calendar week | 日のノートでの日の並べ方（Calendar week / 3 days each side） |
-| Show stickers | Mini calendar | `miniCalendar.displayStickers` | オン | ステッカーを出すか（ステッカーがオフのときは隠す） |
+| Devices | Mini calendar | `miniCalendar.placement` | All devices | ミニカレンダーを出す場所 |
+| Also on non-periodic notes | Mini calendar | `miniCalendar.onOtherNotes` | オン | 周期ノートでないノートにも出すか |
+| Days for daily notes | Mini calendar | `miniCalendar.dayLayout` | Calendar week | 日のノートでの日の並べ方（Calendar week / 3 days each side）。欄の下に今日ならどう並ぶかを出す |
+| Stickers | Mini calendar | `miniCalendar.displayStickers` | オン | ステッカーを出すか（ステッカーがオフのときは隠す） |
 | Compact on desktop | Mini calendar の下の、見出しのない段（どちらかが PC に出るときだけ） | `compactOnDesktop` | オフ | PC で右上の小さな箱にする（パンくずにも効く） |
 
 前の `timeline.*` の設定は、起動したときに読み替えて消す（オフにしていれば両方オフ。ほかのノートにも出すか・ステッカーは引き継ぐ）。出す場所を 3 択で持っていたときの Never はオフに読み替える（[ADR-0033](../adr/0033-heading-toggles.md)）。

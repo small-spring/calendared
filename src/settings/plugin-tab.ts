@@ -370,10 +370,10 @@ export class SettingsTab extends PluginSettingTab {
   // Calendared: the breadcrumbs and the mini calendar (docs/adr/0031, 0032), each turned on and off by its heading's
   // toggle (docs/adr/0033). "Period breadcrumbs" on screen, so it isn't taken for the community plugin "Breadcrumbs"
   private navigationGroups(): SettingDefinitionItem[] {
-    const showOn = {
-      options: { always: "All devices", phone: "Phones only" },
-      desc: "Tablets don't count as phones.",
-    };
+    // Calendared: named without "Show", which the heading already says. The old names are kept for searching
+    const devices = { name: "Devices", aliases: ["Show on"], desc: "Tablets don't count as phones." };
+    const deviceOptions = { always: "All devices", phone: "Phones only" };
+    const otherNotes = { name: "Also on non-periodic notes", aliases: ["Show on non-periodic notes"] };
     const featureToggle = (feature: "breadcrumbs" | "miniCalendar") => ({
       isOn: () => settings()[feature].enabled,
       onChange: (on: boolean) => this.setControlValue(`${feature}.enabled`, on),
@@ -394,8 +394,8 @@ export class SettingsTab extends PluginSettingTab {
         type: "group",
         visible: () => settings().breadcrumbs.enabled,
         items: [
-          { name: "Show on", desc: showOn.desc, control: { type: "dropdown", key: "breadcrumbs.placement", options: showOn.options } },
-          { name: "Show on non-periodic notes", control: { type: "toggle", key: "breadcrumbs.onOtherNotes" } },
+          { ...devices, control: { type: "dropdown", key: "breadcrumbs.placement", options: deviceOptions } },
+          { ...otherNotes, control: { type: "toggle", key: "breadcrumbs.onOtherNotes" } },
         ],
       },
       {
@@ -413,11 +413,12 @@ export class SettingsTab extends PluginSettingTab {
         type: "group",
         visible: () => settings().miniCalendar.enabled,
         items: [
-          { name: "Show on", desc: showOn.desc, control: { type: "dropdown", key: "miniCalendar.placement", options: showOn.options } },
-          { name: "Show on non-periodic notes", control: { type: "toggle", key: "miniCalendar.onOtherNotes" } },
+          { ...devices, control: { type: "dropdown", key: "miniCalendar.placement", options: deviceOptions } },
+          { ...otherNotes, control: { type: "toggle", key: "miniCalendar.onOtherNotes" } },
           {
-            name: "Days shown",
-            desc: "For daily notes. Other notes show 2 on each side.",
+            name: "Days for daily notes",
+            aliases: ["Days shown"],
+            desc: "Other periodic notes show 2 on each side.",
             // Calendared: today's daily note as the mini calendar would show it, under the description, so the choice
             // can be seen. Changes with the dropdown
             render: (setting) => {
@@ -432,7 +433,8 @@ export class SettingsTab extends PluginSettingTab {
             },
           },
           {
-            name: "Show stickers",
+            name: "Stickers",
+            aliases: ["Show stickers"],
             // has no effect while stickers are off
             visible: () => settings().stickersEnabled,
             control: { type: "toggle", key: "miniCalendar.displayStickers" },
