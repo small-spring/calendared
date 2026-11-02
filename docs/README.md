@@ -7,11 +7,12 @@ Calendared の開発向けの文書（日本語）。使う人向けの説明は
 
 - [spec/](spec/): 機能ごとの仕様
   - [spec/overview.md](spec/overview.md): 機能と設定項目の一覧（まずここ）
+  - [spec/architecture.md](spec/architecture.md): コードの地図（`src/` のどこに何があるかと、主な処理の流れ。コードを読む前にここ）
   - [spec/periods.md](spec/periods.md): 周期ノートの値の形と、週の定義
   - [spec/fiscal-year.md](spec/fiscal-year.md): 四半期と年の始まりの月（使う人の例、パンくず、カレンダー）
   - [spec/stickers.md](spec/stickers.md): ステッカー機能
   - [spec/migrations.md](spec/migrations.md): 移行（書式の変換、ステッカーのプロパティの付け替え、移行の案内）
-  - [spec/state.md](spec/state.md): 状態（ストア）の一覧と、状態管理の作り直しの記録
+  - [spec/state.md](spec/state.md): 状態管理の作り直しの記録（今のストアの一覧は architecture.md）
 - [customizations.md](customizations.md): 元の版との違い（変更の記録）。変更を終えたら 1〜2 行で足す。GPL-3.0 の「改変したことと日付」の記録も兼ねる
 
 ## なぜそうしたか
@@ -28,7 +29,7 @@ Calendared の開発向けの文書（日本語）。使う人向けの説明は
 
 ## やり方・参考
 
-- [guides/development.md](guides/development.md): ビルド・deploy・依存の更新・書き方の決まり・テスト
+- [guides/development.md](guides/development.md): はじめに（初日の手順）・変更を入れるときの手順・ビルド・deploy・テスト・依存の更新・書き方の決まり
 - [guides/device-testing.md](guides/device-testing.md): Windows・iPhone の実機で試す
 - [guides/usage-ja.md](guides/usage-ja.md): 使う人向けの日本語の使い方（入れ方を含む。パートナーに渡す）
 - [guides/publishing.md](guides/publishing.md): 公開の手続きの決まり・要件・issue の下書き（公開が済んだら archive/ へ）
