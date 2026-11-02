@@ -105,15 +105,17 @@ export function confirmKeepAsIs(which: IGranularity | "sticker", count: number) 
   const previous = which === "sticker" ? s.migrationNotices.stickerProperty : s.migrationNotices.formats[which];
   if (!previous) return;
   const modal = new Modal(PluginService.getPlugin()!.app);
-  modal.setTitle("Keep these notes as they are?");
+  // one note or several: the words follow the count
+  const one = count === 1;
+  modal.setTitle(one ? "Keep this note as it is?" : "Keep these notes as they are?");
   const text =
     which === "sticker"
-      ? `${notes(count)} keep their sticker in "${previous}", so the calendar won't show it.`
-      : `${notes(count)} keep their names in ${previous}, so the calendar won't show them.`;
-  modal.contentEl.createEl("p", { text: `${text} The notes aren't changed or deleted.` });
+      ? `${notes(count)} ${one ? "keeps its sticker" : "keep their stickers"} in "${previous}", so the calendar won't show ${one ? "it" : "them"}.`
+      : `${notes(count)} ${one ? "keeps its name" : "keep their names"} in ${previous}, so the calendar won't show ${one ? "it" : "them"}.`;
+  modal.contentEl.createEl("p", { text: `${text} ${one ? "The note isn't" : "The notes aren't"} changed or deleted.` });
   modal.contentEl.createEl("p", {
     cls: "calendared-faint",
-    text: `This reminder won't come back. To ${which === "sticker" ? "move them" : "rename them"} later, open Migrate notes at the bottom of the settings and enter "${previous}".`,
+    text: `This reminder won't come back. To ${which === "sticker" ? "move" : "rename"} ${one ? "it" : "them"} later, open Migrate notes at the bottom of the settings and enter "${previous}".`,
   });
   const buttons = modal.contentEl.createDiv("modal-button-container");
   new ButtonComponent(buttons).setButtonText("Cancel").onClick(() => modal.close());
