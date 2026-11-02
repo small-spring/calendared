@@ -25,7 +25,8 @@ const rows = readdirSync(dir)
   .map((name) => {
     const p = frontMatter(readFileSync(join(dir, name), "utf8"));
     if (!p) throw new Error(`${name}: no front matter`);
-    const made = p.status === "却下" ? "―" : p.implemented === "true" ? "済" : "まだ";
+    // a rejected or replaced decision is not work left to do
+    const made = p.status === "却下" || p.status === "置き換え" ? "―" : p.implemented === "true" ? "済" : "まだ";
     return `| [${p.id}](${name}) | ${p.title} | ${p.area} | ${p.status} | ${p.date} | ${made} |`;
   });
 
