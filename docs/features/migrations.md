@@ -1,6 +1,6 @@
 # ノートの移行（Migrate notes）
 
-すでにあるノートを、今の設定に合わせる操作。設定画面の一番下の「Migrate notes ›」（サブページ）にまとめている。
+すでにあるノートを、今の設定に合わせる操作。設定画面の一番下、見出し「Danger zone」の「Migrate notes ›」（サブページ）にまとめている。
 決めた理由は [ADR-0019](../adr/0019-one-format-per-period.md)・[ADR-0023](../adr/0023-migrations-without-content-changes.md)・
 [ADR-0024](../adr/0024-migration-safety.md)・[ADR-0035](../adr/0035-migration-notice.md)。どのファイルにあるかは [code/architecture.md](../code/architecture.md)。
 

@@ -26,6 +26,7 @@ import {
   PluginSettingTab,
   type Setting,
   type SettingDefinitionItem,
+  type SettingDefinitionPage,
   type SettingGroupItem,
   ToggleComponent,
 } from "obsidian";
@@ -154,7 +155,7 @@ export class SettingsTab extends PluginSettingTab {
       ...this.navigationGroups(),
       ...this.stickerGroups(),
       this.languageGroup(),
-      this.migrationPage(),
+      this.dangerZoneGroup(),
     ];
   }
 
@@ -543,9 +544,15 @@ export class SettingsTab extends PluginSettingTab {
     };
   }
 
+  // the migrations rename notes in bulk, so they sit under a heading in the error color, apart from the settings above
+  // (docs/adr/0054)
+  private dangerZoneGroup(): SettingDefinitionItem {
+    return { type: "group", heading: "Danger zone", cls: "calendared-danger-zone", items: [this.migrationPage()] };
+  }
+
   // Calendared: the migrations live on a page of its own at the bottom (docs/adr/0023, 0024, docs/features/migrations.md).
   // Each shows the list of notes it changes before it runs (review-modal.ts)
-  private migrationPage(): SettingDefinitionItem {
+  private migrationPage(): SettingDefinitionPage {
     return {
       type: "page",
       name: "Migrate notes",

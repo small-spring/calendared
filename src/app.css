@@ -73,6 +73,11 @@
   margin-top: 0;
 }
 
+/* the heading over the migrations (dangerZoneGroup in src/settings/plugin-tab.ts) */
+.calendared-settings .setting-group.calendared-danger-zone > .setting-item-heading .setting-item-name {
+  color: var(--text-error);
+}
+
 /* a setting with a box under its name and description (the format field, the emoji search languages) */
 .setting-item.calendared-setting-stacked {
   flex-direction: column;

@@ -26,3 +26,5 @@ aliases:
   項目だと思った）。そこで、言語には見出し「Language」を、Compact on desktop には見出し「Desktop layout」を付けた。
   まとめて 1 つの見出し（Display）にする案もあったが、Compact on desktop はパンくずとミニカレンダーのすぐ下に置いておきたいので分けた。
   これで設定画面に見出しのない段は、一番上の段だけになる
+- **追記（2026-11-02）**: Migrate notes も、見出しのないまま Language の下にあると、言語の項目に見えた。ノートの名前をまとめて変える
+  入口なので、見出し「Danger zone」を付け、見出しの字を Obsidian の警告の赤（`--text-error`）にした
