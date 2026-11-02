@@ -21,6 +21,7 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 - テストの仕組み（Vitest）を入れ、テンプレートの置き換え・ファイル名の読み取り・周期の日付の計算にテストを書いた。
   `npm run deploy` はテストが通らないとコピーしない（[guides/development.md](guides/development.md) の「テスト」）〔2026-10-29〕
 - ビルドの道具を更新: Vite 5 → 7、vite-plugin-svelte 4 → 6。`tsconfig.json` の `moduleResolution` を `bundler` に〔2026-10-29〕
+- 使う人向けの文書を見直した。README は入れ方を先頭近くへ移し、公開の予定と英語の入れ方・更新のしかたをそろえた。日本語の使い方に設定の一番上・コマンド・テンプレートの節を足した〔2026-11-02〕
 
 ## 不具合修正
 

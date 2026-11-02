@@ -36,10 +36,41 @@ Works on desktop and mobile. Needs Obsidian 1.13.1 or later.
 - **Migrations**: After changing a format or the sticker property, rename the old notes or move their stickers in one go,
   with a list to check first.
 
+## Installation
+
+Calendared is planned to be published as a community plugin later, but not in its current form. For now, build it
+from source on a computer:
+
+1. Install [Node.js](https://nodejs.org/) (an LTS version is fine)
+2. Get the repository. It is private, so you need to sign in to GitHub (cloning with GitHub Desktop also works):
+
+   ```bash
+   git clone https://github.com/small-spring/calendared.git
+   cd calendared
+   npm install
+   ```
+
+3. Build it and copy it into your vault (the vault's folder is the one with the `.obsidian` folder in it):
+
+   ```bash
+   npm run deploy -- "/path/to/your/vault"
+   ```
+
+   This runs the tests, builds, and copies `main.js`, `manifest.json`, and `styles.css` to
+   `.obsidian/plugins/calendared/` in the vault. On Windows, run `bash scripts/deploy.sh "/c/path/to/your/vault"` in
+   Git Bash instead
+4. In Obsidian, turn on **Calendared** in **Settings → Community plugins** (the first time, turn off **Restricted mode**)
+
+For a phone, install it in the vault on your computer and let your sync bring the `.obsidian/plugins/calendared/` folder
+over (with Obsidian Sync, turn on syncing of community plugins).
+
+To update, run `git pull` in the repository, run step 3 again, and restart Obsidian (or turn the plugin off and on).
+
 ## Getting started
 
 1. Open **Settings → Calendared**. Under **Periodic notes**, turn on the periods you use (daily and weekly are on at first).
-   Click a period to set its format, folder, and template.
+   Click a period to set its format, folder, and template. Create the folder in Obsidian first: a folder that isn't in
+   the vault isn't saved.
 2. Click the calendar icon in the ribbon, or run **Calendared: Toggle calendar interface**, to open the calendar.
 3. Click a date to open or create that day's note.
 4. Click the sticker button (😊+) in the tab title bar of a periodic note to give it an emoji.
@@ -54,7 +85,8 @@ Works on desktop and mobile. Needs Obsidian 1.13.1 or later.
 - The open note is highlighted, and the calendar follows it to its month. With weekly notes on, the open week's row is shaded.
 - **Open now** at the top right goes back to now. It is also in the tab title bar of every note (turn it off in settings).
 - If you turn off both days and weeks, the calendar shows months or years instead.
-- Month and weekday names are in Obsidian's language. **Calendar language** changes them in the calendar only.
+- Month and weekday names are in Obsidian's language. **Calendar language** changes them in the calendar, the
+  breadcrumbs, and the mini calendar. Note names still use Obsidian's language.
 
 ## Breadcrumbs and mini calendar
 
@@ -199,22 +231,6 @@ is `#pnc-container`, and the breadcrumbs and mini calendar are `.calendared-nav`
   /* also --color-text-<period>-bttn and --color-background-<period>-bttn, for day, week, month, quarter, year */
 }
 ```
-
-## Installation
-
-Calendared is not in the community plugins list. While the repository is private, build it from source:
-
-1. Install [Node.js](https://nodejs.org/) and clone this repository
-2. `npm install`
-3. `npm run deploy -- "/path/to/your/vault"` — runs the tests, builds, and copies `main.js`, `manifest.json`, and
-   `styles.css` to `.obsidian/plugins/calendared/` in the vault. On Windows, run `bash scripts/deploy.sh "/c/path/to/your/vault"`
-   in Git Bash instead
-4. In Obsidian, turn on **Calendared** in **Settings → Community plugins**
-
-For a phone, install it in the vault on your computer and let your sync bring the `.obsidian/plugins/calendared/` folder
-over (with Obsidian Sync, turn on syncing of community plugins).
-
-Releases (`main.js`, `manifest.json`, `styles.css`) can also be put in `.obsidian/plugins/calendared/` by hand.
 
 ## Network use
 
