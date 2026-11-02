@@ -2,7 +2,7 @@ import { PluginService } from "@/app-service";
 import { weekdayNames } from "@/calendar-locale";
 import { DAILY_NOTES_PLUGIN_ID, DEFAULT_FORMATS_PER_GRANULARITY, granularities } from "@/constants";
 import { formatTokenGuide, type TokenGuideItem } from "@/format-tokens";
-import { getPeriodicityFromGranularity, IGranularity } from "@/io";
+import { getPeriodicityFromGranularity, IGranularity, watchVault } from "@/io";
 import type { DnPluginSettings } from "@/io/settings";
 import { validateFolder, validateFormat, validateTemplate } from "@/io/validation";
 import { templateFilePath } from "@/io/note-path";
@@ -34,6 +34,7 @@ import { mount, unmount } from "svelte";
 import { get, type Writable } from "svelte/store";
 import writableDerived from "svelte-writable-derived";
 import type { ISettings, PeriodSettings } from "./constants";
+import { DrawnValue } from "./drawn-value";
 import { formatsToReset, savePendingEdits } from "./format-on-close";
 import { noticesOnPage } from "./migration-notice";
 import { openAtStartupOf, setOpenAtStartup, setPeriodEnabled } from "./period-switch";
@@ -81,12 +82,60 @@ function withValueAt(value: unknown, path: string[], newValue: unknown): unknown
 export class SettingsTab extends PluginSettingTab {
   private periodRowsQueued = false;
   private periodRowToggles = new WeakMap<HTMLElement, ToggleComponent>();
+  private migrationStatusQueued = false;
+  private pressing = false;
+  private redrawAfterPress = false;
+  private migrationStatus = new DrawnValue(() => (anyMigrationNotice() ? "warning" : null));
 
   // Calendared: the plugin passes itself in. Upstream read it from PluginService and called super only if it was there,
   // which TypeScript reports as an error ('super' must be called before accessing 'this')
   constructor(app: App, plugin: Plugin) {
     super(app, plugin);
     this.containerEl.addClass("calendared-settings");
+    // the warning on Migrate notes follows the notices and the notes they count, which change without a control of this
+    // page (a changed sticker property, "Keep as is", a migration run), so the page is drawn again when it would come or go
+    plugin.register(settingsStore.subscribe(() => this.queueMigrationStatus()));
+    plugin.register(watchVault(app, () => this.queueMigrationStatus()));
+    this.watchPresses();
+  }
+
+  /**
+   * Draws the page again if the warning on Migrate notes changed. Only while this page is shown: going back from a page
+   * under it draws this page anew
+   */
+  private queueMigrationStatus() {
+    if (this.migrationStatusQueued || !this.containerEl.isConnected) return;
+    this.migrationStatusQueued = true;
+    queueMicrotask(() => this.redrawIfMigrationStatusChanged());
+  }
+
+  private redrawIfMigrationStatusChanged() {
+    // leaving the sticker property's field by clicking another control changes the notice while the mouse is down;
+    // drawing then would replace that control before the click lands, so it waits for the button to come up
+    if (this.pressing) {
+      this.redrawAfterPress = true;
+      return;
+    }
+    this.migrationStatusQueued = false;
+    if (this.containerEl.isConnected && this.migrationStatus.changed()) this.update();
+  }
+
+  private watchPresses() {
+    this.containerEl.addEventListener(
+      "pointerdown",
+      () => {
+        this.pressing = true;
+        const release = () => {
+          this.pressing = false;
+          if (!this.redrawAfterPress) return;
+          this.redrawAfterPress = false;
+          // after the click that follows
+          window.setTimeout(() => this.redrawIfMigrationStatusChanged());
+        };
+        this.containerEl.ownerDocument.addEventListener("pointerup", release, { once: true, capture: true });
+      },
+      true,
+    );
   }
 
   /** Only Obsidian before 1.13 calls this; the settings need the definitions */
@@ -567,7 +616,7 @@ export class SettingsTab extends PluginSettingTab {
       type: "page",
       name: "Migrate notes",
       desc: "Rename notes after changing a format, or move stickers after changing the sticker property.",
-      status: () => (anyMigrationNotice() ? "warning" : null),
+      status: () => this.migrationStatus.draw(),
       items: [
         {
           type: "group",

@@ -87,6 +87,7 @@
 | `plugin-tab.ts` | 設定画面（Obsidian 1.13 の宣言で書く設定。[ADR-0020](../adr/0020-settings-page-layout.md)） |
 | `ui/` | 設定画面に足す部品。`periods/`（書式の欄、件数）、`migrations/`（移行の実行・一覧の画面・案内。[features/migrations.md](../features/migrations.md)）、`stickers/`（絵文字の検索の言語） |
 | `period-switch.ts`・`format-on-close.ts`・`migration-notice.ts`・`template-rename.ts` | 周期のオン・オフ、書式を閉じるときの扱い、移行の案内、テンプレートの名前変更への追従 |
+| `drawn-value.ts` | 画面に描いたときの値を覚えておき、変わったら描き直すかを決める（「Migrate notes」の警告の印） |
 
 ## 主な処理の流れ
 
