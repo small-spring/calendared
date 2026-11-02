@@ -547,7 +547,17 @@ export class SettingsTab extends PluginSettingTab {
   // the migrations rename notes in bulk, so they sit under a heading in the error color, apart from the settings above
   // (docs/adr/0054)
   private dangerZoneGroup(): SettingDefinitionItem {
-    return { type: "group", heading: "Danger zone", cls: "calendared-danger-zone", items: [this.migrationPage()] };
+    return {
+      type: "group",
+      heading: "Danger zone",
+      cls: "calendared-danger-zone",
+      extraButtons: [
+        headingExtras({
+          description: "Changes notes already in your vault: renames them or edits their properties. Each shows the notes first.",
+        }),
+      ],
+      items: [this.migrationPage()],
+    };
   }
 
   // Calendared: the migrations live on a page of its own at the bottom (docs/adr/0023, 0024, docs/features/migrations.md).
