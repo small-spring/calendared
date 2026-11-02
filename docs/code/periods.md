@@ -1,4 +1,4 @@
-# 周期ノートと週の定義
+# 周期ノートの値と区切り（週・四半期・年）
 
 周期ノート（日・週・月・四半期・年）を、プラグインの中でどういう値として持ち、どう読むか。
 2026-10-29 に検討し、同じ日に実装した（元の作りとの違いは git の履歴にある）。
@@ -47,7 +47,23 @@
 - moment の言語の週の決まり（`ww` / `gggg`。日本語は日曜はじまりで 1 月 1 日を含む週が第 1 週）は使わない。
   moment 全体の設定も、Obsidian やほかのプラグインと共有しているので変えない
 
-## 4. 設計判断の記録（ADR）
+## 4. 四半期と年の区切り（[ADR-0039](../adr/0039-fiscal-year-in-period-pages.md)）
+
+四半期と年を好きな月から始める機能（[features/quarter-year-start.md](../features/quarter-year-start.md)）の作り。
+
+- 決め方は `src/periods.ts` の `PeriodRules`（週の決め方と、四半期・年の `YearCycle`）。設定から `periodRulesFor` で作る。
+  期間の計算（`periodOf`、`rangeOfPeriod`、`shiftPeriod`、`formatPeriod`、`parsePeriod`）とパンくず・ミニカレンダー
+  （`src/navigation.ts` の `periodStart`・`samePeriod`・`breadcrumbs`・`crumbText`）はこれを通す
+- ほかの所は moment に暦の四半期・年を直接聞かない。`src/period-rules-guard.test.ts` が `src/` を調べて止める
+  （ESLint は `.svelte` を読まないのでテストにした）。暦の年でよい所は、その行か 1 行上に「calendar on purpose」と書く
+- 名前の数字は、書式を記号に分けて（`src/format-tokens.ts`）、`YYYY`・`Q` を名前の数字に置き換えて書く。読むときは moment で数字を読み、
+  書き戻して同じ名前になるものだけを受け取る
+- ノートの名前を見せる所・書く所は、どれも `formatPeriod` を通す: 作る前の確認の文言（作るパスから取る）、設定画面の書式のプレビュー、
+  テンプレートの `{{title}}`・`{{date}}`（書式を書かないとき。ずらしたときは、ずらした先の期間の名前）。
+  テンプレートで `{{date:...}}` と書式を書いたときだけは、暦の日付として moment で書く。
+  書式を変数で渡す `date.format(format)` はガードのテストでは見つけられないので、名前を書くときは `formatPeriod` を使う
+
+## 5. 設計判断の記録（ADR）
 
 - [ADR-0009 周期ノートの正体は、周期ごとの名前で持つ](../adr/0009-period-identity-by-name.md)
 - [ADR-0010 読む側は期間の操作で考える](../adr/0010-readers-use-period-operations.md)

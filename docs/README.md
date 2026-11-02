@@ -22,14 +22,14 @@ Calendared の文書。まず「誰が読むか」で分け、開発向けの中
 - [features/overview.md](features/overview.md): 機能と設定の一覧（まずここ。ファイルを分けていない機能の決まりもここ）
 - [features/stickers.md](features/stickers.md): ステッカー（Stickers）
 - [features/migrations.md](features/migrations.md): ノートの移行（Migrate notes。書式の変換、ステッカーのプロパティの付け替え、移行の案内）
-- [features/fiscal-year.md](features/fiscal-year.md): 四半期と年の始まりの月（Starts in）
+- [features/quarter-year-start.md](features/quarter-year-start.md): 四半期と年を好きな月から始める（Starts in。年度に合わせる）
 
 ## コードの仕組み（code/）
 
 作る人から見える形。コードを読む前に開く。
 
 - [code/architecture.md](code/architecture.md): コードの地図（`src/` のどこに何があるかと、主な処理の流れ）。どのファイルに何があるかは、ここだけに書く
-- [code/periods.md](code/periods.md): 周期ノートをプラグインの中でどういう値として持つかと、週の定義
+- [code/periods.md](code/periods.md): 周期ノートをプラグインの中でどういう値として持つかと、週・四半期・年の区切りの作り
 
 ## 使う人向けの素材（screenshots/）
 
