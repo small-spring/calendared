@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Keep your days, weeks, months, quarters, and years calendared. Open periodic notes from a calendar, breadcrumbs, and a mini calendar, and mark each one with an emoji sticker.",
   "author": "small-spring",
-  "main": "main.js",
+  "main": "dist/main.js",
   "type": "module",
   "license": "GPL-3.0-only",
   "engines": {

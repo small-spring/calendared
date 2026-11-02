@@ -47,11 +47,11 @@ MODE="${DEPLOY_MODE:-production}"
 NODE_ENV="$MODE" npx vite build --mode "$MODE"
 
 # smoke test: refuse to deploy a bundle that crashes while loading (see scripts/check-load.cjs)
-node scripts/check-load.cjs main.js
+node scripts/check-load.cjs dist/main.js
 
 for VAULT in "${VAULTS[@]}"; do
   DEST="$VAULT/.obsidian/plugins/$PLUGIN_ID"
   mkdir -p "$DEST"
-  cp manifest.json main.js styles.css "$DEST/"
+  cp manifest.json dist/main.js dist/styles.css "$DEST/"
   echo "Deployed $PLUGIN_ID ($MODE) to $DEST"
 done

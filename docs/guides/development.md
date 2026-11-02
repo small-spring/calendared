@@ -31,7 +31,7 @@
    下の「Obsidian で確かめる」。CLI を使わないなら、設定でプラグインをオフ → オン）
 
 - コードを読む前に [コードの地図](../spec/architecture.md) を見る。機能と設定の一覧は [spec/overview.md](../spec/overview.md)
-- `npm run dev` は、ファイルを保存するたびにリポジトリ直下の `main.js` を作り直すだけで、Vault には入らない。
+- `npm run dev` は、ファイルを保存するたびに `dist/main.js` を作り直すだけで、Vault には入らない。
   型や書き間違いを早く見たいときに使い、Obsidian で試すときは `npm run deploy` する
 
 ## 変更を入れるときの手順
@@ -60,16 +60,17 @@
 ## ビルドと確認
 
 - `npm test`: テスト（下の「テスト」）
-- `npm run build`: ESLint（`npm run lint`）→ 型チェック（`npm run check`）→ ADR の一覧が古くないかの確認 → ビルド。どれかが落ちたら止まる
-  - 既知の警告: `build.outDir must not be the same directory of root`。プラグインはリポジトリ直下に `main.js`・`styles.css` を
-    置く決まりのため（Vault へのコピーと Release がそこから取る）。`emptyOutDir: false` なので、ほかのファイルは消えない
+- `npm run build`: ESLint（`npm run lint`）→ 型チェック（`npm run check`）→ ADR の一覧が古くないかの確認 → ビルド。どれかが落ちたら止まる。
+  警告は出ない（出たら新しく起きたもの）
+  - できたものは `dist/`（`main.js`・`main.js.map`・`styles.css`。git に入れない）。deploy と Release は、これといちばん上の
+    `manifest.json` を使う
 - `npm run check`: svelte-check（TypeScript と Svelte の型チェック）だけを動かす。既知のエラー・警告はない（0 件）。
   ほかの部品の型定義は確かめない（`tsconfig.json` の `skipLibCheck`。emoji-mart の型定義に解けない読み込みがあるため）
 - `npm run lint-fix`: 型チェックのあと、ESLint で直せるものを直す。整形の道具（Prettier など）は使っていない。まわりのコードの書き方に合わせる
 - `npm run deploy`（`scripts/deploy.sh [Vault のパス]`）: ビルドして Vault の `.obsidian/plugins/calendared/` にコピーする。
   行き先の決め方は上の「はじめに」
   - ビルドの前にテスト（`npm test`）を動かし、落ちたらコピーしない。ESLint と型チェックは動かさない（`npm run build` で確かめる）
-  - コピーの前に読み込み確認（`scripts/check-load.cjs`）をする。ビルドした `main.js` を Node.js で、偽物の Obsidian
+  - コピーの前に読み込み確認（`scripts/check-load.cjs`）をする。ビルドした `dist/main.js` を Node.js で、偽物の Obsidian
     （何を聞かれても何かを返す Proxy）を使って読み込み、読み込み中に落ちたらコピーしない。
     読み込み順の不具合（例: `Cannot access 'X' before initialization`）は型チェックや ESLint では見つからないため
   - 動作や見た目は確かめないので、Obsidian での確認は別に必要

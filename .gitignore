@@ -6,6 +6,8 @@ node_modules
 !.env.example
 data.json
 data.sync*.json
+# Calendared: the build goes into dist/ (vite.config.ts); main.js etc. at the root are left from older builds
+dist
 main.js
 main.js.map
 styles.css

@@ -36,6 +36,7 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 - `npm run build` で型チェック（svelte-check）も動かすようにし、残っていたエラー（設定画面の `super`）と警告を直した。整形の道具 biome を外し、`package.json` に `engines` を足した〔2026-11-02〕
 - `npm run deploy`・`npm run emoji-language` の既定の行き先（持ち主の Vault）をなくした。引数・`OBSIDIAN_VAULT`・手元の `.deploy-vault` で決め、ないときは案内を出して止まる〔2026-11-02〕
 - `.deploy-vault` に複数の Vault を書くと、`npm run deploy` は 1 回ビルドして全部にコピーする（持ち主は試しの Vault と private）〔2026-11-02〕
+- ビルドの出力先を、リポジトリのいちばん上から `dist/`（git に入れない）にした。Vite がビルドのたびに「ソースを上書きするかもしれない」と警告していた。deploy・Release・読み込み確認も `dist/` から取る〔2026-11-02〕
 - 開発向けの文書を見直した。コードの地図（`docs/spec/architecture.md`）、初日の手順、変更を入れるときの手順と、どこに何を書くかの目安を足した。この文書は、節を機能ごとに分け直し、「変更の記録」とした〔2026-11-02〕
 
 ## 不具合修正
@@ -239,7 +240,7 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 - カレンダーの選択を別の値（`activeFileStore`）として持つのをやめ、Obsidian が開いているとするノートから求めるようにした（ずれようがない）〔2026-10-30〕
 - 状態管理の作り直し（[state.md](spec/state.md)）を終えた。表示中の月の謎（年次ノートを作っても月が移ったり移らなかったりした）は、Obsidian がアクティブでないタブにノートを開いたときに `file-open` を遅らせることが原因と分かった〔2026-10-30〕
 - カレンダーの画面・設定画面・ステッカーのピッカーの部品を外す処理を、2 回目は何もしない形にした（開発用の版で Svelte の警告 `lifecycle_double_unmount` が出ていた）。設定画面を隠さずにもう一度表示したとき、前の部品が残るのも直した〔2026-10-30〕
-- ビルドの警告（型を `type` を付けずに読み込んでいた 23 か所）を消した〔2026-10-30〕（`build.outDir` の警告は残っている。[guides/development.md](guides/development.md) の「ビルドと確認」）
+- ビルドの警告（型を `type` を付けずに読み込んでいた 23 か所）を消した〔2026-10-30〕（→ 残っていた `build.outDir` の警告は、のちに出力先を `dist/` にして消した〔2026-11-02〕）
 - 吹き出しまわりを作り直した。フローティング表示と共用だった土台のクラスと `Popover` の入れ物をやめ、ステッカーのピッカーを 1 つのクラス
   （`src/ui/sticker-picker.ts`）に、カレンダーの右クリックを関数（`src/ui/note-menu.ts` の `openNoteMenu`）にした。「Manage sticker」はメニューで
   直接足す。名前もピッカー（`StickerPicker.svelte`、`stickerPickerNoteStore`、`emoji-picker.ts`）に揃えた。開くたびに増えて残っていた、

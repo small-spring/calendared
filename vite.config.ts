@@ -16,7 +16,7 @@ export default defineConfig({
                 entryFileNames: "main.js",
                 assetFileNames: "styles.css",
                 sourcemapBaseUrl: pathToFileURL(
-                    __dirname
+                    resolve(__dirname, "dist")
                 ).toString(),
             },
             external: [
@@ -36,7 +36,9 @@ export default defineConfig({
                 ...builtins,
             ],
         },
-        outDir: "./",
+        // Calendared: into dist/ (not git-tracked), like Vite's default. Upstream built into the repository's root, which
+        // made Vite warn on every build that the output could overwrite sources. Deploy and the release copy from here
+        outDir: "dist",
         emptyOutDir: false,
         sourcemap: true,
     },

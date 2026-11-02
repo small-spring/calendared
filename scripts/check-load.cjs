@@ -4,14 +4,14 @@
 // from an import cycle), which type checking and ESLint can't see. It does NOT run the plugin's onload()
 // or check any behavior.
 //
-// Usage: node scripts/check-load.cjs [path/to/main.js]   (default: ./main.js)
+// Usage: node scripts/check-load.cjs [path/to/main.js]   (default: ./dist/main.js)
 "use strict";
 
 const fs = require("fs");
 const path = require("path");
 const Module = require("module");
 
-const bundlePath = path.resolve(process.argv[2] ?? "main.js");
+const bundlePath = path.resolve(process.argv[2] ?? "dist/main.js");
 
 // ---------------------------------------------------------------------------
 // 1. A value that pretends to be anything.
