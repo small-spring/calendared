@@ -1,4 +1,4 @@
-// Calendared: sticker button in the header of open periodic notes, next to the reading-view icon
+// Calendared: sticker button in the header of open periodic notes, left of Open now (ACTION_ORDER in view-actions.ts)
 // (Obsidian's `view.addAction`), plus the helpers shared with the commands and the right-click menu.
 // See docs/spec/stickers.md.
 import { PluginService } from "@/app-service";
@@ -21,7 +21,7 @@ export function isPeriodicNote(file: TFile | null | undefined): file is TFile {
 
 export class StickerActions {
   /** the header button added to each Markdown view showing a periodic note */
-  private buttons = new ViewActions();
+  private buttons = new ViewActions("sticker");
 
   /** Add, update or remove the button on every open Markdown view to match the note it shows */
   refresh() {

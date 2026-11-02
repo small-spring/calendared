@@ -20,3 +20,4 @@ export class Notice {
 
 /** Obsidian's app language; Obsidian defaults to English */
 export const getLanguage = () => "en";
+export class MarkdownView {}

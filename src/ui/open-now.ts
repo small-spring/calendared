@@ -50,7 +50,7 @@ export function openNow() {
 
 export class OpenNowActions {
   /** the header button added to each Markdown view */
-  private buttons = new ViewActions();
+  private buttons = new ViewActions("open-now");
 
   /** Add or remove the button on every open Markdown view, and dim it where now's note is already open */
   refresh() {
