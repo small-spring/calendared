@@ -208,6 +208,7 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 - 書式の欄の下の Moment.js の文書へのリンクをやめ、その周期で使える記号を意味つきで出すようにした。README と日本語の使い方にも周期ごとの記号の表を書いた（ADR-0042）〔2026-11-01〕
 - 設定画面のテンプレートを開く鉛筆のボタンを、説明の文の「Open ファイル名」のリンクに替えた。ファイルがあるときだけ出す。ボタンは入力欄をずらし、パスを編集するボタンに見え、空のときは押しても何も起きなかった〔2026-11-01〕
 - パンくずとミニカレンダーの設定の名前から「Show」を外した（見出しで言っているので）。「Show on」→「Devices」、「Show on non-periodic notes」→「Also on non-periodic notes」、「Days shown」→「Days for daily notes」、「Show stickers」→「Stickers」。古い名前でも設定の検索で見つかる〔2026-11-02〕
+- 出す端末の設定（「Show on」→「Devices」）を、名前だけで何を決めるかわかるように、トグル「Phones only」にした（オンでスマホだけ）。保存する値（`placement`）は変えていない〔2026-11-02〕
 
 ## 移行
 

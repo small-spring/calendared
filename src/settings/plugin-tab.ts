@@ -112,6 +112,10 @@ export class SettingsTab extends PluginSettingTab {
       case "periods.quarter.yearInName":
       case "periods.year.yearInName":
         return yearCycleOf(s.periods[key.split(".")[1] as "quarter" | "year"]).yearInName;
+      // Calendared: "Phones only" is a toggle over the saved placement (always / phone)
+      case "breadcrumbs.phoneOnly":
+      case "miniCalendar.phoneOnly":
+        return s[key.split(".")[0] as "breadcrumbs" | "miniCalendar"].placement === "phone";
     }
     return key.split(".").reduce<unknown>((value, k) => (value as Record<string, unknown> | undefined)?.[k], s);
   }
@@ -134,6 +138,9 @@ export class SettingsTab extends PluginSettingTab {
       settingsStore.update((s) => withValueAt(s, key.split("."), v) as ISettings);
       // Year in names shows only for a cycle that doesn't start in January, and the examples change
       this.update();
+    } else if (/^(breadcrumbs|miniCalendar)\.phoneOnly$/.test(key)) {
+      const placement = value ? "phone" : "always";
+      settingsStore.update((s) => withValueAt(s, [key.split(".")[0], "placement"], placement) as ISettings);
     } else {
       settingsStore.update((s) => withValueAt(s, key.split("."), value) as ISettings);
     }
@@ -370,9 +377,13 @@ export class SettingsTab extends PluginSettingTab {
   // Calendared: the breadcrumbs and the mini calendar (docs/adr/0031, 0032), each turned on and off by its heading's
   // toggle (docs/adr/0033). "Period breadcrumbs" on screen, so it isn't taken for the community plugin "Breadcrumbs"
   private navigationGroups(): SettingDefinitionItem[] {
-    // Calendared: named without "Show", which the heading already says. The old names are kept for searching
-    const devices = { name: "Devices", aliases: ["Show on"], desc: "Tablets don't count as phones." };
-    const deviceOptions = { always: "All devices", phone: "Phones only" };
+    // Calendared: named by what they decide, without "Show", which the heading already says. Where it shows had two
+    // choices (All devices / Phones only), so it is one toggle. The old names are kept for searching
+    const phonesOnly = {
+      name: "Phones only",
+      aliases: ["Show on", "Devices"],
+      desc: "Show it only on phones, not on computers or tablets.",
+    };
     const otherNotes = { name: "Also on non-periodic notes", aliases: ["Show on non-periodic notes"] };
     const featureToggle = (feature: "breadcrumbs" | "miniCalendar") => ({
       isOn: () => settings()[feature].enabled,
@@ -394,7 +405,7 @@ export class SettingsTab extends PluginSettingTab {
         type: "group",
         visible: () => settings().breadcrumbs.enabled,
         items: [
-          { ...devices, control: { type: "dropdown", key: "breadcrumbs.placement", options: deviceOptions } },
+          { ...phonesOnly, control: { type: "toggle", key: "breadcrumbs.phoneOnly" } },
           { ...otherNotes, control: { type: "toggle", key: "breadcrumbs.onOtherNotes" } },
         ],
       },
@@ -413,7 +424,7 @@ export class SettingsTab extends PluginSettingTab {
         type: "group",
         visible: () => settings().miniCalendar.enabled,
         items: [
-          { ...devices, control: { type: "dropdown", key: "miniCalendar.placement", options: deviceOptions } },
+          { ...phonesOnly, control: { type: "toggle", key: "miniCalendar.phoneOnly" } },
           { ...otherNotes, control: { type: "toggle", key: "miniCalendar.onOtherNotes" } },
           {
             name: "Days for daily notes",
