@@ -157,7 +157,7 @@ file is made. With no template set, new notes start empty. These placeholders ar
 
 | Placeholder | Becomes |
 | --- | --- |
-| `{{title}}`, `{{date}}` | The note's name (the period's format, with fiscal quarters and years) |
+| `{{title}}`, `{{date}}` | The note's name (the period's format, with fiscal quarters and years). With a format, the first day of the note's period, whenever the note is made |
 | `{{time}}`, `{{currentDate}}` | The time and date now |
 | `{{monday}}` … `{{sunday}}` | That day in the note's week |
 | `{{date+1d}}`, `{{date-1w}}` | Shifted dates |
