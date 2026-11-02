@@ -1,23 +1,81 @@
 # 開発のしかた
 
-## 環境
+## はじめに（初日の手順）
 
-- Node.js 24 LTS（Homebrew の `node@24`）、npm 11.19 以上
+1. Node.js 24 LTS と npm 11.19 以上を入れる（持ち主は Homebrew の `node@24`）。`package.json` の `engines` と `.npmrc` の
+   `engine-strict=true` で、版が古いと `npm install` が止まる
+2. リポジトリを取ってきて、部品を入れる
 
-## ビルドと Vault への反映
+   ```bash
+   git clone https://github.com/small-spring/calendared.git
+   cd calendared
+   npm install
+   ```
 
-- `npm run build`: ESLint をかけてからビルドする
+3. 試しの Vault を各自で作る。Obsidian で空のフォルダを Vault として開くだけでよい。ふだん使う Vault には入れない
+   （ノートを作る・設定を変える確かめで、本物のデータが変わる）。持ち主は `~/Documents/Obsidian/calendared-test` を使っている
+4. `npm run deploy` の行き先を決める。既定の行き先はないので、次のどれかで指定する（上ほど優先）
+   - 引数: `npm run deploy -- ~/path/to/vault`
+   - 環境変数: `OBSIDIAN_VAULT=~/path/to/vault npm run deploy`
+   - 手元の設定ファイル: リポジトリ直下の `.deploy-vault` に Vault のパスを 1 行書く（git に入らない）。以後は `npm run deploy` だけでよい
+
+   ```bash
+   echo ~/path/to/vault > .deploy-vault
+   ```
+
+   どれもないと、案内を出して止まる。持ち主は `.deploy-vault` で private の Vault を指している
+5. `npm run deploy` を実行する（テスト → ビルド → 読み込み確認 → Vault の `.obsidian/plugins/calendared/` へコピー）
+6. Obsidian で、設定 → コミュニティプラグイン → 制限モードをオフにし、Calendared をオンにする（初めの 1 回だけ）
+7. コードを変えたら、もう一度 `npm run deploy` して、Obsidian で読み直す（`obsidian plugin:reload id=calendared`。
+   下の「Obsidian で確かめる」。CLI を使わないなら、設定でプラグインをオフ → オン）
+
+- コードを読む前に [コードの地図](../spec/architecture.md) を見る。機能と設定の一覧は [spec/overview.md](../spec/overview.md)
+- `npm run dev` は、ファイルを保存するたびにリポジトリ直下の `main.js` を作り直すだけで、Vault には入らない。
+  型や書き間違いを早く見たいときに使い、Obsidian で試すときは `npm run deploy` する
+
+## 変更を入れるときの手順
+
+1. 新しく作る・直すときは、先にテストを書いて失敗を確かめる（下の「テスト」）。作り直す前は、今の振る舞いを固定するテストを書く
+2. 元の版から変えたコードに `Calendared:` で始まるコメントを付ける（下の「書き方の決まり」）
+3. `npm test`（日付の計算を変えたら `npm run test:dst` も）と `npm run build`（ESLint・型チェック・ADR の一覧の古さ）を通す
+4. `npm run deploy` して、動作と見た目を Obsidian で確かめる
+5. 使う人から見える機能を変えたら、[README.md](../../README.md)（英語）と [usage-ja.md](usage-ja.md)（日本語）を両方直す。
+   仕様が変わったら [spec/](../spec/) も直す
+6. [customizations.md](../customizations.md) に 1〜2 行で足し（末尾に〔日付〕）、[todo.md](../todo.md) から消す
+7. 設計判断をしたら [adr/](../adr/) に 1 決定 1 ファイルで書き、`npm run adr` で一覧を作り直す（書き方は [adr/README.md](../adr/README.md)）
+8. コミットする。題は日本語で 1 行、本文に、なぜそうしたか・不具合の原因・どう確かめたかを書く。自分が変えたファイルだけを入れる
+
+### どこに書くか（目安）
+
+| 書くこと | 書く場所 |
+| --- | --- |
+| そのコードが何をするか、元の版から何をなぜ変えたか | コードのコメント（英語。`Calendared:` で始める） |
+| その変更の理由、不具合の原因、確かめ方 | コミットメッセージの本文（日本語） |
+| 元の版と何が違うか（1〜2 行） | [customizations.md](../customizations.md) |
+| 案を比べて 1 つを選んだこと、あとで「なぜこうしたの」と聞かれそうなこと、これからの変更を縛る決まり | [adr/](../adr/)（1 決定 1 ファイル）。1 つの不具合の直し方や、迷わずに決まったことは、コミットの本文で足りる |
+| 今どう動くか（仕様） | [spec/](../spec/) |
+| これからやること | [todo.md](../todo.md) だけ |
+
+## ビルドと確認
+
+- `npm test`: テスト（下の「テスト」）
+- `npm run build`: ESLint（`npm run lint`）→ 型チェック（`npm run check`）→ ADR の一覧が古くないかの確認 → ビルド。どれかが落ちたら止まる
+  - 既知の警告: `build.outDir must not be the same directory of root`。プラグインはリポジトリ直下に `main.js`・`styles.css` を
+    置く決まりのため（Vault へのコピーと Release がそこから取る）。`emptyOutDir: false` なので、ほかのファイルは消えない
+- `npm run check`: svelte-check（TypeScript と Svelte の型チェック）だけを動かす。既知のエラー・警告はない（0 件）。
+  ほかの部品の型定義は確かめない（`tsconfig.json` の `skipLibCheck`。emoji-mart の型定義に解けない読み込みがあるため）
+- `npm run lint-fix`: 型チェックのあと、ESLint で直せるものを直す。整形の道具（Prettier など）は使っていない。まわりのコードの書き方に合わせる
 - `npm run deploy`（`scripts/deploy.sh [Vault のパス]`）: ビルドして Vault の `.obsidian/plugins/calendared/` にコピーする。
-  Vault の既定は `~/Documents/Obsidian/private`（環境変数 `OBSIDIAN_VAULT` でも指定できる）
-  - `DEPLOY_MODE=development npm run deploy` で開発用の版を入れる。窓口の読み直しの時間などを Console に出す（`import.meta.env.DEV`）。
-    Svelte の確認処理も入るので、本番の版より遅い。試し終わったら `npm run deploy` で本番の版に戻す
-  - ビルドの前にテスト（`npm test`）を動かし、落ちたらコピーしない
+  行き先の決め方は上の「はじめに」
+  - ビルドの前にテスト（`npm test`）を動かし、落ちたらコピーしない。ESLint と型チェックは動かさない（`npm run build` で確かめる）
   - コピーの前に読み込み確認（`scripts/check-load.cjs`）をする。ビルドした `main.js` を Node.js で、偽物の Obsidian
     （何を聞かれても何かを返す Proxy）を使って読み込み、読み込み中に落ちたらコピーしない。
     読み込み順の不具合（例: `Cannot access 'X' before initialization`）は型チェックや ESLint では見つからないため
   - 動作や見た目は確かめないので、Obsidian での確認は別に必要
+  - `DEPLOY_MODE=development npm run deploy` で開発用の版を入れる。窓口の読み直しの時間などを Console に出す（`import.meta.env.DEV`）。
+    Svelte の確認処理も入るので、本番の版より遅い。試し終わったら `npm run deploy` で本番の版に戻す
 - Windows・iPhone で試すときは [device-testing.md](device-testing.md)（Remotely Save で Calendared のフォルダだけを同期する）
-- `npm run emoji-language -- <言語> [Vault のパス]`（`scripts/add-emoji-language.mjs`）: 絵文字の検索の言葉を、ダウンロードせずに
+- `npm run emoji-language -- <言語> [Vault のパス]`（`scripts/add-emoji-language.mjs`。Vault は deploy と同じ決め方）: 絵文字の検索の言葉を、ダウンロードせずに
   Vault のプラグインのフォルダに置く（下の「絵文字の検索の言葉」）。リポジトリが非公開の間は、設定からの追加はダウンロードに失敗するので、こちらを使う
 
 ### Release
@@ -31,10 +89,6 @@ git push origin 0.1.0
 ```
 
 - タグと `version` が違うと止まる。先に `manifest.json` と `package.json` の `version` を上げてコミットする
-- `npm run check`: svelte-check。残っている既知の警告・エラー:
-  - 設定画面のトグル（`Toggle.svelte`）のアクセシビリティの警告 2 件
-  - emoji-mart の型定義ファイルの中のエラー 2 件（部品の側の問題。ビルドには影響しない）
-  - `Format.svelte` の `tabindex` の型のエラー 1 件（元の版から）
 
 ## Obsidian で確かめる（Obsidian CLI）
 
@@ -56,11 +110,12 @@ obsidian plugin:reload id=calendared
 | スマホの見た目にする | `obsidian dev:mobile on` / `off` |
 | エラーとログを読む | `obsidian dev:errors`、`obsidian dev:console` |
 
-気をつけること（文書には書かれていない）
+気をつけること（公式の文書に書かれていないこと）。Vault の名前とパスは持ち主のもの（ふだんの Vault が `private`、試しの Vault が
+`calendared-test`）。自分の Vault に読み替える
 
-- ふだんの Vault（private）をそのまま触る。設定のトグルを動かしたりノートを作ったりすると、本物のデータが変わる。
-  確かめるだけなら、読む・撮る・開くにとどめる
-- ノートを作る・設定を変える確かめは、試しの Vault `~/Documents/Obsidian/calendared-test` で行う（2026-11-02 に作った）。
+- `vault=` を付けないと、いま前にある Vault を触る。設定のトグルを動かしたりノートを作ったりすると、本物のデータが変わる。
+  ふだんの Vault では、読む・撮る・開くにとどめる
+- ノートを作る・設定を変える確かめは、試しの Vault（持ち主は `~/Documents/Obsidian/calendared-test`）で行う。
   入れるのは `npm run deploy -- ~/Documents/Obsidian/calendared-test`、操作は `obsidian vault=calendared-test …`。
   起動時の動きは、`data.json` を書き換えてから `osascript -e 'quit app "Obsidian"'` → `open "obsidian://open?vault=calendared-test"` で開き直して見る。
   ノートを消すのは `app.vault.trash(file, true)`（シェルからゴミ箱へは移せない）
@@ -153,8 +208,14 @@ Vitest 3 には critical が 2 件あった（テスト用サーバー経由の�
 
 ## 書き方の決まり
 
+変更を入れるときの流れは上の「変更を入れるときの手順」。ここは書き方の細かい決まり。
+
 - 元の版から変えたコードには `Calendared:` で始まるコメントを付ける（何をなぜ変えたか）
-- なぜそうしたか・不具合の原因は、コミットメッセージの本文に書く
+  - 元の版のファイルの中では、変えた所ごと（関数・行）に付ける。元はどうだったかも短く書く（例: `Upstream used ...`）
+  - 新しく作ったファイルは、頭に 1 つ付ければよい（ファイルの役目を書く）。中の関数ごとには要らない
+  - `git log -S 'Calendared:'` などで探せるので、言葉は検索しやすく具体的にする
+- 言葉: コードのコメント・画面の文・スクリプトの出力は英語。コミットメッセージ（題 1 行 + 本文）と `docs/` の文書は日本語
+- なぜそうしたか・不具合の原因は、コミットメッセージの本文に書く（どこに何を書くかは上の「どこに書くか（目安）」）
 - 元の版から変えたことは [customizations.md](../customizations.md) に 1〜2 行で足す。末尾に〔日付〕を付ける
 - 元の版の更新は取り込まない（2026-10-29 に決めた。独立した版として育てるため。公開するかは [ADR-0028](../adr/0028-decide-publishing-after-feedback.md)）。
   元の版のファイル（README、CHANGELOG、release-please の設定、`.github/` など）も自由に変えてよい。
