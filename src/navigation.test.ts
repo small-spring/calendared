@@ -1,5 +1,6 @@
 import moment from "moment";
 import "moment/locale/fa";
+import "moment/locale/ja";
 import "moment/locale/oc-lnc";
 import "moment/locale/tlh";
 import "moment/locale/x-pseudo";
@@ -13,6 +14,7 @@ import {
     migratePlacementSettings,
     migrateTimelineSettings,
     barShows,
+    dayLayoutPreview,
     showsOn,
     stripDates,
     type Placement,
@@ -184,6 +186,31 @@ describe("stripDates: ミニカレンダーに並べる期間（それぞれの�
 
     it("期間の途中の日を渡しても、期間の始まりに揃える", () => {
         expect(ymds(stripDates("month", d("2026-10-30"), 0, "week", mondayWeeks))[2]).toBe("2026-10-01");
+    });
+});
+
+describe("dayLayoutPreview: 設定画面で「Days shown」の値ごとに見せる、今日の日のノートのミニカレンダー", () => {
+    const days = (cells: { day: string }[]) => cells.map((c) => c.day);
+
+    it("Calendar week: 今日を含む週の 7 日。曜日（ミニカレンダーと同じ書き方）つきで、今日に印", () => {
+        const cells = dayLayoutPreview(d("2026-11-04"), "week", mondayWeeks, "en");
+        expect(days(cells)).toEqual(["2", "3", "4", "5", "6", "7", "8"]);
+        expect(cells.map((c) => c.weekday)).toEqual(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]);
+        expect(cells.map((c) => c.isToday)).toEqual([false, false, true, false, false, false, false]);
+    });
+
+    it("Calendar week: 週の始まりの設定に従う", () => {
+        expect(days(dayLayoutPreview(d("2026-11-04"), "week", sundayWeeks, "en"))).toEqual(["1", "2", "3", "4", "5", "6", "7"]);
+    });
+
+    it("3 days each side: 今日が真ん中", () => {
+        const cells = dayLayoutPreview(d("2026-11-04"), "centered", mondayWeeks, "en");
+        expect(days(cells)).toEqual(["1", "2", "3", "4", "5", "6", "7"]);
+        expect(cells[3].isToday).toBe(true);
+    });
+
+    it("曜日はカレンダーの言語で書く", () => {
+        expect(dayLayoutPreview(d("2026-11-04"), "week", mondayWeeks, "ja")[0].weekday).toBe("月");
     });
 });
 

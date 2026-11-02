@@ -120,6 +120,23 @@ export function stripDates(
     return Array.from({ length: count }, (_, i) => first.clone().add(i, granularity));
 }
 
+/**
+ * Calendared: the mini calendar for today's daily note, as the settings show it under "Days shown" so the choice can
+ * be seen. The days come from stripDates, so they match the mini calendar itself
+ */
+export function dayLayoutPreview(
+    today: moment.Moment,
+    dayLayout: DayLayout,
+    rules: PeriodRules,
+    locale: string,
+): { weekday: string; day: string; isToday: boolean }[] {
+    return stripDates("day", today, 0, dayLayout, rules).map((date) => ({
+        weekday: inLocale(date, locale).format("ddd"),
+        day: date.format("D"),
+        isToday: date.isSame(today, "day"),
+    }));
+}
+
 export type Crumb = {
     granularity: IGranularity;
     /** the period's first day */

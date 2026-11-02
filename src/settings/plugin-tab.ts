@@ -36,6 +36,7 @@ import { formatsToReset, savePendingEdits } from "./format-on-close";
 import { noticesOnPage } from "./migration-notice";
 import { openAtStartupOf, setOpenAtStartup, setPeriodEnabled } from "./period-switch";
 import { settingsStore } from "./store";
+import DayLayoutPreview from "./ui/DayLayoutPreview.svelte";
 import Format from "./ui/periods/Format.svelte";
 import { headingExtras, mountBelow, nameWithIcon } from "./ui/rows";
 import EmojiLanguages from "./ui/stickers/EmojiLanguages.svelte";
@@ -418,10 +419,17 @@ export class SettingsTab extends PluginSettingTab {
           {
             name: "Days shown",
             desc: "For daily notes. Other notes show 2 on each side.",
-            control: {
-              type: "dropdown",
-              key: "miniCalendar.dayLayout",
-              options: { week: "Calendar week", centered: "3 days each side" },
+            // Calendared: today's daily note as the mini calendar would show it, under the description, so the choice
+            // can be seen. Changes with the dropdown
+            render: (setting) => {
+              setting.addDropdown((dropdown) =>
+                dropdown
+                  .addOptions({ week: "Calendar week", centered: "3 days each side" })
+                  .setValue(settings().miniCalendar.dayLayout)
+                  .onChange((value) => this.setControlValue("miniCalendar.dayLayout", value)),
+              );
+              const view = mount(DayLayoutPreview, { target: setting.infoEl.createDiv() });
+              return () => void unmount(view);
             },
           },
           {

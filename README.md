@@ -99,7 +99,8 @@ To update, run `git pull` in the repository, run step 3 again, and restart Obsid
   A weekly note belongs to the year, quarter, and month of its Thursday. A quarterly note belongs to the year of its
   second month.
 - **Mini calendar**: The notes of the same period around the open one, with dots and stickers. Use ‹ › to look further.
-  For daily notes it shows the calendar week (or three days on each side).
+  For daily notes it shows the calendar week (or three days on each side). The setting **Days shown** picks which,
+  and shows under it how today's daily note would look.
 - Both can be turned off, shown on phones only, or hidden on notes that aren't periodic notes. On notes that aren't
   periodic notes, they show "now".
 - On desktop, **Compact on desktop** turns the strip into a small box at the top right of the note.
