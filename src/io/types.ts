@@ -11,6 +11,8 @@ declare module 'obsidian' {
     setting?: {
       activeTab?: Record<string, unknown>;
       close?: () => void;
+      open?: () => void;
+      openTabById?: (id: string) => void;
     }
   }
   interface View {
@@ -18,6 +20,7 @@ declare module 'obsidian' {
   }
   interface Vault {
     getAvailablePath: (path: string, extension: string) => string;
+    getConfig?: (key: string) => unknown;
   }
 
   interface WorkspaceLeaf {
