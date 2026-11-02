@@ -13,6 +13,11 @@ export function turnedOffMessage(granularity: IGranularity): string {
   return `${periodicityTitle(granularity)} notes are turned off in settings`;
 }
 
+/** Shown where a note would be made with a format that can't name it; `error` is the settings' error for the format */
+export function invalidFormatMessage(granularity: IGranularity, error: string): string {
+  return `${periodicityTitle(granularity)} note format is invalid: ${error.replace(/\s+/g, " ")}`;
+}
+
 const CURRENT_NOTE: Record<IGranularity, string> = {
   day: "today's note",
   week: "this week's note",

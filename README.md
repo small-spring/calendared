@@ -131,6 +131,9 @@ note instead, even in the editor. Pick other keys if you use those for editing.
 - A format may only use tokens of periods that contain the whole period: the week-numbering year and week for weeks
   (`YYYY` and `MM` can't be used, since a week can span two months or years), the year and quarter for quarters, and
   the year for years. Other tokens show an error.
+- While a period's format has an error (or is empty), its new notes aren't created: a notice says so
+  (e.g. "Daily note format is invalid: …"). Notes you already have still open. Closing the settings puts an invalid
+  format back to the default.
 - **Week starts on**: Saturday, Sunday, or Monday. Week numbers are always ISO 8601.
 
 ## Quarters and years from any month

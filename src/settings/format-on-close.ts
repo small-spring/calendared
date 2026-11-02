@@ -1,6 +1,6 @@
 import { granularities } from "@/constants";
 import type { IGranularity } from "@/io";
-import { validateFormat } from "@/io/validation";
+import { noteFormatError } from "@/io/validation";
 import type { PeriodSettings } from "./constants";
 
 // Calendared: what the settings check about formats when they close
@@ -12,7 +12,7 @@ import type { PeriodSettings } from "./constants";
 export function formatsToReset(periods: Record<IGranularity, Pick<PeriodSettings, "enabled" | "format">>): IGranularity[] {
   return granularities.filter((g) => {
     const { enabled, format } = periods[g];
-    return enabled && (!format.trim() || !!validateFormat(format, g));
+    return enabled && !!noteFormatError(format, g);
   });
 }
 

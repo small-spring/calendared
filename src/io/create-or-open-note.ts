@@ -8,7 +8,8 @@ import { type IGranularity } from "./types";
 import { ensureFolderExists, getNotePath, getTemplateInfo } from "./vault";
 import { noteNameOf } from "./note-path";
 import { PluginService } from "@/app-service";
-import { turnedOffMessage } from "@/period-words";
+import { invalidFormatMessage, turnedOffMessage } from "@/period-words";
+import { noteFormatError } from "./validation/format";
 import { periodStart } from "@/periods";
 import { refreshToday } from "@/stores/dates";
 
@@ -46,6 +47,13 @@ export async function createOrOpenNote({
     // Existing notes still open (above); only creation is blocked.
     if (!get(settingsStore).periods[granularity].enabled) {
       return new Notice(turnedOffMessage(granularity));
+    }
+
+    // Calendared: the settings put an invalid format back to the default only when they close, so until then (e.g. after
+    // Esc from a period's page) a note would get a wrong name. Existing notes still open (above) (docs/adr/0051)
+    const formatError = noteFormatError(get(settingsStore).periods[granularity].format, granularity);
+    if (formatError) {
+      return new Notice(invalidFormatMessage(granularity, formatError));
     }
 
     if (confirmBeforeCreateOverride) {

@@ -152,3 +152,11 @@ export function validateFormat(
 
   return error;
 }
+
+/**
+ * Calendared: why the format can't name a new note ("" if it can). Unlike validateFormat, an empty format is one: the
+ * settings field may be empty while it is edited, but a note would be named with a timestamp (docs/adr/0051)
+ */
+export function noteFormatError(value: string, granularity: IGranularity): string {
+  return value.trim() ? validateFormat(value, granularity) : "Format is empty";
+}

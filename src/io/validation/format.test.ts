@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/app-service", () => ({ PluginService: { getPlugin: () => null } }));
 vi.mock("@/settings", async () => (await import("@/test-fixtures")).settingsModule());
 
-const { validateFormat } = await import("./format");
+const { noteFormatError, validateFormat } = await import("./format");
 const { settingsStore } = await import("@/settings");
 
 describe("validateFormat: 書式の誤り（設定画面に出す文）", () => {
@@ -59,5 +59,20 @@ describe("validateFormat: 書式の誤り（設定画面に出す文）", () => 
         } finally {
             settingsStore.update((s) => ({ ...s, periods: { ...s.periods, month: { ...s.periods.month, format: "YYYY-MM" } } }));
         }
+    });
+});
+
+describe("noteFormatError: ノートを作る・名前を付けるのに使えない書式（docs/adr/0051）", () => {
+    it("正しい書式なら空", () => {
+        expect(noteFormatError("YYYY-MM-DD", "day")).toBe("");
+    });
+
+    it("まちがった書式なら、設定画面と同じ誤りの文", () => {
+        expect(noteFormatError("YYYY-MM", "day")).toBe(validateFormat("YYYY-MM", "day"));
+    });
+
+    it("空や空白だけの書式も使えない（設定画面では誤りにしないが、時刻や空白がファイル名になってしまう）", () => {
+        expect(noteFormatError("", "day")).toBe("Format is empty");
+        expect(noteFormatError("  ", "week")).toBe("Format is empty");
     });
 });
