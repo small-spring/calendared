@@ -38,6 +38,7 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 - `.deploy-vault` に複数の Vault を書くと、`npm run deploy` は 1 回ビルドして全部にコピーする（持ち主は試しの Vault と private）〔2026-11-02〕
 - ビルドの出力先を、リポジトリのいちばん上から `dist/`（git に入れない）にした。Vite がビルドのたびに「ソースを上書きするかもしれない」と警告していた。deploy・Release・読み込み確認も `dist/` から取る〔2026-11-02〕
 - 開発向けの文書を見直した。コードの地図（`docs/spec/architecture.md`）、初日の手順、変更を入れるときの手順と、どこに何を書くかの目安を足した。この文書は、節を機能ごとに分け直し、「変更の記録」とした〔2026-11-02〕
+- README にスクリーンショット（カレンダー、パンくずとミニカレンダー）を載せた。試しの Vault に英語の見本ノートを作って撮った〔2026-11-02〕
 
 ## 不具合修正
 

@@ -45,7 +45,6 @@
 パートナーはリポジトリのコントリビューターなので、自分でビルドして入れてもらう（2026-10-31 に決めた）。
 入れ方と使い方は [guides/usage-ja.md](guides/usage-ja.md)。
 
-- README のスクリーンショットを撮って `docs/screenshots/` に置き、README のコメントを外す（撮るものは [screenshots/README.md](screenshots/README.md)）— 自分
 - パートナーに [guides/usage-ja.md](guides/usage-ja.md) を渡して、入れてもらう — 自分
 - しばらく使ってもらい、感想を聞く。聞きたいこと: 何に使ったか、わかりにくかった所、要らない機能、欲しい機能 — 自分
   - 四半期・年の始まりの月について（[spec/fiscal-year.md](spec/fiscal-year.md) の「気づいたこと」）: 日・月のノートも年度で呼びたいか

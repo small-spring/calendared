@@ -13,10 +13,10 @@ each note, and from commands. Mark any periodic note with an emoji sticker and s
 
 Works on desktop and mobile. Needs Obsidian 1.13.1 or later.
 
-<!-- Screenshots: put the images in docs/screenshots/ (see docs/screenshots/README.md), then uncomment.
-![The calendar with stickers](docs/screenshots/calendar.png)
-![Breadcrumbs and the mini calendar above a daily note](docs/screenshots/breadcrumbs.png)
--->
+<p>
+  <img src="docs/screenshots/calendar.png" alt="The calendar with stickers" height="400">
+  <img src="docs/screenshots/breadcrumbs.png" alt="Breadcrumbs and the mini calendar above a daily note" height="400">
+</p>
 
 ## Features
 
