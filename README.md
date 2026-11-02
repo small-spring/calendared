@@ -10,8 +10,8 @@ Calendared is a fork of [Periodic Notes Calendar](https://github.com/luiisca/obs
 Luis Cadillo, maintained separately. Please report problems here, not to the original project.
 
 <p>
-  <img src="docs/screenshots/calendar.png" alt="The calendar with stickers" height="400">
-  <img src="docs/screenshots/breadcrumbs.png" alt="Breadcrumbs and the mini calendar above a daily note" height="400">
+  <img src="docs/user/screenshots/calendar.png" alt="The calendar with stickers" height="400">
+  <img src="docs/user/screenshots/breadcrumbs.png" alt="Breadcrumbs and the mini calendar above a daily note" height="400">
 </p>
 
 ## Features
@@ -240,7 +240,7 @@ While this repository is private, the download fails. Run `npm run emoji-languag
 
 ## Documentation
 
-- 日本語の使い方: [docs/guides/usage-ja.md](docs/guides/usage-ja.md)
+- 日本語の使い方: [docs/user/usage-ja.md](docs/user/usage-ja.md)
 - What changed from the original (Japanese): [docs/customizations.md](docs/customizations.md)
 - Documents for development (Japanese): [docs/README.md](docs/README.md)
 

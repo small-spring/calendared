@@ -134,7 +134,7 @@ Thank you,
 - 通信すること（開発者ポリシーの開示事項）: 絵文字の検索の言語を追加したときだけ、その言語の検索の言葉を jsDelivr（`cdn.jsdelivr.net`）か
   GitHub（`raw.githubusercontent.com`）からダウンロードする。送るのは言語だけ。それ以外は通信しない
 - おすすめのキーの割り当て（既定のホットキーは付けない代わり）
-- 日本語の説明は [usage-ja.md](usage-ja.md)
+- 日本語の説明は [usage-ja.md](../user/usage-ja.md)
 
 ## 申請の手順
 

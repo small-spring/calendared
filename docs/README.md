@@ -1,7 +1,15 @@
 # 文書の目次
 
-Calendared の開発向けの文書（日本語）。使う人向けの説明は、ルートの [README.md](../README.md)（英語）と、その要約の [guides/usage-ja.md](guides/usage-ja.md)（日本語）。
-必要なものだけ読む。
+Calendared の文書。まず「誰が読むか」で分け、開発向けの中は「何のために読むか」で分ける。必要なものだけ読む。
+
+## 使う人向け
+
+- ルートの [README.md](../README.md): 使う人の入口（英語）
+- [user/](user/): 使う人向けのもの。ここから開発向けの文書へはリンクしない
+  - [user/usage-ja.md](user/usage-ja.md): 日本語の使い方（README の要約。入れ方を含む。パートナーに渡す）
+  - [user/screenshots/](user/screenshots/): ルートの README に載せるスクリーンショット（撮り直し方はその中の README）
+
+ここから下は開発向け（日本語）。
 
 ## 今どうなっているか
 
@@ -31,12 +39,7 @@ Calendared の開発向けの文書（日本語）。使う人向けの説明は
 
 - [guides/development.md](guides/development.md): はじめに（初日の手順）・変更を入れるときの手順・ビルド・deploy・テスト・依存の更新・書き方の決まり
 - [guides/device-testing.md](guides/device-testing.md): Windows・iPhone の実機で試す
-- [guides/usage-ja.md](guides/usage-ja.md): 使う人向けの日本語の使い方（入れ方を含む。パートナーに渡す）
 - [guides/publishing.md](guides/publishing.md): 公開の手続きの決まり・要件・issue の下書き（公開が済んだら archive/ へ）
-
-## 画像
-
-- [screenshots/](screenshots/): ルートの README に載せるスクリーンショット
 
 ## 使い終わったもの
 
@@ -46,6 +49,7 @@ Calendared の開発向けの文書（日本語）。使う人向けの説明は
 
 ## 置き場所の決まり
 
+- 使う人が読むものは README（英語）と user/ に置き、それ以外は開発向けとする。使う人向けの文書は操作の言葉で書き、仕様や ADR へリンクしない（開発向けから使う人向けへのリンクはよい）
 - 今の仕様は spec/、決めた理由は adr/、調べたことは research/、これから作るものの設計は plans/、作業は todo.md、やり方は guides/ に分ける。
   同じことを 2 か所に書かない（ほかの場所からはリンクする）
 - 大きなものを作るときは plans/ に 1 ファイル作る。作り終えたら、その内容を spec/ に移して plans/ のファイルを消し、

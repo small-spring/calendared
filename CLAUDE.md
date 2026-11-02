@@ -5,7 +5,7 @@ Svelte 5 + TypeScript + Vite + Tailwind。作業ブランチは `custom`。`upst
 
 ## 文書
 
-目次は `docs/README.md`（必要なものだけ読む）。`README.md`（ルート）は使う人向け（英語）。日本語の使い方は `docs/guides/usage-ja.md`。機能を変えたら両方を直す。
+目次は `docs/README.md`（必要なものだけ読む）。`README.md`（ルート）は使う人向け（英語）。日本語の使い方は `docs/user/usage-ja.md`。機能を変えたら両方を直す。
 
 ## 決まり
 

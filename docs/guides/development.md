@@ -40,7 +40,7 @@
 2. 元の版から変えたコードに `Calendared:` で始まるコメントを付ける（下の「書き方の決まり」）
 3. `npm test`（日付の計算を変えたら `npm run test:dst` も）と `npm run build`（ESLint・型チェック・ADR の一覧の古さ）を通す
 4. `npm run deploy` して、動作と見た目を Obsidian で確かめる
-5. 使う人から見える機能を変えたら、[README.md](../../README.md)（英語）と [usage-ja.md](usage-ja.md)（日本語）を両方直す。
+5. 使う人から見える機能を変えたら、[README.md](../../README.md)（英語）と [usage-ja.md](../user/usage-ja.md)（日本語）を両方直す。
    仕様が変わったら [spec/](../spec/) も直す
 6. [customizations.md](../customizations.md) に 1〜2 行で足し（末尾に〔日付〕）、[todo.md](../todo.md) から消す
 7. 設計判断をしたら [adr/](../adr/) に 1 決定 1 ファイルで書き、`npm run adr` で一覧を作り直す（書き方は [adr/README.md](../adr/README.md)）
