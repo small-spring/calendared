@@ -10,7 +10,7 @@
   Obsidian に触れるのは `io/`・`ui/`・`settings/` と `main.ts`
 - 状態は Svelte のストア（`stores/`、`settings/store.ts`）。ただし、Obsidian が知っていること（ファイル、プロパティ、開いているノート）は
   写しを持たず、窓口 `io/vault-source.ts` から毎回読む（[ADR-0016](../adr/0016-vault-source.md)）
-- `@/` は `src/` を指す（`vite.config.ts`・`tsconfig.json`）
+- `@/` は `src/` を指す（`config/vite.config.ts`・`config/vitest.config.ts`・`tsconfig.json`）
 
 ## フォルダとファイル
 

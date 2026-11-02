@@ -32,7 +32,7 @@ function fake() {
 
 // ---------------------------------------------------------------------------
 // 2. Fake modules that only exist inside Obsidian.
-//    The bundle keeps these as `require("obsidian")` etc. (see `external` in vite.config.ts).
+//    The bundle keeps these as `require("obsidian")` etc. (see `external` in config/vite.config.ts).
 //    Every export is a fake, so `class X extends Plugin {}`, `new Notice()` and `getLanguage()` all work.
 //    (Calendared: exports were classes, so calling a function like getLanguage() while loading failed)
 // ---------------------------------------------------------------------------

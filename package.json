@@ -11,15 +11,15 @@
     "npm": ">=11.19"
   },
   "scripts": {
-    "dev": "vite build --mode development --watch",
-    "build": "npm run lint && npm run check && npm run adr -- --check && vite build --mode production",
+    "dev": "vite build --config config/vite.config.ts --mode development --watch",
+    "build": "npm run lint && npm run check && npm run adr -- --check && vite build --config config/vite.config.ts --mode production",
     "check": "svelte-check --tsconfig ./tsconfig.json --threshold error",
     "check:watch": "svelte-check --tsconfig ./tsconfig.json --threshold error --watch",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:dst": "TZ=America/Santiago vitest run",
-    "lint": "eslint ./src",
-    "lint-fix": "npm run check && eslint --fix ./src",
+    "test": "vitest run --config config/vitest.config.ts",
+    "test:watch": "vitest --config config/vitest.config.ts",
+    "test:dst": "TZ=America/Santiago vitest run --config config/vitest.config.ts",
+    "lint": "eslint --config config/eslint.config.js ./src",
+    "lint-fix": "npm run check && eslint --config config/eslint.config.js --fix ./src",
     "deploy": "scripts/deploy.sh",
     "adr": "node scripts/adr-index.mjs",
     "emoji-language": "node scripts/add-emoji-language.mjs"

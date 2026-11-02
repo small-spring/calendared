@@ -71,9 +71,6 @@
   - 返事を待つ。許可が出たら、issue へのリンクを README のクレジットに書く。30 日たっても返事がなければ、B の形で進める — 自分
 - `versions.json`（どの版がどの `minAppVersion` から動くかの対応表）を作るか決める。任意 — Claude
 - リポジトリの整理
-  - `CHANGELOG.md`: 今は元の版の履歴。消して、自分の版の最初のバージョンから英語で書き始める案 — 決めるのは自分
-  - release-please の設定（`release-please-config.json`、`.release-please-manifest.json`）を消すか決める。2026-10-31 にワークフローを
-    作り直して、もう使っていない — 自分
   - 既定のブランチを決める（`custom` のままか、`main` にするか）。審査は既定のブランチの先頭の `manifest.json` を読む — 自分
   - `upstream` の remote を、元のコードを見比べる参照用に残すか決める — 自分
   - GitHub のリポジトリ（small-spring/calendared）を公開にする。2026-10-30 の時点では外から見えない。README とライセンス表示が済んでから — 自分

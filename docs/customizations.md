@@ -39,6 +39,7 @@ Calendared は [luiisca/obsidian-periodic-notes-calendar](https://github.com/lui
 - ビルドの出力先を、リポジトリのいちばん上から `dist/`（git に入れない）にした。Vite がビルドのたびに「ソースを上書きするかもしれない」と警告していた。deploy・Release・読み込み確認も `dist/` から取る〔2026-11-02〕
 - 開発向けの文書を見直した。コードの地図（`docs/spec/architecture.md`）、初日の手順、変更を入れるときの手順と、どこに何を書くかの目安を足した。この文書は、節を機能ごとに分け直し、「変更の記録」とした〔2026-11-02〕
 - README にスクリーンショット（カレンダー、パンくずとミニカレンダー）を載せた。試しの Vault に英語の見本ノートを作って撮った〔2026-11-02〕
+- リポジトリのいちばん上を整理した。道具の設定ファイル（Vite・Vitest・ESLint・PostCSS・Tailwind）を `config/` に移し、使っていない release-please の設定と、元の版の履歴だった `CHANGELOG.md` を消した〔2026-11-02〕
 
 ## 不具合修正
 

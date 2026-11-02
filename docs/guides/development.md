@@ -67,6 +67,10 @@
 - `npm run check`: svelte-check（TypeScript と Svelte の型チェック）だけを動かす。既知のエラー・警告はない（0 件）。
   ほかの部品の型定義は確かめない（`tsconfig.json` の `skipLibCheck`。emoji-mart の型定義に解けない読み込みがあるため）
 - `npm run lint-fix`: 型チェックのあと、ESLint で直せるものを直す。整形の道具（Prettier など）は使っていない。まわりのコードの書き方に合わせる
+- 道具の設定ファイル（Vite・Vitest・ESLint・PostCSS・Tailwind）は `config/` に置いている。どれもいちばん上で探す道具なので、
+  `package.json` の各コマンドに `--config` を付けて場所を教えている（PostCSS は `config/vite.config.ts`、Tailwind は `config/postcss.config.js` から）。
+  中のパスはリポジトリのいちばん上から数える。`tsconfig.json`・`.npmrc`・`package.json`・`manifest.json` は、エディタや npm・Obsidian が
+  いちばん上で探すので動かせない。エディタの ESLint・Tailwind の拡張を使うときは、設定ファイルの場所を拡張の設定で教える
 - `npm run deploy`（`scripts/deploy.sh [Vault のパス]`）: ビルドして Vault の `.obsidian/plugins/calendared/` にコピーする。
   行き先の決め方は上の「はじめに」
   - ビルドの前にテスト（`npm test`）を動かし、落ちたらコピーしない。ESLint と型チェックは動かさない（`npm run build` で確かめる）
@@ -140,7 +144,7 @@ obsidian plugin:reload id=calendared
 
 ## テスト
 
-`npm test`（1 回動かす）/ `npm run test:watch`（ファイルを保存するたびに動かす）。道具は Vitest。設定は `vitest.config.ts`。
+`npm test`（1 回動かす）/ `npm run test:watch`（ファイルを保存するたびに動かす）。道具は Vitest。設定は `config/vitest.config.ts`。
 
 - `npm run test:dst`: 夏時間のある時間帯（`TZ=America/Santiago`）でテストを動かす。日付の計算を変えたら、`npm test` と一緒に動かす。
   チリは夏時間の始まりに 0 時を飛ばす（2026-09-06 は 1 時から始まる）ので、日付を「その日の 0 時」として扱うまちがいがあると、日がずれて落ちることがある。
@@ -167,7 +171,7 @@ obsidian plugin:reload id=calendared
     設定を置き換えるときは `vi.mock("@/settings", async () => (await import("@/test-fixtures")).settingsModule())`
     （`vi.mock` の中身はファイルの頭に移されて先に動くので、道具は中で読み込む）。`settingsModule` は `settingsStore` と
     `periodRulesStore` を返す
-  - ESLint の「moment を直接読み込まない」決まりは、テストのファイルでは外している（`eslint.config.js`）
+  - ESLint の「moment を直接読み込まない」決まりは、テストのファイルでは外している（`config/eslint.config.js`）
 
 ## 依存パッケージと安全対策
 
@@ -220,7 +224,7 @@ Vitest 3 には critical が 2 件あった（テスト用サーバー経由の�
 - なぜそうしたか・不具合の原因は、コミットメッセージの本文に書く（どこに何を書くかは上の「どこに書くか（目安）」）
 - 元の版から変えたことは [customizations.md](../customizations.md) に 1〜2 行で足す。末尾に〔日付〕を付ける
 - 元の版の更新は取り込まない（2026-10-29 に決めた。独立した版として育てるため。公開するかは [ADR-0028](../adr/0028-decide-publishing-after-feedback.md)）。
-  元の版のファイル（README、CHANGELOG、release-please の設定、`.github/` など）も自由に変えてよい。
+  元の版のファイル（README、`.github/` など）も自由に変えてよい。
   `upstream` の remote は元のコードを見比べる参照用
 - 機能を削ったときは、コードにコメントを残さない（customizations.md に何を削ったかを書く）
 
