@@ -1,10 +1,3 @@
-> [!NOTE]
-> **Calendared** is a modified version of [luiisca/obsidian-periodic-notes-calendar](https://github.com/luiisca/obsidian-periodic-notes-calendar) v1.2.1
-> by Luis Cadillo, changed since 2026-10-28 (GPL-3.0, same as the original). It is not maintained by the original author.
-> What changed: [docs/customizations.md](docs/customizations.md) (Japanese).
->
-> 日本語の使い方: [docs/guides/usage-ja.md](docs/guides/usage-ja.md)。開発向けの文書の目次: [docs/README.md](docs/README.md)。
-
 # Calendared
 
 Keep your days, weeks, months, quarters, and years calendared. Calendared creates and opens periodic notes
@@ -12,6 +5,9 @@ Keep your days, weeks, months, quarters, and years calendared. Calendared create
 each note, and from commands. Mark any periodic note with an emoji sticker and see it on the calendar.
 
 Works on desktop and mobile. Needs Obsidian 1.13.1 or later.
+
+Calendared is a fork of [Periodic Notes Calendar](https://github.com/luiisca/obsidian-periodic-notes-calendar) by
+Luis Cadillo, maintained separately. Please report problems here, not to the original project.
 
 <p>
   <img src="docs/screenshots/calendar.png" alt="The calendar with stickers" height="400">
@@ -241,6 +237,12 @@ that language's keywords from this repository, through jsDelivr (`cdn.jsdelivr.n
 
 While this repository is private, the download fails. Run `npm run emoji-language -- ja "/path/to/your/vault"`
 (with your language) instead, and restart Obsidian.
+
+## Documentation
+
+- 日本語の使い方: [docs/guides/usage-ja.md](docs/guides/usage-ja.md)
+- What changed from the original (Japanese): [docs/customizations.md](docs/customizations.md)
+- Documents for development (Japanese): [docs/README.md](docs/README.md)
 
 ## Credits and license
 
