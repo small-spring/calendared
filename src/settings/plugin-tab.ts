@@ -22,6 +22,7 @@ import {
   App,
   type ButtonComponent,
   Notice,
+  type Plugin,
   PluginSettingTab,
   type Setting,
   type SettingDefinitionItem,
@@ -80,13 +81,11 @@ export class SettingsTab extends PluginSettingTab {
   private periodRowsQueued = false;
   private periodRowToggles = new WeakMap<HTMLElement, ToggleComponent>();
 
-  constructor() {
-    const plugin = PluginService.getPlugin();
-    const app = plugin?.app as App;
-    if (plugin && app) {
-      super(app, plugin);
-    }
-    this.containerEl?.addClass("calendared-settings");
+  // Calendared: the plugin passes itself in. Upstream read it from PluginService and called super only if it was there,
+  // which TypeScript reports as an error ('super' must be called before accessing 'this')
+  constructor(app: App, plugin: Plugin) {
+    super(app, plugin);
+    this.containerEl.addClass("calendared-settings");
   }
 
   /** Only Obsidian before 1.13 calls this; the settings need the definitions */

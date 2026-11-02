@@ -67,7 +67,8 @@
   // phones: under Obsidian's header, which floats over the note; app.css places it and pushes the note down.
   // Desktop: a bar between the tab's header and its note (mounted there), or with "Compact on desktop" a small box at
   // the top right of the note. Tablets count as desktop: they keep the side calendar in view
-  const isPhoneBar = Platform.isPhone && !isSide;
+  // Calendared: $derived, so svelte-check doesn't warn (state_referenced_locally); isSide is set once when it is mounted
+  let isPhoneBar = $derived(Platform.isPhone && !isSide);
   /** the compact box (18.5rem, 26px from the right) takes at most the tab's right half; in a narrower tab (split side
    * by side) it would cover the note's title, so the bar shows instead */
   let isWide = $state(true);

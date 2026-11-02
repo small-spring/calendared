@@ -10,6 +10,8 @@
     "module": "ESNext",
     "target": "esnext",
     "allowJs": true,
+    // Calendared: emoji-mart's type definitions import a path that doesn't resolve; don't check other packages' types
+    "skipLibCheck": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
     "strictBindCallApply": true,

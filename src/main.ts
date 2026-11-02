@@ -74,7 +74,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
     // Calendared: add or remove the breadcrumbs and mini calendar when the settings change which notes show them
     this.register(settingsStore.subscribe(() => NavigationManager.instance?.syncAll()));
 
-    this.addSettingTab(new SettingsTab());
+    this.addSettingTab(new SettingsTab(this.app, this));
     // Calendared: a row in the Page preview settings, where Ctrl/Cmd on hover is switched (docs/adr/0026)
     this.registerHoverLinkSource(HOVER_LINK_SOURCE, { display: "Calendared", defaultMod: true });
 
