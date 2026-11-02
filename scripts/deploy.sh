@@ -40,11 +40,11 @@ for VAULT in "${VAULTS[@]}"; do
 done
 
 # unit tests of the plain logic (see docs/guides/development.md); refuse to deploy if any fails
-npx vitest run
+npx vitest run --config config/vitest.config.ts
 
 MODE="${DEPLOY_MODE:-production}"
 # import.meta.env.DEV follows NODE_ENV, not --mode
-NODE_ENV="$MODE" npx vite build --mode "$MODE"
+NODE_ENV="$MODE" npx vite build --config config/vite.config.ts --mode "$MODE"
 
 # smoke test: refuse to deploy a bundle that crashes while loading (see scripts/check-load.cjs)
 node scripts/check-load.cjs dist/main.js
