@@ -59,8 +59,9 @@
 待つ間にほかを進める。「自分」は手でやること（GitHub への書き込み、決めごと、実機の確認）、「Claude」はコードや文書の作業。
 
 - 元の作者の許可（いちばん先。ほかを止める）
-  - issue を出す — 自分
-  - 返事を待つ。許可が出たら、issue へのリンクを README のクレジットに書く。30 日たっても返事がなければ、B の形で進める — 自分
+  - 2026-11-04 に issue を出した: https://github.com/luiisca/obsidian-periodic-notes-calendar/issues/93
+    （すぐに Linear の bot が付き、元の作者の作業の一覧に入った。元の作者の返事はまだ）
+  - 返事を待つ。許可が出たら、issue へのリンクを README のクレジットに書く。2026-12-04 を過ぎても返事がなければ、B の形で進める — 自分
 - `versions.json`（どの版がどの `minAppVersion` から動くかの対応表）を作るか決める。任意 — Claude
 - リポジトリの整理
   - 既定のブランチを決める（`custom` のままか、`main` にするか）。審査は既定のブランチの先頭の `manifest.json` を読む — 自分
