@@ -134,7 +134,6 @@ Calendared sets no hotkeys by default. Set them in **Settings → Hotkeys** (sea
 | Open today's note | Cmd+D (Ctrl+D) |
 | Open previous periodic note / Open next periodic note | Cmd+← / Cmd+→ (Ctrl+← / Ctrl+→) |
 | Open this month's note | Cmd+M (Ctrl+M) |
-| Toggle calendar interface | Cmd+Shift+C (Ctrl+Shift+C) |
 
 Cmd+← / → also move to the start and end of the line while editing. Once a hotkey is set, it opens the previous or next
 note instead, even in the editor. Pick other keys if you use those for editing.
