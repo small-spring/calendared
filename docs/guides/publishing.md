@@ -65,7 +65,7 @@ Main differences from the original:
 
 Most of the code was written with Claude Code (an AI coding tool), directed and reviewed by me.
 
-Obsidian's developer policies ask that a fork listed in the community directory has the original author's explicit,
+[Obsidian's developer policies](https://docs.obsidian.md/community-directory/developer-policies#Forks) ask that a fork listed in the community directory has the original author's explicit,
 publicly verifiable permission, so I am asking here:
 
 **Would you allow me to publish this fork as a separate plugin in the Obsidian community directory?**
@@ -79,7 +79,10 @@ If you agree, I will:
 
 If you would rather not, or would prefer that I contribute some of the changes back here instead,
 please let me know. Either answer is completely fine.
-Following the policy, if I haven't heard from you within 30 days, I will take that as no objection and go ahead.
+The same [developer policies](https://docs.obsidian.md/community-directory/developer-policies#Forks) also allow a fork to go ahead when the original project
+has not been updated for at least 6 months and the original author has not responded within 30 days of being contacted.
+The last release here (v1.2.1) was in February 2026, so if I haven't heard from you within 30 days,
+I will take that as no objection and go ahead.
 If you have any concerns later, I would be glad to hear them.
 
 Thank you,
@@ -109,7 +112,7 @@ small-spring
 >
 > コードの大部分は、Claude Code（AI のコーディングの道具）で、私の指示と確認のもとで書きました。
 >
-> Obsidian の開発者ポリシーでは、コミュニティの一覧に載せるフォークには、元の作者のはっきりした、誰でも確かめられる許可が
+> [Obsidian の開発者ポリシー](https://docs.obsidian.md/community-directory/developer-policies#Forks)では、コミュニティの一覧に載せるフォークには、元の作者のはっきりした、誰でも確かめられる許可が
 > 必要とされています。そこで、ここでお尋ねします。
 >
 > **このフォークを、別のプラグインとして Obsidian のコミュニティの一覧に公開してもよいでしょうか？**
@@ -121,7 +124,9 @@ small-spring
 > - Calendared は改造版で、あなたが手入れしているものではないことを明記し、不具合は Calendared のほうに知らせるよう書く
 >
 > 望まない場合や、変更の一部をこちらに還元してほしい場合は、教えてください。どちらの答えでもまったく構いません。
-> ポリシーに従い、30 日たっても返事がなければ、反対はないものとして進めます。
+> 同じ[開発者ポリシー](https://docs.obsidian.md/community-directory/developer-policies#Forks)では、元の版が 6 か月以上更新されておらず、元の作者に連絡して 30 日たっても返事がなければ、
+> フォークを進めてよいとされています。こちらの最後のリリース（v1.2.1）は 2026 年 2 月なので、30 日たっても返事がなければ、
+> 反対はないものとして進めます。
 > あとで気になることがあれば、ぜひ聞かせてください。
 >
 > よろしくお願いします。
