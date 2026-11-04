@@ -41,10 +41,11 @@ export const EMOJI_DATA_SIZES_KB: Record<EmojiSearchLanguage, number> = {
 };
 
 /**
- * The commit of this repository whose data/emoji-keywords/ the plugin downloads. A commit, not a branch, so the files
- * never change under a released plugin; change it after regenerating the files (docs/guides/development.md)
+ * The tag of this repository whose data/emoji-keywords/ the plugin downloads (ADR-0056). A tag that is never moved, not a
+ * branch, so the files never change under a released plugin; after regenerating the files, push a new tag
+ * (`emoji-data-<n+1>`) and write it here (docs/guides/development.md)
  */
-export const EMOJI_DATA_REF = "fa15980637a6da9a5119050df5500fe7f3edf072";
+export const EMOJI_DATA_REF = "emoji-data-1";
 
 const REPOSITORY = "small-spring/calendared";
 

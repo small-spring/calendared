@@ -149,8 +149,8 @@ Calendared ではタグ形式を **読まない** ので、元の版で付けた
   - 対象は emoji-mart が文言を訳している言語。Sanskrit は CLDR にほとんど言葉がなく、表が空になるので外した
   - 出どころとライセンス（Unicode License v3）は `data/emoji-keywords/README.md`・`LICENSE` と `THIRD_PARTY_NOTICES.md` に書いた
 - 設定の「Add languages」で言語を選んで「Download」を押したときだけ、その言語の表をダウンロードする（`src/emoji-search.ts` の `EmojiKeywordStore`）
-  - 取る先は jsDelivr（`cdn.jsdelivr.net/gh/small-spring/calendared@<コミット>/data/emoji-keywords/<言語>.json`）。取れなければ GitHub の raw。
-    コミットは `EMOJI_DATA_REF` で固定しているので、公開した版のプラグインが取る中身は変わらない。送るのはファイルの名前（言語）だけ
+  - 取る先は jsDelivr（`cdn.jsdelivr.net/gh/small-spring/calendared@<タグ>/data/emoji-keywords/<言語>.json`）。取れなければ GitHub の raw。
+    取る版は `EMOJI_DATA_REF` のタグ（`emoji-data-1` など。動かさない）で固定しているので、公開した版のプラグインが取る中身は変わらない（[ADR-0056](../adr/0056-emoji-data-tag.md)）。送るのはファイルの名前（言語）だけ
   - 中身を確かめてから、データの版（`EMOJI_DATA_REF`）と一緒にプラグインのフォルダの `emoji-keywords/<言語>.json` に保存する。
     どの言語を入れているかは、このファイルで決まる（設定には持たない。新しい端末で勝手にダウンロードしないため）
   - 起動時は保存したファイルを読むだけで、通信しない。データの版が変わったファイルは使わない（入れ直しが要る）
@@ -161,7 +161,7 @@ Calendared ではタグ形式を **読まない** ので、元の版で付けた
   前に読み込んだときのピッカーが使われるので効かない）
 - emoji-mart は、英語以外の文言を、渡されないとネットから取りに行く。それを避けるため、`@emoji-mart/data/i18n/<言語>.json`（20 言語、合わせて約 80 KB）を
   同梱し、Obsidian の表示言語（`getLanguage()`、古い版では localStorage の `language`）のものを渡す
-- CLDR のデータを新しい版にしたら、同じスクリプトで表を作り直し、コミットしてから、そのコミットを `EMOJI_DATA_REF` に書く（[guides/development.md](../guides/development.md)）
+- CLDR のデータを新しい版にしたら、同じスクリプトで表を作り直し、コミットして新しいタグを付けてから、そのタグを `EMOJI_DATA_REF` に書く（[guides/development.md](../guides/development.md)）
 
 **実装上の注意**
 

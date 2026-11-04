@@ -32,7 +32,7 @@ if (!existsSync(join(vault, ".obsidian"))) {
 }
 
 const source = readFileSync(join(root, "src/emoji-search.ts"), "utf8");
-const ref = source.match(/EMOJI_DATA_REF = "([0-9a-f]+)"/)?.[1];
+const ref = source.match(/EMOJI_DATA_REF = "([\w.-]+)"/)?.[1];
 if (!ref) {
   console.error("EMOJI_DATA_REF not found in src/emoji-search.ts");
   process.exit(1);

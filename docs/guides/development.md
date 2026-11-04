@@ -213,10 +213,17 @@ Vitest 3 には critical が 2 件あった（テスト用サーバー経由の�
 ユーザーが設定で言語を追加したときに、jsDelivr 経由でこのリポジトリから取る（[stickers.md](../features/stickers.md) の 10 章）。
 
 - 作り直したら、`src/emoji-search.ts` の `EMOJI_DATA_SIZES_KB`（言語ごとの大きさ）を直す。ずれているとテストが落ちる
-- 作り直したファイルをコミットして push してから、そのコミットの ID を `EMOJI_DATA_REF` に書く（プラグインはそのコミットから取る）。
-  前のデータを保存している人は、版が変わるので入れ直しが要る
-- git の履歴を書き換える（rebase や filter-repo など）とコミットの ID が変わり、`EMOJI_DATA_REF` の指す先が push した履歴から消える。
-  書き換えたら、同じ中身のコミットの ID に直す（`git rev-parse <コミット>:data/emoji-keywords` で中身が同じか比べられる）
+- 作り直したファイルをコミットし、次の番号のタグ（`emoji-data-2` など）を付けて、タグも push してから、そのタグを `EMOJI_DATA_REF` に書く
+  （プラグインはそのタグから取る。[ADR-0056](../adr/0056-emoji-data-tag.md)）。前のデータを保存している人は、版が変わるので入れ直しが要る
+
+  ```bash
+  git tag -a emoji-data-2 -m "Emoji search keywords, version 2. Do not move this tag."
+  git push origin refs/tags/emoji-data-2
+  ```
+
+- 一度 push した `emoji-data-<n>` のタグは動かさない・消さない（出した版のプラグインがそのタグから取り続ける）
+- git の履歴を書き換えたら（filter-repo など）、`emoji-data-<n>` のタグが同じ中身のコミットに付いたまま push されているかを確かめる
+  （`git ls-remote origin 'refs/tags/emoji-data-*'`）。filter-repo はタグも付け直すが、push を忘れると取れなくなる
 - CLDR を新しい版にしたら、`data/emoji-keywords/README.md` と `THIRD_PARTY_NOTICES.md` の版も直す
 - 手元で試す: リポジトリを小さなサーバーで配り、ダウンロード先をそこに向けた開発用の版を入れる。終わったらサーバーを止める
 

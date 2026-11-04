@@ -61,6 +61,13 @@ describe("emojiDataUrls: ダウンロードする先（先に jsDelivr、だめ�
         ]);
     });
 
+    it("タグを指定した URL（EMOJI_DATA_REF はタグ）", () => {
+        expect(emojiDataUrls("ja", "emoji-data-1")).toEqual([
+            "https://cdn.jsdelivr.net/gh/small-spring/calendared@emoji-data-1/data/emoji-keywords/ja.json",
+            "https://raw.githubusercontent.com/small-spring/calendared/emoji-data-1/data/emoji-keywords/ja.json",
+        ]);
+    });
+
     it("置き場所を差し替えれば（開発用）、そこだけから取る", () => {
         expect(emojiDataUrls("ja", "abc123", "http://localhost:8765/")).toEqual([
             "http://localhost:8765/data/emoji-keywords/ja.json",
