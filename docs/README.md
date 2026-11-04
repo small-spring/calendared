@@ -45,7 +45,7 @@ Calendared の文書。まず「誰が読むか」で分け、開発向けの中
 
 - [todo.md](todo.md): 作業の一覧（機能・不具合・公開の手続き・いつか・見送ったこと）。やることはここだけに書く
 - [plans/](plans/): これから作るものの設計（目指す姿と、決めることの一覧）
-  - [plans/sticker-kinds.md](plans/sticker-kinds.md): ステッカーを複数の種類にする（いつか）の設計
+  - [plans/sticker-kinds.md](plans/sticker-kinds.md): ステッカーを複数の種類にする・使う周期を選ぶ（いつか）の設計
 
 ## やり方・参考
 
