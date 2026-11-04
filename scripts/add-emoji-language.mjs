@@ -1,8 +1,8 @@
 // Put a language's emoji search keywords straight into a vault's Calendared folder, without downloading.
 //
 // The plugin downloads them from this repository through jsDelivr or GitHub when the language is added in settings
-// (src/emoji-search.ts). While the repository is private neither can reach it, so this writes the same file the
-// download would: `.obsidian/plugins/calendared/emoji-keywords/<language>.json`, holding { ref, keywords } with the
+// (src/emoji-search.ts). When neither can be reached (a network that blocks both, for example), this writes the same
+// file the download would: `.obsidian/plugins/calendared/emoji-keywords/<language>.json`, holding { ref, keywords } with the
 // keywords of data/emoji-keywords/ at EMOJI_DATA_REF. Restart Obsidian (or turn the plugin off and on) to use it.
 //
 // Usage: node scripts/add-emoji-language.mjs <language> [vault_path]   (e.g. `ja`)

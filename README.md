@@ -34,11 +34,13 @@ Luis Cadillo, maintained separately. Please report problems here, not to the ori
 
 ## Installation
 
-Calendared is planned to be published as a community plugin later, but not in its current form. For now, build it
-from source on a computer:
+Calendared is not in the community plugin list yet. Once it is, install it from **Settings → Community plugins →
+Browse** in Obsidian (search for "Calendared"); that works on phones too.
+
+Until then, build it from source on a computer:
 
 1. Install [Node.js](https://nodejs.org/) (an LTS version is fine)
-2. Get the repository. It is private, so you need to sign in to GitHub (cloning with GitHub Desktop also works):
+2. Get the repository (cloning with GitHub Desktop also works):
 
    ```bash
    git clone https://github.com/small-spring/calendared.git
@@ -235,8 +237,8 @@ Calendared connects to the internet only when you add a language under **Emoji s
 that language's keywords from this repository, through jsDelivr (`cdn.jsdelivr.net`) or GitHub
 (`raw.githubusercontent.com`), and keeps them in the plugin's folder. Only the language is sent.
 
-While this repository is private, the download fails. Run `npm run emoji-language -- ja "/path/to/your/vault"`
-(with your language) instead, and restart Obsidian.
+If the download fails (for example, behind a network that blocks both), run
+`npm run emoji-language -- ja "/path/to/your/vault"` (with your language) in the repository instead, and restart Obsidian.
 
 ## Documentation
 

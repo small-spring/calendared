@@ -16,3 +16,5 @@ styles.css
 vite.config.ts.timestamp-*
 # Calendared: the vault `npm run deploy` copies into (scripts/deploy.sh); each person's own
 .deploy-vault
+# Calendared: notes only for this computer (vault names etc.), read by Claude Code
+CLAUDE.local.md
