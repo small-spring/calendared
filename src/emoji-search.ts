@@ -44,7 +44,7 @@ export const EMOJI_DATA_SIZES_KB: Record<EmojiSearchLanguage, number> = {
  * The commit of this repository whose data/emoji-keywords/ the plugin downloads. A commit, not a branch, so the files
  * never change under a released plugin; change it after regenerating the files (docs/guides/development.md)
  */
-export const EMOJI_DATA_REF = "2d499124d00c424818764ec4fd1d737f0d4aaed6";
+export const EMOJI_DATA_REF = "fa15980637a6da9a5119050df5500fe7f3edf072";
 
 const REPOSITORY = "small-spring/calendared";
 

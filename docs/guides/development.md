@@ -13,7 +13,7 @@
    ```
 
 3. 試しの Vault を各自で作る。Obsidian で空のフォルダを Vault として開くだけでよい。ふだん使う Vault には入れない
-   （ノートを作る・設定を変える確かめで、本物のデータが変わる）。持ち主は `~/Documents/Obsidian/calendared-test` を使っている
+   （ノートを作る・設定を変える確かめで、本物のデータが変わる）。持ち主の Vault の名前とパスは、git に入らない `CLAUDE.local.md` に書いてある
 4. `npm run deploy` の行き先を決める。既定の行き先はないので、次のどれかで指定する（上ほど優先）
    - 引数: `npm run deploy -- ~/path/to/vault`
    - 環境変数: `OBSIDIAN_VAULT=~/path/to/vault npm run deploy`
@@ -24,7 +24,7 @@
    echo ~/path/to/vault > .deploy-vault
    ```
 
-   どれもないと、案内を出して止まる。持ち主の `.deploy-vault` は、試しの Vault と private の 2 行
+   どれもないと、案内を出して止まる。持ち主の `.deploy-vault` は、試しの Vault とふだんの Vault の 2 行
 5. `npm run deploy` を実行する（テスト → ビルド → 読み込み確認 → Vault の `.obsidian/plugins/calendared/` へコピー）
 6. Obsidian で、設定 → コミュニティプラグイン → 制限モードをオフにし、Calendared をオンにする（初めの 1 回だけ）
 7. コードを変えたら、もう一度 `npm run deploy` して、Obsidian で読み直す（`obsidian plugin:reload id=calendared`。
@@ -92,7 +92,7 @@
     Svelte の確認処理も入るので、本番の版より遅い。試し終わったら `npm run deploy` で本番の版に戻す
 - Windows・iPhone で試すときは [device-testing.md](device-testing.md)（Remotely Save で Calendared のフォルダだけを同期する）
 - `npm run emoji-language -- <言語> [Vault のパス]`（`scripts/add-emoji-language.mjs`。Vault は deploy と同じ決め方だが、`.deploy-vault` からは 1 行目だけ）: 絵文字の検索の言葉を、ダウンロードせずに
-  Vault のプラグインのフォルダに置く（下の「絵文字の検索の言葉」）。リポジトリが非公開の間は、設定からの追加はダウンロードに失敗するので、こちらを使う
+  Vault のプラグインのフォルダに置く（下の「絵文字の検索の言葉」）。設定からの追加でダウンロードできないとき（ネットワークが jsDelivr と GitHub を止めているなど）に使う
 
 ### Release
 
@@ -128,14 +128,14 @@ obsidian plugin:reload id=calendared
 | スマホの見た目にする | `obsidian dev:mobile on` / `off` |
 | エラーとログを読む | `obsidian dev:errors`、`obsidian dev:console` |
 
-気をつけること（公式の文書に書かれていないこと）。Vault の名前とパスは持ち主のもの（ふだんの Vault が `private`、試しの Vault が
-`calendared-test`）。自分の Vault に読み替える
+気をつけること（公式の文書に書かれていないこと）。下の `<試しの Vault>` は自分の試しの Vault の名前、`<試しの Vault のパス>` はそのフォルダに読み替える
+（持ち主のものは `CLAUDE.local.md`）
 
 - `vault=` を付けないと、いま前にある Vault を触る。設定のトグルを動かしたりノートを作ったりすると、本物のデータが変わる。
   ふだんの Vault では、読む・撮る・開くにとどめる
-- ノートを作る・設定を変える確かめは、試しの Vault（持ち主は `~/Documents/Obsidian/calendared-test`）で行う。
-  入れるのは `npm run deploy -- ~/Documents/Obsidian/calendared-test`、操作は `obsidian vault=calendared-test …`。
-  起動時の動きは、`data.json` を書き換えてから `osascript -e 'quit app "Obsidian"'` → `open "obsidian://open?vault=calendared-test"` で開き直して見る。
+- ノートを作る・設定を変える確かめは、試しの Vault で行う。
+  入れるのは `npm run deploy -- <試しの Vault のパス>`、操作は `obsidian vault=<試しの Vault> …`。
+  起動時の動きは、`data.json` を書き換えてから `osascript -e 'quit app "Obsidian"'` → `open "obsidian://open?vault=<試しの Vault>"` で開き直して見る。
   ノートを消すのは `app.vault.trash(file, true)`（シェルからゴミ箱へは移せない）
 - 文字で確かめられるものは、`dev:dom` か `eval` で読む。Obsidian が裏にあっても読める
 - `dev:screenshot` は、Obsidian が前にないと描き直しが止まっていて、古い画面が写る。撮る直前に `open -a Obsidian` で前に出す
@@ -215,6 +215,8 @@ Vitest 3 には critical が 2 件あった（テスト用サーバー経由の�
 - 作り直したら、`src/emoji-search.ts` の `EMOJI_DATA_SIZES_KB`（言語ごとの大きさ）を直す。ずれているとテストが落ちる
 - 作り直したファイルをコミットして push してから、そのコミットの ID を `EMOJI_DATA_REF` に書く（プラグインはそのコミットから取る）。
   前のデータを保存している人は、版が変わるので入れ直しが要る
+- git の履歴を書き換える（rebase や filter-repo など）とコミットの ID が変わり、`EMOJI_DATA_REF` の指す先が push した履歴から消える。
+  書き換えたら、同じ中身のコミットの ID に直す（`git rev-parse <コミット>:data/emoji-keywords` で中身が同じか比べられる）
 - CLDR を新しい版にしたら、`data/emoji-keywords/README.md` と `THIRD_PARTY_NOTICES.md` の版も直す
 - 手元で試す: リポジトリを小さなサーバーで配り、ダウンロード先をそこに向けた開発用の版を入れる。終わったらサーバーを止める
 
