@@ -47,8 +47,8 @@ Hi Luis,
 Thank you for Periodic Notes Calendar. What drew me to it was that it can create monthly notes, not just daily notes,
 right from the calendar. It was close to what I wanted, so in late October 2026, before using it day to day,
 I started customizing a fork of v1.2.1 for my own use.
-The changes have grown large enough that I would like to publish it as a separate community plugin
-named **Calendared** (plugin id: `calendared`).
+I have since made many changes, and I would like to publish it as a separate community plugin
+named **Calendared** (plugin id: `calendared`), if you are okay with it.
 The repository is here: https://github.com/small-spring/calendared
 
 Main differences from the original:
@@ -95,8 +95,8 @@ small-spring
 > Luis さん、こんにちは。
 >
 > Periodic Notes Calendar をありがとうございます。惹かれたのは、日のノートだけでなく月のノートも、カレンダーから直接作れることでした。
-> 欲しかったものに近かったので、日々使い始める前に、2026 年 10 月の終わりから v1.2.1 をフォークして自分用に改造してきました。変更が大きくなったので、**Calendared** という名前
-> （プラグインの id は `calendared`）の別のコミュニティプラグインとして公開したいと考えています。
+> 欲しかったものに近かったので、日々使い始める前に、2026 年 10 月の終わりから v1.2.1 をフォークして自分用に改造してきました。それからたくさん変更を加えてきたので、
+> よろしければ、**Calendared** という名前（プラグインの id は `calendared`）の別のコミュニティプラグインとして公開したいと考えています。
 > リポジトリはこちらです: https://github.com/small-spring/calendared
 >
 > 元の版との主な違い:
