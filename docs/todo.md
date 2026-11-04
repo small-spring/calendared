@@ -61,12 +61,15 @@
   - 2026-11-04 に issue を出した: https://github.com/luiisca/obsidian-periodic-notes-calendar/issues/93
     （すぐに Linear の bot が付き、元の作者の作業の一覧に入った。元の作者の返事はまだ）
   - 返事を待つ。返事が来たら（または期限を過ぎたら）、README のクレジットの「許可を求めた」の一文を、結果に合わせて直す。2026-12-04 を過ぎても返事がなければ、B の形で進める — 自分
+  - 12-04 が近づいても返事がなければ、催促するか決める。issue に一度だけ短く書き足すか、プロフィールにある X（@luiiis_ca）から
+    issue を見てもらうよう頼む（元の作者はほかのリポジトリで 2026-10 まで活動していて、「連絡が取れない」と見てもらえないおそれがあるため。
+    できる限り連絡したと示せる）— 自分
 - `versions.json`（どの版がどの `minAppVersion` から動くかの対応表）を作るか決める。任意 — Claude
 - 確かめる
   - `npm test`・`npm run build`・`npm run deploy` が通る — Claude
-  - Release から入れて動くか。BRAT でこのリポジトリを指定して入れるのが手軽 — 自分
+  - Release から入れて動くか。BRAT でこのリポジトリを指定して入れるのが手軽（README には書かない）— 自分
 - 申請（手順は guides/publishing.md の「申請の手順」）
-  - Release を作る。`manifest.json` の `version` と同じタグを push すると、ワークフローが下書きを作る（[guides/development.md](guides/development.md) の「Release」）— 自分
+  - Release を作る（パートナーの感想で直したものを入れてから 0.1.0 にするのがよい。2026-11-04 に、急がず後でと決めた）。`manifest.json` の `version` と同じタグを push すると、ワークフローが下書きを作る（[guides/development.md](guides/development.md) の「Release」）— 自分
   - community.obsidian.md でプラグインを登録する — 自分
   - 自動の審査で指摘されたら直す — Claude と自分
 - 公開が済んだら、文書を切り替える — Claude
