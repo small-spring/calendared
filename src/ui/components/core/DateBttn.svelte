@@ -60,6 +60,9 @@
   class={cn(
     "date-bttn",
     "relative !h-auto w-full flex flex-col font-medium rounded-[--radius-s] tabular-nums transition-colors text-center",
+    // the caller's classes come before the state classes, so the open note's look always wins
+    // (the month list's gray for the shown month used to hide it, leaving dark text on gray)
+    className,
     isActive
       ? "isActive !text-[--text-on-accent] !bg-[--interactive-accent] hover:!bg-[--interactive-accent-hover]"
       : isToday
@@ -70,7 +73,6 @@
     isActive && isToday && "!text-[--text-on-accent]",
     // Calendared: today's (this week's, this month's...) button is bold, since its accent color alone looks dim and thin
     isToday && "!font-bold",
-    className,
   )}
   style={`
         background-color: var(--color-background-${granularity}-bttn);
