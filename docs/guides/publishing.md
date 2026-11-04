@@ -35,6 +35,8 @@ Obsidian の開発者ポリシー（Developer policies の「Forks」）では�
 - 署名は GitHub の名前（small-spring）にしてある。本名を書くなら差し替える
 - リポジトリへのリンクは、出す前にリポジトリを公開にする前提。公開にしないなら、その 1 文を消す
 - AI（Claude Code）で書いたことは README の Credits と同じく書いておく（あとで知られるより、先に言うほうが誠実なため）
+- 返事がなければ 30 日後に進めることを書いておく（ポリシーの B の連絡にあたることを、issue の中に残すため）。
+  あとで反対されたら取り下げる、とは約束しない（ポリシーが求めるのは 30 日待つことまで。言われたら、そのとき応じ方を考える）
 
 **Title**: Permission to publish a modified fork as a separate community plugin
 
@@ -77,6 +79,8 @@ If you agree, I will:
 
 If you would rather not, or would prefer that I contribute some of the changes back here instead,
 please let me know. Either answer is completely fine.
+Following the policy, if I haven't heard from you within 30 days, I will take that as no objection and go ahead.
+If you have any concerns later, I would be glad to hear them.
 
 Thank you,
 small-spring
@@ -117,6 +121,8 @@ small-spring
 > - Calendared は改造版で、あなたが手入れしているものではないことを明記し、不具合は Calendared のほうに知らせるよう書く
 >
 > 望まない場合や、変更の一部をこちらに還元してほしい場合は、教えてください。どちらの答えでもまったく構いません。
+> ポリシーに従い、30 日たっても返事がなければ、反対はないものとして進めます。
+> あとで気になることがあれば、ぜひ聞かせてください。
 >
 > よろしくお願いします。
 > small-spring
