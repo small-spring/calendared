@@ -1,5 +1,5 @@
 import { normalizePath } from "obsidian";
-import { parsePeriod, type PeriodName, type PeriodRules } from "@/periods";
+import { parsePeriod, rangeOfPeriod, type PeriodName, type PeriodRules } from "@/periods";
 import type { IGranularity } from "./types";
 
 /**
@@ -29,6 +29,29 @@ export function periodOfNote(
 ): PeriodName | null {
   if (file.extension !== "md" || !isInFolder(file.path, folder)) return null;
   return parsePeriod(file.basename, granularity, format, rules);
+}
+
+/**
+ * The note of the period nearest before / after `start` (the first day of a period), among the notes the format reads
+ * in the period's folder. Open previous / next periodic note skip the periods that have no note. null when there is none
+ */
+export function nearestNote<F extends { path: string; basename: string; extension: string }>(
+  files: F[],
+  granularity: IGranularity,
+  setting: { folder: string; format: string },
+  rules: PeriodRules,
+  start: moment.Moment,
+  direction: "previous" | "next",
+): F | null {
+  const ahead = (a: moment.Moment, b: moment.Moment) => (direction === "previous" ? a.isBefore(b, "day") : a.isAfter(b, "day"));
+  let nearest: { file: F; start: moment.Moment } | null = null;
+  for (const file of files) {
+    const period = periodOfNote(file, granularity, setting, rules);
+    const range = period && rangeOfPeriod(period, rules);
+    if (!range || !ahead(range.start, start)) continue;
+    if (!nearest || ahead(nearest.start, range.start)) nearest = { file, start: range.start };
+  }
+  return nearest?.file ?? null;
 }
 
 /** Calendared: whether the path is in the folder or a folder under it. Every path is in "/" */

@@ -4,11 +4,11 @@ import { MarkdownView, Notice, Plugin, TAbstractFile, TFile, WorkspaceLeaf, Work
 import { get } from 'svelte/store';
 import { PluginService } from './app-service';
 import { CALENDAR_LUCIDE_ICON, granularities, LEAF_TYPE } from './constants';
-import { getFileData, initVaultSource, openCurrentNote } from './io';
+import { getFileData, initVaultSource, nearestNote, openCurrentNote, vaultSource } from './io';
 import { getPeriodicityFromGranularity } from './io/parse';
 import type { IGranularity } from './io/types';
 import { isValidPeriodicNote, periodicNoteOf, validateFormat } from './io/validation';
-import { overlapsMonth, rangeOfPeriod, shiftPeriod } from './periods';
+import { overlapsMonth, rangeOfPeriod } from './periods';
 import {
   displayedDateStore,
   refreshToday,
@@ -115,6 +115,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
 
     // Calendared: step from the open periodic note to the one before / after it in the same period
     // (a monthly note goes to the previous / next month). Only opens existing notes (shows a notice otherwise).
+    // Periods without a note are skipped: it opens the nearest earlier / later note.
     // Hidden from the palette unless a periodic note is open
     (['previous', 'next'] as const).forEach((pos) => {
       this.addCommand({
@@ -129,8 +130,7 @@ export default class PeriodicNotesCalendarPlugin extends Plugin {
           if (checking) return true;
 
           const rules = get(periodRulesStore);
-          const targetPeriod = shiftPeriod(period, pos === 'next' ? 1 : -1, rules);
-          const { file: target } = getFileData(granularity, rangeOfPeriod(targetPeriod, rules)!.start);
+          const target = nearestNoteOf(granularity, rangeOfPeriod(period, rules)!.start, pos);
           if (target) {
             this.app.workspace.getLeaf(false).openFile(target).catch(console.error);
           } else {
@@ -386,4 +386,16 @@ function trackMigrationNotices(): () => void {
     before = after;
     if (notices !== s.migrationNotices) settingsStore.update((current) => ({ ...current, migrationNotices: notices }));
   });
+}
+
+/**
+ * Calendared: the nearest earlier / later note of the period, for Open previous / next periodic note. Among notes of
+ * the same period (one in a folder under the period's folder, too), the one at the usual path comes first
+ */
+function nearestNoteOf(granularity: IGranularity, start: moment.Moment, direction: 'previous' | 'next'): TFile | null {
+  const { periods } = get(settingsStore);
+  const found = nearestNote(vaultSource().markdownFiles(), granularity, periods[granularity], get(periodRulesStore), start, direction);
+  if (!found) return null;
+  const note = periodicNoteOf(found);
+  return (note && getFileData(granularity, note.date).file) ?? found;
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { md, mondayWeeks } from "@/test-fixtures";
-import { notesWithFormat, periodOfNote } from "./notes-by-format";
+import { d, md, mondayWeeks } from "@/test-fixtures";
+import { nearestNote, notesWithFormat, periodOfNote } from "./notes-by-format";
 
 const daily = { folder: "日記", format: "YYYY-MM-DD" };
 
@@ -68,5 +68,51 @@ describe("periodOfNote: その周期のフォルダにあり、書式どおり�
         expect(periodOfNote(md("メモ/2026-10-30.md"), "day", daily, mondayWeeks)).toBeNull();
         expect(periodOfNote(md("日記/2026-10-30.pdf"), "day", daily, mondayWeeks)).toBeNull();
         expect(periodOfNote(md("日記/2026-10-3.md"), "day", daily, mondayWeeks)).toBeNull();
+    });
+});
+
+describe("nearestNote（前）: その周期のノートのうち、ある日より前でいちばん近いもの（Open previous periodic note）", () => {
+    it("すぐ前の日のノートがあれば、それ", () => {
+        const files = [md("日記/2026-11-02.md"), md("日記/2026-11-03.md")];
+        expect(nearestNote(files, "day", daily, mondayWeeks, d("2026-11-04"), "previous")?.path).toBe("日記/2026-11-03.md");
+    });
+
+    it("すぐ前の日のノートがなければ、さらに前でいちばん近いノート", () => {
+        const files = [md("日記/2026-10-01.md"), md("日記/2026-10-30.md"), md("日記/2026-11-05.md")];
+        expect(nearestNote(files, "day", daily, mondayWeeks, d("2026-11-04"), "previous")?.path).toBe("日記/2026-10-30.md");
+    });
+
+    it("前にノートがなければ null（その日やあとのノートは選ばない）", () => {
+        const files = [md("日記/2026-11-04.md"), md("日記/2026-11-05.md")];
+        expect(nearestNote(files, "day", daily, mondayWeeks, d("2026-11-04"), "previous")).toBeNull();
+    });
+
+    it("フォルダの外や書式に合わないノートは数えない", () => {
+        const files = [md("日記/2026-10-01.md"), md("2026-11-03.md"), md("日記/2026-11-03 copy.md")];
+        expect(nearestNote(files, "day", daily, mondayWeeks, d("2026-11-04"), "previous")?.path).toBe("日記/2026-10-01.md");
+    });
+
+    it("月次ノートは月で比べる（年をまたいでも）", () => {
+        const monthly = { folder: "月", format: "YYYY-MM" };
+        const files = [md("月/2025-11.md"), md("月/2026-08.md")];
+        expect(nearestNote(files, "month", monthly, mondayWeeks, d("2026-11-01"), "previous")?.path).toBe("月/2026-08.md");
+    });
+});
+
+describe("nearestNote（後）: その周期のノートのうち、ある日より後でいちばん近いもの（Open next periodic note）", () => {
+    it("すぐ後の日のノートがなければ、さらに後でいちばん近いノート", () => {
+        const files = [md("日記/2026-11-01.md"), md("日記/2026-11-04.md"), md("日記/2026-11-20.md")];
+        expect(nearestNote(files, "day", daily, mondayWeeks, d("2026-11-02"), "next")?.path).toBe("日記/2026-11-04.md");
+    });
+
+    it("後にノートがなければ null（その日や前のノートは選ばない）", () => {
+        const files = [md("日記/2026-11-01.md"), md("日記/2026-11-02.md")];
+        expect(nearestNote(files, "day", daily, mondayWeeks, d("2026-11-02"), "next")).toBeNull();
+    });
+
+    it("週次ノートは週で比べる", () => {
+        const weekly = { folder: "週", format: "GGGG-[W]WW" };
+        const files = [md("週/2026-W44.md"), md("週/2026-W47.md"), md("週/2026-W50.md")];
+        expect(nearestNote(files, "week", weekly, mondayWeeks, d("2026-11-02"), "next")?.path).toBe("週/2026-W47.md");
     });
 });
