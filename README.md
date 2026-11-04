@@ -7,7 +7,8 @@ each note, and from commands. Mark any periodic note with an emoji sticker and s
 Works on desktop and mobile. Needs Obsidian 1.13.1 or later.
 
 Calendared is a fork of [Periodic Notes Calendar](https://github.com/luiisca/obsidian-periodic-notes-calendar) by
-Luis Cadillo, maintained separately. Please report problems here, not to the original project.
+Luis Cadillo. It is maintained separately by small-spring, not by Luis Cadillo, so please report problems here, not to the
+original project.
 
 <p>
   <img src="docs/screenshots/calendar.png" alt="The calendar with stickers" height="400">
@@ -247,7 +248,9 @@ If the download fails (for example, behind a network that blocks both), run
 ## Credits and license
 
 - Based on [Periodic Notes Calendar](https://github.com/luiisca/obsidian-periodic-notes-calendar) v1.2.1 by
-  Luis Cadillo ([luiisca](https://github.com/luiisca)). Thank you.
+  Luis Cadillo ([luiisca](https://github.com/luiisca)), the original author and a contributor to Calendared. Thank you.
+- Permission to list Calendared in the Obsidian community directory was asked of the original author on 2026-11-04 in
+  [luiisca/obsidian-periodic-notes-calendar#93](https://github.com/luiisca/obsidian-periodic-notes-calendar/issues/93).
 - Modified by [small-spring](https://github.com/small-spring) since 2026-10-28. Every change and its date is in the git history.
   The changes up to 2026-11-02 are also listed in [docs/archive/customizations.md](docs/archive/customizations.md) (Japanese).
 - Most of the code is written by Claude (Anthropic's AI) using Claude Code, directed and reviewed by small-spring.
