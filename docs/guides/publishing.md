@@ -15,7 +15,7 @@ Calendared を Obsidian のコミュニティプラグインとして公開す�
   2026-11-02 までの変更は [archive/customizations.md](../archive/customizations.md) にもまとめてある
 - **自分が使わない機能は削る**（手入れが大変なため）。2026-10-29 に、プレビュー欄・フローティング表示・minimal mode の切り替え・
   TODO の引き継ぎ・自然言語の日付を削った（[archive/customizations.md](../archive/customizations.md) の「削った機能」）
-- **公開するかは、機能を詰めてパートナーに使ってもらってから決める**（2026-10-30 に決めた。[ADR-0028](../adr/0028-decide-publishing-after-feedback.md)）。README は、仕様が固まってから書く
+- **公開する**（2026-11-04 に決めた。[ADR-0028](../adr/0028-decide-publishing-after-feedback.md) の追記）。パートナーの感想は聞き始めていて、公開の手続きと並べて直していく
 
 ## 元の作者の許可
 
@@ -29,64 +29,81 @@ Obsidian の開発者ポリシー（Developer policies の「Forks」）では�
 
 ## issue の下書き
 
-元の版のリポジトリの Issues に出す。タイトルと本文は英語。`<...>` は出す前に埋める。
+元の版のリポジトリの Issues に出す。タイトルと本文は英語。2026-11-04 に今の機能に合わせて書き直した。
+出す前に、次を確かめる。
+
+- 署名は GitHub の名前（small-spring）にしてある。本名を書くなら差し替える
+- リポジトリへのリンクは、出す前にリポジトリを公開にする前提。公開にしないなら、その 1 文を消す
+- AI（Claude Code）で書いたことは README の Credits と同じく書いておく（あとで知られるより、先に言うほうが誠実なため）
 
 **Title**: Permission to publish a modified fork as a separate community plugin
 
 ```markdown
 Hi Luis,
 
-Thank you for Periodic Notes Calendar. I have been using it every day, and it became the base of my own setup.
-
-Since October 2026 I have been modifying a fork of v1.2.1 for my own use, and the changes have grown large enough
-that I would like to publish it as a separate community plugin named **Calendared** (plugin id: `calendared`).
+Thank you for Periodic Notes Calendar. What drew me to it was that it can create monthly notes, not just daily notes,
+right from the calendar. It was close to what I wanted, so in late October 2026, before using it day to day,
+I started customizing a fork of v1.2.1 for my own use.
+The changes have grown large enough that I would like to publish it as a separate community plugin
+named **Calendared** (plugin id: `calendared`).
 The repository is here: https://github.com/small-spring/calendared
 
 Main differences from the original:
 
-- Stickers are stored in a note property (`sticker: 👍`) instead of tags in the body
-- Weeks follow one week scheme (ISO week numbers by default) across the calendar, the timeline and templates
-- The timeline is kept per tab, and the calendar reads notes and the open note directly from Obsidian
-  (the list of notes is no longer saved in data.json)
-- Some features were removed to keep it maintainable: the preview panel, floating mode, minimal mode toggle,
-  carrying over TODOs and natural language dates
+- Stickers are saved in a note property (`sticker: 👍`) instead of tags in the body
+- The timeline became breadcrumbs (`2026 › Q4 › Oct › W44 › 30th`) and a mini calendar above each note, kept per tab
+- Weeks follow ISO 8601 week numbers and start on Saturday, Sunday, or Monday, the same way everywhere
+  (file names, the calendar, the breadcrumbs, and templates)
+- Quarters and years can start in any month (fiscal years)
+- Each period has one format, and only notes in the period's folder count as its notes.
+  The calendar reads notes from the vault directly instead of keeping a list in data.json
+- A "Migrate notes" section renames old notes after a format change, with a list to check first
+- Some features were removed to keep it maintainable: the preview panel, floating mode, the minimal mode toggle,
+  carrying over TODOs, and natural language dates
 
-Obsidian's developer policies ask forks in the community directory to have the original author's explicit,
+Most of the code was written with Claude Code (an AI coding tool), directed and reviewed by me.
+
+Obsidian's developer policies ask that a fork listed in the community directory has the original author's explicit,
 publicly verifiable permission, so I am asking here:
 
 **Would you allow me to publish this fork as a separate plugin in the Obsidian community directory?**
 
 If you agree, I will:
 
-- keep the GPL-3.0 license and your copyright notice,
-- credit you as the original author and a contributor in the README, with a link to this repository and to this issue,
-- make it clear that Calendared is a modified version and not maintained by you.
+- keep the GPL-3.0 license,
+- credit you as the original author and a contributor in the README, with links to your repository and to this issue,
+- make it clear that Calendared is a modified version that you do not maintain, and ask users to report problems
+  to Calendared, not to you.
 
-If you would rather not, or if you would prefer that I contribute some of the changes back here instead,
+If you would rather not, or would prefer that I contribute some of the changes back here instead,
 please let me know. Either answer is completely fine.
 
 Thank you,
-<名前>
+small-spring
 ```
 
-日本語訳（自分が内容を確かめるため。出すのは英語だけ）:
+日本語訳（内容を確かめるため。出すのは英語だけ）:
 
 > Luis さん、こんにちは。
 >
-> Periodic Notes Calendar をありがとうございます。毎日使っていて、自分の使い方の土台になっています。
->
-> 2026 年 10 月から、v1.2.1 をフォークして自分用に改造してきました。変更が大きくなったので、**Calendared** という名前
+> Periodic Notes Calendar をありがとうございます。惹かれたのは、日のノートだけでなく月のノートも、カレンダーから直接作れることでした。
+> 欲しかったものに近かったので、日々使い始める前に、2026 年 10 月の終わりから v1.2.1 をフォークして自分用に改造してきました。変更が大きくなったので、**Calendared** という名前
 > （プラグインの id は `calendared`）の別のコミュニティプラグインとして公開したいと考えています。
 > リポジトリはこちらです: https://github.com/small-spring/calendared
 >
 > 元の版との主な違い:
 >
 > - ステッカーを、本文のタグではなくノートのプロパティ（`sticker: 👍`）に保存する
-> - 週を、カレンダー・タイムライン・テンプレートで 1 つの決め方（既定は ISO の週番号）にそろえた
-> - タイムラインをタブごとに持ち、カレンダーはノートと開いているノートを Obsidian から直接読む
->   （ノートの一覧を data.json に保存しなくなった）
+> - タイムラインを、各ノートの上のパンくず（`2026 › Q4 › Oct › W44 › 30th`）とミニカレンダーにし、タブごとに持つ
+> - 週は ISO 8601 の週番号で、始まりは土・日・月から選べる。ファイル名・カレンダー・パンくず・テンプレートのどこでも同じ
+> - 四半期と年を好きな月から始められる（年度）
+> - 書式は周期ごとに 1 つで、その周期のフォルダにあるノートだけをその周期のノートとして扱う。
+>   カレンダーは、ノートの一覧を data.json に持たず、Vault から直接読む
+> - 「Migrate notes」で、書式を変えたあとに古いノートの名前を、一覧で確かめてからまとめて変えられる
 > - 手入れできる量に保つため、いくつかの機能を削った: プレビュー欄、フローティング表示、minimal mode の切り替え、
 >   TODO の引き継ぎ、自然言語の日付
+>
+> コードの大部分は、Claude Code（AI のコーディングの道具）で、私の指示と確認のもとで書きました。
 >
 > Obsidian の開発者ポリシーでは、コミュニティの一覧に載せるフォークには、元の作者のはっきりした、誰でも確かめられる許可が
 > 必要とされています。そこで、ここでお尋ねします。
@@ -95,14 +112,14 @@ Thank you,
 >
 > 許可していただけたら、次のようにします。
 >
-> - GPL-3.0 のライセンスと、あなたの著作権表示を残す
-> - README で、あなたを元の作者・貢献者として明記し、このリポジトリとこの issue へのリンクを載せる
-> - Calendared は改造版で、あなたが手入れしているものではないことを明記する
+> - GPL-3.0 のライセンスを守る
+> - README で、あなたを元の作者・貢献者として明記し、あなたのリポジトリとこの issue へのリンクを載せる
+> - Calendared は改造版で、あなたが手入れしているものではないことを明記し、不具合は Calendared のほうに知らせるよう書く
 >
 > 望まない場合や、変更の一部をこちらに還元してほしい場合は、教えてください。どちらの答えでもまったく構いません。
 >
 > よろしくお願いします。
-> <名前>
+> small-spring
 
 ## ライセンスとクレジット
 
