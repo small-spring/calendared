@@ -35,7 +35,8 @@ Obsidian の開発者ポリシー（Developer policies の「Forks」）では�
 - 署名は GitHub の名前（small-spring）にしてある。本名を書くなら差し替える
 - リポジトリへのリンクは、出す前にリポジトリを公開にする前提。公開にしないなら、その 1 文を消す
 - AI（Claude Code）で書いたことは README の Credits と同じく書いておく（あとで知られるより、先に言うほうが誠実なため）
-- 返事がなければ 30 日後に進めることを書いておく（ポリシーの B の連絡にあたることを、issue の中に残すため）。
+- 返事がなければ 30 日後に進めることを、穏やかに書いておく（ポリシーの B の連絡にあたることを、issue の中に残すため。
+  「連絡せずに進めるのではなく、先に伝えたかった」と添えて、圧力に読めないようにした）。
   あとで反対されたら取り下げる、とは約束しない（ポリシーが求めるのは 30 日待つことまで。言われたら、そのとき応じ方を考える）
 
 **Title**: Permission to publish a modified fork as a separate community plugin
@@ -79,10 +80,10 @@ If you agree, I will:
 
 If you would rather not, or would prefer that I contribute some of the changes back here instead,
 please let me know. Either answer is completely fine.
-The same [developer policies](https://docs.obsidian.md/community-directory/developer-policies#Forks) also allow a fork to go ahead when the original project
-has not been updated for at least 6 months and the original author has not responded within 30 days of being contacted.
-The last release here (v1.2.1) was in February 2026, so if I haven't heard from you within 30 days,
-I will take that as no objection and go ahead.
+According to the same [policy](https://docs.obsidian.md/community-directory/developer-policies#Forks), a fork may also be submitted if the original project has not been updated
+for at least 6 months and the original author has not responded within 30 days of being contacted.
+Since the last release here (v1.2.1) was in February 2026, I understand that I may proceed under this provision
+if I don't hear back within 30 days. I wanted to make you aware of this rather than simply proceeding without contacting you.
 If you have any concerns later, I would be glad to hear them.
 
 Thank you,
@@ -124,9 +125,9 @@ small-spring
 > - Calendared は改造版で、あなたが手入れしているものではないことを明記し、不具合は Calendared のほうに知らせるよう書く
 >
 > 望まない場合や、変更の一部をこちらに還元してほしい場合は、教えてください。どちらの答えでもまったく構いません。
-> 同じ[開発者ポリシー](https://docs.obsidian.md/community-directory/developer-policies#Forks)では、元の版が 6 か月以上更新されておらず、元の作者に連絡して 30 日たっても返事がなければ、
-> フォークを進めてよいとされています。こちらの最後のリリース（v1.2.1）は 2026 年 2 月なので、30 日たっても返事がなければ、
-> 反対はないものとして進めます。
+> 同じ[ポリシー](https://docs.obsidian.md/community-directory/developer-policies#Forks)では、元の版が 6 か月以上更新されておらず、元の作者に連絡して 30 日たっても返事がなければ、
+> フォークを申請してもよいとされています。こちらの最後のリリース（v1.2.1）は 2026 年 2 月なので、30 日たっても返事がなければ、
+> この決まりに沿って進められると理解しています。連絡せずに進めるのではなく、先にお伝えしておきたいと思いました。
 > あとで気になることがあれば、ぜひ聞かせてください。
 >
 > よろしくお願いします。
