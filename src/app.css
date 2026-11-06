@@ -21,6 +21,9 @@
   --color-text-month-bttn: var(--text-normal);
   --color-text-quarter-bttn: var(--text-normal);
   --color-text-year-bttn: var(--text-normal);
+
+  /* the stickers on the calendar's dates and titles (Sticker.svelte); the dates' numbers are 12px */
+  --calendared-sticker-size: 16px;
 }
 
 .weekend {

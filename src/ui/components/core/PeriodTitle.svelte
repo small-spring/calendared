@@ -89,8 +89,7 @@
       <span class="relative">
         {title.text ?? inLocale(date, $settingsStore.localeSettings.localeOverride).format(title.formatValue)}
         {#if showSticker && title.fileData.sticker}
-          <!-- the emoji keeps the date buttons' small size, whatever the title's size -->
-          <span class="text-xs font-normal"><Sticker sticker={title.fileData.sticker.emoji} /></span>
+          <Sticker sticker={title.fileData.sticker.emoji} />
         {/if}
       </span>
     </Button>
